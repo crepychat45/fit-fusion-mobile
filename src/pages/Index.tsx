@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Dumbbell, Calendar, Check, Settings } from "lucide-react";
 import { userProfile } from "@/data/user";
 import { workouts } from "@/data/workouts";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   return (
@@ -19,9 +20,11 @@ const Index = () => {
           </h1>
           <p className="text-sm text-muted-foreground">Welcome back, {userProfile.name}</p>
         </div>
-        <Button variant="ghost" size="icon" className="rounded-full">
-          <Settings className="h-5 w-5" />
-        </Button>
+        <Link to="/settings">
+          <Button variant="ghost" size="icon" className="rounded-full">
+            <Settings className="h-5 w-5" />
+          </Button>
+        </Link>
       </header>
       
       {/* Today's Plan */}
@@ -84,9 +87,11 @@ const Index = () => {
       <section className="px-4 mt-6">
         <div className="flex items-center justify-between mb-2">
           <h2 className="font-medium">Featured Workouts</h2>
-          <Button variant="link" className="text-primary p-0 h-auto text-sm">
-            View All
-          </Button>
+          <Link to="/workouts">
+            <Button variant="link" className="text-primary p-0 h-auto text-sm">
+              View All
+            </Button>
+          </Link>
         </div>
         
         <div className="grid grid-cols-2 gap-3">
@@ -101,6 +106,13 @@ const Index = () => {
             />
           ))}
         </div>
+      </section>
+      
+      {/* App Credit */}
+      <section className="px-4 mt-10 mb-16">
+        <p className="text-center text-xs text-muted-foreground">
+          FitFusion © 2025 By Junedkhan
+        </p>
       </section>
       
       {/* Mobile Navigation */}

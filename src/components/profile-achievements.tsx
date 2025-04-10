@@ -1,41 +1,7 @@
 
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Award, Dumbbell, Trophy, TrendingUp } from "lucide-react";
-
-export interface Achievement {
-  icon: React.ElementType;
-  title: string;
-  description: string;
-  earned: boolean;
-}
-
-const achievements: Achievement[] = [
-  {
-    icon: Trophy,
-    title: "Workout Warrior",
-    description: "Complete 20 workouts",
-    earned: true
-  },
-  {
-    icon: Dumbbell,
-    title: "Strength Master",
-    description: "Lift 1000kg total in a single week",
-    earned: true
-  },
-  {
-    icon: TrendingUp,
-    title: "Consistent Athlete",
-    description: "Work out 5 days in a row",
-    earned: true
-  },
-  {
-    icon: Award,
-    title: "Fitness Enthusiast",
-    description: "Try all workout categories",
-    earned: false
-  }
-];
+import { achievements } from "@/data/achievements";
 
 export function ProfileAchievements() {
   return (
