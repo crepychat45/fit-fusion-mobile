@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -36,6 +35,10 @@ import { ProfilePhotoUpload } from "@/components/profile-photo-upload";
 import { AuthForm } from "@/components/auth/auth-form";
 import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useForm } from "react-hook-form";
 
 const menuItems = [
   {
@@ -64,7 +67,65 @@ const Profile = () => {
   const [showAuth, setShowAuth] = useState(false);
   const [showChatbot, setShowChatbot] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
-  const { toast } = useToast();
+  const [profileData, setProfileData] = useState({
+    name: userProfile.name,
+    goal: userProfile.goal,
+    level: userProfile.level,
+    email: "john.smith@example.com"
+  });
+  
+  const profileForm = useForm({
+    defaultValues: {
+      name: profileData.name,
+      goal: profileData.goal,
+      level: profileData.level,
+    }
+  });
+  
+  const accountForm = useForm({
+    defaultValues: {
+      email: profileData.email,
+    }
+  });
+  
+  const handleSaveProfileChanges = (data: any) => {
+    setProfileData(prev => ({
+      ...prev,
+      name: data.name,
+      goal: data.goal,
+      level: data.level
+    }));
+    
+    toast({
+      title: "Profile updated",
+      description: "Your profile information has been saved successfully",
+    });
+    
+    setShowEditProfile(false);
+  };
+  
+  const handleSaveAccountChanges = (data: any) => {
+    setProfileData(prev => ({
+      ...prev,
+      email: data.email
+    }));
+    
+    toast({
+      title: "Account updated",
+      description: "Your account information has been saved successfully",
+    });
+    
+    setShowEditProfile(false);
+  };
+  
+  const handleDeleteAccount = () => {
+    toast({
+      title: "Account deletion requested",
+      description: "Your account deletion request has been submitted.",
+      variant: "destructive"
+    });
+    setShowEditProfile(false);
+  };
   
   const handleLogout = () => {
     toast({
@@ -75,7 +136,6 @@ const Profile = () => {
   
   return (
     <div className="min-h-screen bg-background pb-16">
-      {/* Header */}
       <div className="fitness-gradient pt-12 pb-20 px-4">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-white">Profile</h1>
@@ -90,12 +150,11 @@ const Profile = () => {
         </div>
       </div>
       
-      {/* Profile Card */}
       <div className="px-4 -mt-16 relative z-10">
         <Card className="p-4 shadow">
           <div className="flex items-center">
             <div className="relative">
-              <ProfilePhotoUpload name={userProfile.name} />
+              <ProfilePhotoUpload name={profileData.name} />
             </div>
             
             <div className="ml-4 flex-1">
@@ -150,60 +209,107 @@ const Profile = () => {
                   </TabsList>
                   <TabsContent value="profile" className="space-y-4 mt-4">
                     <div className="flex flex-col items-center mb-4">
-                      <ProfilePhotoUpload name={userProfile.name} />
+                      <ProfilePhotoUpload name={profileData.name} />
                       <p className="text-sm text-muted-foreground mt-2">Tap to change photo</p>
                     </div>
                     
-                    <div className="grid gap-4">
-                      <div className="grid gap-2">
-                        <label htmlFor="name" className="text-sm font-medium">Name</label>
-                        <input 
-                          id="name" 
-                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                          defaultValue={userProfile.name}
+                    <Form {...profileForm}>
+                      <form onSubmit={profileForm.handleSubmit(handleSaveProfileChanges)} className="space-y-4">
+                        <FormField
+                          control={profileForm.control}
+                          name="name"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Name</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                            </FormItem>
+                          )}
                         />
-                      </div>
-                      
-                      <div className="grid gap-2">
-                        <label htmlFor="goal" className="text-sm font-medium">Fitness Goal</label>
-                        <input 
-                          id="goal" 
-                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                          defaultValue={userProfile.goal}
+                        
+                        <FormField
+                          control={profileForm.control}
+                          name="goal"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Fitness Goal</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                            </FormItem>
+                          )}
                         />
-                      </div>
-                      
-                      <div className="grid gap-2">
-                        <label htmlFor="level" className="text-sm font-medium">Fitness Level</label>
-                        <select 
-                          id="level" 
-                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                          defaultValue={userProfile.level}
-                        >
-                          <option value="Beginner">Beginner</option>
-                          <option value="Intermediate">Intermediate</option>
-                          <option value="Advanced">Advanced</option>
-                        </select>
-                      </div>
-                    </div>
-                    
-                    <Button className="w-full">Save Changes</Button>
+                        
+                        <FormField
+                          control={profileForm.control}
+                          name="level"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Fitness Level</FormLabel>
+                              <Select 
+                                onValueChange={field.onChange} 
+                                defaultValue={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select a level" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="Beginner">Beginner</SelectItem>
+                                  <SelectItem value="Intermediate">Intermediate</SelectItem>
+                                  <SelectItem value="Advanced">Advanced</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <Button type="submit" className="w-full">Save Changes</Button>
+                      </form>
+                    </Form>
                   </TabsContent>
                   
                   <TabsContent value="account" className="space-y-4 mt-4">
-                    <div className="grid gap-4">
-                      <div className="grid gap-2">
-                        <label htmlFor="email" className="text-sm font-medium">Email</label>
-                        <input 
-                          id="email" 
-                          type="email"
-                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                          defaultValue="john.smith@example.com"
+                    <Form {...accountForm}>
+                      <form onSubmit={accountForm.handleSubmit(handleSaveAccountChanges)} className="space-y-4">
+                        <FormField
+                          control={accountForm.control}
+                          name="email"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email</FormLabel>
+                              <FormControl>
+                                <Input type="email" {...field} />
+                              </FormControl>
+                            </FormItem>
+                          )}
                         />
-                      </div>
+                        
+                        <Button type="submit" className="w-full">Save Changes</Button>
+                      </form>
+                    </Form>
+                    
+                    <div className="pt-4 border-t">
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => {
+                          toast({
+                            title: "Change password",
+                            description: "This feature would redirect to the password change screen",
+                          });
+                        }}
+                      >
+                        Change Password
+                      </Button>
                       
-                      <Button variant="outline" className="w-full">Change Password</Button>
-                      <Button variant="outline" className="w-full text-destructive border-destructive/30 hover:bg-destructive/5">
+                      <Button 
+                        variant="outline" 
+                        className="w-full mt-2 text-destructive border-destructive/30 hover:bg-destructive/5"
+                        onClick={handleDeleteAccount}
+                      >
                         Delete Account
                       </Button>
                     </div>
@@ -215,7 +321,6 @@ const Profile = () => {
         </Card>
       </div>
       
-      {/* Stats Summary */}
       <div className="px-4 mt-6">
         <h3 className="font-medium mb-2">Activity Summary</h3>
         <div className="bg-card rounded-lg shadow p-4">
@@ -250,12 +355,10 @@ const Profile = () => {
         </div>
       </div>
       
-      {/* Achievements */}
       <div className="px-4 mt-6">
         <ProfileAchievements />
       </div>
       
-      {/* Menu */}
       <div className="px-4 mt-6">
         <h3 className="font-medium mb-2">Settings</h3>
         <Card className="shadow overflow-hidden">
@@ -276,21 +379,18 @@ const Profile = () => {
         </Card>
       </div>
       
-      {/* Authentication Dialog */}
       <Dialog open={showAuth} onOpenChange={setShowAuth}>
         <DialogContent className="sm:max-w-md p-0">
           <AuthForm />
         </DialogContent>
       </Dialog>
       
-      {/* Chatbot Dialog */}
       <Dialog open={showChatbot} onOpenChange={setShowChatbot}>
         <DialogContent className="sm:max-w-md p-0 h-[600px]">
           <AIChatbot />
         </DialogContent>
       </Dialog>
       
-      {/* Logout */}
       <div className="px-4 mt-6 mb-6">
         <Button 
           variant="outline" 
@@ -303,12 +403,10 @@ const Profile = () => {
         </Button>
       </div>
       
-      {/* Footer */}
       <div className="px-4 mt-6 mb-20 text-center text-xs text-muted-foreground">
         <p>FitFusion © 2025 By Junedkhan</p>
       </div>
       
-      {/* Mobile Navigation */}
       <MobileNav />
     </div>
   );
