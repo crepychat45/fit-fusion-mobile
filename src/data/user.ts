@@ -2,6 +2,10 @@
 export interface UserProfile {
   name: string;
   goal: string;
+  memberSince: string;
+  level: string;
+  lastWorkout: string;
+  isPro: boolean;
   stats: {
     workoutsCompleted: number;
     streakDays: number;
@@ -21,6 +25,10 @@ export interface UserProfile {
 export const userProfile: UserProfile = {
   name: "John Smith",
   goal: "Build muscle & improve fitness",
+  memberSince: "April 2025",
+  level: "Intermediate",
+  lastWorkout: "Upper Body",
+  isPro: true,
   stats: {
     workoutsCompleted: 27,
     streakDays: 5,

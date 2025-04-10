@@ -11,6 +11,10 @@ import ExerciseDetail from "./pages/exercise-detail";
 import Progress from "./pages/progress";
 import Profile from "./pages/profile";
 import NotFound from "./pages/NotFound";
+import Settings from "./pages/settings";
+import NotificationsPage from "./pages/notifications";
+import Privacy from "./pages/privacy";
+import Help from "./pages/help";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +31,10 @@ const App = () => (
           <Route path="/exercise/:workoutId/:exerciseId" element={<ExerciseDetail />} />
           <Route path="/progress" element={<Progress />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/help" element={<Help />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
