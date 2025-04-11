@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { ChevronLeft, Lock, Shield, Download, FileWarning, Key } from "lucide-react";
@@ -49,6 +48,9 @@ const Privacy = () => {
   const [showChangePasswordDialog, setShowChangePasswordDialog] = useState(false);
   const [showTwoFactorDialog, setShowTwoFactorDialog] = useState(false);
   const { toast } = useToast();
+  const [dataSharing, setDataSharing] = useState(false);
+  const [analytics, setAnalytics] = useState(true);
+  const [personalization, setPersonalization] = useState(true);
 
   // Handle password change
   const passwordForm = useForm({
@@ -141,6 +143,37 @@ const Privacy = () => {
     setShowTwoFactorDialog(false);
     setVerificationCode('');
   };
+  
+  // Handle privacy settings changes
+  const handleDataSharingChange = (checked: boolean) => {
+    setDataSharing(checked);
+    toast({
+      title: checked ? "Data sharing enabled" : "Data sharing disabled",
+      description: checked 
+        ? "Your workout data will be shared with third-party apps" 
+        : "Your workout data will not be shared with third-party apps",
+    });
+  };
+  
+  const handleAnalyticsChange = (checked: boolean) => {
+    setAnalytics(checked);
+    toast({
+      title: checked ? "Analytics enabled" : "Analytics disabled",
+      description: checked 
+        ? "You're helping us improve the app with usage data" 
+        : "You've opted out of sharing usage data",
+    });
+  };
+  
+  const handlePersonalizationChange = (checked: boolean) => {
+    setPersonalization(checked);
+    toast({
+      title: checked ? "Personalization enabled" : "Personalization disabled",
+      description: checked 
+        ? "Content will be customized based on your activity" 
+        : "Content will no longer be customized based on your activity",
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background pb-16">
@@ -185,7 +218,11 @@ const Privacy = () => {
                       <Label htmlFor="data-sharing" className="font-medium">Data Sharing</Label>
                       <p className="text-sm text-muted-foreground">Share workout data with third-party apps</p>
                     </div>
-                    <Switch id="data-sharing" />
+                    <Switch 
+                      id="data-sharing" 
+                      checked={dataSharing} 
+                      onCheckedChange={handleDataSharingChange}
+                    />
                   </div>
                   
                   <div className="flex items-center justify-between">
@@ -193,7 +230,12 @@ const Privacy = () => {
                       <Label htmlFor="analytics" className="font-medium">Analytics</Label>
                       <p className="text-sm text-muted-foreground">Help improve the app with usage data</p>
                     </div>
-                    <Switch id="analytics" defaultChecked />
+                    <Switch 
+                      id="analytics" 
+                      checked={analytics} 
+                      onCheckedChange={handleAnalyticsChange}
+                      defaultChecked 
+                    />
                   </div>
                   
                   <div className="flex items-center justify-between">
@@ -201,7 +243,12 @@ const Privacy = () => {
                       <Label htmlFor="personalization" className="font-medium">Personalization</Label>
                       <p className="text-sm text-muted-foreground">Customize content based on your activity</p>
                     </div>
-                    <Switch id="personalization" defaultChecked />
+                    <Switch 
+                      id="personalization" 
+                      checked={personalization} 
+                      onCheckedChange={handlePersonalizationChange}
+                      defaultChecked 
+                    />
                   </div>
                 </div>
               </div>

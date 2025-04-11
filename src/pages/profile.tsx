@@ -33,7 +33,7 @@ import {
 import { AIChatbot } from "@/components/ai-chatbot";
 import { ProfilePhotoUpload } from "@/components/profile-photo-upload";
 import { AuthForm } from "@/components/auth/auth-form";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast, toast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -73,6 +73,8 @@ const Profile = () => {
     level: userProfile.level,
     email: "john.smith@example.com"
   });
+  
+  const { toast } = useToast();
   
   const profileForm = useForm({
     defaultValues: {
