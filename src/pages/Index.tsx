@@ -8,8 +8,30 @@ import { Dumbbell, Calendar, Check, Settings } from "lucide-react";
 import { userProfile } from "@/data/user";
 import { workouts } from "@/data/workouts";
 import { Link } from "react-router-dom";
+import { ActivitySummary } from "@/components/activity-summary";
+import { motion } from "framer-motion";
 
 const Index = () => {
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        staggerChildren: 0.1
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: { duration: 0.5 }
+    }
+  };
+  
   return (
     <div className="min-h-screen bg-background pb-16">
       {/* App Header */}
@@ -28,63 +50,83 @@ const Index = () => {
       </header>
       
       {/* Today's Plan */}
-      <section className="px-4 mt-2">
+      <motion.section 
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="px-4 mt-2"
+      >
         <div className="flex items-center gap-2 mb-2">
           <Calendar className="h-4 w-4 text-primary" />
           <h2 className="font-medium">Today's Plan</h2>
         </div>
         
-        <div className="bg-card rounded-lg p-4 shadow-sm">
-          <div className="flex justify-between items-start">
-            <div className="flex-1">
-              <h3 className="font-semibold">Full Body Strength</h3>
-              <p className="text-sm text-muted-foreground">45 min • 5 exercises</p>
+        <motion.div variants={itemVariants}>
+          <div className="bg-card rounded-lg p-4 shadow-sm border border-primary/10">
+            <div className="flex justify-between items-start">
+              <div className="flex-1">
+                <h3 className="font-semibold">Full Body Strength</h3>
+                <p className="text-sm text-muted-foreground">45 min • 5 exercises</p>
+              </div>
+              <div className="bg-primary/10 p-2 rounded-full">
+                <Dumbbell className="h-6 w-6 text-primary" />
+              </div>
             </div>
-            <div className="bg-primary/10 p-2 rounded-full">
-              <Dumbbell className="h-6 w-6 text-primary" />
+            
+            <div className="flex mt-4 gap-3">
+              <Button className="flex-1" size="sm">
+                Start Workout
+              </Button>
+              <Button variant="outline" size="sm" className="flex-1">
+                Reschedule
+              </Button>
             </div>
           </div>
-          
-          <div className="flex mt-4 gap-3">
-            <Button className="flex-1" size="sm">
-              Start Workout
-            </Button>
-            <Button variant="outline" size="sm" className="flex-1">
-              Reschedule
-            </Button>
-          </div>
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
       
-      {/* User Stats */}
-      <section className="px-4 mt-6">
-        <h2 className="font-medium mb-2">Your Activity</h2>
-        <UserStats 
-          workoutsCompleted={userProfile.stats.workoutsCompleted}
-          streakDays={userProfile.stats.streakDays}
-          caloriesBurned={userProfile.stats.caloriesBurned}
-          avgHeartRate={userProfile.stats.avgHeartRate}
-        />
-      </section>
+      {/* Activity Summary */}
+      <motion.section
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible" 
+        className="px-4 mt-6"
+      >
+        <motion.div variants={itemVariants}>
+          <ActivitySummary />
+        </motion.div>
+      </motion.section>
       
       {/* Recent Achievements */}
-      <section className="px-4 mt-6">
+      <motion.section 
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="px-4 mt-6"
+      >
         <h2 className="font-medium mb-2">Recent Achievements</h2>
-        <div className="bg-card rounded-lg p-4 shadow-sm">
-          <div className="flex items-center gap-2">
-            <div className="rounded-full bg-green-100 p-1">
-              <Check className="h-4 w-4 text-green-600" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-sm font-medium">5-Day Streak</h3>
-              <p className="text-xs text-muted-foreground">Keep it up!</p>
+        <motion.div variants={itemVariants}>
+          <div className="bg-card rounded-lg p-4 shadow-sm border border-primary/10">
+            <div className="flex items-center gap-2">
+              <div className="rounded-full bg-green-100 p-1">
+                <Check className="h-4 w-4 text-green-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-medium">5-Day Streak</h3>
+                <p className="text-xs text-muted-foreground">Keep it up!</p>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
       
       {/* Featured Workouts */}
-      <section className="px-4 mt-6">
+      <motion.section
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible" 
+        className="px-4 mt-6"
+      >
         <div className="flex items-center justify-between mb-2">
           <h2 className="font-medium">Featured Workouts</h2>
           <Link to="/workouts">
@@ -96,24 +138,28 @@ const Index = () => {
         
         <div className="grid grid-cols-2 gap-3">
           {workouts.slice(0, 4).map((workout) => (
-            <WorkoutCard
-              key={workout.id}
-              id={workout.id}
-              title={workout.title}
-              category={workout.category}
-              duration={workout.duration}
-              exercises={workout.exercises.length}
-            />
+            <motion.div key={workout.id} variants={itemVariants}>
+              <WorkoutCard
+                id={workout.id}
+                title={workout.title}
+                category={workout.category}
+                duration={workout.duration}
+                exercises={workout.exercises.length}
+              />
+            </motion.div>
           ))}
         </div>
-      </section>
+      </motion.section>
       
       {/* App Credit */}
-      <section className="px-4 mt-10 mb-16">
+      <motion.section
+        variants={itemVariants} 
+        className="px-4 mt-10 mb-16"
+      >
         <p className="text-center text-xs text-muted-foreground">
           FitFusion © 2025 By Junedkhan
         </p>
-      </section>
+      </motion.section>
       
       {/* Mobile Navigation */}
       <MobileNav />
