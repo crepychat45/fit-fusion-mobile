@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -29,16 +30,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { AIChatbot } from "@/components/ai-chatbot";
 import { ProfilePhotoUpload } from "@/components/profile-photo-upload";
 import { AuthForm } from "@/components/auth/auth-form";
-import { useToast, toast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
+import { motion } from "framer-motion";
 
 const menuItems = [
   {
@@ -67,6 +70,7 @@ const Profile = () => {
   const [showAuth, setShowAuth] = useState(false);
   const [showChatbot, setShowChatbot] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
   const [profileData, setProfileData] = useState({
     name: userProfile.name,
     goal: userProfile.goal,
@@ -135,6 +139,11 @@ const Profile = () => {
       description: "You have been successfully logged out",
     });
   };
+
+  // Handle profile photo update
+  const handleProfilePhotoUpdate = (imageUrl: string) => {
+    setProfileImage(imageUrl);
+  };
   
   return (
     <div className="min-h-screen bg-background pb-16">
@@ -153,179 +162,200 @@ const Profile = () => {
       </div>
       
       <div className="px-4 -mt-16 relative z-10">
-        <Card className="p-4 shadow">
-          <div className="flex items-center">
-            <div className="relative">
-              <ProfilePhotoUpload name={profileData.name} />
-            </div>
-            
-            <div className="ml-4 flex-1">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="font-semibold text-lg">{userProfile.name}</h2>
-                  <p className="text-sm text-muted-foreground">{userProfile.goal}</p>
-                </div>
-                {userProfile.isPro && (
-                  <Badge variant="outline" className="bg-secondary/50 text-primary">Pro</Badge>
-                )}
+        <motion.div 
+          whileHover={{ y: -5 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
+          <Card className="p-4 shadow-lg border-primary/10">
+            <div className="flex items-center">
+              <div className="relative">
+                <ProfilePhotoUpload 
+                  name={profileData.name} 
+                  initialImage={profileImage}
+                  onImageUpdate={handleProfilePhotoUpdate}
+                />
               </div>
               
-              <div className="flex items-center mt-2 text-sm text-muted-foreground">
-                <Clock className="h-3.5 w-3.5 mr-1" />
-                <span>Member since {userProfile.memberSince}</span>
+              <div className="ml-4 flex-1">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="font-semibold text-lg">{profileData.name}</h2>
+                    <p className="text-sm text-muted-foreground">{profileData.goal}</p>
+                  </div>
+                  {userProfile.isPro && (
+                    <Badge variant="outline" className="bg-secondary/50 text-primary">Pro</Badge>
+                  )}
+                </div>
+                
+                <div className="flex items-center mt-2 text-sm text-muted-foreground">
+                  <Clock className="h-3.5 w-3.5 mr-1" />
+                  <span>Member since {userProfile.memberSince}</span>
+                </div>
               </div>
             </div>
-          </div>
-          
-          <div className="grid grid-cols-3 gap-3 mt-4">
-            <div className="text-center">
-              <p className="text-2xl font-bold">{userProfile.stats.workoutsCompleted}</p>
-              <p className="text-xs text-muted-foreground">Workouts</p>
+            
+            <div className="grid grid-cols-3 gap-3 mt-4">
+              <div className="text-center">
+                <p className="text-2xl font-bold">{userProfile.stats.workoutsCompleted}</p>
+                <p className="text-xs text-muted-foreground">Workouts</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold">{userProfile.stats.streakDays}</p>
+                <p className="text-xs text-muted-foreground">Day Streak</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold">{userProfile.stats.caloriesBurned}</p>
+                <p className="text-xs text-muted-foreground">Calories</p>
+              </div>
             </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold">{userProfile.stats.streakDays}</p>
-              <p className="text-xs text-muted-foreground">Day Streak</p>
-            </div>
-            <div className="text-center">
-              <p className="text-2xl font-bold">{userProfile.stats.caloriesBurned}</p>
-              <p className="text-xs text-muted-foreground">Calories</p>
-            </div>
-          </div>
-          
-          <Dialog open={showEditProfile} onOpenChange={setShowEditProfile}>
-            <DialogTrigger asChild>
-              <Button variant="default" className="w-full mt-4 bg-primary">
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Profile
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Edit Profile</DialogTitle>
-              </DialogHeader>
-              <div className="py-4">
-                <Tabs defaultValue="profile" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="profile">Profile Info</TabsTrigger>
-                    <TabsTrigger value="account">Account</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="profile" className="space-y-4 mt-4">
-                    <div className="flex flex-col items-center mb-4">
-                      <ProfilePhotoUpload name={profileData.name} />
-                      <p className="text-sm text-muted-foreground mt-2">Tap to change photo</p>
-                    </div>
-                    
-                    <Form {...profileForm}>
-                      <form onSubmit={profileForm.handleSubmit(handleSaveProfileChanges)} className="space-y-4">
-                        <FormField
-                          control={profileForm.control}
-                          name="name"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Name</FormLabel>
-                              <FormControl>
-                                <Input {...field} />
-                              </FormControl>
-                            </FormItem>
-                          )}
+            
+            <Dialog open={showEditProfile} onOpenChange={setShowEditProfile}>
+              <DialogTrigger asChild>
+                <Button variant="default" className="w-full mt-4 bg-primary">
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Profile
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Edit Profile</DialogTitle>
+                  <DialogDescription>
+                    Make changes to your profile information here.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="py-4">
+                  <Tabs defaultValue="profile" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="profile">Profile Info</TabsTrigger>
+                      <TabsTrigger value="account">Account</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="profile" className="space-y-4 mt-4">
+                      <div className="flex flex-col items-center mb-4">
+                        <ProfilePhotoUpload 
+                          name={profileData.name}
+                          initialImage={profileImage}
+                          onImageUpdate={handleProfilePhotoUpdate}
                         />
-                        
-                        <FormField
-                          control={profileForm.control}
-                          name="goal"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Fitness Goal</FormLabel>
-                              <FormControl>
-                                <Input {...field} />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={profileForm.control}
-                          name="level"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Fitness Level</FormLabel>
-                              <Select 
-                                onValueChange={field.onChange} 
-                                defaultValue={field.value}
-                              >
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select a level" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="Beginner">Beginner</SelectItem>
-                                  <SelectItem value="Intermediate">Intermediate</SelectItem>
-                                  <SelectItem value="Advanced">Advanced</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <Button type="submit" className="w-full">Save Changes</Button>
-                      </form>
-                    </Form>
-                  </TabsContent>
-                  
-                  <TabsContent value="account" className="space-y-4 mt-4">
-                    <Form {...accountForm}>
-                      <form onSubmit={accountForm.handleSubmit(handleSaveAccountChanges)} className="space-y-4">
-                        <FormField
-                          control={accountForm.control}
-                          name="email"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Email</FormLabel>
-                              <FormControl>
-                                <Input type="email" {...field} />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <Button type="submit" className="w-full">Save Changes</Button>
-                      </form>
-                    </Form>
-                    
-                    <div className="pt-4 border-t">
-                      <Button 
-                        variant="outline" 
-                        className="w-full"
-                        onClick={() => {
-                          toast({
-                            title: "Change password",
-                            description: "This feature would redirect to the password change screen",
-                          });
-                        }}
-                      >
-                        Change Password
-                      </Button>
+                        <p className="text-sm text-muted-foreground mt-2">Tap to change photo</p>
+                      </div>
                       
-                      <Button 
-                        variant="outline" 
-                        className="w-full mt-2 text-destructive border-destructive/30 hover:bg-destructive/5"
-                        onClick={handleDeleteAccount}
-                      >
-                        Delete Account
-                      </Button>
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </Card>
+                      <Form {...profileForm}>
+                        <form onSubmit={profileForm.handleSubmit(handleSaveProfileChanges)} className="space-y-4">
+                          <FormField
+                            control={profileForm.control}
+                            name="name"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Name</FormLabel>
+                                <FormControl>
+                                  <Input {...field} />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={profileForm.control}
+                            name="goal"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Fitness Goal</FormLabel>
+                                <FormControl>
+                                  <Input {...field} />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={profileForm.control}
+                            name="level"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Fitness Level</FormLabel>
+                                <Select 
+                                  onValueChange={field.onChange} 
+                                  defaultValue={field.value}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select a level" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="Beginner">Beginner</SelectItem>
+                                    <SelectItem value="Intermediate">Intermediate</SelectItem>
+                                    <SelectItem value="Advanced">Advanced</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <Button type="submit" className="w-full">Save Changes</Button>
+                        </form>
+                      </Form>
+                    </TabsContent>
+                    
+                    <TabsContent value="account" className="space-y-4 mt-4">
+                      <Form {...accountForm}>
+                        <form onSubmit={accountForm.handleSubmit(handleSaveAccountChanges)} className="space-y-4">
+                          <FormField
+                            control={accountForm.control}
+                            name="email"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Email</FormLabel>
+                                <FormControl>
+                                  <Input type="email" {...field} />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <Button type="submit" className="w-full">Save Changes</Button>
+                        </form>
+                      </Form>
+                      
+                      <div className="pt-4 border-t">
+                        <Button 
+                          variant="outline" 
+                          className="w-full"
+                          onClick={() => {
+                            toast({
+                              title: "Change password",
+                              description: "This feature would redirect to the password change screen",
+                            });
+                          }}
+                        >
+                          Change Password
+                        </Button>
+                        
+                        <Button 
+                          variant="outline" 
+                          className="w-full mt-2 text-destructive border-destructive/30 hover:bg-destructive/5"
+                          onClick={handleDeleteAccount}
+                        >
+                          Delete Account
+                        </Button>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </Card>
+        </motion.div>
       </div>
       
       <div className="px-4 mt-6">
         <h3 className="font-medium mb-2">Activity Summary</h3>
-        <div className="bg-card rounded-lg shadow p-4">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-card rounded-lg shadow-lg p-4 border border-primary/5"
+        >
           <UserStats 
             workoutsCompleted={userProfile.stats.workoutsCompleted}
             streakDays={userProfile.stats.streakDays}
@@ -334,27 +364,31 @@ const Profile = () => {
           />
           
           <div className="mt-4 grid grid-cols-2 gap-3">
-            <Card className="bg-secondary/30">
-              <CardContent className="p-3 flex items-center space-x-3">
-                <Activity className="h-5 w-5 text-primary" />
-                <div>
-                  <p className="text-sm font-medium">Last Workout</p>
-                  <p className="text-xs text-muted-foreground">{userProfile.lastWorkout}</p>
-                </div>
-              </CardContent>
-            </Card>
+            <motion.div whileHover={{ scale: 1.03 }} transition={{ type: "spring", stiffness: 400 }}>
+              <Card className="bg-secondary/30 hover:bg-secondary/40 transition-colors duration-300">
+                <CardContent className="p-3 flex items-center space-x-3">
+                  <Activity className="h-5 w-5 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium">Last Workout</p>
+                    <p className="text-xs text-muted-foreground">{userProfile.lastWorkout}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
             
-            <Card className="bg-secondary/30">
-              <CardContent className="p-3 flex items-center space-x-3">
-                <Medal className="h-5 w-5 text-primary" />
-                <div>
-                  <p className="text-sm font-medium">Level</p>
-                  <p className="text-xs text-muted-foreground">{userProfile.level}</p>
-                </div>
-              </CardContent>
-            </Card>
+            <motion.div whileHover={{ scale: 1.03 }} transition={{ type: "spring", stiffness: 400 }}>
+              <Card className="bg-secondary/30 hover:bg-secondary/40 transition-colors duration-300">
+                <CardContent className="p-3 flex items-center space-x-3">
+                  <Medal className="h-5 w-5 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium">Level</p>
+                    <p className="text-xs text-muted-foreground">{userProfile.level}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
       </div>
       
       <div className="px-4 mt-6">
@@ -363,10 +397,16 @@ const Profile = () => {
       
       <div className="px-4 mt-6">
         <h3 className="font-medium mb-2">Settings</h3>
-        <Card className="shadow overflow-hidden">
+        <Card className="shadow-lg overflow-hidden border border-primary/5">
           {menuItems.map((item, index) => (
             <Link to={item.path} key={item.label}>
-              <div className="flex items-center justify-between p-4 hover:bg-muted/50 cursor-pointer">
+              <motion.div 
+                whileHover={{ 
+                  backgroundColor: "rgba(var(--muted), 0.2)",
+                  x: 5 
+                }}
+                className="flex items-center justify-between p-4 hover:bg-muted/50 cursor-pointer"
+              >
                 <div className="flex items-center">
                   <div className="bg-secondary/50 rounded-full p-2 mr-3">
                     <item.icon className="h-5 w-5 text-primary" />
@@ -374,7 +414,7 @@ const Profile = () => {
                   <span className="font-medium">{item.label}</span>
                 </div>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </div>
+              </motion.div>
               {index < menuItems.length - 1 && <Separator />}
             </Link>
           ))}

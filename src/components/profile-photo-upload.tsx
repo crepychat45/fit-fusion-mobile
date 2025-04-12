@@ -1,20 +1,29 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Camera, CheckCircle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { motion } from "framer-motion";
 
 interface ProfilePhotoUploadProps {
   name: string;
-  initialImage?: string;
+  initialImage?: string | null;
+  onImageUpdate?: (image: string) => void;
 }
 
-export function ProfilePhotoUpload({ name, initialImage }: ProfilePhotoUploadProps) {
+export function ProfilePhotoUpload({ name, initialImage, onImageUpdate }: ProfilePhotoUploadProps) {
   const [image, setImage] = useState<string | null>(initialImage || null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const { toast } = useToast();
+  
+  // Update image when initialImage prop changes
+  useEffect(() => {
+    if (initialImage) {
+      setImage(initialImage);
+    }
+  }, [initialImage]);
   
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -47,6 +56,12 @@ export function ProfilePhotoUpload({ name, initialImage }: ProfilePhotoUploadPro
     reader.onloadend = () => {
       if (typeof reader.result === 'string') {
         setImage(reader.result);
+        
+        // Call the callback with the new image if it exists
+        if (onImageUpdate) {
+          onImageUpdate(reader.result);
+        }
+        
         setLoading(false);
         
         // Show success animation
@@ -68,14 +83,23 @@ export function ProfilePhotoUpload({ name, initialImage }: ProfilePhotoUploadPro
   
   return (
     <div className="relative">
-      <Avatar className="h-20 w-20 border-4 border-background">
-        <AvatarFallback className="bg-primary text-white text-xl">
-          {getInitials(name)}
-        </AvatarFallback>
-        {image && <AvatarImage src={image} />}
-      </Avatar>
+      <motion.div
+        whileHover={{ scale: 1.05 }}
+        transition={{ type: "spring", stiffness: 300 }}
+      >
+        <Avatar className="h-20 w-20 border-4 border-background shadow-md">
+          <AvatarFallback className="bg-primary text-white text-xl">
+            {getInitials(name)}
+          </AvatarFallback>
+          {image && <AvatarImage src={image} alt={name} />}
+        </Avatar>
+      </motion.div>
       
-      <div className="absolute bottom-0 right-0">
+      <motion.div 
+        className="absolute bottom-0 right-0"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+      >
         <label htmlFor="profile-photo-upload" className="cursor-pointer">
           <div className={`
             rounded-full p-1.5 
@@ -83,7 +107,13 @@ export function ProfilePhotoUpload({ name, initialImage }: ProfilePhotoUploadPro
             text-white shadow-md transition-all duration-300
           `}>
             {success ? (
-              <CheckCircle className="h-3.5 w-3.5" />
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 400 }}
+              >
+                <CheckCircle className="h-3.5 w-3.5" />
+              </motion.div>
             ) : (
               <Camera className="h-3.5 w-3.5" />
             )}
@@ -96,7 +126,7 @@ export function ProfilePhotoUpload({ name, initialImage }: ProfilePhotoUploadPro
             onChange={handleImageChange}
           />
         </label>
-      </div>
+      </motion.div>
       
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-background/50 rounded-full">

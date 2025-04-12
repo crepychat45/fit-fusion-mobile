@@ -29,8 +29,28 @@ export function ProfileAchievements() {
     }
   };
   
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1 }
+  };
+  
   return (
-    <div className="space-y-4">
+    <motion.div 
+      className="space-y-4"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
       <div className="flex items-center justify-between">
         <h3 className="font-medium">Achievements</h3>
         <Badge variant="outline" className="bg-primary/10 text-primary">
@@ -47,13 +67,18 @@ export function ProfileAchievements() {
         />
       </div>
       
-      <div className="grid grid-cols-2 gap-3">
+      <motion.div 
+        className="grid grid-cols-2 gap-3"
+        variants={containerVariants}
+      >
         {achievements.map((achievement, index) => (
           <motion.div
             key={index}
-            whileHover={{ scale: 1.02 }}
+            variants={itemVariants}
+            whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => handleAchievementClick(index)}
+            layout
           >
             <Card 
               className={`${
@@ -121,7 +146,7 @@ export function ProfileAchievements() {
             </Card>
           </motion.div>
         ))}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
