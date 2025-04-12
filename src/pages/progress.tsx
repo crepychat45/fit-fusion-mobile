@@ -5,16 +5,16 @@ import { ProgressChart } from "@/components/progress-chart";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { userProfile } from "@/data/user";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, CalendarCell, CalendarGrid, CalendarHeader, CalendarHeading, CalendarNext, CalendarPrevious, CalendarTitle } from "@/components/ui/calendar";
+import { Calendar } from "@/components/ui/calendar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BarChart, Bar, XAxis, ResponsiveContainer, Tooltip, LineChart, Line, CartesianGrid, YAxis } from "recharts";
 import { format, subMonths, subYears, getYear, getMonth, startOfMonth, startOfYear, endOfMonth, endOfYear, eachMonthOfInterval, eachYearOfInterval, isSameDay } from "date-fns";
 import { Dumbbell, Calendar as CalendarIcon, Activity, Heart, Flame, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { Progress } from "@/components/ui/progress";
+import { Progress as ProgressBar } from "@/components/ui/progress";
 
-const Progress = () => {
+const ProgressPage = () => {
   const [timeframe, setTimeframe] = useState<"day" | "week" | "month" | "year">("week");
   const [activeTab, setActiveTab] = useState("activity");
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -187,7 +187,7 @@ const Progress = () => {
                   <span className="text-sm text-muted-foreground">Progress</span>
                   <span className="text-sm font-medium">75%</span>
                 </div>
-                <Progress value={75} className="h-2" />
+                <ProgressBar value={75} className="h-2" />
               </div>
             </CardContent>
           </Card>
@@ -367,24 +367,6 @@ const Progress = () => {
                     selected={selectedDate}
                     onSelect={(date) => date && handleDateSelect(date)}
                     className="rounded-md"
-                    components={{
-                      CalendarCell: (props) => (
-                        <CalendarCell
-                          {...props}
-                          className="relative p-0 h-9 w-9 text-center focus-within:relative focus-within:z-20"
-                        >
-                          <time
-                            dateTime={props.date.toDateString()}
-                            className="flex h-9 w-9 items-center justify-center rounded-full p-0"
-                          >
-                            {props.day}
-                          </time>
-                          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-5 h-5">
-                            {renderCalendarActivity(props.date)}
-                          </div>
-                        </CalendarCell>
-                      ),
-                    }}
                   />
                 </CardContent>
               </Card>
@@ -457,4 +439,4 @@ const Progress = () => {
   );
 };
 
-export default Progress;
+export default ProgressPage;
