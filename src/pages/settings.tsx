@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { 
@@ -14,7 +13,7 @@ import {
   Languages,
   Share2,
   Shield,
-  CloudSync,
+  CloudOff,
   Bluetooth
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -47,7 +46,6 @@ const Settings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Load settings from localStorage or use defaults
   const loadSavedSettings = () => {
     try {
       return {
@@ -115,7 +113,6 @@ const Settings = () => {
   
   const savedSettings = loadSavedSettings();
   
-  // State for all settings
   const [darkMode, setDarkMode] = useState(savedSettings.darkMode);
   const [sounds, setSounds] = useState(savedSettings.sounds);
   const [metric, setMetric] = useState(savedSettings.metric);
@@ -123,19 +120,14 @@ const Settings = () => {
   const [autoSave, setAutoSave] = useState(savedSettings.autoSave);
   const [animations, setAnimations] = useState(savedSettings.animations);
   
-  // Notification settings
   const [notificationSettings, setNotificationSettings] = useState(savedSettings.notifications);
   
-  // Privacy settings
   const [privacySettings, setPrivacySettings] = useState(savedSettings.privacy);
   
-  // Sync settings
   const [syncSettings, setSyncSettings] = useState(savedSettings.sync);
   
-  // Device settings
   const [deviceSettings, setDeviceSettings] = useState(savedSettings.device);
   
-  // Apply dark mode when component mounts or when darkMode changes
   useEffect(() => {
     const root = window.document.documentElement;
     
@@ -148,7 +140,6 @@ const Settings = () => {
     }
   }, [darkMode]);
   
-  // Save settings to localStorage
   const saveSettings = (key: string, value: boolean, section?: string) => {
     try {
       if (section) {
@@ -166,7 +157,6 @@ const Settings = () => {
     }
   };
   
-  // Handle setting changes with toast notifications
   const handleDarkModeChange = (checked: boolean) => {
     setDarkMode(checked);
     saveSettings('darkMode', checked);
@@ -227,7 +217,6 @@ const Settings = () => {
     });
   };
   
-  // Handle notification setting changes
   const handleNotificationChange = (key: string, checked: boolean) => {
     const newSettings = { ...notificationSettings, [key]: checked };
     setNotificationSettings(newSettings);
@@ -239,7 +228,6 @@ const Settings = () => {
     });
   };
   
-  // Handle privacy setting changes
   const handlePrivacyChange = (key: string, checked: boolean) => {
     const newSettings = { ...privacySettings, [key]: checked };
     setPrivacySettings(newSettings);
@@ -251,7 +239,6 @@ const Settings = () => {
     });
   };
   
-  // Handle sync setting changes
   const handleSyncChange = (key: string, checked: boolean) => {
     const newSettings = { ...syncSettings, [key]: checked };
     setSyncSettings(newSettings);
@@ -263,7 +250,6 @@ const Settings = () => {
     });
   };
   
-  // Handle device setting changes
   const handleDeviceChange = (key: string, checked: boolean) => {
     const newSettings = { ...deviceSettings, [key]: checked };
     setDeviceSettings(newSettings);
@@ -282,9 +268,7 @@ const Settings = () => {
     }
   };
   
-  // Reset all settings to default
   const resetSettings = () => {
-    // Default settings
     const defaults = {
       darkMode: false,
       sounds: true,
@@ -315,7 +299,6 @@ const Settings = () => {
       }
     };
     
-    // Update state
     setDarkMode(defaults.darkMode);
     setSounds(defaults.sounds);
     setMetric(defaults.metric);
@@ -327,9 +310,7 @@ const Settings = () => {
     setSyncSettings(defaults.sync);
     setDeviceSettings(defaults.device);
     
-    // Clear localStorage values
     try {
-      // Basic settings
       localStorage.setItem('darkMode', defaults.darkMode.toString());
       localStorage.setItem('sounds', defaults.sounds.toString());
       localStorage.setItem('metric', defaults.metric.toString());
@@ -337,22 +318,18 @@ const Settings = () => {
       localStorage.setItem('autoSave', defaults.autoSave.toString());
       localStorage.setItem('animations', defaults.animations.toString());
       
-      // Notification settings
       Object.keys(defaults.notifications).forEach(key => {
         localStorage.setItem(`notif_${key}`, defaults.notifications[key as keyof typeof defaults.notifications].toString());
       });
       
-      // Privacy settings
       Object.keys(defaults.privacy).forEach(key => {
         localStorage.setItem(`privacy_${key}`, defaults.privacy[key as keyof typeof defaults.privacy].toString());
       });
       
-      // Sync settings
       Object.keys(defaults.sync).forEach(key => {
         localStorage.setItem(`sync_${key}`, defaults.sync[key as keyof typeof defaults.sync].toString());
       });
       
-      // Device settings
       Object.keys(defaults.device).forEach(key => {
         localStorage.setItem(`device_${key}`, defaults.device[key as keyof typeof defaults.device].toString());
       });
@@ -370,12 +347,10 @@ const Settings = () => {
       });
     }
     
-    // Update document root for dark mode
     const root = window.document.documentElement;
     root.classList.remove("dark");
   };
 
-  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { 
@@ -397,7 +372,6 @@ const Settings = () => {
 
   return (
     <div className="min-h-screen bg-background pb-16">
-      {/* Header */}
       <div className="fitness-gradient pt-12 pb-6 px-4">
         <div className="flex items-center">
           <button 
@@ -410,7 +384,6 @@ const Settings = () => {
         </div>
       </div>
       
-      {/* Settings Content */}
       <div className="px-4 py-6">
         <motion.div 
           variants={containerVariants}
@@ -673,7 +646,7 @@ const Settings = () => {
               <AccordionItem value="sync" className="border-none">
                 <AccordionTrigger className="py-3 px-4 bg-card rounded-lg shadow-sm">
                   <div className="flex items-center text-left">
-                    <CloudSync className="h-4 w-4 mr-3 text-primary" />
+                    <CloudOff className="h-4 w-4 mr-3 text-primary" />
                     <div>
                       <span className="font-medium">Sync & Backup</span>
                       <p className="text-xs text-muted-foreground">Data synchronization</p>
@@ -841,7 +814,6 @@ const Settings = () => {
         </div>
       </div>
       
-      {/* Mobile Navigation */}
       <MobileNav />
     </div>
   );
