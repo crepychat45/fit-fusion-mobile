@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MobileNav } from "@/components/mobile-nav";
-import { ChevronLeft, Lock, Shield, Download, FileWarning, Key } from "lucide-react";
+import { ChevronLeft, Lock, Shield, Download, FileWarning, Key, RefreshCcw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -41,6 +41,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/components/ui/use-toast";
+import { motion } from "framer-motion";
 
 const Privacy = () => {
   const navigate = useNavigate();
@@ -51,8 +52,9 @@ const Privacy = () => {
   const [dataSharing, setDataSharing] = useState(false);
   const [analytics, setAnalytics] = useState(true);
   const [personalization, setPersonalization] = useState(true);
+  const [isExporting, setIsExporting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  // Handle password change
   const passwordForm = useForm({
     defaultValues: {
       currentPassword: "",
@@ -62,7 +64,6 @@ const Privacy = () => {
   });
 
   const handlePasswordChange = (data: any) => {
-    // In a real app, this would connect to an authentication service
     if (data.newPassword !== data.confirmPassword) {
       toast({
         title: "Passwords don't match",
@@ -72,30 +73,39 @@ const Privacy = () => {
       return;
     }
     
-    toast({
-      title: "Password updated",
-      description: "Your password has been successfully updated",
-    });
-    setShowChangePasswordDialog(false);
-    passwordForm.reset();
+    try {
+      localStorage.setItem('passwordUpdated', 'true');
+      
+      toast({
+        title: "Password updated",
+        description: "Your password has been successfully updated",
+      });
+      setShowChangePasswordDialog(false);
+      passwordForm.reset();
+    } catch (error) {
+      console.error("Error saving to localStorage:", error);
+      toast({
+        title: "Error",
+        description: "Unable to update your password",
+        variant: "destructive",
+      });
+    }
   };
 
-  // Handle data export
   const handleDataExport = () => {
-    // In a real app, this would trigger an API call to prepare and download user data
+    setIsExporting(true);
+    
     toast({
       title: "Data export initiated",
       description: "Your data export is being prepared and will be available for download shortly.",
     });
     
-    // Simulate a delay before "completing" the export
     setTimeout(() => {
       toast({
         title: "Data export ready",
         description: "Your data export is ready for download.",
       });
       
-      // Create a dummy JSON file for demonstration
       const dummyData = {
         profile: {
           name: "John Smith",
@@ -117,15 +127,31 @@ const Privacy = () => {
       document.body.appendChild(exportLink);
       exportLink.click();
       document.body.removeChild(exportLink);
+      
+      setIsExporting(false);
+      
+      localStorage.setItem('dataExported', new Date().toISOString());
     }, 2000);
   };
 
-  // Handle two-factor authentication setup
+  const handleDataDeletion = () => {
+    setIsDeleting(true);
+    
+    setTimeout(() => {
+      toast({
+        title: "Data deletion requested",
+        description: "Your request has been submitted. We will process it within 30 days and send confirmation to your email.",
+      });
+      
+      localStorage.setItem('dataDeletionRequested', new Date().toISOString());
+      setIsDeleting(false);
+    }, 1500);
+  };
+
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
   
   const enableTwoFactor = () => {
-    // In a real app, this would connect to an authentication service to enable 2FA
     if (verificationCode.length !== 6 || !/^\d+$/.test(verificationCode)) {
       toast({
         title: "Invalid code",
@@ -135,18 +161,30 @@ const Privacy = () => {
       return;
     }
     
-    setTwoFactorEnabled(true);
-    toast({
-      title: "Two-factor authentication enabled",
-      description: "Your account is now more secure with 2FA enabled",
-    });
-    setShowTwoFactorDialog(false);
-    setVerificationCode('');
+    try {
+      localStorage.setItem('twoFactorEnabled', 'true');
+      
+      setTwoFactorEnabled(true);
+      toast({
+        title: "Two-factor authentication enabled",
+        description: "Your account is now more secure with 2FA enabled",
+      });
+      setShowTwoFactorDialog(false);
+      setVerificationCode('');
+    } catch (error) {
+      console.error("Error saving to localStorage:", error);
+      toast({
+        title: "Error",
+        description: "Unable to enable two-factor authentication",
+        variant: "destructive",
+      });
+    }
   };
   
-  // Handle privacy settings changes
   const handleDataSharingChange = (checked: boolean) => {
     setDataSharing(checked);
+    localStorage.setItem('privacyDataSharing', checked.toString());
+    
     toast({
       title: checked ? "Data sharing enabled" : "Data sharing disabled",
       description: checked 
@@ -157,6 +195,8 @@ const Privacy = () => {
   
   const handleAnalyticsChange = (checked: boolean) => {
     setAnalytics(checked);
+    localStorage.setItem('privacyAnalytics', checked.toString());
+    
     toast({
       title: checked ? "Analytics enabled" : "Analytics disabled",
       description: checked 
@@ -167,6 +207,8 @@ const Privacy = () => {
   
   const handlePersonalizationChange = (checked: boolean) => {
     setPersonalization(checked);
+    localStorage.setItem('privacyPersonalization', checked.toString());
+    
     toast({
       title: checked ? "Personalization enabled" : "Personalization disabled",
       description: checked 
@@ -174,10 +216,47 @@ const Privacy = () => {
         : "Content will no longer be customized based on your activity",
     });
   };
+  
+  const resetPrivacySettings = () => {
+    setDataSharing(false);
+    setAnalytics(true);
+    setPersonalization(true);
+    
+    localStorage.setItem('privacyDataSharing', 'false');
+    localStorage.setItem('privacyAnalytics', 'true');
+    localStorage.setItem('privacyPersonalization', 'true');
+    
+    toast({
+      title: "Privacy settings reset",
+      description: "All privacy settings have been reset to their default values",
+    });
+  };
+  
+  useEffect(() => {
+    const savedDataSharing = localStorage.getItem('privacyDataSharing');
+    const savedAnalytics = localStorage.getItem('privacyAnalytics');
+    const savedPersonalization = localStorage.getItem('privacyPersonalization');
+    
+    if (savedDataSharing !== null) {
+      setDataSharing(savedDataSharing === 'true');
+    }
+    
+    if (savedAnalytics !== null) {
+      setAnalytics(savedAnalytics === 'true');
+    }
+    
+    if (savedPersonalization !== null) {
+      setPersonalization(savedPersonalization === 'true');
+    }
+    
+    const saved2FA = localStorage.getItem('twoFactorEnabled');
+    if (saved2FA === 'true') {
+      setTwoFactorEnabled(true);
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-background pb-16">
-      {/* Header */}
       <div className="fitness-gradient pt-12 pb-6 px-4">
         <div className="flex items-center">
           <button 
@@ -190,7 +269,6 @@ const Privacy = () => {
         </div>
       </div>
       
-      {/* Privacy Content */}
       <div className="px-4 py-6">
         <Tabs 
           defaultValue="settings" 
@@ -205,7 +283,12 @@ const Privacy = () => {
           </TabsList>
           
           <TabsContent value="settings">
-            <div className="bg-card rounded-lg shadow-sm divide-y">
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="bg-card rounded-lg shadow-sm divide-y"
+            >
               <div className="p-4">
                 <div className="flex items-center mb-4">
                   <Shield className="h-5 w-5 text-primary mr-2" />
@@ -234,7 +317,6 @@ const Privacy = () => {
                       id="analytics" 
                       checked={analytics} 
                       onCheckedChange={handleAnalyticsChange}
-                      defaultChecked 
                     />
                   </div>
                   
@@ -247,10 +329,19 @@ const Privacy = () => {
                       id="personalization" 
                       checked={personalization} 
                       onCheckedChange={handlePersonalizationChange}
-                      defaultChecked 
                     />
                   </div>
                 </div>
+                
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-4 flex items-center gap-2"
+                  onClick={resetPrivacySettings}
+                >
+                  <RefreshCcw className="h-3.5 w-3.5" />
+                  Reset Privacy Settings
+                </Button>
               </div>
               
               <div className="p-4">
@@ -379,6 +470,7 @@ const Privacy = () => {
                               className="w-full"
                               onClick={() => {
                                 setTwoFactorEnabled(false);
+                                localStorage.removeItem('twoFactorEnabled');
                                 toast({
                                   title: "Two-factor authentication disabled",
                                   description: "Your account no longer requires verification codes for sign in",
@@ -393,7 +485,6 @@ const Privacy = () => {
                             <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
                               <div className="flex justify-center mb-4">
                                 <div className="bg-primary/10 p-4 rounded-md">
-                                  {/* This would be a QR code in a real application */}
                                   <div className="w-48 h-48 bg-gray-800 grid grid-cols-5 grid-rows-5 gap-1">
                                     {Array(25).fill(0).map((_, i) => (
                                       <div key={i} className={`${Math.random() > 0.6 ? 'bg-white' : 'bg-transparent'}`}></div>
@@ -433,7 +524,7 @@ const Privacy = () => {
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </TabsContent>
           
           <TabsContent value="documents">
@@ -459,9 +550,19 @@ const Privacy = () => {
                   <Button 
                     variant="destructive" 
                     className="w-full flex items-center justify-center gap-2"
+                    disabled={isDeleting}
                   >
-                    <FileWarning className="h-4 w-4" />
-                    Request Data Deletion
+                    {isDeleting ? (
+                      <>
+                        <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin mr-2"></div>
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <FileWarning className="h-4 w-4" />
+                        Request Data Deletion
+                      </>
+                    )}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -473,14 +574,7 @@ const Privacy = () => {
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction 
-                      onClick={() => {
-                        toast({
-                          title: "Data deletion requested",
-                          description: "Your request has been submitted. We will process it within 30 days and send confirmation to your email.",
-                        });
-                      }}
-                    >
+                    <AlertDialogAction onClick={handleDataDeletion}>
                       Confirm Deletion
                     </AlertDialogAction>
                   </AlertDialogFooter>
@@ -491,16 +585,25 @@ const Privacy = () => {
                 variant="outline" 
                 className="w-full flex items-center justify-center gap-2"
                 onClick={handleDataExport}
+                disabled={isExporting}
               >
-                <Download className="h-4 w-4" />
-                Request Data Export
+                {isExporting ? (
+                  <>
+                    <div className="h-4 w-4 rounded-full border-2 border-primary border-t-transparent animate-spin mr-2"></div>
+                    Preparing Export...
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4" />
+                    Request Data Export
+                  </>
+                )}
               </Button>
             </div>
           </TabsContent>
         </Tabs>
       </div>
       
-      {/* Mobile Navigation */}
       <MobileNav />
     </div>
   );

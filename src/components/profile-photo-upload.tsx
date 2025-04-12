@@ -55,11 +55,12 @@ export function ProfilePhotoUpload({ name, initialImage, onImageUpdate }: Profil
     const reader = new FileReader();
     reader.onloadend = () => {
       if (typeof reader.result === 'string') {
-        setImage(reader.result);
+        const newImage = reader.result;
+        setImage(newImage);
         
-        // Call the callback with the new image if it exists
+        // Call the callback with the new image
         if (onImageUpdate) {
-          onImageUpdate(reader.result);
+          onImageUpdate(newImage);
         }
         
         setLoading(false);
@@ -68,10 +69,22 @@ export function ProfilePhotoUpload({ name, initialImage, onImageUpdate }: Profil
         setSuccess(true);
         setTimeout(() => setSuccess(false), 2000);
         
-        toast({
-          title: "Photo uploaded",
-          description: "Your profile photo has been updated",
-        });
+        // Save to localStorage for persistence
+        try {
+          localStorage.setItem('profileImage', newImage);
+          
+          toast({
+            title: "Photo uploaded",
+            description: "Your profile photo has been updated",
+          });
+        } catch (error) {
+          console.error("Error saving image to localStorage:", error);
+          toast({
+            title: "Storage error",
+            description: "Unable to save your profile photo",
+            variant: "destructive"
+          });
+        }
       }
     };
     reader.readAsDataURL(file);
