@@ -7,7 +7,7 @@ import { ArrowLeft, Dumbbell, Clock, ChevronRight, Play, Video, X } from "lucide
 import { Badge } from "@/components/ui/badge";
 import { workouts } from "@/data/workouts";
 import { WorkoutVideo } from "@/components/workout-video";
-import { videos } from "@/data/workout-videos";
+import { workoutVideos } from "@/data/workout-videos";
 import { motion } from "framer-motion";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -40,7 +40,7 @@ const WorkoutDetail = () => {
   }
   
   // Find video for this workout if available
-  const workoutVideo = videos.find(v => v.workoutId === id);
+  const workoutVideo = workoutVideos.find(v => v.workoutId === id);
   
   const handleStartWorkout = () => {
     // Play a sound effect
@@ -148,10 +148,10 @@ const WorkoutDetail = () => {
               duration={exercise.duration}
               description={exercise.muscles.join(", ")}
               onSelect={() => navigate(`/exercise/${workout.id}/${exercise.id}`)}
-              hasVideo={Boolean(videos.find(v => v.exerciseId === exercise.id))}
+              hasVideo={Boolean(workoutVideos.find(v => v.exerciseId === exercise.id))}
               onVideoClick={(e) => {
                 e.stopPropagation();
-                const exerciseVideo = videos.find(v => v.exerciseId === exercise.id);
+                const exerciseVideo = workoutVideos.find(v => v.exerciseId === exercise.id);
                 if (exerciseVideo) {
                   openVideoPreview(exerciseVideo.videoUrl);
                 }
@@ -180,7 +180,12 @@ const WorkoutDetail = () => {
           
           {selectedVideo && (
             <div className="aspect-video w-full">
-              <WorkoutVideo videoUrl={selectedVideo} />
+              <WorkoutVideo 
+                videoUrl={selectedVideo}
+                title="Exercise Demo"
+                thumbnailUrl="/placeholder.svg"
+                duration="2:30"
+              />
             </div>
           )}
         </DialogContent>

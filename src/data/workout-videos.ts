@@ -8,6 +8,8 @@ export interface WorkoutVideoData {
   category: string;
   level: string;
   description: string;
+  workoutId?: string;
+  exerciseId?: string;
 }
 
 export const workoutVideos: WorkoutVideoData[] = [
@@ -19,7 +21,8 @@ export const workoutVideos: WorkoutVideoData[] = [
     duration: "15:30",
     category: "HIIT",
     level: "Intermediate",
-    description: "A high-intensity interval training workout targeting all major muscle groups for maximum calorie burn."
+    description: "A high-intensity interval training workout targeting all major muscle groups for maximum calorie burn.",
+    workoutId: "workout1"
   },
   {
     id: "v2",
@@ -29,7 +32,8 @@ export const workoutVideos: WorkoutVideoData[] = [
     duration: "25:15",
     category: "Yoga",
     level: "Beginner",
-    description: "A gentle introduction to yoga poses and breathing techniques perfect for beginners."
+    description: "A gentle introduction to yoga poses and breathing techniques perfect for beginners.",
+    workoutId: "workout2"
   },
   {
     id: "v3",
@@ -39,7 +43,9 @@ export const workoutVideos: WorkoutVideoData[] = [
     duration: "20:45",
     category: "Strength",
     level: "Intermediate",
-    description: "Focus on building upper body strength with this comprehensive dumbbell workout."
+    description: "Focus on building upper body strength with this comprehensive dumbbell workout.",
+    workoutId: "workout3",
+    exerciseId: "ex1"
   },
   {
     id: "v4",
@@ -49,7 +55,8 @@ export const workoutVideos: WorkoutVideoData[] = [
     duration: "12:00",
     category: "Core",
     level: "All Levels",
-    description: "Strengthen your core with this intense ab workout that targets all areas of your midsection."
+    description: "Strengthen your core with this intense ab workout that targets all areas of your midsection.",
+    exerciseId: "ex2"
   },
   {
     id: "v5",
@@ -59,7 +66,8 @@ export const workoutVideos: WorkoutVideoData[] = [
     duration: "18:30",
     category: "Strength",
     level: "Advanced",
-    description: "Build stronger legs and glutes with this challenging lower body workout."
+    description: "Build stronger legs and glutes with this challenging lower body workout.",
+    workoutId: "workout5"
   },
   {
     id: "v6",
@@ -69,6 +77,7 @@ export const workoutVideos: WorkoutVideoData[] = [
     duration: "15:00",
     category: "Flexibility",
     level: "All Levels",
-    description: "Improve flexibility and reduce muscle tension with this full-body stretching routine."
+    description: "Improve flexibility and reduce muscle tension with this full-body stretching routine.",
+    workoutId: "workout6"
   }
 ];

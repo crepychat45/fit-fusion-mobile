@@ -1,42 +1,42 @@
-
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { Card, CardContent } from "@/components/ui/card";
+import { ChevronRight } from "lucide-react";
 
-interface ActivityCardProps {
+export interface ActivityCardProps {
   title: string;
-  value: string | number;
-  subtitle?: string;
-  icon?: React.ReactNode;
-  className?: string;
+  description?: string;
+  date: string;
+  icon: React.ReactNode;
+  stats: { label: string; value: string }[];
+  onClick?: () => void;
 }
 
-export function ActivityCard({ 
-  title, 
-  value, 
-  subtitle, 
-  icon, 
-  className 
-}: ActivityCardProps) {
+export function ActivityCard({ title, description, date, icon, stats, onClick }: ActivityCardProps) {
   return (
-    <Card className={cn("overflow-hidden", className)}>
-      <CardHeader className="p-3 pb-0">
+    <Card
+      className="overflow-hidden border-primary/10 shadow-sm hover:bg-secondary/5"
+      onClick={onClick}
+    >
+      <CardContent className="p-4">
         <div className="flex items-start justify-between">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
-            {title}
-          </CardTitle>
-          {icon && (
-            <div className="text-primary">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
               {icon}
+              <h3 className="text-sm font-medium">{title}</h3>
             </div>
-          )}
+            <p className="text-xs text-muted-foreground">{description}</p>
+            <p className="text-xs text-muted-foreground">{date}</p>
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground ml-2" />
         </div>
-      </CardHeader>
-      <CardContent className="p-3 pt-1">
-        <div className="text-2xl font-bold">{value}</div>
-        {subtitle && (
-          <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
-        )}
+        <div className="mt-4 flex flex-col gap-2">
+          {stats.map((stat) => (
+            <div key={stat.label} className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">{stat.label}</span>
+              <span className="font-medium">{stat.value}</span>
+            </div>
+          ))}
+        </div>
       </CardContent>
     </Card>
   );
