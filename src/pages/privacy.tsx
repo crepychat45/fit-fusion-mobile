@@ -3,7 +3,7 @@ import { MobileNav } from "@/components/mobile-nav";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { 
-  Shield, Lock, FileText, CloudSync, Share2, MapPin, 
+  Shield, Lock, FileText, CloudOff, Share2, MapPin, 
   Bell, Trash2, Info, ChevronRight, ArrowUpRight, Download,
   Clock, User, Fingerprint, Eye, Key, AlertTriangle, Settings,
   Smartphone, Users, CheckSquare
@@ -74,7 +74,7 @@ const Privacy = () => {
               
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <CloudSync className="h-5 w-5 text-muted-foreground" />
+                  <CloudOff className="h-5 w-5 text-muted-foreground" />
                   <div>
                     <p className="font-medium">Data Synchronization</p>
                     <p className="text-xs text-muted-foreground">Sync data across devices</p>
