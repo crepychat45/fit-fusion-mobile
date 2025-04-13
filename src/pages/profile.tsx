@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MobileNav } from "@/components/mobile-nav";
@@ -112,6 +113,7 @@ const Profile = () => {
   const [showChatbot, setShowChatbot] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   
   const savedData = loadSavedProfileData();
   const [profileImage, setProfileImage] = useState<string | null>(savedData.image);
@@ -218,10 +220,21 @@ const Profile = () => {
   };
   
   const handleLogout = () => {
+    // Play a sound effect
+    const audio = new Audio("/notification.mp3");
+    audio.volume = 0.3;
+    audio.play().catch(err => console.log("Audio playback prevented: ", err));
+    
+    // Show toast notification
     toast({
       title: "Logged out",
       description: "You have been successfully logged out",
     });
+    
+    // Redirect to home page
+    setTimeout(() => {
+      navigate("/");
+    }, 1000);
   };
 
   const handleProfilePhotoUpdate = (imageUrl: string) => {
@@ -235,6 +248,12 @@ const Profile = () => {
   };
   
   const resetProfile = () => {
+    // Play audio feedback
+    const audio = new Audio("/notification.mp3");
+    audio.volume = 0.3;
+    audio.play().catch(err => console.log("Audio playback prevented: ", err));
+    
+    // Reset all profile data to defaults
     setProfileData({
       name: initialUserProfile.name,
       goal: initialUserProfile.goal,
@@ -539,6 +558,7 @@ const Profile = () => {
         </Card>
       </div>
       
+      {/* Reset Profile Confirmation */}
       <AlertDialog open={showResetConfirm} onOpenChange={setShowResetConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -550,6 +570,22 @@ const Profile = () => {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={resetProfile}>Reset</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
+      {/* Logout Confirmation */}
+      <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Log out?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to log out of your account?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout}>Log Out</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -579,7 +615,7 @@ const Profile = () => {
         <Button 
           variant="outline" 
           className="flex-1 text-destructive border-destructive/30 hover:bg-destructive/5" 
-          onClick={handleLogout}
+          onClick={() => setShowLogoutConfirm(true)}
         >
           <LogOut className="h-4 w-4 mr-2" />
           Log Out

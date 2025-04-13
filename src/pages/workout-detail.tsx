@@ -1,15 +1,28 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ExerciseCard } from "@/components/exercise-card";
-import { ArrowLeft, Dumbbell, Clock, ChevronRight, Play } from "lucide-react";
+import { ArrowLeft, Dumbbell, Clock, ChevronRight, Play, Video, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { workouts } from "@/data/workouts";
+import { WorkoutVideo } from "@/components/workout-video";
+import { videos } from "@/data/workout-videos";
+import { motion } from "framer-motion";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const WorkoutDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [showVideo, setShowVideo] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   
   const workout = workouts.find((w) => w.id === id);
   
@@ -25,6 +38,32 @@ const WorkoutDetail = () => {
       </div>
     );
   }
+  
+  // Find video for this workout if available
+  const workoutVideo = videos.find(v => v.workoutId === id);
+  
+  const handleStartWorkout = () => {
+    // Play a sound effect
+    const audio = new Audio("/workout-start.mp3");
+    audio.volume = 0.3;
+    audio.play().catch(err => console.log("Audio playback prevented: ", err));
+    
+    // Provide feedback via toast
+    toast({
+      title: "Workout Started",
+      description: "Get ready! Your workout has started.",
+    });
+    
+    // Vibrate if supported
+    if (navigator.vibrate) {
+      navigator.vibrate(200);
+    }
+  };
+  
+  const openVideoPreview = (videoUrl: string) => {
+    setSelectedVideo(videoUrl);
+    setShowVideo(true);
+  };
   
   return (
     <div className="min-h-screen bg-background pb-6">
@@ -48,25 +87,48 @@ const WorkoutDetail = () => {
       
       {/* Workout Details */}
       <div className="px-4 -mt-12 relative z-10">
-        <Badge className="mb-2">{workout.category}</Badge>
-        <h1 className="text-2xl font-bold">{workout.title}</h1>
-        
-        <div className="flex items-center gap-4 mt-2 text-muted-foreground text-sm">
-          <div className="flex items-center gap-1">
-            <Clock className="h-4 w-4" />
-            <span>{workout.duration} min</span>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Badge className="mb-2">{workout.category}</Badge>
+          <h1 className="text-2xl font-bold">{workout.title}</h1>
+          
+          <div className="flex items-center gap-4 mt-2 text-muted-foreground text-sm">
+            <div className="flex items-center gap-1">
+              <Clock className="h-4 w-4" />
+              <span>{workout.duration} min</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Dumbbell className="h-4 w-4" />
+              <span>{workout.exercises.length} exercises</span>
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            <Dumbbell className="h-4 w-4" />
-            <span>{workout.exercises.length} exercises</span>
-          </div>
-        </div>
+          
+          <p className="mt-4 text-sm text-muted-foreground">
+            {workout.description}
+          </p>
+          
+          {workoutVideo && (
+            <div 
+              className="mt-4 relative aspect-video rounded-lg overflow-hidden cursor-pointer group"
+              onClick={() => openVideoPreview(workoutVideo.videoUrl)}
+            >
+              <img 
+                src={workoutVideo.thumbnailUrl || "/placeholder.svg"} 
+                alt={`${workout.title} preview`}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center group-hover:bg-black/60 transition-colors">
+                <Video className="h-10 w-10 text-white" />
+                <span className="text-white font-medium ml-2">Watch Preview</span>
+              </div>
+            </div>
+          )}
+        </motion.div>
         
-        <p className="mt-4 text-sm text-muted-foreground">
-          {workout.description}
-        </p>
-        
-        <Button className="w-full mt-6" size="lg">
+        <Button className="w-full mt-6" size="lg" onClick={handleStartWorkout}>
           <Play className="h-4 w-4 mr-2" />
           Start Workout
         </Button>
@@ -86,10 +148,43 @@ const WorkoutDetail = () => {
               duration={exercise.duration}
               description={exercise.muscles.join(", ")}
               onSelect={() => navigate(`/exercise/${workout.id}/${exercise.id}`)}
+              hasVideo={Boolean(videos.find(v => v.exerciseId === exercise.id))}
+              onVideoClick={(e) => {
+                e.stopPropagation();
+                const exerciseVideo = videos.find(v => v.exerciseId === exercise.id);
+                if (exerciseVideo) {
+                  openVideoPreview(exerciseVideo.videoUrl);
+                }
+              }}
             />
           ))}
         </div>
       </div>
+      
+      {/* Video Dialog */}
+      <Dialog open={showVideo} onOpenChange={setShowVideo}>
+        <DialogContent className="sm:max-w-md p-0">
+          <DialogHeader className="p-4 absolute z-10 w-full bg-gradient-to-b from-black/80 to-transparent">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-white">Exercise Video</DialogTitle>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-white" 
+                onClick={() => setShowVideo(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </DialogHeader>
+          
+          {selectedVideo && (
+            <div className="aspect-video w-full">
+              <WorkoutVideo videoUrl={selectedVideo} />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

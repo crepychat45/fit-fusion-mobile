@@ -1,23 +1,99 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { MobileNav } from "@/components/mobile-nav";
-import { WorkoutCard } from "@/components/workout-card";
-import { UserStats } from "@/components/user-stats";
-import { Button } from "@/components/ui/button";
-import { Dumbbell, Calendar, Check, Settings } from "lucide-react";
-import { userProfile } from "@/data/user";
-import { workouts } from "@/data/workouts";
-import { Link } from "react-router-dom";
+import { ActivityCard } from "@/components/activity-card";
 import { ActivitySummary } from "@/components/activity-summary";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { userProfile } from "@/data/user";
+import { Dumbbell, Timer, Calendar, ChevronRight, AlarmClock, Bell } from "lucide-react";
+import { workouts } from "@/data/workouts";
+import { format } from "date-fns";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+
+// Scheduled workouts data
+const scheduledWorkouts = [
+  {
+    id: "1",
+    name: "Upper Body",
+    time: "07:00 AM",
+    day: "Today",
+    duration: "45 min"
+  },
+  {
+    id: "2",
+    name: "Cardio Session",
+    time: "06:30 AM",
+    day: "Tomorrow",
+    duration: "30 min"
+  }
+];
 
 const Index = () => {
-  // Animation variants
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [showReschedule, setShowReschedule] = useState(false);
+  const [selectedWorkout, setSelectedWorkout] = useState<any>(null);
+  const [scheduledDate, setScheduledDate] = useState<Date | undefined>(new Date());
+  const [scheduledTime, setScheduledTime] = useState("07:00 AM");
+  
+  // Times for reschedule dropdown
+  const availableTimes = [
+    "05:00 AM", "05:30 AM", "06:00 AM", "06:30 AM", 
+    "07:00 AM", "07:30 AM", "08:00 AM", "08:30 AM",
+    "05:00 PM", "05:30 PM", "06:00 PM", "06:30 PM", 
+    "07:00 PM", "07:30 PM", "08:00 PM", "08:30 PM"
+  ];
+  
+  const handleStartWorkout = (workout: any) => {
+    // Play a subtle sound effect when starting a workout
+    const audio = new Audio("/workout-start.mp3");
+    audio.volume = 0.3;
+    audio.play().catch(err => console.log("Audio playback prevented: ", err));
+    
+    toast({
+      title: "Workout Started",
+      description: `Starting ${workout.name} workout. Let's crush it!`,
+    });
+    
+    // Navigate to the workout detail page
+    navigate(`/workout/${workouts[0].id}`);
+  };
+  
+  const openRescheduleDialog = (workout: any) => {
+    setSelectedWorkout(workout);
+    setShowReschedule(true);
+  };
+  
+  const handleReschedule = () => {
+    if (selectedWorkout && scheduledDate) {
+      toast({
+        title: "Workout Rescheduled",
+        description: `${selectedWorkout.name} rescheduled to ${format(scheduledDate, "EEEE, MMM d")} at ${scheduledTime}`,
+      });
+      setShowReschedule(false);
+    }
+  };
+  
+  // Animation variants for list items
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { 
+    visible: {
       opacity: 1,
-      transition: { 
+      transition: {
         staggerChildren: 0.1
       }
     }
@@ -25,8 +101,8 @@ const Index = () => {
   
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
-    visible: { 
-      y: 0, 
+    visible: {
+      y: 0,
       opacity: 1,
       transition: { duration: 0.5 }
     }
@@ -34,132 +110,225 @@ const Index = () => {
   
   return (
     <div className="min-h-screen bg-background pb-16">
-      {/* App Header */}
-      <header className="p-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold">
-            <span className="text-gradient">FitFusion</span>
-          </h1>
-          <p className="text-sm text-muted-foreground">Welcome back, {userProfile.name}</p>
-        </div>
-        <Link to="/settings">
-          <Button variant="ghost" size="icon" className="rounded-full">
-            <Settings className="h-5 w-5" />
-          </Button>
-        </Link>
-      </header>
-      
-      {/* Today's Plan */}
-      <motion.section 
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="px-4 mt-2"
-      >
-        <div className="flex items-center gap-2 mb-2">
-          <Calendar className="h-4 w-4 text-primary" />
-          <h2 className="font-medium">Today's Plan</h2>
-        </div>
-        
-        <motion.div variants={itemVariants}>
-          <div className="bg-card rounded-lg p-4 shadow-sm border border-primary/10">
-            <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <h3 className="font-semibold">Full Body Strength</h3>
-                <p className="text-sm text-muted-foreground">45 min • 5 exercises</p>
-              </div>
-              <div className="bg-primary/10 p-2 rounded-full">
-                <Dumbbell className="h-6 w-6 text-primary" />
-              </div>
-            </div>
-            
-            <div className="flex mt-4 gap-3">
-              <Button className="flex-1" size="sm">
-                Start Workout
-              </Button>
-              <Button variant="outline" size="sm" className="flex-1">
-                Reschedule
-              </Button>
-            </div>
-          </div>
-        </motion.div>
-      </motion.section>
+      {/* Header */}
+      <div className="fitness-gradient pt-12 pb-6 px-4">
+        <h1 className="text-xl font-bold text-white mb-1">Welcome back, {userProfile.name}</h1>
+        <p className="text-white/80 text-sm">{format(new Date(), "EEEE, MMMM d")}</p>
+      </div>
       
       {/* Activity Summary */}
-      <motion.section
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible" 
-        className="px-4 mt-6"
-      >
-        <motion.div variants={itemVariants}>
-          <ActivitySummary />
-        </motion.div>
-      </motion.section>
+      <div className="px-4 -mt-6 relative z-10">
+        <ActivitySummary
+          workoutsCompleted={userProfile.stats.workoutsCompleted}
+          streakDays={userProfile.stats.streakDays}
+          caloriesBurned={userProfile.stats.caloriesBurned}
+          avgHeartRate={userProfile.stats.avgHeartRate}
+        />
+      </div>
       
-      {/* Recent Achievements */}
-      <motion.section 
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="px-4 mt-6"
-      >
-        <h2 className="font-medium mb-2">Recent Achievements</h2>
-        <motion.div variants={itemVariants}>
-          <div className="bg-card rounded-lg p-4 shadow-sm border border-primary/10">
-            <div className="flex items-center gap-2">
-              <div className="rounded-full bg-green-100 p-1">
-                <Check className="h-4 w-4 text-green-600" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-sm font-medium">5-Day Streak</h3>
-                <p className="text-xs text-muted-foreground">Keep it up!</p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      </motion.section>
-      
-      {/* Featured Workouts */}
-      <motion.section
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible" 
-        className="px-4 mt-6"
-      >
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="font-medium">Featured Workouts</h2>
-          <Link to="/workouts">
-            <Button variant="link" className="text-primary p-0 h-auto text-sm">
-              View All
-            </Button>
-          </Link>
+      {/* Today's Workout */}
+      <div className="px-4 mt-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-medium">Today's Workout</h2>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center text-xs text-muted-foreground"
+            onClick={() => navigate("/workouts")}
+          >
+            See All <ChevronRight className="h-4 w-4 ml-1" />
+          </Button>
         </div>
         
-        <div className="grid grid-cols-2 gap-3">
-          {workouts.slice(0, 4).map((workout) => (
-            <motion.div key={workout.id} variants={itemVariants}>
-              <WorkoutCard
-                id={workout.id}
-                title={workout.title}
-                category={workout.category}
-                duration={workout.duration}
-                exercises={workout.exercises.length}
-              />
-            </motion.div>
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {scheduledWorkouts.map((workout, index) => (
+            workout.day === "Today" && (
+              <motion.div key={workout.id} variants={itemVariants}>
+                <Card className="mb-3 overflow-hidden border border-primary/10 shadow-md">
+                  <CardContent className="p-0">
+                    <div className="flex items-center p-4">
+                      <div className="bg-primary/10 p-3 rounded-full">
+                        <Dumbbell className="h-6 w-6 text-primary" />
+                      </div>
+                      <div className="ml-4 flex-1">
+                        <h3 className="font-medium">{workout.name}</h3>
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <AlarmClock className="mr-1 h-3.5 w-3.5" />
+                          <span>{workout.time}</span>
+                          <span className="mx-1">•</span>
+                          <Timer className="mr-1 h-3.5 w-3.5" />
+                          <span>{workout.duration}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2 p-3 bg-muted/30 border-t">
+                      <Button 
+                        variant="default" 
+                        className="w-full"
+                        onClick={() => handleStartWorkout(workout)}
+                      >
+                        Start Workout
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => openRescheduleDialog(workout)}
+                      >
+                        Reschedule
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )
           ))}
-        </div>
-      </motion.section>
+        </motion.div>
+      </div>
       
-      {/* App Credit */}
-      <motion.section
-        variants={itemVariants} 
-        className="px-4 mt-10 mb-16"
-      >
-        <p className="text-center text-xs text-muted-foreground">
-          FitFusion © 2025 By Junedkhan
-        </p>
-      </motion.section>
+      {/* Upcoming Workouts */}
+      <div className="px-4 mt-6">
+        <h2 className="font-medium mb-3">Upcoming Workouts</h2>
+        
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {scheduledWorkouts.map((workout, index) => (
+            workout.day !== "Today" && (
+              <motion.div key={workout.id} variants={itemVariants}>
+                <Card className="mb-3 overflow-hidden border border-primary/10 shadow-sm">
+                  <CardContent className="p-4">
+                    <div className="flex items-center">
+                      <div className="bg-secondary/50 p-3 rounded-full">
+                        <Calendar className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="ml-4 flex-1">
+                        <div className="flex justify-between items-center">
+                          <h3 className="font-medium">{workout.name}</h3>
+                          <Badge variant="outline">{workout.day}</Badge>
+                        </div>
+                        <div className="flex items-center text-sm text-muted-foreground mt-1">
+                          <AlarmClock className="mr-1 h-3.5 w-3.5" />
+                          <span>{workout.time}</span>
+                          <span className="mx-1">•</span>
+                          <Timer className="mr-1 h-3.5 w-3.5" />
+                          <span>{workout.duration}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )
+          ))}
+        </motion.div>
+      </div>
+      
+      {/* Recent Activity */}
+      <div className="px-4 mt-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-medium">Recent Activity</h2>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center text-xs text-muted-foreground"
+            onClick={() => navigate("/progress")}
+          >
+            View All <ChevronRight className="h-4 w-4 ml-1" />
+          </Button>
+        </div>
+        
+        <div className="space-y-3">
+          <ActivityCard 
+            title="Leg Day Workout"
+            description="Completed in 45 minutes"
+            date="Yesterday"
+            icon={<Dumbbell className="h-6 w-6" />}
+            stats={[
+              { label: "Calories", value: "320" },
+              { label: "Exercises", value: "8" }
+            ]}
+          />
+          
+          <ActivityCard 
+            title="Morning Cardio"
+            description="Completed in 30 minutes"
+            date="2 days ago"
+            icon={<Timer className="h-6 w-6" />}
+            stats={[
+              { label: "Calories", value: "240" },
+              { label: "Distance", value: "4.2 km" }
+            ]}
+          />
+        </div>
+      </div>
+      
+      {/* Daily Tips */}
+      <div className="px-4 mt-6 mb-20">
+        <Card className="border-primary/10 shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Fitness Tip of the Day</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Stay hydrated during your workouts! Aim to drink water before, during, and after exercising to maintain optimal performance.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+      
+      {/* Reschedule Dialog */}
+      <Dialog open={showReschedule} onOpenChange={setShowReschedule}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Reschedule Workout</DialogTitle>
+            <DialogDescription>
+              Choose a new date and time for your workout
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            <div className="mb-4">
+              <h4 className="text-sm font-medium mb-2">Select Date</h4>
+              <CalendarComponent
+                mode="single"
+                selected={scheduledDate}
+                onSelect={setScheduledDate}
+                className="rounded-md border"
+                initialFocus
+              />
+            </div>
+            
+            <div className="mb-4">
+              <h4 className="text-sm font-medium mb-2">Select Time</h4>
+              <select 
+                value={scheduledTime}
+                onChange={(e) => setScheduledTime(e.target.value)}
+                className="w-full border rounded-md p-2"
+              >
+                {availableTimes.map((time) => (
+                  <option key={time} value={time}>{time}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReschedule(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleReschedule}>
+              Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       
       {/* Mobile Navigation */}
       <MobileNav />

@@ -1,71 +1,85 @@
 
 import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Clock } from "lucide-react";
+import { Card, CardContent } from "./ui/card";
+import { Dumbbell, Timer, ChevronRight, Video } from "lucide-react";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { Button } from "./ui/button";
 
 interface ExerciseCardProps {
   name: string;
-  sets: number;
-  reps: number;
-  duration?: number;
-  image?: string;
-  description?: string;
+  sets?: number;
+  reps?: number;
+  duration?: string;
+  description: string;
   onSelect?: () => void;
+  hasVideo?: boolean;
+  onVideoClick?: (e: React.MouseEvent) => void;
 }
 
-export function ExerciseCard({ 
-  name, 
-  sets, 
-  reps, 
-  duration, 
-  image, 
+export function ExerciseCard({
+  name,
+  sets,
+  reps,
+  duration,
   description,
-  onSelect 
+  onSelect,
+  hasVideo = false,
+  onVideoClick
 }: ExerciseCardProps) {
   return (
-    <Card 
-      className="flex overflow-hidden cursor-pointer hover:shadow-sm transition-all"
-      onClick={onSelect}
+    <motion.div
+      whileHover={{ scale: 1.01 }}
+      transition={{ duration: 0.2 }}
     >
-      <div className="w-24 h-24 bg-muted-foreground/10 flex items-center justify-center">
-        {image ? (
-          <img 
-            src={image} 
-            alt={name} 
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="h-12 w-12 rounded-full fitness-gradient flex items-center justify-center text-white font-bold">
-            {name.substring(0, 1).toUpperCase()}
+      <Card 
+        className={cn(
+          "overflow-hidden border-primary/10 shadow-sm",
+          onSelect && "cursor-pointer"
+        )}
+        onClick={onSelect}
+      >
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium">{name}</h3>
+                {hasVideo && (
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 text-primary hover:text-primary/80 -mr-2"
+                    onClick={onVideoClick}
+                  >
+                    <Video className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground mt-1">
+                {description}
+              </p>
+            </div>
+            {onSelect && <ChevronRight className="h-5 w-5 text-muted-foreground ml-2 flex-shrink-0" />}
           </div>
-        )}
-      </div>
-      
-      <CardContent className="flex-1 flex flex-col justify-center p-3">
-        <h3 className="font-medium text-sm">{name}</h3>
-        
-        <div className="flex gap-1 mt-1 text-muted-foreground text-xs">
-          <span>{sets} sets</span>
-          <span>•</span>
-          <span>{reps} reps</span>
           
-          {duration && (
-            <>
-              <span>•</span>
-              <span className="flex items-center gap-0.5">
-                <Clock className="h-3 w-3" />
-                {duration}s
-              </span>
-            </>
+          {(sets || reps || duration) && (
+            <div className="flex items-center gap-3 mt-3 text-sm text-muted-foreground">
+              {sets && reps && (
+                <div className="flex items-center gap-1">
+                  <Dumbbell className="h-3.5 w-3.5" />
+                  <span>{sets} sets × {reps} reps</span>
+                </div>
+              )}
+              {duration && (
+                <div className="flex items-center gap-1">
+                  <Timer className="h-3.5 w-3.5" />
+                  <span>{duration}</span>
+                </div>
+              )}
+            </div>
           )}
-        </div>
-        
-        {description && (
-          <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
-            {description}
-          </p>
-        )}
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }
