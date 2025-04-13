@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -39,22 +38,18 @@ const WorkoutDetail = () => {
     );
   }
   
-  // Find video for this workout if available
   const workoutVideo = workoutVideos.find(v => v.workoutId === id);
   
   const handleStartWorkout = () => {
-    // Play a sound effect
     const audio = new Audio("/workout-start.mp3");
     audio.volume = 0.3;
     audio.play().catch(err => console.log("Audio playback prevented: ", err));
     
-    // Provide feedback via toast
     toast({
       title: "Workout Started",
       description: "Get ready! Your workout has started.",
     });
     
-    // Vibrate if supported
     if (navigator.vibrate) {
       navigator.vibrate(200);
     }
@@ -67,7 +62,6 @@ const WorkoutDetail = () => {
   
   return (
     <div className="min-h-screen bg-background pb-6">
-      {/* Header */}
       <div className="relative h-48 fitness-gradient">
         <Button 
           variant="ghost" 
@@ -85,7 +79,6 @@ const WorkoutDetail = () => {
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background via-background/90 to-transparent h-24" />
       </div>
       
-      {/* Workout Details */}
       <div className="px-4 -mt-12 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -134,7 +127,6 @@ const WorkoutDetail = () => {
         </Button>
       </div>
       
-      {/* Exercises */}
       <div className="px-4 mt-8">
         <h2 className="font-medium mb-3">Exercises</h2>
         
@@ -145,7 +137,7 @@ const WorkoutDetail = () => {
               name={exercise.name}
               sets={exercise.sets}
               reps={exercise.reps}
-              duration={exercise.duration}
+              duration={exercise.duration ? exercise.duration.toString() : undefined}
               description={exercise.muscles.join(", ")}
               onSelect={() => navigate(`/exercise/${workout.id}/${exercise.id}`)}
               hasVideo={Boolean(workoutVideos.find(v => v.exerciseId === exercise.id))}
@@ -161,7 +153,6 @@ const WorkoutDetail = () => {
         </div>
       </div>
       
-      {/* Video Dialog */}
       <Dialog open={showVideo} onOpenChange={setShowVideo}>
         <DialogContent className="sm:max-w-md p-0">
           <DialogHeader className="p-4 absolute z-10 w-full bg-gradient-to-b from-black/80 to-transparent">
