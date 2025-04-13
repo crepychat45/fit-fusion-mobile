@@ -1,17 +1,22 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, PlayCircle } from "lucide-react";
+import { ArrowLeft, PlayCircle, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { workouts } from "@/data/workouts";
+import { workoutVideos } from "@/data/workout-videos";
+import { WorkoutVideo } from "@/components/workout-video";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const ExerciseDetail = () => {
   const { workoutId, exerciseId } = useParams<{ workoutId: string; exerciseId: string }>();
   const navigate = useNavigate();
+  const [showVideo, setShowVideo] = useState(false);
   
   const workout = workouts.find((w) => w.id === workoutId);
   const exercise = workout?.exercises.find((e) => e.id === exerciseId);
+  const exerciseVideo = workoutVideos.find(v => v.exerciseId === exerciseId);
   
   if (!workout || !exercise) {
     return (
@@ -25,6 +30,12 @@ const ExerciseDetail = () => {
       </div>
     );
   }
+  
+  const handleWatchDemo = () => {
+    if (exerciseVideo) {
+      setShowVideo(true);
+    }
+  };
   
   return (
     <div className="min-h-screen bg-background">
@@ -60,7 +71,7 @@ const ExerciseDetail = () => {
         <div className="mt-4">
           <h2 className="text-base font-medium mb-2">How to perform</h2>
           <p className="text-sm text-muted-foreground">
-            {exercise.instructions}
+            {exercise.instructions || "Start in a standing position with feet shoulder-width apart. Keep your back straight throughout the movement. Complete all repetitions with proper form."}
           </p>
         </div>
         
@@ -79,12 +90,46 @@ const ExerciseDetail = () => {
           <Button variant="outline" className="flex-1" onClick={() => navigate(-1)}>
             Back to workout
           </Button>
-          <Button className="flex-1">
+          <Button 
+            className="flex-1" 
+            onClick={handleWatchDemo}
+            disabled={!exerciseVideo}
+          >
             <PlayCircle className="h-4 w-4 mr-2" />
             Watch Demo
           </Button>
         </div>
       </div>
+      
+      {/* Video Dialog */}
+      <Dialog open={showVideo} onOpenChange={setShowVideo}>
+        <DialogContent className="sm:max-w-md p-0">
+          <DialogHeader className="p-4 absolute z-10 w-full bg-gradient-to-b from-black/80 to-transparent">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-white">Exercise Demo</DialogTitle>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-white" 
+                onClick={() => setShowVideo(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </DialogHeader>
+          
+          {exerciseVideo && (
+            <div className="aspect-video w-full">
+              <WorkoutVideo 
+                videoUrl={exerciseVideo.videoUrl}
+                title={exercise.name}
+                thumbnailUrl="/placeholder.svg"
+                duration="2:30"
+              />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -41,18 +42,24 @@ const WorkoutDetail = () => {
   const workoutVideo = workoutVideos.find(v => v.workoutId === id);
   
   const handleStartWorkout = () => {
+    // Play audio feedback
     const audio = new Audio("/workout-start.mp3");
     audio.volume = 0.3;
     audio.play().catch(err => console.log("Audio playback prevented: ", err));
     
+    // Show toast notification
     toast({
       title: "Workout Started",
       description: "Get ready! Your workout has started.",
     });
     
+    // Vibrate if supported
     if (navigator.vibrate) {
       navigator.vibrate(200);
     }
+    
+    // Navigate to exercise screen or start timer
+    navigate(`/exercise/${workout.id}/${workout.exercises[0].id}`);
   };
   
   const openVideoPreview = (videoUrl: string) => {

@@ -16,6 +16,7 @@ import NotificationsPage from "./pages/notifications";
 import Privacy from "./pages/privacy";
 import Help from "./pages/help";
 import Wearables from "./pages/wearables";
+import { FitAssistant } from "./components/fit-assistant";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ const App = () => (
           <Route path="/wearables" element={<Wearables />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <FitAssistant />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

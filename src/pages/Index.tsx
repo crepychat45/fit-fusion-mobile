@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { ActivityCard } from "@/components/activity-card";
@@ -23,8 +22,8 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { DailyTip } from "@/components/daily-tip";
 
-// Scheduled workouts data
 const scheduledWorkouts = [
   {
     id: "1",
@@ -50,7 +49,6 @@ const Index = () => {
   const [scheduledDate, setScheduledDate] = useState<Date | undefined>(new Date());
   const [scheduledTime, setScheduledTime] = useState("07:00 AM");
   
-  // Times for reschedule dropdown
   const availableTimes = [
     "05:00 AM", "05:30 AM", "06:00 AM", "06:30 AM", 
     "07:00 AM", "07:30 AM", "08:00 AM", "08:30 AM",
@@ -59,7 +57,6 @@ const Index = () => {
   ];
   
   const handleStartWorkout = (workout: any) => {
-    // Play a subtle sound effect when starting a workout
     const audio = new Audio("/workout-start.mp3");
     audio.volume = 0.3;
     audio.play().catch(err => console.log("Audio playback prevented: ", err));
@@ -69,7 +66,6 @@ const Index = () => {
       description: `Starting ${workout.name} workout. Let's crush it!`,
     });
     
-    // Navigate to the workout detail page
     navigate(`/workout/${workouts[0].id}`);
   };
   
@@ -88,7 +84,6 @@ const Index = () => {
     }
   };
   
-  // Animation variants for list items
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -110,13 +105,25 @@ const Index = () => {
   
   return (
     <div className="min-h-screen bg-background pb-16">
-      {/* Header */}
       <div className="fitness-gradient pt-12 pb-6 px-4">
-        <h1 className="text-xl font-bold text-white mb-1">Welcome back, {userProfile.name}</h1>
-        <p className="text-white/80 text-sm">{format(new Date(), "EEEE, MMMM d")}</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-white mb-1">Welcome back, {userProfile.name}</h1>
+            <p className="text-white/80 text-sm">{format(new Date(), "EEEE, MMMM d")}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="bg-white/10 text-white hover:bg-white/20"
+              onClick={() => navigate("/notifications")}
+            >
+              <Bell className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
       </div>
       
-      {/* Activity Summary */}
       <div className="px-4 -mt-6 relative z-10">
         <ActivitySummary
           workoutsCompleted={userProfile.stats.workoutsCompleted}
@@ -126,7 +133,6 @@ const Index = () => {
         />
       </div>
       
-      {/* Today's Workout */}
       <div className="px-4 mt-6">
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-medium">Today's Workout</h2>
@@ -190,7 +196,6 @@ const Index = () => {
         </motion.div>
       </div>
       
-      {/* Upcoming Workouts */}
       <div className="px-4 mt-6">
         <h2 className="font-medium mb-3">Upcoming Workouts</h2>
         
@@ -230,7 +235,6 @@ const Index = () => {
         </motion.div>
       </div>
       
-      {/* Recent Activity */}
       <div className="px-4 mt-6">
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-medium">Recent Activity</h2>
@@ -269,21 +273,10 @@ const Index = () => {
         </div>
       </div>
       
-      {/* Daily Tips */}
       <div className="px-4 mt-6 mb-20">
-        <Card className="border-primary/10 shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Fitness Tip of the Day</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Stay hydrated during your workouts! Aim to drink water before, during, and after exercising to maintain optimal performance.
-            </p>
-          </CardContent>
-        </Card>
+        <DailyTip />
       </div>
       
-      {/* Reschedule Dialog */}
       <Dialog open={showReschedule} onOpenChange={setShowReschedule}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -330,7 +323,6 @@ const Index = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Mobile Navigation */}
       <MobileNav />
     </div>
   );
