@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { 
@@ -16,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
-import { useTheme, Theme } from "@/contexts/theme-context"; // Import Theme type
+import { useTheme, Theme } from "@/contexts/theme-context";
 import { playSound, vibrate, testSound, testHapticFeedback } from "@/utils/feedback-utils";
 
 const Settings = () => {
@@ -127,8 +126,8 @@ const Settings = () => {
     localStorage.setItem("fitfusion-step-counting", stepCounting.toString());
   }, [stepCounting]);
   
-  const handleThemeChange = (selectedTheme: string) => {
-    setTheme(selectedTheme as Theme);
+  const handleThemeChange = (selectedTheme: Theme) => {
+    setTheme(selectedTheme);
     
     toast({
       title: "Theme Updated",
@@ -217,28 +216,28 @@ const Settings = () => {
                 onValueChange={handleThemeChange}
                 className="grid grid-cols-3 gap-4"
               >
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center relative">
                   <div className={`border rounded-full p-3 mb-2 ${theme === 'light' ? 'bg-primary text-primary-foreground border-primary' : 'bg-card'}`}>
                     <Sun className="h-5 w-5" />
                   </div>
                   <RadioGroupItem value="light" id="light" className="sr-only" />
-                  <Label htmlFor="light" className="text-sm">Light</Label>
+                  <Label htmlFor="light" className="text-sm cursor-pointer">Light</Label>
                 </div>
                 
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center relative">
                   <div className={`border rounded-full p-3 mb-2 ${theme === 'dark' ? 'bg-primary text-primary-foreground border-primary' : 'bg-card'}`}>
                     <Moon className="h-5 w-5" />
                   </div>
                   <RadioGroupItem value="dark" id="dark" className="sr-only" />
-                  <Label htmlFor="dark" className="text-sm">Dark</Label>
+                  <Label htmlFor="dark" className="text-sm cursor-pointer">Dark</Label>
                 </div>
                 
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center relative">
                   <div className={`border rounded-full p-3 mb-2 ${theme === 'system' ? 'bg-primary text-primary-foreground border-primary' : 'bg-card'}`}>
                     <Monitor className="h-5 w-5" />
                   </div>
                   <RadioGroupItem value="system" id="system" className="sr-only" />
-                  <Label htmlFor="system" className="text-sm">System</Label>
+                  <Label htmlFor="system" className="text-sm cursor-pointer">System</Label>
                 </div>
               </RadioGroup>
             </div>
