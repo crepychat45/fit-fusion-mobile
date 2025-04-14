@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 type Theme = "light" | "dark" | "system";
@@ -14,6 +13,8 @@ const ThemeContext = createContext<ThemeContextType>({
 });
 
 export const useTheme = () => useContext(ThemeContext);
+
+export type { Theme }; // Export the Theme type
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ 
   children 

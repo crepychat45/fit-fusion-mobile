@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
-import { useTheme } from "@/contexts/theme-context";
+import { useTheme, Theme } from "@/contexts/theme-context"; // Import Theme type
 import { playSound, vibrate, testSound, testHapticFeedback } from "@/utils/feedback-utils";
 
 const Settings = () => {
