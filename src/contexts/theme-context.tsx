@@ -58,6 +58,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
       root.classList.add(mediaQuery.matches ? "dark" : "light");
     };
     
+    // Initial call to handleChange to set the correct theme on mount
+    handleChange();
+    
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, [theme]);
