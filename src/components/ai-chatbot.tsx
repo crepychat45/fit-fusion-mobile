@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Loader2, Frown, MessageSquare, Search, Brain, Sparkles, Info } from "lucide-react";
+import { Send, Bot, User, Loader2, Frown, MessageSquare, Search, Brain, Sparkles, Info, BarChart, Dumbbell, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
