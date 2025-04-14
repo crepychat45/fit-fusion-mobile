@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { 
   ChevronLeft, Moon, Sun, Monitor, Volume2, VolumeX, Smartphone, 
@@ -16,46 +16,119 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
+import { useTheme } from "@/contexts/theme-context";
+import { playSound, vibrate, testSound, testHapticFeedback } from "@/utils/feedback-utils";
 
 const Settings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
   
   // Theme settings
-  const [theme, setTheme] = useState("system");
-  const [textSize, setTextSize] = useState(16);
+  const [textSize, setTextSize] = useState(() => {
+    const savedSize = localStorage.getItem("fitfusion-text-size");
+    return savedSize ? parseInt(savedSize) : 16;
+  });
   
   // Sound settings
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [workoutSounds, setWorkoutSounds] = useState(true);
-  const [notificationSounds, setNotificationSounds] = useState(true);
-  const [volume, setVolume] = useState([70]);
-  const [voiceGuidance, setVoiceGuidance] = useState(false);
-  const [hapticFeedback, setHapticFeedback] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    return localStorage.getItem("fitfusion-sound-enabled") !== "false";
+  });
+  const [workoutSounds, setWorkoutSounds] = useState(() => {
+    return localStorage.getItem("fitfusion-workout-sounds") !== "false";
+  });
+  const [notificationSounds, setNotificationSounds] = useState(() => {
+    return localStorage.getItem("fitfusion-notification-sounds") !== "false";
+  });
+  const [volume, setVolume] = useState<number[]>(() => {
+    const savedVolume = localStorage.getItem("fitfusion-sound-volume");
+    return savedVolume ? [parseInt(savedVolume)] : [70];
+  });
+  const [voiceGuidance, setVoiceGuidance] = useState(() => {
+    return localStorage.getItem("fitfusion-voice-guidance") === "true";
+  });
+  const [hapticFeedback, setHapticFeedback] = useState(() => {
+    return localStorage.getItem("fitfusion-haptic-enabled") !== "false";
+  });
+  
+  // View settings
+  const [compactView, setCompactView] = useState(() => {
+    return localStorage.getItem("fitfusion-compact-view") === "true";
+  });
+  const [showCalories, setShowCalories] = useState(() => {
+    return localStorage.getItem("fitfusion-show-calories") !== "false";
+  });
+  const [showHeartRate, setShowHeartRate] = useState(() => {
+    return localStorage.getItem("fitfusion-show-heart-rate") !== "false";
+  });
   
   // Wearable settings
-  const [heartRateMonitoring, setHeartRateMonitoring] = useState(true);
-  const [sleepTracking, setSleepTracking] = useState(false);
-  const [stepCounting, setStepCounting] = useState(true);
+  const [heartRateMonitoring, setHeartRateMonitoring] = useState(() => {
+    return localStorage.getItem("fitfusion-heart-rate-monitoring") !== "false";
+  });
+  const [sleepTracking, setSleepTracking] = useState(() => {
+    return localStorage.getItem("fitfusion-sleep-tracking") === "true";
+  });
+  const [stepCounting, setStepCounting] = useState(() => {
+    return localStorage.getItem("fitfusion-step-counting") !== "false";
+  });
+  
+  // Save settings to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem("fitfusion-text-size", textSize.toString());
+    document.documentElement.style.fontSize = `${textSize}px`;
+  }, [textSize]);
+  
+  useEffect(() => {
+    localStorage.setItem("fitfusion-sound-enabled", soundEnabled.toString());
+  }, [soundEnabled]);
+  
+  useEffect(() => {
+    localStorage.setItem("fitfusion-workout-sounds", workoutSounds.toString());
+  }, [workoutSounds]);
+  
+  useEffect(() => {
+    localStorage.setItem("fitfusion-notification-sounds", notificationSounds.toString());
+  }, [notificationSounds]);
+  
+  useEffect(() => {
+    localStorage.setItem("fitfusion-sound-volume", volume[0].toString());
+  }, [volume]);
+  
+  useEffect(() => {
+    localStorage.setItem("fitfusion-voice-guidance", voiceGuidance.toString());
+  }, [voiceGuidance]);
+  
+  useEffect(() => {
+    localStorage.setItem("fitfusion-haptic-enabled", hapticFeedback.toString());
+  }, [hapticFeedback]);
+  
+  useEffect(() => {
+    localStorage.setItem("fitfusion-compact-view", compactView.toString());
+  }, [compactView]);
+  
+  useEffect(() => {
+    localStorage.setItem("fitfusion-show-calories", showCalories.toString());
+  }, [showCalories]);
+  
+  useEffect(() => {
+    localStorage.setItem("fitfusion-show-heart-rate", showHeartRate.toString());
+  }, [showHeartRate]);
+  
+  useEffect(() => {
+    localStorage.setItem("fitfusion-heart-rate-monitoring", heartRateMonitoring.toString());
+  }, [heartRateMonitoring]);
+  
+  useEffect(() => {
+    localStorage.setItem("fitfusion-sleep-tracking", sleepTracking.toString());
+  }, [sleepTracking]);
+  
+  useEffect(() => {
+    localStorage.setItem("fitfusion-step-counting", stepCounting.toString());
+  }, [stepCounting]);
   
   const handleThemeChange = (selectedTheme: string) => {
-    setTheme(selectedTheme);
-    
-    // Apply theme logic would go here in a real app
-    document.documentElement.classList.remove("light", "dark");
-    
-    if (selectedTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else if (selectedTheme === "light") {
-      document.documentElement.classList.add("light");
-    } else {
-      // For system preference, check media query
-      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.add("light");
-      }
-    }
+    setTheme(selectedTheme as Theme);
     
     toast({
       title: "Theme Updated",
@@ -65,7 +138,6 @@ const Settings = () => {
   
   const updateTextSize = (size: number[]) => {
     setTextSize(size[0]);
-    document.documentElement.style.fontSize = `${size[0]}px`;
     
     toast({
       title: "Text Size Updated",
@@ -73,7 +145,7 @@ const Settings = () => {
     });
   };
   
-  const testSound = () => {
+  const handleTestSound = async () => {
     if (!soundEnabled) {
       toast({
         title: "Sound is Disabled",
@@ -82,18 +154,24 @@ const Settings = () => {
       return;
     }
     
-    const audio = new Audio("/notification-sound.mp3");
-    audio.volume = volume[0] / 100;
-    audio.play().catch(err => {
-      console.log("Audio playback prevented: ", err);
+    try {
+      await testSound();
+      
+      if (hapticFeedback) {
+        testHapticFeedback();
+      }
+      
+      toast({
+        title: "Sound Test",
+        description: "Sound played successfully!",
+      });
+    } catch (error) {
+      console.error("Sound test failed:", error);
       toast({
         title: "Sound Test Failed",
         description: "Unable to play sound. Please check your device settings.",
+        variant: "destructive",
       });
-    });
-    
-    if (hapticFeedback && navigator.vibrate) {
-      navigator.vibrate(200);
     }
   };
   
@@ -208,7 +286,11 @@ const Settings = () => {
                     <PanelLeft className="h-4 w-4" />
                     <span>Compact View</span>
                   </Label>
-                  <Switch id="compact-view" />
+                  <Switch 
+                    id="compact-view" 
+                    checked={compactView}
+                    onCheckedChange={setCompactView}
+                  />
                 </div>
                 
                 <div className="flex items-center justify-between">
@@ -216,7 +298,11 @@ const Settings = () => {
                     <Dumbbell className="h-4 w-4" />
                     <span>Show Calories</span>
                   </Label>
-                  <Switch id="show-calories" defaultChecked />
+                  <Switch 
+                    id="show-calories" 
+                    checked={showCalories}
+                    onCheckedChange={setShowCalories}
+                  />
                 </div>
                 
                 <div className="flex items-center justify-between">
@@ -224,7 +310,11 @@ const Settings = () => {
                     <Heart className="h-4 w-4" />
                     <span>Show Heart Rate</span>
                   </Label>
-                  <Switch id="show-heart-rate" defaultChecked />
+                  <Switch 
+                    id="show-heart-rate" 
+                    checked={showHeartRate}
+                    onCheckedChange={setShowHeartRate}
+                  />
                 </div>
               </div>
             </div>
@@ -239,7 +329,20 @@ const Settings = () => {
                 <h3 className="text-lg font-medium">Sound</h3>
                 <Switch 
                   checked={soundEnabled} 
-                  onCheckedChange={setSoundEnabled} 
+                  onCheckedChange={(checked) => {
+                    setSoundEnabled(checked);
+                    if (checked) {
+                      toast({
+                        title: "Sound Enabled",
+                        description: "App sounds have been turned on.",
+                      });
+                    } else {
+                      toast({
+                        title: "Sound Disabled",
+                        description: "App sounds have been turned off.",
+                      });
+                    }
+                  }} 
                 />
               </div>
               
@@ -307,7 +410,7 @@ const Settings = () => {
                   variant="outline" 
                   size="sm" 
                   className="ml-auto block mt-2" 
-                  onClick={testSound}
+                  onClick={handleTestSound}
                   disabled={!soundEnabled}
                 >
                   Test Sound
@@ -322,7 +425,12 @@ const Settings = () => {
                 <h3 className="text-lg font-medium">Haptic Feedback</h3>
                 <Switch 
                   checked={hapticFeedback} 
-                  onCheckedChange={setHapticFeedback} 
+                  onCheckedChange={(checked) => {
+                    setHapticFeedback(checked);
+                    if (checked && navigator.vibrate) {
+                      navigator.vibrate(100);
+                    }
+                  }} 
                 />
               </div>
               
@@ -338,7 +446,7 @@ const Settings = () => {
                 className="w-full mt-4" 
                 onClick={() => {
                   if (hapticFeedback && navigator.vibrate) {
-                    navigator.vibrate([100, 30, 100, 30, 100]);
+                    testHapticFeedback();
                     toast({
                       title: "Haptic Feedback Test",
                       description: "If your device supports vibration, you should feel it now.",
@@ -450,7 +558,24 @@ const Settings = () => {
                   <Switch id="background-sync" defaultChecked />
                 </div>
                 
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => {
+                    toast({
+                      title: "Syncing Data",
+                      description: "Your fitness data is being synced...",
+                    });
+                    
+                    // Simulate sync delay
+                    setTimeout(() => {
+                      toast({
+                        title: "Sync Complete",
+                        description: "Your fitness data has been successfully synced.",
+                      });
+                    }, 2000);
+                  }}
+                >
                   Sync Now
                 </Button>
                 
@@ -471,7 +596,7 @@ const Settings = () => {
                 <Dumbbell className="h-8 w-8 text-primary" />
               </div>
               <h3 className="text-xl font-bold">FitFusion</h3>
-              <p className="text-sm text-muted-foreground">Version 1.2.0</p>
+              <p className="text-sm text-muted-foreground">Version 2.0.0</p>
             </div>
             
             <Separator />
@@ -487,12 +612,32 @@ const Settings = () => {
                 <ChevronLeft className="h-4 w-4 rotate-180" />
               </Button>
               
-              <Button variant="outline" className="w-full justify-between">
+              <Button 
+                variant="outline" 
+                className="w-full justify-between" 
+                onClick={() => {
+                  window.open("/terms-of-service.html", "_blank");
+                  toast({
+                    title: "Terms of Service",
+                    description: "Opened Terms of Service in a new tab.",
+                  });
+                }}
+              >
                 <span>Terms of Service</span>
                 <ChevronLeft className="h-4 w-4 rotate-180" />
               </Button>
               
-              <Button variant="outline" className="w-full justify-between">
+              <Button 
+                variant="outline" 
+                className="w-full justify-between"
+                onClick={() => {
+                  window.open("/licenses.html", "_blank");
+                  toast({
+                    title: "Licenses",
+                    description: "Opened Licenses information in a new tab.",
+                  });
+                }}
+              >
                 <span>Licenses</span>
                 <ChevronLeft className="h-4 w-4 rotate-180" />
               </Button>
