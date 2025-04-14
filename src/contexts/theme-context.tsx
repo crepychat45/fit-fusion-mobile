@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 type Theme = "light" | "dark" | "system";
@@ -38,12 +39,11 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
         ? "dark" 
         : "light";
       root.classList.add(systemTheme);
+      localStorage.setItem("fitfusion-theme", theme);
     } else {
       root.classList.add(theme);
+      localStorage.setItem("fitfusion-theme", theme);
     }
-
-    // Save to localStorage
-    localStorage.setItem("fitfusion-theme", theme);
   }, [theme]);
 
   // Listen for system theme changes

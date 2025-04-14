@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Loader2, Frown, MessageSquare, Search } from "lucide-react";
+import { Send, Bot, User, Loader2, Frown, MessageSquare, Search, Brain, Sparkles, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,11 +8,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { userProfile } from "@/data/user";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTheme } from "@/contexts/theme-context";
 
 interface Message {
   text: string;
   isBot: boolean;
   timestamp: Date;
+  isThinking?: boolean;
 }
 
 const initialMessages: Message[] = [
@@ -40,6 +42,10 @@ const responses: Record<string, string> = {
   "level": `Your fitness level is currently set to "${userProfile.level}". As you progress, this level will adjust to match your improvements.`,
   "dark mode": "You can enable dark mode in the Settings tab under App Appearance. It's easier on the eyes during night workouts!",
   "notifications": "Manage your notification preferences in Settings > Notifications. You can customize alerts for workouts, achievements, and more.",
+  "premium": "FitFusion Premium offers exclusive workouts, detailed analytics, personalized training plans, and priority support. Check your profile to upgrade!",
+  "nutrition": "FitFusion helps you track your macros and calories. Set your daily nutrition goals in the Nutrition tab and log your meals to stay on track.",
+  "schedule": "Plan your workout schedule in the Calendar tab. You can set reminders and track your consistency over time.",
+  "community": "Connect with other fitness enthusiasts in our Community section. Share your progress, join challenges, and get motivated together!",
   "default": "I'm not sure about that. Please check our Help & Support section for more information or contact us directly."
 };
 
@@ -50,6 +56,7 @@ export function AIChatbot() {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { theme } = useTheme();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -88,10 +95,22 @@ export function AIChatbot() {
     setMessages(prev => [...prev, userMessage]);
     setInput("");
     setSuggestions([]);
+    
+    // Add typing indicator
     setIsTyping(true);
+    const thinkingMessage: Message = {
+      text: "",
+      isBot: true,
+      timestamp: new Date(),
+      isThinking: true
+    };
+    setMessages(prev => [...prev, thinkingMessage]);
     
     // Process response
     setTimeout(() => {
+      // Remove thinking message
+      setMessages(prev => prev.filter(m => !m.isThinking));
+      
       const lowercaseInput = input.toLowerCase();
       let responseText = responses.default;
       
@@ -112,6 +131,8 @@ export function AIChatbot() {
         responseText = `Based on your schedule, today you have a Full Body Strength workout planned. It's a 45-minute session with 5 exercises.`;
       } else if (lowercaseInput.includes("thank")) {
         responseText = `You're welcome! I'm here to help you achieve your fitness goals. Let me know if you need anything else.`;
+      } else if (lowercaseInput.includes("theme") || lowercaseInput.includes("dark mode") || lowercaseInput.includes("light mode")) {
+        responseText = `You can change your theme preferences in Settings > Display. Choose between light, dark, or system mode according to your preference.`;
       }
       
       const botMessage: Message = {
@@ -122,7 +143,7 @@ export function AIChatbot() {
       
       setIsTyping(false);
       setMessages(prev => [...prev, botMessage]);
-    }, 1200);
+    }, Math.random() * 800 + 800); // Random delay between 800-1600ms
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -148,6 +169,14 @@ export function AIChatbot() {
     }
   };
 
+  // New feature - Quick action buttons
+  const quickActions = [
+    { text: "My stats", icon: <BarChart className="h-3 w-3" /> },
+    { text: "Workout tips", icon: <Dumbbell className="h-3 w-3" /> },
+    { text: "Progress check", icon: <BarChart className="h-3 w-3" /> },
+    { text: "Today's plan", icon: <Calendar className="h-3 w-3" /> }
+  ];
+
   return (
     <Card className="h-[500px] flex flex-col">
       <CardContent className="p-4 flex-1 flex flex-col">
@@ -167,54 +196,47 @@ export function AIChatbot() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <div 
-                    className={`max-w-[80%] p-3 rounded-lg ${
-                      msg.isBot 
-                        ? 'bg-secondary/50 text-foreground rounded-tl-none' 
-                        : 'bg-primary text-primary-foreground rounded-tr-none'
-                    }`}
-                  >
-                    <div className="flex items-center mb-1">
-                      <div className="rounded-full p-1 mr-1 bg-background/20">
-                        {msg.isBot ? (
+                  {msg.isThinking ? (
+                    <div className="max-w-[80%] p-3 rounded-lg bg-secondary/50 text-foreground rounded-tl-none">
+                      <div className="flex items-center mb-1">
+                        <div className="rounded-full p-1 mr-1 bg-background/20">
                           <Bot className="h-3 w-3" />
-                        ) : (
-                          <User className="h-3 w-3" />
-                        )}
+                        </div>
+                        <span className="text-xs">Assistant</span>
                       </div>
-                      <span className="text-xs">{msg.isBot ? 'Assistant' : 'You'}</span>
+                      <div className="flex items-center space-x-1">
+                        <div className="w-2 h-2 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                        <div className="w-2 h-2 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                        <div className="w-2 h-2 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                      </div>
                     </div>
-                    <p className="text-sm">{msg.text}</p>
-                    <p className="text-xs opacity-70 text-right mt-1">
-                      {format(msg.timestamp, 'hh:mm a')}
-                    </p>
-                  </div>
+                  ) : (
+                    <div 
+                      className={`max-w-[80%] p-3 rounded-lg ${
+                        msg.isBot 
+                          ? 'bg-secondary/50 text-foreground rounded-tl-none' 
+                          : 'bg-primary text-primary-foreground rounded-tr-none'
+                      }`}
+                    >
+                      <div className="flex items-center mb-1">
+                        <div className="rounded-full p-1 mr-1 bg-background/20">
+                          {msg.isBot ? (
+                            <Bot className="h-3 w-3" />
+                          ) : (
+                            <User className="h-3 w-3" />
+                          )}
+                        </div>
+                        <span className="text-xs">{msg.isBot ? 'Assistant' : 'You'}</span>
+                      </div>
+                      <p className="text-sm">{msg.text}</p>
+                      <p className="text-xs opacity-70 text-right mt-1">
+                        {format(msg.timestamp, 'hh:mm a')}
+                      </p>
+                    </div>
+                  )}
                 </motion.div>
               ))}
             </AnimatePresence>
-            
-            {isTyping && (
-              <motion.div 
-                className="flex justify-start"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <div className="bg-secondary/50 text-foreground rounded-lg rounded-tl-none p-3 max-w-[80%]">
-                  <div className="flex items-center mb-1">
-                    <div className="rounded-full p-1 mr-1 bg-background/20">
-                      <Bot className="h-3 w-3" />
-                    </div>
-                    <span className="text-xs">Assistant</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <div className="w-2 h-2 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                    <div className="w-2 h-2 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                    <div className="w-2 h-2 bg-primary/50 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
             
             <div ref={messagesEndRef} />
           </div>
@@ -244,12 +266,13 @@ export function AIChatbot() {
               onKeyPress={handleKeyPress}
               className="flex-1 mr-2"
               ref={inputRef}
+              disabled={isTyping}
             />
             <Button 
               onClick={handleSend} 
               size="icon" 
               className="bg-primary"
-              disabled={isTyping}
+              disabled={!input.trim() || isTyping}
             >
               {isTyping ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -268,18 +291,37 @@ export function AIChatbot() {
                 {["How to track progress?", "What workouts are available?", "Show my stats", "Nutrition tips", "How to earn achievements?"].map((q, i) => (
                   <div 
                     key={i} 
-                    className="text-xs py-1 px-2 bg-background/50 rounded cursor-pointer hover:bg-background"
+                    className="text-xs py-1 px-2 bg-background/50 rounded cursor-pointer hover:bg-background flex items-center"
                     onClick={() => {
                       setInput(q);
                       setTimeout(() => handleSend(), 100);
                     }}
                   >
+                    <Sparkles className="h-2.5 w-2.5 mr-1 text-primary" />
                     {q}
                   </div>
                 ))}
               </div>
             </div>
           )}
+          
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+            {quickActions.map((action, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                size="sm"
+                className="text-xs whitespace-nowrap"
+                onClick={() => {
+                  setInput(action.text);
+                  setTimeout(() => handleSend(), 100);
+                }}
+              >
+                {action.icon}
+                <span className="ml-1">{action.text}</span>
+              </Button>
+            ))}
+          </div>
         </div>
       </CardContent>
     </Card>
