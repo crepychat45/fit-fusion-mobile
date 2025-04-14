@@ -3,13 +3,15 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ExerciseCard } from "@/components/exercise-card";
-import { ArrowLeft, Dumbbell, Clock, ChevronRight, Play, Video, X } from "lucide-react";
+import { ArrowLeft, Dumbbell, Clock, Play, Video, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { workouts } from "@/data/workouts";
 import { WorkoutVideo } from "@/components/workout-video";
 import { workoutVideos } from "@/data/workout-videos";
 import { motion } from "framer-motion";
 import { useToast } from "@/components/ui/use-toast";
+import { useLanguage } from "@/contexts/language-context";
+import { provideFeedback } from "@/utils/feedback-utils";
 import {
   Dialog,
   DialogContent,
@@ -21,8 +23,10 @@ const WorkoutDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [showVideo, setShowVideo] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+  const [isStarting, setIsStarting] = useState(false);
   
   const workout = workouts.find((w) => w.id === id);
   
@@ -41,11 +45,11 @@ const WorkoutDetail = () => {
   
   const workoutVideo = workoutVideos.find(v => v.workoutId === id);
   
-  const handleStartWorkout = () => {
-    // Play audio feedback
-    const audio = new Audio("/workout-start.mp3");
-    audio.volume = 0.3;
-    audio.play().catch(err => console.log("Audio playback prevented: ", err));
+  const handleStartWorkout = async () => {
+    setIsStarting(true);
+    
+    // Provide feedback (sound + haptic)
+    await provideFeedback("workout-start", "success");
     
     // Show toast notification
     toast({
@@ -53,13 +57,11 @@ const WorkoutDetail = () => {
       description: "Get ready! Your workout has started.",
     });
     
-    // Vibrate if supported
-    if (navigator.vibrate) {
-      navigator.vibrate(200);
-    }
-    
-    // Navigate to exercise screen or start timer
-    navigate(`/exercise/${workout.id}/${workout.exercises[0].id}`);
+    // Navigate to exercise screen after a short delay for feedback to complete
+    setTimeout(() => {
+      setIsStarting(false);
+      navigate(`/exercise/${workout.id}/${workout.exercises[0].id}`);
+    }, 800);
   };
   
   const openVideoPreview = (videoUrl: string) => {
@@ -128,9 +130,14 @@ const WorkoutDetail = () => {
           )}
         </motion.div>
         
-        <Button className="w-full mt-6" size="lg" onClick={handleStartWorkout}>
-          <Play className="h-4 w-4 mr-2" />
-          Start Workout
+        <Button 
+          className="w-full mt-6" 
+          size="lg" 
+          onClick={handleStartWorkout}
+          disabled={isStarting}
+        >
+          <Play className={`h-4 w-4 mr-2 ${isStarting ? 'animate-pulse' : ''}`} />
+          {t('workout.start')}
         </Button>
       </div>
       

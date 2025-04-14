@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, PlayCircle, X } from "lucide-react";
@@ -8,6 +8,7 @@ import { workouts } from "@/data/workouts";
 import { workoutVideos } from "@/data/workout-videos";
 import { WorkoutVideo } from "@/components/workout-video";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { toast } from "@/components/ui/use-toast";
 
 const ExerciseDetail = () => {
   const { workoutId, exerciseId } = useParams<{ workoutId: string; exerciseId: string }>();
@@ -17,6 +18,17 @@ const ExerciseDetail = () => {
   const workout = workouts.find((w) => w.id === workoutId);
   const exercise = workout?.exercises.find((e) => e.id === exerciseId);
   const exerciseVideo = workoutVideos.find(v => v.exerciseId === exerciseId);
+  
+  useEffect(() => {
+    // Check if we have a workout and exercise
+    if (!workout || !exercise) {
+      toast({
+        title: "Exercise not found",
+        description: "We couldn't find the exercise you're looking for.",
+        variant: "destructive"
+      });
+    }
+  }, [workout, exercise]);
   
   if (!workout || !exercise) {
     return (
@@ -34,6 +46,11 @@ const ExerciseDetail = () => {
   const handleWatchDemo = () => {
     if (exerciseVideo) {
       setShowVideo(true);
+    } else {
+      toast({
+        title: "Video unavailable",
+        description: "Demo video is not available for this exercise.",
+      });
     }
   };
   
@@ -93,7 +110,6 @@ const ExerciseDetail = () => {
           <Button 
             className="flex-1" 
             onClick={handleWatchDemo}
-            disabled={!exerciseVideo}
           >
             <PlayCircle className="h-4 w-4 mr-2" />
             Watch Demo
@@ -123,8 +139,8 @@ const ExerciseDetail = () => {
               <WorkoutVideo 
                 videoUrl={exerciseVideo.videoUrl}
                 title={exercise.name}
-                thumbnailUrl="/placeholder.svg"
-                duration="2:30"
+                thumbnailUrl={exerciseVideo.thumbnailUrl || "/placeholder.svg"}
+                duration={exerciseVideo.duration || "2:30"}
               />
             </div>
           )}

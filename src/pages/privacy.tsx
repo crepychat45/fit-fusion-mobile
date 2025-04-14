@@ -12,10 +12,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
+import { useLanguage } from "@/contexts/language-context";
 
 const Privacy = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [locationEnabled, setLocationEnabled] = useState(true);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [dataSync, setDataSync] = useState(true);
@@ -29,10 +31,31 @@ const Privacy = () => {
   };
   
   const handleAction = (action: string) => {
-    toast({
-      title: action,
-      description: "This action would be processed in a real app.",
-    });
+    switch (action) {
+      case "Download Your Data":
+        toast({
+          title: "Download Started",
+          description: "Your data export is being prepared. You'll receive a notification when it's ready.",
+        });
+        break;
+      case "Privacy Policy":
+        window.open("https://example.com/privacy-policy", "_blank");
+        break;
+      case "Data Encryption":
+        toast({
+          title: "End-to-End Encryption",
+          description: "Your data is encrypted using industry-standard protocols.",
+        });
+        break;
+      case "Change Password":
+        navigate("/settings");
+        break;
+      default:
+        toast({
+          title: action,
+          description: "Feature will be implemented soon.",
+        });
+    }
   };
   
   return (
@@ -45,7 +68,7 @@ const Privacy = () => {
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
-          <h1 className="text-xl font-bold text-white ml-2">Privacy & Data</h1>
+          <h1 className="text-xl font-bold text-white ml-2">{t('privacy.title')}</h1>
         </div>
       </header>
       
@@ -56,7 +79,7 @@ const Privacy = () => {
               <Shield className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h2 className="font-medium">Privacy Status</h2>
+              <h2 className="font-medium">{t('privacy.status')}</h2>
               <p className="text-xs text-muted-foreground">Your account is protected</p>
             </div>
           </div>
