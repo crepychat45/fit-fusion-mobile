@@ -16,8 +16,8 @@ export interface Workout {
   level: "beginner" | "intermediate" | "advanced";
   duration: number;
   exercises: Exercise[];
-  popularity?: number;
-  createdAt?: number;
+  popularity: number;
+  createdAt: number;
 }
 
 export const workouts: Workout[] = [
