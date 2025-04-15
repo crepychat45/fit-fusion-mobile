@@ -1,11 +1,11 @@
-
 import React, { useState, useEffect } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { 
   ChevronLeft, Moon, Sun, Monitor, Volume2, VolumeX, Smartphone, 
   Eye, Clock, Bell, Settings as SettingsIcon, Heart, Dumbbell, 
   Check, PanelLeft, MessageSquare, Vibrate, FileCode2, HelpCircle,
-  Hash, Languages, CirclePlus, X, ChevronsUpDown, Cpu, Code, Database
+  Hash, Languages, CirclePlus, X, ChevronsUpDown, Cpu, Code, Database,
+  ChevronRight
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
