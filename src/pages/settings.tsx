@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { 
   ChevronLeft, Moon, Sun, Monitor, Volume2, VolumeX, Smartphone, 
   Eye, Clock, Bell, Settings as SettingsIcon, Heart, Dumbbell, 
-  Check, PanelLeft, MessageSquare, Vibrate
+  Check, PanelLeft, MessageSquare, Vibrate, FileCode2, HelpCircle,
+  Hash, Languages, CirclePlus, X, ChevronsUpDown, Cpu, Code, Database
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -17,6 +19,33 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { useTheme, Theme } from "@/contexts/theme-context";
 import { playSound, vibrate, testSound, testHapticFeedback } from "@/utils/feedback-utils";
+import { Card, CardContent } from "@/components/ui/card";
+import { WorkoutCompactView } from "@/components/workout-compact-view";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -72,6 +101,17 @@ const Settings = () => {
     return localStorage.getItem("fitfusion-step-counting") !== "false";
   });
   
+  // Programming languages settings
+  const [codeEditorEnabled, setCodeEditorEnabled] = useState(() => {
+    return localStorage.getItem("fitfusion-code-editor-enabled") === "true";
+  });
+  const [programmingLanguages, setProgrammingLanguages] = useState<string[]>(() => {
+    const savedLanguages = localStorage.getItem("fitfusion-programming-languages");
+    return savedLanguages ? JSON.parse(savedLanguages) : ["JavaScript", "HTML", "CSS"];
+  });
+  const [languagePickerOpen, setLanguagePickerOpen] = useState(false);
+  const [customLanguage, setCustomLanguage] = useState("");
+  
   // Save settings to localStorage when they change
   useEffect(() => {
     localStorage.setItem("fitfusion-text-size", textSize.toString());
@@ -125,6 +165,14 @@ const Settings = () => {
   useEffect(() => {
     localStorage.setItem("fitfusion-step-counting", stepCounting.toString());
   }, [stepCounting]);
+  
+  useEffect(() => {
+    localStorage.setItem("fitfusion-code-editor-enabled", codeEditorEnabled.toString());
+  }, [codeEditorEnabled]);
+  
+  useEffect(() => {
+    localStorage.setItem("fitfusion-programming-languages", JSON.stringify(programmingLanguages));
+  }, [programmingLanguages]);
   
   const handleThemeChange = (selectedTheme: Theme) => {
     setTheme(selectedTheme);
@@ -181,6 +229,58 @@ const Settings = () => {
     });
   };
   
+  const addProgrammingLanguage = (language: string) => {
+    if (language && !programmingLanguages.includes(language)) {
+      setProgrammingLanguages([...programmingLanguages, language]);
+      setCustomLanguage("");
+      setLanguagePickerOpen(false);
+      
+      toast({
+        title: "Language Added",
+        description: `${language} has been added to your programming languages.`,
+      });
+    }
+  };
+  
+  const removeProgrammingLanguage = (language: string) => {
+    setProgrammingLanguages(programmingLanguages.filter(lang => lang !== language));
+    
+    toast({
+      title: "Language Removed",
+      description: `${language} has been removed from your programming languages.`,
+    });
+  };
+  
+  const languageOptions = [
+    "JavaScript",
+    "Python",
+    "C++",
+    "HTML",
+    "CSS",
+    "TypeScript",
+    "Java",
+    "C#",
+    "Ruby",
+    "Go",
+    "Rust",
+    "Swift",
+    "Kotlin",
+    "PHP",
+    "SQL",
+    "Bash",
+    "PowerShell",
+    "R",
+    "Dart",
+    "Scala"
+  ].filter(lang => !programmingLanguages.includes(lang));
+  
+  const handleCustomLanguageSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (customLanguage.trim()) {
+      addProgrammingLanguage(customLanguage.trim());
+    }
+  };
+  
   return (
     <div className="min-h-screen bg-background pb-16">
       {/* Header */}
@@ -198,10 +298,11 @@ const Settings = () => {
       
       <Tabs defaultValue="display" className="w-full">
         <div className="px-4 pt-2 overflow-x-auto no-scrollbar">
-          <TabsList className="w-full grid grid-cols-4">
+          <TabsList className="w-full grid grid-cols-5">
             <TabsTrigger value="display">Display</TabsTrigger>
             <TabsTrigger value="sound">Sound</TabsTrigger>
             <TabsTrigger value="device">Device</TabsTrigger>
+            <TabsTrigger value="developer">Developer</TabsTrigger>
             <TabsTrigger value="about">About</TabsTrigger>
           </TabsList>
         </div>
@@ -315,6 +416,21 @@ const Settings = () => {
                     onCheckedChange={setShowHeartRate}
                   />
                 </div>
+
+                {/* Preview Area */}
+                <div className="mt-6 border rounded-lg p-3 bg-background/50">
+                  <h4 className="text-sm font-medium mb-2">Preview</h4>
+                  <WorkoutCompactView 
+                    id="preview"
+                    title="Full Body Workout"
+                    category="strength"
+                    level="intermediate"
+                    duration={45}
+                    isCompact={compactView}
+                    showCalories={showCalories}
+                    showHeartRate={showHeartRate}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -331,6 +447,7 @@ const Settings = () => {
                   onCheckedChange={(checked) => {
                     setSoundEnabled(checked);
                     if (checked) {
+                      playSound('success');
                       toast({
                         title: "Sound Enabled",
                         description: "App sounds have been turned on.",
@@ -354,7 +471,12 @@ const Settings = () => {
                   <Switch 
                     id="workout-sounds" 
                     checked={workoutSounds}
-                    onCheckedChange={setWorkoutSounds}
+                    onCheckedChange={(checked) => {
+                      setWorkoutSounds(checked);
+                      if (checked && soundEnabled) {
+                        playSound('workout-start', 0.5);
+                      }
+                    }}
                     disabled={!soundEnabled}
                   />
                 </div>
@@ -367,7 +489,12 @@ const Settings = () => {
                   <Switch 
                     id="notification-sounds" 
                     checked={notificationSounds}
-                    onCheckedChange={setNotificationSounds}
+                    onCheckedChange={(checked) => {
+                      setNotificationSounds(checked);
+                      if (checked && soundEnabled) {
+                        playSound('notification', 0.5);
+                      }
+                    }}
                     disabled={!soundEnabled}
                   />
                 </div>
@@ -397,7 +524,12 @@ const Settings = () => {
                       min={0} 
                       max={100} 
                       step={1}
-                      onValueChange={setVolume}
+                      onValueChange={(newVolume) => {
+                        setVolume(newVolume);
+                        if (soundEnabled && newVolume[0] > 0) {
+                          playSound('tap', newVolume[0] / 100);
+                        }
+                      }}
                       disabled={!soundEnabled}
                       className="w-32"
                     />
@@ -405,15 +537,78 @@ const Settings = () => {
                   </div>
                 </div>
                 
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="ml-auto block mt-2" 
-                  onClick={handleTestSound}
-                  disabled={!soundEnabled}
-                >
-                  Test Sound
-                </Button>
+                <div className="flex gap-2 mt-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="ml-auto" 
+                    onClick={() => handleTestSound()}
+                    disabled={!soundEnabled}
+                  >
+                    Test Sound
+                  </Button>
+                  
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        disabled={!soundEnabled}
+                      >
+                        Custom Sounds
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Custom Sound Settings</DialogTitle>
+                        <DialogDescription>
+                          Customize sound effects for different app events.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-2">
+                        <div className="grid grid-cols-2 gap-4">
+                          {['Workout Start', 'Workout Complete', 'Notification', 'Achievement', 'Success', 'Error'].map((sound) => (
+                            <Card key={sound} className="cursor-pointer hover:bg-secondary/10 transition-colors">
+                              <CardContent className="p-3 flex justify-between items-center">
+                                <div>
+                                  <p className="text-sm font-medium">{sound}</p>
+                                  <p className="text-xs text-muted-foreground">Default</p>
+                                </div>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  onClick={() => {
+                                    playSound(sound.toLowerCase().replace(' ', '-') as any);
+                                  }}
+                                >
+                                  <Volume2 className="h-4 w-4" />
+                                </Button>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                        
+                        <div className="mt-4">
+                          <Label className="text-sm text-muted-foreground">Upload Custom Sound</Label>
+                          <div className="mt-2 flex gap-2">
+                            <Input 
+                              type="file" 
+                              accept="audio/*" 
+                              className="text-sm"
+                              disabled
+                            />
+                            <Button disabled variant="outline" size="sm">
+                              Upload
+                            </Button>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Custom sound uploads will be available in a future update.
+                          </p>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
               </div>
             </div>
             
@@ -540,6 +735,31 @@ const Settings = () => {
                     }}
                   />
                 </div>
+                
+                {/* New wearable features */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="smart-notifications" className="font-medium">Smart Notifications</Label>
+                    <p className="text-sm text-muted-foreground">Get alerts based on your activity patterns</p>
+                  </div>
+                  <Switch id="smart-notifications" defaultChecked />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="location-tracking" className="font-medium">Location Tracking</Label>
+                    <p className="text-sm text-muted-foreground">Map your outdoor workout routes</p>
+                  </div>
+                  <Switch id="location-tracking" defaultChecked />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="auto-workout" className="font-medium">Auto Workout Detection</Label>
+                    <p className="text-sm text-muted-foreground">Automatically detect and log workouts</p>
+                  </div>
+                  <Switch id="auto-workout" defaultChecked />
+                </div>
               </div>
             </div>
             
@@ -555,6 +775,22 @@ const Settings = () => {
                     <p className="text-sm text-muted-foreground">Sync data when app is closed</p>
                   </div>
                   <Switch id="background-sync" defaultChecked />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="wifi-only" className="font-medium">Wi-Fi Only Sync</Label>
+                    <p className="text-sm text-muted-foreground">Sync data only when on Wi-Fi</p>
+                  </div>
+                  <Switch id="wifi-only" />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="auto-backup" className="font-medium">Auto Backup</Label>
+                    <p className="text-sm text-muted-foreground">Weekly backup of all your data</p>
+                  </div>
+                  <Switch id="auto-backup" defaultChecked />
                 </div>
                 
                 <Button 
@@ -587,6 +823,215 @@ const Settings = () => {
           </div>
         </TabsContent>
         
+        {/* Developer Settings */}
+        <TabsContent value="developer" className="px-4 py-6">
+          <div className="space-y-6">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium">Code Editor</h3>
+                <Switch 
+                  checked={codeEditorEnabled}
+                  onCheckedChange={setCodeEditorEnabled}
+                />
+              </div>
+              
+              <p className="text-sm text-muted-foreground mb-4">
+                The code editor allows you to create custom workouts and analyze your fitness data using programming languages.
+              </p>
+              
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label className="font-medium">Programming Languages</Label>
+                    <Popover open={languagePickerOpen} onOpenChange={setLanguagePickerOpen}>
+                      <PopoverTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex items-center"
+                          disabled={!codeEditorEnabled}
+                        >
+                          <CirclePlus className="h-4 w-4 mr-1" />
+                          Add Language
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[240px] p-0" align="end">
+                        <Command>
+                          <CommandInput placeholder="Search languages..." />
+                          <CommandList>
+                            <CommandEmpty>No languages found.</CommandEmpty>
+                            <CommandGroup>
+                              {languageOptions.map(language => (
+                                <CommandItem
+                                  key={language}
+                                  onSelect={() => addProgrammingLanguage(language)}
+                                >
+                                  <span>{language}</span>
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                          <form onSubmit={handleCustomLanguageSubmit} className="border-t p-2">
+                            <div className="flex gap-1">
+                              <Input
+                                value={customLanguage}
+                                onChange={(e) => setCustomLanguage(e.target.value)}
+                                placeholder="Add custom language..."
+                                className="h-8 text-sm"
+                              />
+                              <Button
+                                type="submit"
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 px-2"
+                                disabled={!customLanguage.trim()}
+                              >
+                                <Check className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </form>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {programmingLanguages.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">No languages selected</p>
+                    ) : (
+                      programmingLanguages.map(language => (
+                        <Badge 
+                          key={language} 
+                          variant="secondary"
+                          className="py-1 px-2 flex items-center gap-1"
+                        >
+                          <Code className="h-3 w-3" />
+                          {language}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-4 w-4 rounded-full ml-1 hover:bg-destructive/10 p-0"
+                            onClick={() => removeProgrammingLanguage(language)}
+                            disabled={!codeEditorEnabled}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </Badge>
+                      ))
+                    )}
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="auto-format" className="font-medium">Auto Format Code</Label>
+                      <p className="text-sm text-muted-foreground">Format code on save</p>
+                    </div>
+                    <Switch 
+                      id="auto-format" 
+                      defaultChecked 
+                      disabled={!codeEditorEnabled}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="syntax-highlight" className="font-medium">Syntax Highlighting</Label>
+                      <p className="text-sm text-muted-foreground">Colorize code by syntax</p>
+                    </div>
+                    <Switch 
+                      id="syntax-highlight" 
+                      defaultChecked 
+                      disabled={!codeEditorEnabled}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="code-completion" className="font-medium">Code Completion</Label>
+                      <p className="text-sm text-muted-foreground">Intelligent code suggestions</p>
+                    </div>
+                    <Switch 
+                      id="code-completion" 
+                      defaultChecked 
+                      disabled={!codeEditorEnabled}
+                    />
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                <div>
+                  <Label className="font-medium">Data Science Tools</Label>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    <Card className="p-3 cursor-pointer hover:bg-secondary/10 transition-colors">
+                      <div className="flex items-center gap-2">
+                        <Database className="h-4 w-4 text-primary" />
+                        <span className="text-sm">Dataset Explorer</span>
+                      </div>
+                    </Card>
+                    
+                    <Card className="p-3 cursor-pointer hover:bg-secondary/10 transition-colors">
+                      <div className="flex items-center gap-2">
+                        <Cpu className="h-4 w-4 text-primary" />
+                        <span className="text-sm">ML Training</span>
+                      </div>
+                    </Card>
+                  </div>
+                </div>
+                
+                <Button 
+                  className="w-full" 
+                  disabled={!codeEditorEnabled}
+                  onClick={() => navigate("/code-editor")}
+                >
+                  Open Code Editor
+                </Button>
+              </div>
+            </div>
+            
+            <Separator />
+            
+            <div>
+              <h3 className="text-lg font-medium mb-4">Advanced Features</h3>
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="dev-mode" className="font-medium">Developer Mode</Label>
+                    <p className="text-sm text-muted-foreground">Access advanced debugging tools</p>
+                  </div>
+                  <Switch id="dev-mode" />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="api-access" className="font-medium">API Access</Label>
+                    <p className="text-sm text-muted-foreground">Enable external API integrations</p>
+                  </div>
+                  <Switch id="api-access" />
+                </div>
+              </div>
+              
+              <Button 
+                variant="outline" 
+                className="w-full mt-4"
+                onClick={() => {
+                  toast({
+                    title: "API Documentation",
+                    description: "Opening API documentation in new tab."
+                  });
+                }}
+              >
+                View API Documentation
+              </Button>
+            </div>
+          </div>
+        </TabsContent>
+        
         {/* About Settings */}
         <TabsContent value="about" className="px-4 py-6">
           <div className="space-y-6">
@@ -603,12 +1048,12 @@ const Settings = () => {
             <div className="space-y-3">
               <Button variant="outline" className="w-full justify-between" onClick={() => navigate("/help")}>
                 <span>Help & Support</span>
-                <ChevronLeft className="h-4 w-4 rotate-180" />
+                <ChevronRight className="h-4 w-4" />
               </Button>
               
               <Button variant="outline" className="w-full justify-between" onClick={() => navigate("/privacy")}>
                 <span>Privacy Policy</span>
-                <ChevronLeft className="h-4 w-4 rotate-180" />
+                <ChevronRight className="h-4 w-4" />
               </Button>
               
               <Button 
@@ -623,7 +1068,7 @@ const Settings = () => {
                 }}
               >
                 <span>Terms of Service</span>
-                <ChevronLeft className="h-4 w-4 rotate-180" />
+                <ChevronRight className="h-4 w-4" />
               </Button>
               
               <Button 
@@ -638,7 +1083,21 @@ const Settings = () => {
                 }}
               >
                 <span>Licenses</span>
-                <ChevronLeft className="h-4 w-4 rotate-180" />
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="w-full justify-between"
+                onClick={() => {
+                  toast({
+                    title: "What's New",
+                    description: "View the latest features and improvements.",
+                  });
+                }}
+              >
+                <span>What's New</span>
+                <Badge className="ml-2 bg-primary text-primary-foreground">2.0</Badge>
               </Button>
             </div>
             
