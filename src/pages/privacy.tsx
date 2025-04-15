@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { useLanguage } from "@/contexts/language-context";
+import { useSettings } from "@/contexts/settings-context";
 import { 
   Dialog, 
   DialogContent, 
@@ -39,24 +40,31 @@ import {
   TabsTrigger 
 } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { exportUserData, getEstimatedFileSize } from "@/utils/sound-exports";
+import { exportUserData, getEstimatedFileSize, downloadFile } from "@/utils/sound-exports";
 
 const Privacy = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
+  const { 
+    codeEditorEnabled, 
+    setCCodeEditorEnabled: setCodeEditorEnabled
+  } = useSettings();
+  
   const [locationEnabled, setLocationEnabled] = useState(true);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [dataSync, setDataSync] = useState(true);
   const [biometricAuth, setBiometricAuth] = useState(false);
-  const [codeEditorEnabled, setCodeEditorEnabled] = useState(false);
   const [runwaysEnabled, setRunwaysEnabled] = useState(false);
   const [aiAssistance, setAiAssistance] = useState(true);
+  const [dataEncryption, setDataEncryption] = useState(true);
+  
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [exportFormat, setExportFormat] = useState("json");
   const [exportCategories, setExportCategories] = useState<string[]>(["workouts"]);
   const [exportTimeRange, setExportTimeRange] = useState("30days");
   const [isExporting, setIsExporting] = useState(false);
+  const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   
   const handleToggle = (setting: string, value: boolean) => {
     toast({
@@ -74,13 +82,42 @@ const Privacy = () => {
         window.open("https://example.com/privacy-policy", "_blank");
         break;
       case "Data Encryption":
+        setDataEncryption(!dataEncryption);
         toast({
-          title: "End-to-End Encryption",
-          description: "Your data is encrypted using industry-standard protocols.",
+          title: dataEncryption ? "Encryption Disabled" : "Encryption Enabled",
+          description: dataEncryption 
+            ? "Your data is no longer encrypted." 
+            : "Your data is now encrypted using industry-standard protocols.",
         });
         break;
       case "Change Password":
         navigate("/settings");
+        break;
+      case "Clear Cached Data":
+        toast({
+          title: "Data Purged",
+          description: "Cached data has been cleared from your device.",
+        });
+        break;
+      case "Manage Third-Party Access":
+        toast({
+          title: "Third-Party Data Access",
+          description: "Manage which services can access your data.",
+        });
+        // Simulate opening a management page
+        setTimeout(() => {
+          toast({
+            title: "No connected services",
+            description: "You haven't granted access to any third-party services.",
+          });
+        }, 1500);
+        break;
+      case "Device Access Log":
+        navigate("/device-access");
+        toast({
+          title: "Device Access Log",
+          description: "Viewing all devices that have accessed your account.",
+        });
         break;
       default:
         toast({
@@ -92,6 +129,7 @@ const Privacy = () => {
   
   const handleExportData = async () => {
     setIsExporting(true);
+    setDownloadUrl(null);
     
     try {
       // Convert UI selections to the format expected by exportUserData
@@ -103,10 +141,10 @@ const Privacy = () => {
         anonymized: false
       };
       
-      const downloadUrl = await exportUserData(config);
+      const url = await exportUserData(config);
+      setDownloadUrl(url);
       
       setIsExporting(false);
-      setExportDialogOpen(false);
       
       toast({
         title: "Data Export Ready",
@@ -116,7 +154,10 @@ const Privacy = () => {
             size="sm" 
             variant="outline"
             onClick={() => {
-              window.open(downloadUrl, '_blank');
+              if (downloadUrl) {
+                const fileName = `fitfusion-export-${new Date().toISOString().slice(0, 10)}.${exportFormat}`;
+                downloadFile(downloadUrl, fileName);
+              }
             }}
           >
             Download
@@ -132,6 +173,20 @@ const Privacy = () => {
         description: "There was an error exporting your data. Please try again.",
         variant: "destructive",
       });
+    }
+  };
+  
+  const handleDownload = () => {
+    if (downloadUrl) {
+      const fileName = `fitfusion-export-${new Date().toISOString().slice(0, 10)}.${exportFormat}`;
+      downloadFile(downloadUrl, fileName);
+      
+      toast({
+        title: "Download Started",
+        description: `Your ${exportFormat.toUpperCase()} file is being downloaded.`,
+      });
+      
+      setExportDialogOpen(false);
     }
   };
   
@@ -186,7 +241,7 @@ const Privacy = () => {
             </div>
           </div>
           <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-            Secure
+            {dataEncryption ? 'Secure' : 'Basic'}
           </Badge>
         </div>
         
@@ -369,7 +424,7 @@ const Privacy = () => {
                   <span>Data Encryption</span>
                 </div>
                 <Badge variant="outline" className="rounded-full text-xs">
-                  Enabled
+                  {dataEncryption ? 'Enabled' : 'Disabled'}
                 </Badge>
               </Button>
               
@@ -377,12 +432,7 @@ const Privacy = () => {
               <Button 
                 variant="outline" 
                 className="w-full justify-between"
-                onClick={() => {
-                  toast({
-                    title: "Data Purged",
-                    description: "Cached data has been cleared from your device.",
-                  });
-                }}
+                onClick={() => handleAction("Clear Cached Data")}
               >
                 <div className="flex items-center gap-3">
                   <RefreshCcw className="h-5 w-5 text-muted-foreground" />
@@ -394,12 +444,7 @@ const Privacy = () => {
               <Button 
                 variant="outline" 
                 className="w-full justify-between"
-                onClick={() => {
-                  toast({
-                    title: "Third-Party Data Access",
-                    description: "Manage which services can access your data.",
-                  });
-                }}
+                onClick={() => handleAction("Manage Third-Party Access")}
               >
                 <div className="flex items-center gap-3">
                   <CircleSlash className="h-5 w-5 text-muted-foreground" />
@@ -442,7 +487,7 @@ const Privacy = () => {
               <Button 
                 variant="outline" 
                 className="w-full justify-between"
-                onClick={() => navigate("/device-access")}
+                onClick={() => handleAction("Device Access Log")}
               >
                 <div className="flex items-center gap-3">
                   <Smartphone className="h-5 w-5 text-muted-foreground" />
@@ -587,12 +632,18 @@ const Privacy = () => {
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button 
-              onClick={handleExportData} 
-              disabled={isExporting || exportCategories.length === 0}
-            >
-              {isExporting ? "Preparing Export..." : "Export Data"}
-            </Button>
+            {downloadUrl ? (
+              <Button onClick={handleDownload}>
+                Download File
+              </Button>
+            ) : (
+              <Button 
+                onClick={handleExportData} 
+                disabled={isExporting || exportCategories.length === 0}
+              >
+                {isExporting ? "Preparing Export..." : "Export Data"}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

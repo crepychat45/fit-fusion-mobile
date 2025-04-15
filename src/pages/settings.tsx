@@ -21,6 +21,7 @@ import { useTheme, Theme } from "@/contexts/theme-context";
 import { playSound, vibrate, testSound, testHapticFeedback } from "@/utils/feedback-utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { WorkoutCompactView } from "@/components/workout-compact-view";
+import { useSettings } from "@/contexts/settings-context";
 import {
   Dialog,
   DialogContent,
@@ -51,6 +52,23 @@ const Settings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
+  const { 
+    soundEnabled, 
+    setSoundEnabled,
+    hapticFeedback,
+    setHapticFeedback,
+    compactView,
+    setCompactView,
+    showCalories,
+    setShowCalories,
+    showHeartRate, 
+    setShowHeartRate,
+    codeEditorEnabled,
+    setCCodeEditorEnabled: setCodeEditorEnabled,
+    programmingLanguages,
+    addProgrammingLanguage,
+    removeProgrammingLanguage
+  } = useSettings();
   
   // Theme settings
   const [textSize, setTextSize] = useState(() => {
@@ -59,9 +77,6 @@ const Settings = () => {
   });
   
   // Sound settings
-  const [soundEnabled, setSoundEnabled] = useState(() => {
-    return localStorage.getItem("fitfusion-sound-enabled") !== "false";
-  });
   const [workoutSounds, setWorkoutSounds] = useState(() => {
     return localStorage.getItem("fitfusion-workout-sounds") !== "false";
   });
@@ -75,20 +90,6 @@ const Settings = () => {
   const [voiceGuidance, setVoiceGuidance] = useState(() => {
     return localStorage.getItem("fitfusion-voice-guidance") === "true";
   });
-  const [hapticFeedback, setHapticFeedback] = useState(() => {
-    return localStorage.getItem("fitfusion-haptic-enabled") !== "false";
-  });
-  
-  // View settings
-  const [compactView, setCompactView] = useState(() => {
-    return localStorage.getItem("fitfusion-compact-view") === "true";
-  });
-  const [showCalories, setShowCalories] = useState(() => {
-    return localStorage.getItem("fitfusion-show-calories") !== "false";
-  });
-  const [showHeartRate, setShowHeartRate] = useState(() => {
-    return localStorage.getItem("fitfusion-show-heart-rate") !== "false";
-  });
   
   // Wearable settings
   const [heartRateMonitoring, setHeartRateMonitoring] = useState(() => {
@@ -101,14 +102,23 @@ const Settings = () => {
     return localStorage.getItem("fitfusion-step-counting") !== "false";
   });
   
-  // Programming languages settings
-  const [codeEditorEnabled, setCodeEditorEnabled] = useState(() => {
-    return localStorage.getItem("fitfusion-code-editor-enabled") === "true";
+  // Developer settings
+  const [autoFormatCode, setAutoFormatCode] = useState(() => {
+    return localStorage.getItem("fitfusion-auto-format-code") !== "false";
   });
-  const [programmingLanguages, setProgrammingLanguages] = useState<string[]>(() => {
-    const savedLanguages = localStorage.getItem("fitfusion-programming-languages");
-    return savedLanguages ? JSON.parse(savedLanguages) : ["JavaScript", "HTML", "CSS"];
+  const [syntaxHighlighting, setSyntaxHighlighting] = useState(() => {
+    return localStorage.getItem("fitfusion-syntax-highlight") !== "false";
   });
+  const [codeCompletion, setCodeCompletion] = useState(() => {
+    return localStorage.getItem("fitfusion-code-completion") !== "false";
+  });
+  const [developerMode, setDeveloperMode] = useState(() => {
+    return localStorage.getItem("fitfusion-dev-mode") === "true";
+  });
+  const [apiAccess, setApiAccess] = useState(() => {
+    return localStorage.getItem("fitfusion-api-access") === "true";
+  });
+  
   const [languagePickerOpen, setLanguagePickerOpen] = useState(false);
   const [customLanguage, setCustomLanguage] = useState("");
   
@@ -119,60 +129,53 @@ const Settings = () => {
   }, [textSize]);
   
   useEffect(() => {
-    localStorage.setItem("fitfusion-sound-enabled", soundEnabled.toString());
-  }, [soundEnabled]);
-  
-  useEffect(() => {
-    localStorage.setItem("fitfusion-workout-sounds", workoutSounds.toString());
+    localStorage.setItem("workout-sounds", workoutSounds.toString());
   }, [workoutSounds]);
   
   useEffect(() => {
-    localStorage.setItem("fitfusion-notification-sounds", notificationSounds.toString());
+    localStorage.setItem("notification-sounds", notificationSounds.toString());
   }, [notificationSounds]);
   
   useEffect(() => {
-    localStorage.setItem("fitfusion-sound-volume", volume[0].toString());
+    localStorage.setItem("sound-volume", volume[0].toString());
   }, [volume]);
   
   useEffect(() => {
-    localStorage.setItem("fitfusion-voice-guidance", voiceGuidance.toString());
+    localStorage.setItem("voice-guidance", voiceGuidance.toString());
   }, [voiceGuidance]);
   
   useEffect(() => {
-    localStorage.setItem("fitfusion-haptic-enabled", hapticFeedback.toString());
-  }, [hapticFeedback]);
-  
-  useEffect(() => {
-    localStorage.setItem("fitfusion-compact-view", compactView.toString());
-  }, [compactView]);
-  
-  useEffect(() => {
-    localStorage.setItem("fitfusion-show-calories", showCalories.toString());
-  }, [showCalories]);
-  
-  useEffect(() => {
-    localStorage.setItem("fitfusion-show-heart-rate", showHeartRate.toString());
-  }, [showHeartRate]);
-  
-  useEffect(() => {
-    localStorage.setItem("fitfusion-heart-rate-monitoring", heartRateMonitoring.toString());
+    localStorage.setItem("heart-rate-monitoring", heartRateMonitoring.toString());
   }, [heartRateMonitoring]);
   
   useEffect(() => {
-    localStorage.setItem("fitfusion-sleep-tracking", sleepTracking.toString());
+    localStorage.setItem("sleep-tracking", sleepTracking.toString());
   }, [sleepTracking]);
   
   useEffect(() => {
-    localStorage.setItem("fitfusion-step-counting", stepCounting.toString());
+    localStorage.setItem("step-counting", stepCounting.toString());
   }, [stepCounting]);
   
+  // Developer settings localStorage
   useEffect(() => {
-    localStorage.setItem("fitfusion-code-editor-enabled", codeEditorEnabled.toString());
-  }, [codeEditorEnabled]);
+    localStorage.setItem("auto-format-code", autoFormatCode.toString());
+  }, [autoFormatCode]);
   
   useEffect(() => {
-    localStorage.setItem("fitfusion-programming-languages", JSON.stringify(programmingLanguages));
-  }, [programmingLanguages]);
+    localStorage.setItem("syntax-highlight", syntaxHighlighting.toString());
+  }, [syntaxHighlighting]);
+  
+  useEffect(() => {
+    localStorage.setItem("code-completion", codeCompletion.toString());
+  }, [codeCompletion]);
+  
+  useEffect(() => {
+    localStorage.setItem("dev-mode", developerMode.toString());
+  }, [developerMode]);
+  
+  useEffect(() => {
+    localStorage.setItem("api-access", apiAccess.toString());
+  }, [apiAccess]);
   
   const handleThemeChange = (selectedTheme: Theme) => {
     setTheme(selectedTheme);
@@ -229,9 +232,9 @@ const Settings = () => {
     });
   };
   
-  const addProgrammingLanguage = (language: string) => {
+  const addProgrammingLanguageLocal = (language: string) => {
     if (language && !programmingLanguages.includes(language)) {
-      setProgrammingLanguages([...programmingLanguages, language]);
+      addProgrammingLanguage(language);
       setCustomLanguage("");
       setLanguagePickerOpen(false);
       
@@ -242,13 +245,20 @@ const Settings = () => {
     }
   };
   
-  const removeProgrammingLanguage = (language: string) => {
-    setProgrammingLanguages(programmingLanguages.filter(lang => lang !== language));
+  const removeProgrammingLanguageLocal = (language: string) => {
+    removeProgrammingLanguage(language);
     
     toast({
       title: "Language Removed",
       description: `${language} has been removed from your programming languages.`,
     });
+  };
+  
+  const handleCustomLanguageSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (customLanguage.trim()) {
+      addProgrammingLanguageLocal(customLanguage.trim());
+    }
   };
   
   const languageOptions = [
@@ -274,13 +284,61 @@ const Settings = () => {
     "Scala"
   ].filter(lang => !programmingLanguages.includes(lang));
   
-  const handleCustomLanguageSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (customLanguage.trim()) {
-      addProgrammingLanguage(customLanguage.trim());
+  const handleOpenCodeEditor = () => {
+    if (codeEditorEnabled) {
+      toast({
+        title: "Opening Code Editor",
+        description: "Launching the code editor interface",
+      });
+      
+      // Simulate opening code editor
+      setTimeout(() => {
+        toast({
+          title: "Code Editor Ready",
+          description: "You can now write and run code",
+        });
+      }, 1000);
+    } else {
+      toast({
+        title: "Code Editor Disabled",
+        description: "Please enable the code editor in settings first",
+        variant: "destructive",
+      });
     }
   };
   
+  const openDataScienceTool = (tool: string) => {
+    if (codeEditorEnabled) {
+      toast({
+        title: `Opening ${tool}`,
+        description: `Launching the ${tool} interface`,
+      });
+    } else {
+      toast({
+        title: "Feature Disabled",
+        description: "Please enable the code editor in settings first",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const openApiDocumentation = () => {
+    if (apiAccess) {
+      toast({
+        title: "API Documentation",
+        description: "Opening API documentation in new tab.",
+      });
+      
+      window.open("https://example.com/api-docs", "_blank");
+    } else {
+      toast({
+        title: "API Access Disabled",
+        description: "Please enable API access in settings first",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background pb-16">
       {/* Header */}
@@ -309,12 +367,13 @@ const Settings = () => {
         
         {/* Display Settings */}
         <TabsContent value="display" className="px-4 py-6">
+          
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-medium mb-4">Theme</h3>
               <RadioGroup 
                 value={theme} 
-                onValueChange={handleThemeChange}
+                onValueChange={(value) => setTheme(value as Theme)}
                 className="grid grid-cols-3 gap-4"
               >
                 <div className="flex flex-col items-center relative">
@@ -361,7 +420,7 @@ const Settings = () => {
                     min={12} 
                     max={24} 
                     step={1}
-                    onValueChange={updateTextSize}
+                    onValueChange={(newSize) => setTextSize(newSize[0])}
                     className="w-4/5"
                   />
                   <span className="text-base font-medium">A</span>
@@ -864,7 +923,7 @@ const Settings = () => {
                               {languageOptions.map(language => (
                                 <CommandItem
                                   key={language}
-                                  onSelect={() => addProgrammingLanguage(language)}
+                                  onSelect={() => addProgrammingLanguageLocal(language)}
                                 >
                                   <span>{language}</span>
                                 </CommandItem>
@@ -911,208 +970,5 @@ const Settings = () => {
                             variant="ghost"
                             size="icon"
                             className="h-4 w-4 rounded-full ml-1 hover:bg-destructive/10 p-0"
-                            onClick={() => removeProgrammingLanguage(language)}
-                            disabled={!codeEditorEnabled}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </Badge>
-                      ))
-                    )}
-                  </div>
-                </div>
-                
-                <Separator />
-                
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label htmlFor="auto-format" className="font-medium">Auto Format Code</Label>
-                      <p className="text-sm text-muted-foreground">Format code on save</p>
-                    </div>
-                    <Switch 
-                      id="auto-format" 
-                      defaultChecked 
-                      disabled={!codeEditorEnabled}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label htmlFor="syntax-highlight" className="font-medium">Syntax Highlighting</Label>
-                      <p className="text-sm text-muted-foreground">Colorize code by syntax</p>
-                    </div>
-                    <Switch 
-                      id="syntax-highlight" 
-                      defaultChecked 
-                      disabled={!codeEditorEnabled}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label htmlFor="code-completion" className="font-medium">Code Completion</Label>
-                      <p className="text-sm text-muted-foreground">Intelligent code suggestions</p>
-                    </div>
-                    <Switch 
-                      id="code-completion" 
-                      defaultChecked 
-                      disabled={!codeEditorEnabled}
-                    />
-                  </div>
-                </div>
-                
-                <Separator />
-                
-                <div>
-                  <Label className="font-medium">Data Science Tools</Label>
-                  <div className="grid grid-cols-2 gap-2 mt-2">
-                    <Card className="p-3 cursor-pointer hover:bg-secondary/10 transition-colors">
-                      <div className="flex items-center gap-2">
-                        <Database className="h-4 w-4 text-primary" />
-                        <span className="text-sm">Dataset Explorer</span>
-                      </div>
-                    </Card>
-                    
-                    <Card className="p-3 cursor-pointer hover:bg-secondary/10 transition-colors">
-                      <div className="flex items-center gap-2">
-                        <Cpu className="h-4 w-4 text-primary" />
-                        <span className="text-sm">ML Training</span>
-                      </div>
-                    </Card>
-                  </div>
-                </div>
-                
-                <Button 
-                  className="w-full" 
-                  disabled={!codeEditorEnabled}
-                  onClick={() => navigate("/code-editor")}
-                >
-                  Open Code Editor
-                </Button>
-              </div>
-            </div>
-            
-            <Separator />
-            
-            <div>
-              <h3 className="text-lg font-medium mb-4">Advanced Features</h3>
-              
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="dev-mode" className="font-medium">Developer Mode</Label>
-                    <p className="text-sm text-muted-foreground">Access advanced debugging tools</p>
-                  </div>
-                  <Switch id="dev-mode" />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="api-access" className="font-medium">API Access</Label>
-                    <p className="text-sm text-muted-foreground">Enable external API integrations</p>
-                  </div>
-                  <Switch id="api-access" />
-                </div>
-              </div>
-              
-              <Button 
-                variant="outline" 
-                className="w-full mt-4"
-                onClick={() => {
-                  toast({
-                    title: "API Documentation",
-                    description: "Opening API documentation in new tab."
-                  });
-                }}
-              >
-                View API Documentation
-              </Button>
-            </div>
-          </div>
-        </TabsContent>
-        
-        {/* About Settings */}
-        <TabsContent value="about" className="px-4 py-6">
-          <div className="space-y-6">
-            <div className="text-center">
-              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <Dumbbell className="h-8 w-8 text-primary" />
-              </div>
-              <h3 className="text-xl font-bold">FitFusion</h3>
-              <p className="text-sm text-muted-foreground">Version 2.0.0</p>
-            </div>
-            
-            <Separator />
-            
-            <div className="space-y-3">
-              <Button variant="outline" className="w-full justify-between" onClick={() => navigate("/help")}>
-                <span>Help & Support</span>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-              
-              <Button variant="outline" className="w-full justify-between" onClick={() => navigate("/privacy")}>
-                <span>Privacy Policy</span>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="w-full justify-between" 
-                onClick={() => {
-                  window.open("/terms-of-service.html", "_blank");
-                  toast({
-                    title: "Terms of Service",
-                    description: "Opened Terms of Service in a new tab.",
-                  });
-                }}
-              >
-                <span>Terms of Service</span>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="w-full justify-between"
-                onClick={() => {
-                  window.open("/licenses.html", "_blank");
-                  toast({
-                    title: "Licenses",
-                    description: "Opened Licenses information in a new tab.",
-                  });
-                }}
-              >
-                <span>Licenses</span>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="w-full justify-between"
-                onClick={() => {
-                  toast({
-                    title: "What's New",
-                    description: "View the latest features and improvements.",
-                  });
-                }}
-              >
-                <span>What's New</span>
-                <Badge className="ml-2 bg-primary text-primary-foreground">2.0</Badge>
-              </Button>
-            </div>
-            
-            <div className="flex justify-center pt-4">
-              <Badge variant="outline" className="text-xs">
-                &copy; 2025 FitFusion. All rights reserved.
-              </Badge>
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
-      
-      <MobileNav />
-    </div>
-  );
-};
-
-export default Settings;
+                            onClick={() => removeProgrammingLanguageLocal(language)}
+                            disabled={!code
