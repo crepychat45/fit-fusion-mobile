@@ -7,6 +7,7 @@ import { ArrowLeft, Dumbbell, Clock, Play, Video, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { workouts } from "@/data/workouts";
 import { WorkoutVideo } from "@/components/workout-video";
+import { WorkoutTimer } from "@/components/workout-timer";
 import { workoutVideos } from "@/data/workout-videos";
 import { motion } from "framer-motion";
 import { useToast } from "@/components/ui/use-toast";
@@ -18,6 +19,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 
 const WorkoutDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -27,6 +34,7 @@ const WorkoutDetail = () => {
   const [showVideo, setShowVideo] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [isStarting, setIsStarting] = useState(false);
+  const [showTimer, setShowTimer] = useState(false);
   
   const workout = workouts.find((w) => w.id === id);
   
@@ -67,6 +75,13 @@ const WorkoutDetail = () => {
   const openVideoPreview = (videoUrl: string) => {
     setSelectedVideo(videoUrl);
     setShowVideo(true);
+  };
+  
+  const handleTimerComplete = () => {
+    toast({
+      title: "Timer Complete",
+      description: "Your workout timer has finished!",
+    });
   };
   
   return (
@@ -130,41 +145,101 @@ const WorkoutDetail = () => {
           )}
         </motion.div>
         
-        <Button 
-          className="w-full mt-6" 
-          size="lg" 
-          onClick={handleStartWorkout}
-          disabled={isStarting}
-        >
-          <Play className={`h-4 w-4 mr-2 ${isStarting ? 'animate-pulse' : ''}`} />
-          {t('workout.start')}
-        </Button>
+        <div className="mt-6 flex gap-2">
+          <Button 
+            className="flex-1" 
+            size="lg" 
+            onClick={handleStartWorkout}
+            disabled={isStarting}
+          >
+            <Play className={`h-4 w-4 mr-2 ${isStarting ? 'animate-pulse' : ''}`} />
+            {t('workout.start')}
+          </Button>
+          
+          <Button 
+            variant="outline"
+            size="lg"
+            onClick={() => setShowTimer(!showTimer)}
+          >
+            <Clock className="h-4 w-4 mr-2" />
+            Timer
+          </Button>
+        </div>
+        
+        {showTimer && (
+          <div className="mt-4">
+            <WorkoutTimer 
+              initialTime={workout.duration * 60} 
+              onComplete={handleTimerComplete}
+            />
+          </div>
+        )}
       </div>
       
       <div className="px-4 mt-8">
-        <h2 className="font-medium mb-3">Exercises</h2>
-        
-        <div className="space-y-3">
-          {workout.exercises.map((exercise) => (
-            <ExerciseCard
-              key={exercise.id}
-              name={exercise.name}
-              sets={exercise.sets}
-              reps={exercise.reps}
-              duration={exercise.duration ? exercise.duration.toString() : undefined}
-              description={exercise.muscles.join(", ")}
-              onSelect={() => navigate(`/exercise/${workout.id}/${exercise.id}`)}
-              hasVideo={Boolean(workoutVideos.find(v => v.exerciseId === exercise.id))}
-              onVideoClick={(e) => {
-                e.stopPropagation();
-                const exerciseVideo = workoutVideos.find(v => v.exerciseId === exercise.id);
-                if (exerciseVideo) {
-                  openVideoPreview(exerciseVideo.videoUrl);
-                }
-              }}
-            />
-          ))}
-        </div>
+        <Tabs defaultValue="exercises">
+          <TabsList className="w-full grid grid-cols-2">
+            <TabsTrigger value="exercises">Exercises</TabsTrigger>
+            <TabsTrigger value="details">Details</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="exercises" className="mt-4">
+            <div className="space-y-3">
+              {workout.exercises.map((exercise) => (
+                <ExerciseCard
+                  key={exercise.id}
+                  name={exercise.name}
+                  sets={exercise.sets}
+                  reps={exercise.reps}
+                  duration={exercise.duration ? exercise.duration.toString() : undefined}
+                  description={exercise.muscles.join(", ")}
+                  onSelect={() => navigate(`/exercise/${workout.id}/${exercise.id}`)}
+                  hasVideo={Boolean(workoutVideos.find(v => v.exerciseId === exercise.id))}
+                  onVideoClick={(e) => {
+                    e.stopPropagation();
+                    const exerciseVideo = workoutVideos.find(v => v.exerciseId === exercise.id);
+                    if (exerciseVideo) {
+                      openVideoPreview(exerciseVideo.videoUrl);
+                    }
+                  }}
+                />
+              ))}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="details" className="mt-4">
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-medium mb-1">Level</h3>
+                <p className="text-sm text-muted-foreground capitalize">{workout.level}</p>
+              </div>
+              
+              <div>
+                <h3 className="font-medium mb-1">Target Muscles</h3>
+                <div className="flex flex-wrap gap-2">
+                  {Array.from(new Set(workout.exercises.flatMap(ex => ex.muscles))).map(muscle => (
+                    <Badge key={muscle} variant="outline" className="capitalize">
+                      {muscle}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="font-medium mb-1">Equipment Needed</h3>
+                <p className="text-sm text-muted-foreground">
+                  {workout.category === 'strength' 
+                    ? 'Dumbbells, Exercise Mat' 
+                    : workout.category === 'cardio' 
+                    ? 'None required' 
+                    : workout.category === 'hiit' 
+                    ? 'Exercise Mat, Timer' 
+                    : 'Yoga Mat, Resistance Bands'}
+                </p>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
       
       <Dialog open={showVideo} onOpenChange={setShowVideo}>

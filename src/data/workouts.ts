@@ -1,4 +1,3 @@
-
 export interface Exercise {
   id: string;
   name: string;
@@ -17,6 +16,8 @@ export interface Workout {
   level: "beginner" | "intermediate" | "advanced";
   duration: number;
   exercises: Exercise[];
+  popularity?: number;
+  createdAt?: number;
 }
 
 export const workouts: Workout[] = [
@@ -27,6 +28,8 @@ export const workouts: Workout[] = [
     category: "strength",
     level: "beginner",
     duration: 45,
+    popularity: 95,
+    createdAt: Date.now() - 1000 * 60 * 60 * 24 * 2,
     exercises: [
       {
         id: "e1",
@@ -78,6 +81,8 @@ export const workouts: Workout[] = [
     category: "hiit",
     level: "intermediate",
     duration: 30,
+    popularity: 87,
+    createdAt: Date.now() - 1000 * 60 * 60 * 24 * 5,
     exercises: [
       {
         id: "e6",
@@ -122,6 +127,8 @@ export const workouts: Workout[] = [
     category: "strength",
     level: "beginner",
     duration: 20,
+    popularity: 92,
+    createdAt: Date.now() - 1000 * 60 * 60 * 24 * 7,
     exercises: [
       {
         id: "e10",
@@ -164,6 +171,8 @@ export const workouts: Workout[] = [
     category: "flexibility",
     level: "beginner",
     duration: 25,
+    popularity: 78,
+    createdAt: Date.now() - 1000 * 60 * 60 * 24 * 10,
     exercises: [
       {
         id: "e14",
