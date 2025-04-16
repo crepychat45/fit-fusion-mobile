@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { 
@@ -899,6 +900,50 @@ const Settings = () => {
               </p>
               
               <div className="space-y-4">
+                {/* Code Editor Features */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Editor Features</h4>
+                  
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="auto-format" className="flex items-center gap-2">
+                      <Code className="h-4 w-4" />
+                      <span>Auto Format Code</span>
+                    </Label>
+                    <Switch 
+                      id="auto-format" 
+                      checked={autoFormatCode}
+                      onCheckedChange={setAutoFormatCode}
+                      disabled={!codeEditorEnabled}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="syntax-highlight" className="flex items-center gap-2">
+                      <FileCode2 className="h-4 w-4" />
+                      <span>Syntax Highlighting</span>
+                    </Label>
+                    <Switch 
+                      id="syntax-highlight" 
+                      checked={syntaxHighlighting}
+                      onCheckedChange={setSyntaxHighlighting}
+                      disabled={!codeEditorEnabled}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="code-completion" className="flex items-center gap-2">
+                      <Check className="h-4 w-4" />
+                      <span>Code Completion</span>
+                    </Label>
+                    <Switch 
+                      id="code-completion" 
+                      checked={codeCompletion}
+                      onCheckedChange={setCodeCompletion}
+                      disabled={!codeEditorEnabled}
+                    />
+                  </div>
+                </div>
+
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <Label className="font-medium">Programming Languages</Label>
@@ -971,4 +1016,168 @@ const Settings = () => {
                             size="icon"
                             className="h-4 w-4 rounded-full ml-1 hover:bg-destructive/10 p-0"
                             onClick={() => removeProgrammingLanguageLocal(language)}
-                            disabled={!code
+                            disabled={!codeEditorEnabled}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </Badge>
+                      ))
+                    )}
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                {/* Data Science Tools */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Data Science Tools</h4>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-between"
+                    onClick={() => openDataScienceTool("Dataset Explorer")}
+                    disabled={!codeEditorEnabled}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Database className="h-4 w-4 text-muted-foreground" />
+                      <span>Dataset Explorer</span>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-between"
+                    onClick={() => openDataScienceTool("ML Training")}
+                    disabled={!codeEditorEnabled}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Cpu className="h-4 w-4 text-muted-foreground" />
+                      <span>ML Training</span>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-between"
+                    onClick={handleOpenCodeEditor}
+                    disabled={!codeEditorEnabled}
+                  >
+                    <div className="flex items-center gap-3">
+                      <FileCode2 className="h-4 w-4 text-muted-foreground" />
+                      <span>Open Code Editor</span>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                </div>
+                
+                <Separator />
+                
+                {/* Advanced Developer Features */}
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">Advanced Features</h4>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="dev-mode" className="font-medium flex items-center gap-2">
+                        <Cpu className="h-4 w-4" />
+                        <span>Developer Mode</span>
+                      </Label>
+                      <p className="text-xs text-muted-foreground">Enable advanced debugging tools</p>
+                    </div>
+                    <Switch 
+                      id="dev-mode" 
+                      checked={developerMode}
+                      onCheckedChange={setDeveloperMode}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label htmlFor="api-access" className="font-medium flex items-center gap-2">
+                        <Code className="h-4 w-4" />
+                        <span>API Access</span>
+                      </Label>
+                      <p className="text-xs text-muted-foreground">Allow programmatic access to your data</p>
+                    </div>
+                    <Switch 
+                      id="api-access" 
+                      checked={apiAccess}
+                      onCheckedChange={setApiAccess}
+                    />
+                  </div>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-between mt-2"
+                    onClick={openApiDocumentation}
+                    disabled={!apiAccess}
+                  >
+                    <div className="flex items-center gap-3">
+                      <FileCode2 className="h-4 w-4 text-muted-foreground" />
+                      <span>View API Documentation</span>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+        
+        {/* About Settings */}
+        <TabsContent value="about" className="px-4 py-6">
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-medium mb-4">About FitFusion</h3>
+              <p className="text-sm text-muted-foreground">
+                FitFusion is a comprehensive fitness application designed to help you track your workouts, monitor your progress, and achieve your fitness goals.
+              </p>
+              
+              <div className="mt-4 space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm">Version</span>
+                  <Badge variant="outline">2.5.0</Badge>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span className="text-sm">Last Updated</span>
+                  <span className="text-sm">April 16, 2025</span>
+                </div>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between mt-2"
+                  onClick={() => navigate("/privacy")}
+                >
+                  <div className="flex items-center gap-3">
+                    <Shield className="h-4 w-4 text-muted-foreground" />
+                    <span>Privacy Policy</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between"
+                  onClick={() => navigate("/help")}
+                >
+                  <div className="flex items-center gap-3">
+                    <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                    <span>Help & Support</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
+      
+      <MobileNav />
+    </div>
+  );
+};
+
+export default Settings;
