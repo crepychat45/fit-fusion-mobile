@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./contexts/theme-context";
 import { LanguageProvider } from "./contexts/language-context";
+import { SettingsProvider } from "./contexts/settings-context";
 import Index from "./pages/Index";
 import Workouts from "./pages/workouts";
 import WorkoutDetail from "./pages/workout-detail";
@@ -26,27 +27,29 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <LanguageProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/workouts" element={<Workouts />} />
-              <Route path="/workout/:id" element={<WorkoutDetail />} />
-              <Route path="/exercise/:workoutId/:exerciseId" element={<ExerciseDetail />} />
-              <Route path="/progress" element={<Progress />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/notifications" element={<NotificationsPage />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/help" element={<Help />} />
-              <Route path="/wearables" element={<Wearables />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <FitAssistant />
-          </BrowserRouter>
-        </TooltipProvider>
+        <SettingsProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/workouts" element={<Workouts />} />
+                <Route path="/workout/:id" element={<WorkoutDetail />} />
+                <Route path="/exercise/:workoutId/:exerciseId" element={<ExerciseDetail />} />
+                <Route path="/progress" element={<Progress />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/notifications" element={<NotificationsPage />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/help" element={<Help />} />
+                <Route path="/wearables" element={<Wearables />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <FitAssistant />
+            </BrowserRouter>
+          </TooltipProvider>
+        </SettingsProvider>
       </LanguageProvider>
     </ThemeProvider>
   </QueryClientProvider>
