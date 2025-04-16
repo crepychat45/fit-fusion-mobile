@@ -6,7 +6,7 @@ import {
   Eye, Clock, Bell, Settings as SettingsIcon, Heart, Dumbbell, 
   Check, PanelLeft, MessageSquare, Vibrate, FileCode2, HelpCircle,
   Hash, Languages, CirclePlus, X, ChevronsUpDown, Cpu, Code, Database,
-  ChevronRight
+  ChevronRight, Shield
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
