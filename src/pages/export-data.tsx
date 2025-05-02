@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/components/ui/use-toast";
 import { exportUserData, downloadFile, getEstimatedFileSize, ExportFileType, DataCategory } from "@/utils/sound-exports";
+import { DateRange } from "react-day-picker";
 
 const ExportData = () => {
   const navigate = useNavigate();
@@ -86,6 +87,18 @@ const ExportData = () => {
       });
     } finally {
       setIsExporting(false);
+    }
+  };
+
+  // Modified handler to handle optional 'to' in DateRange
+  const handleDateRangeChange = (range: DateRange | undefined) => {
+    if (!range) {
+      setDateRange({ from: undefined, to: undefined });
+    } else {
+      setDateRange({
+        from: range.from,
+        to: range.to || range.from // If 'to' is missing, use 'from' as fallback
+      });
     }
   };
 
@@ -208,8 +221,8 @@ const ExportData = () => {
                         from: dateRange.from,
                         to: dateRange.to,
                       }}
-                      onSelect={(range) => setDateRange(range || { from: undefined, to: undefined })}
-                      className="rounded-md border"
+                      onSelect={handleDateRangeChange}
+                      className="rounded-md border pointer-events-auto"
                       numberOfMonths={1}
                     />
                   </div>

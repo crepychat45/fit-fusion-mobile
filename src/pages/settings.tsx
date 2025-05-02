@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { 
@@ -19,7 +20,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { useTheme, Theme } from "@/contexts/theme-context";
 import { playSound, vibrate, testSound, testHapticFeedback } from "@/utils/feedback-utils";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { WorkoutCompactView } from "@/components/workout-compact-view";
 import { useSettings } from "@/contexts/settings-context";
 import {
