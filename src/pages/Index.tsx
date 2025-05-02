@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { ActivityCard } from "@/components/activity-card";
@@ -5,7 +6,7 @@ import { ActivitySummary } from "@/components/activity-summary";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { userProfile } from "@/data/user";
-import { Dumbbell, Timer, Calendar, ChevronRight, AlarmClock, Bell } from "lucide-react";
+import { Dumbbell, Timer, Calendar, ChevronRight, AlarmClock, Bell, Settings } from "lucide-react";
 import { workouts } from "@/data/workouts";
 import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -112,6 +113,14 @@ const Index = () => {
             <p className="text-white/80 text-sm">{format(new Date(), "EEEE, MMMM d")}</p>
           </div>
           <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="bg-white/10 text-white hover:bg-white/20"
+              onClick={() => navigate("/settings")}
+            >
+              <Settings className="h-5 w-5" />
+            </Button>
             <Button 
               variant="ghost" 
               size="icon" 
