@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 interface SettingsContextType {
@@ -40,6 +39,14 @@ interface SettingsContextType {
   programmingLanguages: string[];
   addProgrammingLanguage: (language: string) => void;
   removeProgrammingLanguage: (language: string) => void;
+  
+  // Data export settings
+  autoBackupEnabled: boolean;
+  setAutoBackupEnabled: (value: boolean) => void;
+  backupFrequency: 'daily' | 'weekly' | 'monthly';
+  setBackupFrequency: (value: 'daily' | 'weekly' | 'monthly') => void;
+  defaultExportFormat: 'json' | 'csv' | 'pdf' | 'html';
+  setDefaultExportFormat: (value: 'json' | 'csv' | 'pdf' | 'html') => void;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -120,6 +127,21 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return savedLanguages ? JSON.parse(savedLanguages) : ["JavaScript", "HTML", "CSS"];
   });
   
+  // Data export settings
+  const [autoBackupEnabled, setAutoBackupEnabled] = useState(() => {
+    return localStorage.getItem("fitfusion-auto-backup") === "true";
+  });
+  
+  const [backupFrequency, setBackupFrequency] = useState<'daily' | 'weekly' | 'monthly'>(() => {
+    const savedFrequency = localStorage.getItem("fitfusion-backup-frequency");
+    return (savedFrequency as 'daily' | 'weekly' | 'monthly') || 'weekly';
+  });
+  
+  const [defaultExportFormat, setDefaultExportFormat] = useState<'json' | 'csv' | 'pdf' | 'html'>(() => {
+    const savedFormat = localStorage.getItem("fitfusion-export-format");
+    return (savedFormat as 'json' | 'csv' | 'pdf' | 'html') || 'json';
+  });
+  
   // Save settings to localStorage when they change
   useEffect(() => {
     localStorage.setItem("fitfusion-compact-view", compactView.toString());
@@ -182,6 +204,19 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.setItem("fitfusion-programming-languages", JSON.stringify(programmingLanguages));
   }, [programmingLanguages]);
   
+  // Save export settings to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem("fitfusion-auto-backup", autoBackupEnabled.toString());
+  }, [autoBackupEnabled]);
+  
+  useEffect(() => {
+    localStorage.setItem("fitfusion-backup-frequency", backupFrequency);
+  }, [backupFrequency]);
+  
+  useEffect(() => {
+    localStorage.setItem("fitfusion-export-format", defaultExportFormat);
+  }, [defaultExportFormat]);
+  
   // Function to add a programming language
   const addProgrammingLanguage = (language: string) => {
     if (!programmingLanguages.includes(language)) {
@@ -226,7 +261,14 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setCCodeEditorEnabled,
       programmingLanguages,
       addProgrammingLanguage,
-      removeProgrammingLanguage
+      removeProgrammingLanguage,
+      // New export settings
+      autoBackupEnabled,
+      setAutoBackupEnabled,
+      backupFrequency,
+      setBackupFrequency,
+      defaultExportFormat,
+      setDefaultExportFormat
     }}>
       {children}
     </SettingsContext.Provider>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { 
@@ -6,7 +5,7 @@ import {
   Eye, Clock, Bell, Settings as SettingsIcon, Heart, Dumbbell, 
   Check, PanelLeft, MessageSquare, Vibrate, FileCode2, HelpCircle,
   Hash, Languages, CirclePlus, X, ChevronsUpDown, Cpu, Code, Database,
-  ChevronRight, Shield
+  ChevronRight, Shield, FileText, Download
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -826,7 +825,7 @@ const Settings = () => {
             <Separator />
             
             <div>
-              <h3 className="text-lg font-medium mb-4">Data Sync</h3>
+              <h3 className="text-lg font-medium mb-4">Data Management</h3>
               
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -878,6 +877,28 @@ const Settings = () => {
                   <span>Last synced</span>
                   <span>Today, 2:30 PM</span>
                 </div>
+                
+                <Card className="mt-4">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center">
+                      <FileText className="h-5 w-5 mr-2" />
+                      Data Export
+                    </CardTitle>
+                    <CardDescription>
+                      Download your fitness data in various formats
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0 pb-3">
+                    <Button
+                      variant="default"
+                      className="w-full flex justify-between items-center"
+                      onClick={() => navigate("/export-data")}
+                    >
+                      Export Your Data
+                      <Download className="h-4 w-4 ml-2" />
+                    </Button>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </div>
@@ -1129,47 +1150,87 @@ const Settings = () => {
         {/* About Settings */}
         <TabsContent value="about" className="px-4 py-6">
           <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-medium mb-4">About FitFusion</h3>
-              <p className="text-sm text-muted-foreground">
-                FitFusion is a comprehensive fitness application designed to help you track your workouts, monitor your progress, and achieve your fitness goals.
-              </p>
+            <div className="text-center">
+              <div className="inline-block rounded-full bg-primary/10 p-4 mb-4">
+                <SettingsIcon className="h-8 w-8 text-primary" />
+              </div>
+              <h2 className="text-xl font-bold">FitFusion</h2>
+              <p className="text-sm text-muted-foreground">Version 1.2.0</p>
+            </div>
+            
+            <Separator />
+            
+            <div className="space-y-3">
+              <h3 className="font-medium">App Information</h3>
               
-              <div className="mt-4 space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-sm">Version</span>
-                  <Badge variant="outline">2.5.0</Badge>
-                </div>
-                
-                <div className="flex justify-between">
-                  <span className="text-sm">Last Updated</span>
-                  <span className="text-sm">April 16, 2025</span>
-                </div>
-                
+              <div className="flex justify-between items-center py-2">
+                <span className="text-sm">Privacy Policy</span>
                 <Button 
-                  variant="outline" 
-                  className="w-full justify-between mt-2"
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-sm flex items-center gap-1"
                   onClick={() => navigate("/privacy")}
                 >
-                  <div className="flex items-center gap-3">
-                    <Shield className="h-4 w-4 text-muted-foreground" />
-                    <span>Privacy Policy</span>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-between"
-                  onClick={() => navigate("/help")}
-                >
-                  <div className="flex items-center gap-3">
-                    <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                    <span>Help & Support</span>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  View <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
+              
+              <div className="flex justify-between items-center py-2">
+                <span className="text-sm">Terms of Service</span>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-sm flex items-center gap-1"
+                  onClick={() => window.open("/terms-of-service.html", "_blank")}
+                >
+                  View <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              <div className="flex justify-between items-center py-2">
+                <span className="text-sm">Licenses</span>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-sm flex items-center gap-1"
+                  onClick={() => window.open("/licenses.html", "_blank")}
+                >
+                  View <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            
+            <Separator />
+            
+            <div className="space-y-3">
+              <h3 className="font-medium">Support</h3>
+              
+              <Button 
+                variant="outline" 
+                className="w-full justify-start" 
+                onClick={() => navigate("/help")}
+              >
+                <HelpCircle className="h-4 w-4 mr-2" />
+                Help Center
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => {
+                  toast({
+                    title: "Feedback Sent",
+                    description: "Thank you for your feedback! We'll review it shortly.",
+                  });
+                }}
+              >
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Send Feedback
+              </Button>
+            </div>
+            
+            <div className="p-4 bg-primary/5 rounded-lg text-center text-sm text-muted-foreground">
+              <p>© 2025 FitFusion. All rights reserved.</p>
             </div>
           </div>
         </TabsContent>

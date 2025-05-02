@@ -19,6 +19,7 @@ import NotificationsPage from "./pages/notifications";
 import Privacy from "./pages/privacy";
 import Help from "./pages/help";
 import Wearables from "./pages/wearables";
+import ExportData from "./pages/export-data";
 import { FitAssistant } from "./components/fit-assistant";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ const App = () => (
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/help" element={<Help />} />
                 <Route path="/wearables" element={<Wearables />} />
+                <Route path="/export-data" element={<ExportData />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <FitAssistant />
