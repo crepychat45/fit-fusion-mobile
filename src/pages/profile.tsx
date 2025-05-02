@@ -1,13 +1,17 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MobileNav } from "@/components/mobile-nav";
 import { ProfileEditor } from "@/components/profile-editor";
 import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, CheckCircle, BarChart2, ListChecks } from "lucide-react";
+import { Calendar, CheckCircle, BarChart2, ListChecks, Shield, CreditCard, Settings, User, Bell } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { userProfile } from "@/data/user";
 
 const Profile = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
   
   const handleProfileSave = () => {
@@ -39,6 +43,57 @@ const Profile = () => {
           
           <TabsContent value="profile" className="space-y-6">
             <ProfileEditor onSave={handleProfileSave} />
+            
+            {/* Quick Actions Section */}
+            <div className="mt-8">
+              <h3 className="text-lg font-medium mb-3">Quick Actions</h3>
+              <div className="grid grid-cols-1 gap-3">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between"
+                  onClick={() => navigate("/settings")}
+                >
+                  <div className="flex items-center gap-3">
+                    <Settings className="h-5 w-5 text-muted-foreground" />
+                    <span>Settings</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">App Version 3.5.2</span>
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between"
+                  onClick={() => navigate("/privacy")}
+                >
+                  <div className="flex items-center gap-3">
+                    <Shield className="h-5 w-5 text-muted-foreground" />
+                    <span>Privacy & Security</span>
+                  </div>
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between"
+                  onClick={() => navigate("/subscription")}
+                >
+                  <div className="flex items-center gap-3">
+                    <CreditCard className="h-5 w-5 text-muted-foreground" />
+                    <span>Subscription</span>
+                  </div>
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between"
+                  onClick={() => navigate("/notifications")}
+                >
+                  <div className="flex items-center gap-3">
+                    <Bell className="h-5 w-5 text-muted-foreground" />
+                    <span>Notifications</span>
+                  </div>
+                </Button>
+              </div>
+            </div>
           </TabsContent>
           
           <TabsContent value="achievements">
@@ -94,7 +149,7 @@ const Profile = () => {
                     <h3 className="font-medium">Workouts Completed</h3>
                     <BarChart2 className="h-4 w-4 text-muted-foreground" />
                   </div>
-                  <p className="text-3xl font-bold">27</p>
+                  <p className="text-3xl font-bold">{userProfile.stats.workoutsCompleted}</p>
                   <p className="text-sm text-muted-foreground">Total workouts completed.</p>
                 </div>
                 
@@ -103,12 +158,12 @@ const Profile = () => {
                     <h3 className="font-medium">Calories Burned</h3>
                     <BarChart2 className="h-4 w-4 text-muted-foreground" />
                   </div>
-                  <p className="text-3xl font-bold">1,240</p>
+                  <p className="text-3xl font-bold">{userProfile.stats.caloriesBurned}</p>
                   <p className="text-sm text-muted-foreground">Total calories burned.</p>
                 </div>
               </div>
               
-              <Button variant="outline" className="w-full">View Detailed Stats</Button>
+              <Button variant="outline" className="w-full" onClick={() => navigate("/progress")}>View Detailed Stats</Button>
             </div>
           </TabsContent>
         </Tabs>
