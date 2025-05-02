@@ -1,274 +1,367 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+
+type SubscriptionPlan = "Free" | "Basic" | "Super" | "Advance";
+type PaymentMethod = "Cash" | "GPay" | "PhonePe" | "NetBanking" | "CreditCard" | "DebitCard" | "UPI";
 
 interface SettingsContextType {
-  // Display settings
-  compactView: boolean;
-  setCompactView: (value: boolean) => void;
-  showCalories: boolean;
-  setShowCalories: (value: boolean) => void;
-  showHeartRate: boolean;
-  setShowHeartRate: (value: boolean) => void;
-  textSize: number;
-  setTextSize: (value: number) => void;
-  
-  // Sound settings
   soundEnabled: boolean;
-  setSoundEnabled: (value: boolean) => void;
-  workoutSounds: boolean;
-  setWorkoutSounds: (value: boolean) => void;
-  notificationSounds: boolean;
-  setNotificationSounds: (value: boolean) => void;
-  voiceGuidance: boolean;
-  setVoiceGuidance: (value: boolean) => void;
-  volume: number;
-  setVolume: (value: number) => void;
-  hapticFeedback: boolean;
-  setHapticFeedback: (value: boolean) => void;
-  
-  // Device settings
-  heartRateMonitoring: boolean;
-  setHeartRateMonitoring: (value: boolean) => void;
-  sleepTracking: boolean;
-  setSleepTracking: (value: boolean) => void;
-  stepCounting: boolean;
-  setStepCounting: (value: boolean) => void;
-  
-  // Programming languages settings
+  setSoundEnabled: (enabled: boolean) => void;
+  soundVolume: number;
+  setSoundVolume: (volume: number) => void;
+  hapticEnabled: boolean;
+  setHapticEnabled: (enabled: boolean) => void;
+  soundPack: string;
+  setSoundPack: (pack: string) => void;
+  customSounds: Record<string, string>;
+  addCustomSound: (name: string, url: string) => void;
+  removeCustomSound: (name: string) => void;
+  exportFormat: "json" | "csv" | "pdf" | "html";
+  setExportFormat: (format: "json" | "csv" | "pdf" | "html") => void;
+  exportAnonymized: boolean;
+  setExportAnonymized: (anonymized: boolean) => void;
+  exportCategories: string[];
+  setExportCategories: (categories: string[]) => void;
+  theme: "system" | "light" | "dark";
+  setTheme: (theme: "system" | "light" | "dark") => void;
+  fontSize: "small" | "medium" | "large";
+  setFontSize: (size: "small" | "medium" | "large") => void;
+  language: string;
+  setLanguage: (lang: string) => void;
+  autoSync: boolean;
+  setAutoSync: (sync: boolean) => void;
+  cloudBackup: boolean;
+  setCloudBackup: (backup: boolean) => void;
+  notifications: boolean;
+  setNotifications: (notifications: boolean) => void;
   codeEditorEnabled: boolean;
-  setCCodeEditorEnabled: (value: boolean) => void;
-  programmingLanguages: string[];
-  addProgrammingLanguage: (language: string) => void;
-  removeProgrammingLanguage: (language: string) => void;
-  
-  // Data export settings
-  autoBackupEnabled: boolean;
-  setAutoBackupEnabled: (value: boolean) => void;
-  backupFrequency: 'daily' | 'weekly' | 'monthly';
-  setBackupFrequency: (value: 'daily' | 'weekly' | 'monthly') => void;
-  defaultExportFormat: 'json' | 'csv' | 'pdf' | 'html';
-  setDefaultExportFormat: (value: 'json' | 'csv' | 'pdf' | 'html') => void;
+  setCCodeEditorEnabled: (enabled: boolean) => void;
+  appVersion: string;
+  subscriptionPlan: SubscriptionPlan;
+  setSubscriptionPlan: (plan: SubscriptionPlan) => void;
+  paymentMethod: PaymentMethod;
+  setPaymentMethod: (method: PaymentMethod) => void;
+  developerOptions: {
+    debugMode: boolean;
+    apiLogging: boolean;
+    experimentalFeatures: boolean;
+    performanceMonitoring: boolean;
+    betaAccess: boolean;
+    customScripting: boolean;
+  };
+  setDeveloperOption: (option: keyof SettingsContextType["developerOptions"], value: boolean) => void;
+  displayOptions: {
+    animations: boolean;
+    highContrast: boolean;
+    compactView: boolean;
+    showTips: boolean;
+    darkModeSchedule: boolean;
+    customFonts: boolean;
+  };
+  setDisplayOption: (option: keyof SettingsContextType["displayOptions"], value: boolean) => void;
+  saveProfileInfo: (profileData: Record<string, any>) => Promise<boolean>;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
-export const useSettings = () => {
+export const useSettings = (): SettingsContextType => {
   const context = useContext(SettingsContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useSettings must be used within a SettingsProvider");
   }
   return context;
 };
 
-export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Display settings
-  const [compactView, setCompactView] = useState(() => {
-    return localStorage.getItem("fitfusion-compact-view") === "true";
-  });
-  
-  const [showCalories, setShowCalories] = useState(() => {
-    return localStorage.getItem("fitfusion-show-calories") !== "false";
-  });
-  
-  const [showHeartRate, setShowHeartRate] = useState(() => {
-    return localStorage.getItem("fitfusion-show-heart-rate") !== "false";
-  });
-  
-  const [textSize, setTextSize] = useState(() => {
-    const savedSize = localStorage.getItem("fitfusion-text-size");
-    return savedSize ? parseInt(savedSize) : 16;
-  });
-  
+interface SettingsProviderProps {
+  children: ReactNode;
+}
+
+export const SettingsProvider = ({ children }: SettingsProviderProps) => {
   // Sound settings
   const [soundEnabled, setSoundEnabled] = useState(() => {
-    return localStorage.getItem("fitfusion-sound-enabled") !== "false";
+    const saved = localStorage.getItem("fitfusion-sound-enabled");
+    return saved !== null ? saved === "true" : true;
   });
   
-  const [workoutSounds, setWorkoutSounds] = useState(() => {
-    return localStorage.getItem("fitfusion-workout-sounds") !== "false";
+  const [soundVolume, setSoundVolume] = useState(() => {
+    const saved = localStorage.getItem("fitfusion-sound-volume");
+    return saved !== null ? parseInt(saved) : 80;
   });
   
-  const [notificationSounds, setNotificationSounds] = useState(() => {
-    return localStorage.getItem("fitfusion-notification-sounds") !== "false";
+  const [hapticEnabled, setHapticEnabled] = useState(() => {
+    const saved = localStorage.getItem("fitfusion-haptic-enabled");
+    return saved !== null ? saved === "true" : true;
   });
   
-  const [voiceGuidance, setVoiceGuidance] = useState(() => {
-    return localStorage.getItem("fitfusion-voice-guidance") === "true";
+  const [soundPack, setSoundPack] = useState(() => {
+    const saved = localStorage.getItem("fitfusion-sound-pack");
+    return saved || "default";
   });
   
-  const [volume, setVolume] = useState(() => {
-    const savedVolume = localStorage.getItem("fitfusion-sound-volume");
-    return savedVolume ? parseInt(savedVolume) : 70;
+  const [customSounds, setCustomSounds] = useState<Record<string, string>>(() => {
+    const saved = localStorage.getItem("fitfusion-custom-sounds");
+    return saved ? JSON.parse(saved) : {};
   });
   
-  const [hapticFeedback, setHapticFeedback] = useState(() => {
-    return localStorage.getItem("fitfusion-haptic-enabled") !== "false";
+  // Export settings
+  const [exportFormat, setExportFormat] = useState<"json" | "csv" | "pdf" | "html">(() => {
+    const saved = localStorage.getItem("fitfusion-export-format");
+    return (saved as any) || "json";
   });
   
-  // Device settings
-  const [heartRateMonitoring, setHeartRateMonitoring] = useState(() => {
-    return localStorage.getItem("fitfusion-heart-rate-monitoring") !== "false";
+  const [exportAnonymized, setExportAnonymized] = useState(() => {
+    const saved = localStorage.getItem("fitfusion-export-anonymized");
+    return saved !== null ? saved === "true" : false;
   });
   
-  const [sleepTracking, setSleepTracking] = useState(() => {
-    return localStorage.getItem("fitfusion-sleep-tracking") === "true";
+  const [exportCategories, setExportCategories] = useState<string[]>(() => {
+    const saved = localStorage.getItem("fitfusion-export-categories");
+    return saved ? JSON.parse(saved) : ["workouts"];
   });
   
-  const [stepCounting, setStepCounting] = useState(() => {
-    return localStorage.getItem("fitfusion-step-counting") !== "false";
+  // Display settings
+  const [theme, setTheme] = useState<"system" | "light" | "dark">(() => {
+    const saved = localStorage.getItem("fitfusion-theme");
+    return (saved as any) || "system";
   });
   
-  // Programming languages settings
+  const [fontSize, setFontSize] = useState<"small" | "medium" | "large">(() => {
+    const saved = localStorage.getItem("fitfusion-font-size");
+    return (saved as any) || "medium";
+  });
+  
+  const [language, setLanguage] = useState(() => {
+    const saved = localStorage.getItem("fitfusion-language");
+    return saved || "en";
+  });
+  
+  // Sync settings
+  const [autoSync, setAutoSync] = useState(() => {
+    const saved = localStorage.getItem("fitfusion-auto-sync");
+    return saved !== null ? saved === "true" : true;
+  });
+  
+  const [cloudBackup, setCloudBackup] = useState(() => {
+    const saved = localStorage.getItem("fitfusion-cloud-backup");
+    return saved !== null ? saved === "true" : true;
+  });
+  
+  const [notifications, setNotifications] = useState(() => {
+    const saved = localStorage.getItem("fitfusion-notifications");
+    return saved !== null ? saved === "true" : true;
+  });
+  
+  // Developer settings
   const [codeEditorEnabled, setCCodeEditorEnabled] = useState(() => {
-    return localStorage.getItem("fitfusion-code-editor-enabled") === "true";
+    const saved = localStorage.getItem("fitfusion-code-editor-enabled");
+    return saved !== null ? saved === "true" : false;
   });
   
-  const [programmingLanguages, setProgrammingLanguages] = useState<string[]>(() => {
-    const savedLanguages = localStorage.getItem("fitfusion-programming-languages");
-    return savedLanguages ? JSON.parse(savedLanguages) : ["JavaScript", "HTML", "CSS"];
+  // Version info
+  const [appVersion] = useState("3.5.2");
+  
+  // Subscription settings
+  const [subscriptionPlan, setSubscriptionPlan] = useState<SubscriptionPlan>(() => {
+    const saved = localStorage.getItem("fitfusion-subscription-plan");
+    return (saved as SubscriptionPlan) || "Free";
   });
   
-  // Data export settings
-  const [autoBackupEnabled, setAutoBackupEnabled] = useState(() => {
-    return localStorage.getItem("fitfusion-auto-backup") === "true";
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(() => {
+    const saved = localStorage.getItem("fitfusion-payment-method");
+    return (saved as PaymentMethod) || "CreditCard";
   });
   
-  const [backupFrequency, setBackupFrequency] = useState<'daily' | 'weekly' | 'monthly'>(() => {
-    const savedFrequency = localStorage.getItem("fitfusion-backup-frequency");
-    return (savedFrequency as 'daily' | 'weekly' | 'monthly') || 'weekly';
+  // Developer options
+  const [developerOptions, setDeveloperOptions] = useState(() => {
+    const saved = localStorage.getItem("fitfusion-developer-options");
+    return saved ? JSON.parse(saved) : {
+      debugMode: false,
+      apiLogging: false,
+      experimentalFeatures: false,
+      performanceMonitoring: false,
+      betaAccess: false,
+      customScripting: false
+    };
   });
   
-  const [defaultExportFormat, setDefaultExportFormat] = useState<'json' | 'csv' | 'pdf' | 'html'>(() => {
-    const savedFormat = localStorage.getItem("fitfusion-export-format");
-    return (savedFormat as 'json' | 'csv' | 'pdf' | 'html') || 'json';
+  // Display options
+  const [displayOptions, setDisplayOptions] = useState(() => {
+    const saved = localStorage.getItem("fitfusion-display-options");
+    return saved ? JSON.parse(saved) : {
+      animations: true,
+      highContrast: false,
+      compactView: false,
+      showTips: true,
+      darkModeSchedule: false,
+      customFonts: false
+    };
   });
+  
+  // Profile saving function
+  const saveProfileInfo = async (profileData: Record<string, any>): Promise<boolean> => {
+    try {
+      // Save profile data to localStorage
+      localStorage.setItem("fitfusion-profile", JSON.stringify(profileData));
+      
+      // Simulate API call with a delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      return true;
+    } catch (error) {
+      console.error("Error saving profile data:", error);
+      return false;
+    }
+  };
   
   // Save settings to localStorage when they change
-  useEffect(() => {
-    localStorage.setItem("fitfusion-compact-view", compactView.toString());
-  }, [compactView]);
-  
-  useEffect(() => {
-    localStorage.setItem("fitfusion-show-calories", showCalories.toString());
-  }, [showCalories]);
-  
-  useEffect(() => {
-    localStorage.setItem("fitfusion-show-heart-rate", showHeartRate.toString());
-  }, [showHeartRate]);
-  
-  useEffect(() => {
-    localStorage.setItem("fitfusion-text-size", textSize.toString());
-    document.documentElement.style.fontSize = `${textSize}px`;
-  }, [textSize]);
-  
   useEffect(() => {
     localStorage.setItem("fitfusion-sound-enabled", soundEnabled.toString());
   }, [soundEnabled]);
   
   useEffect(() => {
-    localStorage.setItem("fitfusion-workout-sounds", workoutSounds.toString());
-  }, [workoutSounds]);
+    localStorage.setItem("fitfusion-sound-volume", soundVolume.toString());
+  }, [soundVolume]);
   
   useEffect(() => {
-    localStorage.setItem("fitfusion-notification-sounds", notificationSounds.toString());
-  }, [notificationSounds]);
+    localStorage.setItem("fitfusion-haptic-enabled", hapticEnabled.toString());
+  }, [hapticEnabled]);
   
   useEffect(() => {
-    localStorage.setItem("fitfusion-voice-guidance", voiceGuidance.toString());
-  }, [voiceGuidance]);
+    localStorage.setItem("fitfusion-sound-pack", soundPack);
+  }, [soundPack]);
   
   useEffect(() => {
-    localStorage.setItem("fitfusion-sound-volume", volume.toString());
-  }, [volume]);
+    localStorage.setItem("fitfusion-custom-sounds", JSON.stringify(customSounds));
+  }, [customSounds]);
   
   useEffect(() => {
-    localStorage.setItem("fitfusion-haptic-enabled", hapticFeedback.toString());
-  }, [hapticFeedback]);
+    localStorage.setItem("fitfusion-export-format", exportFormat);
+  }, [exportFormat]);
   
   useEffect(() => {
-    localStorage.setItem("fitfusion-heart-rate-monitoring", heartRateMonitoring.toString());
-  }, [heartRateMonitoring]);
+    localStorage.setItem("fitfusion-export-anonymized", exportAnonymized.toString());
+  }, [exportAnonymized]);
   
   useEffect(() => {
-    localStorage.setItem("fitfusion-sleep-tracking", sleepTracking.toString());
-  }, [sleepTracking]);
+    localStorage.setItem("fitfusion-export-categories", JSON.stringify(exportCategories));
+  }, [exportCategories]);
   
   useEffect(() => {
-    localStorage.setItem("fitfusion-step-counting", stepCounting.toString());
-  }, [stepCounting]);
+    localStorage.setItem("fitfusion-theme", theme);
+  }, [theme]);
+  
+  useEffect(() => {
+    localStorage.setItem("fitfusion-font-size", fontSize);
+  }, [fontSize]);
+  
+  useEffect(() => {
+    localStorage.setItem("fitfusion-language", language);
+  }, [language]);
+  
+  useEffect(() => {
+    localStorage.setItem("fitfusion-auto-sync", autoSync.toString());
+  }, [autoSync]);
+  
+  useEffect(() => {
+    localStorage.setItem("fitfusion-cloud-backup", cloudBackup.toString());
+  }, [cloudBackup]);
+  
+  useEffect(() => {
+    localStorage.setItem("fitfusion-notifications", notifications.toString());
+  }, [notifications]);
   
   useEffect(() => {
     localStorage.setItem("fitfusion-code-editor-enabled", codeEditorEnabled.toString());
   }, [codeEditorEnabled]);
   
   useEffect(() => {
-    localStorage.setItem("fitfusion-programming-languages", JSON.stringify(programmingLanguages));
-  }, [programmingLanguages]);
-  
-  // Save export settings to localStorage when they change
-  useEffect(() => {
-    localStorage.setItem("fitfusion-auto-backup", autoBackupEnabled.toString());
-  }, [autoBackupEnabled]);
+    localStorage.setItem("fitfusion-subscription-plan", subscriptionPlan);
+  }, [subscriptionPlan]);
   
   useEffect(() => {
-    localStorage.setItem("fitfusion-backup-frequency", backupFrequency);
-  }, [backupFrequency]);
+    localStorage.setItem("fitfusion-payment-method", paymentMethod);
+  }, [paymentMethod]);
   
   useEffect(() => {
-    localStorage.setItem("fitfusion-export-format", defaultExportFormat);
-  }, [defaultExportFormat]);
+    localStorage.setItem("fitfusion-developer-options", JSON.stringify(developerOptions));
+  }, [developerOptions]);
   
-  // Function to add a programming language
-  const addProgrammingLanguage = (language: string) => {
-    if (!programmingLanguages.includes(language)) {
-      setProgrammingLanguages([...programmingLanguages, language]);
-    }
+  useEffect(() => {
+    localStorage.setItem("fitfusion-display-options", JSON.stringify(displayOptions));
+  }, [displayOptions]);
+  
+  const addCustomSound = (name: string, url: string) => {
+    setCustomSounds(prev => ({
+      ...prev,
+      [name]: url
+    }));
   };
   
-  // Function to remove a programming language
-  const removeProgrammingLanguage = (language: string) => {
-    setProgrammingLanguages(programmingLanguages.filter(lang => lang !== language));
+  const removeCustomSound = (name: string) => {
+    setCustomSounds(prev => {
+      const newSounds = { ...prev };
+      delete newSounds[name];
+      return newSounds;
+    });
+  };
+  
+  const setDeveloperOption = (option: keyof typeof developerOptions, value: boolean) => {
+    setDeveloperOptions(prev => ({
+      ...prev,
+      [option]: value
+    }));
+  };
+  
+  const setDisplayOption = (option: keyof typeof displayOptions, value: boolean) => {
+    setDisplayOptions(prev => ({
+      ...prev,
+      [option]: value
+    }));
   };
   
   return (
     <SettingsContext.Provider value={{
-      compactView,
-      setCompactView,
-      showCalories,
-      setShowCalories,
-      showHeartRate,
-      setShowHeartRate,
-      textSize,
-      setTextSize,
       soundEnabled,
       setSoundEnabled,
-      workoutSounds,
-      setWorkoutSounds,
-      notificationSounds,
-      setNotificationSounds,
-      voiceGuidance,
-      setVoiceGuidance,
-      volume,
-      setVolume,
-      hapticFeedback,
-      setHapticFeedback,
-      heartRateMonitoring,
-      setHeartRateMonitoring,
-      sleepTracking,
-      setSleepTracking,
-      stepCounting,
-      setStepCounting,
+      soundVolume,
+      setSoundVolume,
+      hapticEnabled,
+      setHapticEnabled,
+      soundPack,
+      setSoundPack,
+      customSounds,
+      addCustomSound,
+      removeCustomSound,
+      exportFormat,
+      setExportFormat,
+      exportAnonymized,
+      setExportAnonymized,
+      exportCategories,
+      setExportCategories,
+      theme,
+      setTheme,
+      fontSize,
+      setFontSize,
+      language,
+      setLanguage,
+      autoSync,
+      setAutoSync,
+      cloudBackup,
+      setCloudBackup,
+      notifications,
+      setNotifications,
       codeEditorEnabled,
       setCCodeEditorEnabled,
-      programmingLanguages,
-      addProgrammingLanguage,
-      removeProgrammingLanguage,
-      // New export settings
-      autoBackupEnabled,
-      setAutoBackupEnabled,
-      backupFrequency,
-      setBackupFrequency,
-      defaultExportFormat,
-      setDefaultExportFormat
+      appVersion,
+      subscriptionPlan,
+      setSubscriptionPlan,
+      paymentMethod,
+      setPaymentMethod,
+      developerOptions,
+      setDeveloperOption,
+      displayOptions,
+      setDisplayOption,
+      saveProfileInfo
     }}>
       {children}
     </SettingsContext.Provider>
