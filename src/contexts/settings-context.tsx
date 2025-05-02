@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 type SubscriptionPlan = "Free" | "Basic" | "Super" | "Advance";
@@ -11,6 +10,8 @@ interface SettingsContextType {
   setSoundVolume: (volume: number) => void;
   hapticEnabled: boolean;
   setHapticEnabled: (enabled: boolean) => void;
+  hapticFeedback: boolean;
+  setHapticFeedback: (enabled: boolean) => void;
   soundPack: string;
   setSoundPack: (pack: string) => void;
   customSounds: Record<string, string>;
@@ -41,6 +42,15 @@ interface SettingsContextType {
   setSubscriptionPlan: (plan: SubscriptionPlan) => void;
   paymentMethod: PaymentMethod;
   setPaymentMethod: (method: PaymentMethod) => void;
+  compactView: boolean;
+  setCompactView: (enabled: boolean) => void;
+  showCalories: boolean;
+  setShowCalories: (enabled: boolean) => void;
+  showHeartRate: boolean;
+  setShowHeartRate: (enabled: boolean) => void;
+  programmingLanguages: string[];
+  addProgrammingLanguage: (language: string) => void;
+  removeProgrammingLanguage: (language: string) => void;
   developerOptions: {
     debugMode: boolean;
     apiLogging: boolean;
@@ -93,6 +103,11 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     return saved !== null ? saved === "true" : true;
   });
   
+  const [hapticFeedback, setHapticFeedback] = useState(() => {
+    const saved = localStorage.getItem("fitfusion-haptic-feedback");
+    return saved !== null ? saved === "true" : true;
+  });
+  
   const [soundPack, setSoundPack] = useState(() => {
     const saved = localStorage.getItem("fitfusion-sound-pack");
     return saved || "default";
@@ -101,6 +116,28 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
   const [customSounds, setCustomSounds] = useState<Record<string, string>>(() => {
     const saved = localStorage.getItem("fitfusion-custom-sounds");
     return saved ? JSON.parse(saved) : {};
+  });
+  
+  // Display settings
+  const [compactView, setCompactView] = useState(() => {
+    const saved = localStorage.getItem("fitfusion-compact-view");
+    return saved !== null ? saved === "true" : false;
+  });
+  
+  const [showCalories, setShowCalories] = useState(() => {
+    const saved = localStorage.getItem("fitfusion-show-calories");
+    return saved !== null ? saved === "true" : true;
+  });
+  
+  const [showHeartRate, setShowHeartRate] = useState(() => {
+    const saved = localStorage.getItem("fitfusion-show-heart-rate");
+    return saved !== null ? saved === "true" : true;
+  });
+  
+  // Programming languages
+  const [programmingLanguages, setProgrammingLanguages] = useState<string[]>(() => {
+    const saved = localStorage.getItem("fitfusion-programming-languages");
+    return saved ? JSON.parse(saved) : ["JavaScript", "TypeScript", "Python"];
   });
   
   // Export settings
@@ -119,7 +156,7 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     return saved ? JSON.parse(saved) : ["workouts"];
   });
   
-  // Display settings
+  // Theme settings
   const [theme, setTheme] = useState<"system" | "light" | "dark">(() => {
     const saved = localStorage.getItem("fitfusion-theme");
     return (saved as any) || "system";
@@ -196,22 +233,6 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
       customFonts: false
     };
   });
-  
-  // Profile saving function
-  const saveProfileInfo = async (profileData: Record<string, any>): Promise<boolean> => {
-    try {
-      // Save profile data to localStorage
-      localStorage.setItem("fitfusion-profile", JSON.stringify(profileData));
-      
-      // Simulate API call with a delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      return true;
-    } catch (error) {
-      console.error("Error saving profile data:", error);
-      return false;
-    }
-  };
   
   // Save settings to localStorage when they change
   useEffect(() => {
@@ -290,6 +311,7 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     localStorage.setItem("fitfusion-display-options", JSON.stringify(displayOptions));
   }, [displayOptions]);
   
+  // Functions for managing custom sounds
   const addCustomSound = (name: string, url: string) => {
     setCustomSounds(prev => ({
       ...prev,
@@ -305,6 +327,19 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     });
   };
   
+  // Functions for programming languages
+  const addProgrammingLanguage = (language: string) => {
+    setProgrammingLanguages(prev => {
+      if (prev.includes(language)) return prev;
+      return [...prev, language];
+    });
+  };
+  
+  const removeProgrammingLanguage = (language: string) => {
+    setProgrammingLanguages(prev => prev.filter(lang => lang !== language));
+  };
+  
+  // Functions for developer options
   const setDeveloperOption = (option: keyof typeof developerOptions, value: boolean) => {
     setDeveloperOptions(prev => ({
       ...prev,
@@ -312,12 +347,50 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     }));
   };
   
+  // Functions for display options
   const setDisplayOption = (option: keyof typeof displayOptions, value: boolean) => {
     setDisplayOptions(prev => ({
       ...prev,
       [option]: value
     }));
   };
+  
+  // Profile saving function
+  const saveProfileInfo = async (profileData: Record<string, any>): Promise<boolean> => {
+    try {
+      // Save profile data to localStorage
+      localStorage.setItem("fitfusion-profile", JSON.stringify(profileData));
+      
+      // Simulate API call with a delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      return true;
+    } catch (error) {
+      console.error("Error saving profile data:", error);
+      return false;
+    }
+  };
+  
+  // Add effects to save new state to localStorage
+  useEffect(() => {
+    localStorage.setItem("fitfusion-haptic-feedback", hapticFeedback.toString());
+  }, [hapticFeedback]);
+  
+  useEffect(() => {
+    localStorage.setItem("fitfusion-compact-view", compactView.toString());
+  }, [compactView]);
+  
+  useEffect(() => {
+    localStorage.setItem("fitfusion-show-calories", showCalories.toString());
+  }, [showCalories]);
+  
+  useEffect(() => {
+    localStorage.setItem("fitfusion-show-heart-rate", showHeartRate.toString());
+  }, [showHeartRate]);
+  
+  useEffect(() => {
+    localStorage.setItem("fitfusion-programming-languages", JSON.stringify(programmingLanguages));
+  }, [programmingLanguages]);
   
   return (
     <SettingsContext.Provider value={{
@@ -327,6 +400,8 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
       setSoundVolume,
       hapticEnabled,
       setHapticEnabled,
+      hapticFeedback,
+      setHapticFeedback,
       soundPack,
       setSoundPack,
       customSounds,
@@ -357,6 +432,15 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
       setSubscriptionPlan,
       paymentMethod,
       setPaymentMethod,
+      compactView,
+      setCompactView,
+      showCalories,
+      setShowCalories,
+      showHeartRate,
+      setShowHeartRate,
+      programmingLanguages,
+      addProgrammingLanguage,
+      removeProgrammingLanguage,
       developerOptions,
       setDeveloperOption,
       displayOptions,
