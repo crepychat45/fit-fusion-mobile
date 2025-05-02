@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { Button } from "@/components/ui/button";
@@ -44,7 +45,6 @@ const Settings = () => {
     language,
     setLanguage,
     subscriptionPlan,
-    setSubscriptionPlan,
     unitSystem,
     setUnitSystem,
     soundEnabled,
@@ -54,8 +54,9 @@ const Settings = () => {
     compactView,
     setCompactView,
     showCalories,
-    setShowHeartRate,
+    setShowCalories,
     showHeartRate,
+    setShowHeartRate,
     codeEditorEnabled,
     setCCodeEditorEnabled: setCodeEditorEnabled,
     programmingLanguages,

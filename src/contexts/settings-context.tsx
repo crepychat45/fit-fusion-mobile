@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 
 type SubscriptionPlan = "Free" | "Basic" | "Super" | "Advance";
 type PaymentMethod = "Cash" | "GPay" | "PhonePe" | "NetBanking" | "CreditCard" | "DebitCard" | "UPI";
+type UnitSystem = "metric" | "imperial";
 
 interface SettingsContextType {
   soundEnabled: boolean;
@@ -70,6 +71,8 @@ interface SettingsContextType {
   };
   setDisplayOption: (option: keyof SettingsContextType["displayOptions"], value: boolean) => void;
   saveProfileInfo: (profileData: Record<string, any>) => Promise<boolean>;
+  unitSystem: UnitSystem;
+  setUnitSystem: (system: UnitSystem) => void;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -132,6 +135,12 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
   const [showHeartRate, setShowHeartRate] = useState(() => {
     const saved = localStorage.getItem("fitfusion-show-heart-rate");
     return saved !== null ? saved === "true" : true;
+  });
+
+  // Unit system settings
+  const [unitSystem, setUnitSystem] = useState<UnitSystem>(() => {
+    const saved = localStorage.getItem("fitfusion-unit-system");
+    return (saved as UnitSystem) || "metric";
   });
   
   // Programming languages
@@ -311,6 +320,10 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     localStorage.setItem("fitfusion-display-options", JSON.stringify(displayOptions));
   }, [displayOptions]);
   
+  useEffect(() => {
+    localStorage.setItem("fitfusion-unit-system", unitSystem);
+  }, [unitSystem]);
+  
   // Functions for managing custom sounds
   const addCustomSound = (name: string, url: string) => {
     setCustomSounds(prev => ({
@@ -445,7 +458,9 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
       setDeveloperOption,
       displayOptions,
       setDisplayOption,
-      saveProfileInfo
+      saveProfileInfo,
+      unitSystem,
+      setUnitSystem
     }}>
       {children}
     </SettingsContext.Provider>
