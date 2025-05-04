@@ -13,7 +13,21 @@ import { ChatList } from "./chat-list";
 import { ChatMessage } from "./chat-message";
 import { ChatInput } from "./chat-input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, MessageSquare, Search, Settings, Users, Shield, Lock } from "lucide-react";
+import { 
+  MessageCircle, 
+  MessageSquare, 
+  Search, 
+  Settings, 
+  Users, 
+  Shield, 
+  Lock, 
+  Bell, 
+  BellOff,
+  Trash2,
+  UserPlus,
+  Smartphone,
+  LogOut 
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { userProfile } from "@/data/user";
@@ -26,6 +40,26 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 
 // Mock data for chat
 const mockUsers: ChatUser[] = [
@@ -116,13 +150,18 @@ export function FitfusionChat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [privacyEnabled, setPrivacyEnabled] = useState(true);
   const [encryptedChat, setEncryptedChat] = useState(true);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
+  const [chatBackupEnabled, setChatBackupEnabled] = useState(true);
   
   const currentUserId = "current";
   
   // Scroll to bottom when new messages arrive
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    if (autoScrollEnabled) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, autoScrollEnabled]);
   
   useEffect(() => {
     if (selectedConversationId) {
@@ -320,6 +359,35 @@ export function FitfusionChat() {
     });
   };
 
+  // Function to toggle notifications
+  const toggleNotifications = () => {
+    setNotificationsEnabled(!notificationsEnabled);
+    toast({
+      description: !notificationsEnabled ? "Chat notifications enabled" : "Chat notifications disabled",
+    });
+  };
+
+  // Function to clear chat history
+  const clearChatHistory = () => {
+    if (!selectedConversationId) return;
+    
+    setMessages([]);
+    toast({
+      description: "Chat history cleared",
+    });
+  };
+
+  // Function to delete conversation
+  const deleteConversation = () => {
+    if (!selectedConversationId) return;
+    
+    setConversations(prev => prev.filter(c => c.id !== selectedConversationId));
+    setSelectedConversationId(undefined);
+    toast({
+      description: "Conversation deleted",
+    });
+  };
+
   return (
     <Card className="w-full max-w-3xl mx-auto shadow-lg overflow-hidden">
       <CardHeader className="p-4 border-b">
@@ -373,9 +441,149 @@ export function FitfusionChat() {
                 </div>
               </PopoverContent>
             </Popover>
-            <Button variant="ghost" size="icon">
-              <Settings className="h-4 w-4" />
-            </Button>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent>
+                <SheetHeader className="pb-4">
+                  <SheetTitle>Chat Settings</SheetTitle>
+                  <SheetDescription>
+                    Configure your FitFusion chat experience
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="space-y-6 py-4">
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-medium">Notifications</h4>
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col space-y-1">
+                        <Label htmlFor="notifications">Chat Notifications</Label>
+                        <span className="text-xs text-muted-foreground">
+                          Receive notifications for new messages
+                        </span>
+                      </div>
+                      <Switch 
+                        id="notifications" 
+                        checked={notificationsEnabled}
+                        onCheckedChange={toggleNotifications}
+                      />
+                    </div>
+                  </div>
+                  <Separator />
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-medium">Privacy & Security</h4>
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col space-y-1">
+                        <Label htmlFor="privacy-mode">Privacy Mode</Label>
+                        <span className="text-xs text-muted-foreground">
+                          Hide sensitive information in chats
+                        </span>
+                      </div>
+                      <Switch 
+                        id="privacy-mode" 
+                        checked={privacyEnabled}
+                        onCheckedChange={togglePrivacy}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col space-y-1">
+                        <Label htmlFor="encryption">End-to-End Encryption</Label>
+                        <span className="text-xs text-muted-foreground">
+                          Secure your messages with encryption
+                        </span>
+                      </div>
+                      <Switch 
+                        id="encryption" 
+                        checked={encryptedChat}
+                        onCheckedChange={toggleEncryption}
+                      />
+                    </div>
+                  </div>
+                  <Separator />
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-medium">Chat Experience</h4>
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col space-y-1">
+                        <Label htmlFor="auto-scroll">Auto-scroll to New Messages</Label>
+                        <span className="text-xs text-muted-foreground">
+                          Automatically scroll to new messages
+                        </span>
+                      </div>
+                      <Switch 
+                        id="auto-scroll" 
+                        checked={autoScrollEnabled}
+                        onCheckedChange={setAutoScrollEnabled}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col space-y-1">
+                        <Label htmlFor="chat-backup">Chat Backup</Label>
+                        <span className="text-xs text-muted-foreground">
+                          Backup your chat history
+                        </span>
+                      </div>
+                      <Switch 
+                        id="chat-backup" 
+                        checked={chatBackupEnabled}
+                        onCheckedChange={setChatBackupEnabled}
+                      />
+                    </div>
+                  </div>
+                  <Separator />
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-medium">Data Management</h4>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" className="w-full" size="sm">
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Clear Chat History
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Clear Chat History</DialogTitle>
+                          <DialogDescription>
+                            Are you sure you want to clear your chat history? This action cannot be undone.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                          <Button variant="outline" onClick={() => {}}>Cancel</Button>
+                          <Button variant="destructive" onClick={clearChatHistory}>Clear History</Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                    
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" className="w-full" size="sm">
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete Conversation
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Delete Conversation</DialogTitle>
+                          <DialogDescription>
+                            Are you sure you want to delete this conversation? This action cannot be undone.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                          <Button variant="outline" onClick={() => {}}>Cancel</Button>
+                          <Button variant="destructive" onClick={deleteConversation}>Delete</Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                    
+                    <Button variant="outline" className="w-full" size="sm">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Export Chat Data
+                    </Button>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </CardHeader>
@@ -423,6 +631,12 @@ export function FitfusionChat() {
             <TabsContent value="contacts" className="m-0">
               <ScrollArea className="h-[372px]">
                 <div className="p-4 space-y-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="text-sm font-medium">Your Contacts</h3>
+                    <Button variant="ghost" size="sm" className="text-xs flex items-center gap-1">
+                      <UserPlus className="h-3 w-3" /> Add
+                    </Button>
+                  </div>
                   {mockUsers.map((user) => (
                     <div 
                       key={user.id}
@@ -480,9 +694,11 @@ export function FitfusionChat() {
                           }
                         </p>
                       </div>
-                      {encryptedChat && (
-                        <Lock className="h-3 w-3 ml-auto text-green-500" />
-                      )}
+                      <div className="ml-auto flex flex-col items-end">
+                        {encryptedChat && (
+                          <Lock className="h-3 w-3 text-green-500" />
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -505,7 +721,7 @@ export function FitfusionChat() {
                     className="md:hidden mr-2"
                     onClick={() => setSelectedConversationId(undefined)}
                   >
-                    <MessageCircle className="h-4 w-4" />
+                    <ArrowLeft className="h-4 w-4" />
                   </Button>
                   <Avatar className="h-8 w-8 mr-2 relative">
                     <AvatarImage src={otherParticipant.avatar} alt={otherParticipant.name} />
@@ -536,9 +752,41 @@ export function FitfusionChat() {
                     </div>
                   </div>
                 </div>
-                <Button variant="ghost" size="icon">
-                  <Settings className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center">
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={toggleNotifications}
+                    title={notificationsEnabled ? "Mute notifications" : "Enable notifications"}
+                  >
+                    {notificationsEnabled ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
+                  </Button>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <Settings className="h-4 w-4" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent align="end" className="w-56">
+                      <div className="space-y-2">
+                        <Button variant="ghost" className="w-full justify-start" size="sm">
+                          <Smartphone className="mr-2 h-4 w-4" />
+                          View Profile
+                        </Button>
+                        <Button variant="ghost" className="w-full justify-start text-destructive" size="sm" 
+                          onClick={clearChatHistory}>
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Clear Chat
+                        </Button>
+                        <Button variant="ghost" className="w-full justify-start text-destructive" size="sm"
+                          onClick={deleteConversation}>
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete Conversation
+                        </Button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
               
               <ScrollArea className="flex-1 p-4">
