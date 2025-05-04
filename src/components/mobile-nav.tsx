@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Activity, Dumbbell, Home, User } from "lucide-react";
+import { Activity, Dumbbell, Home, User, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -19,6 +19,11 @@ const navItems = [
     icon: Activity,
     label: "Progress",
     path: "/progress",
+  },
+  {
+    icon: MessageSquare,
+    label: "Chat",
+    path: "/chat",
   },
   {
     icon: User,

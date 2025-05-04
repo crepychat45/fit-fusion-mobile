@@ -21,6 +21,7 @@ import Help from "./pages/help";
 import Wearables from "./pages/wearables";
 import ExportData from "./pages/export-data";
 import Subscription from "./pages/subscription"; 
+import ChatPage from "./pages/chat";
 import { FitAssistant } from "./components/fit-assistant";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
                 <Route path="/exercise/:workoutId/:exerciseId" element={<ExerciseDetail />} />
                 <Route path="/progress" element={<Progress />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/chat" element={<ChatPage />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/notifications" element={<NotificationsPage />} />
                 <Route path="/privacy" element={<Privacy />} />

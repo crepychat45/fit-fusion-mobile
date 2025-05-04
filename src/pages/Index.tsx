@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { ActivityCard } from "@/components/activity-card";
@@ -24,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { DailyTip } from "@/components/daily-tip";
+import { FitfusionChat } from "@/components/chat/fitfusion-chat";
 
 const scheduledWorkouts = [
   {
@@ -49,6 +49,7 @@ const Index = () => {
   const [selectedWorkout, setSelectedWorkout] = useState<any>(null);
   const [scheduledDate, setScheduledDate] = useState<Date | undefined>(new Date());
   const [scheduledTime, setScheduledTime] = useState("07:00 AM");
+  const [showChat, setShowChat] = useState(false);
   
   const availableTimes = [
     "05:00 AM", "05:30 AM", "06:00 AM", "06:30 AM", 
@@ -242,6 +243,30 @@ const Index = () => {
             )
           ))}
         </motion.div>
+      </div>
+      
+      <div className="px-4 mt-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-medium">FitFusion Chat</h2>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="flex items-center text-xs text-muted-foreground"
+            onClick={() => setShowChat(!showChat)}
+          >
+            {showChat ? "Hide" : "Show"} <ChevronRight className="h-4 w-4 ml-1" />
+          </Button>
+        </div>
+        
+        {showChat && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <FitfusionChat />
+          </motion.div>
+        )}
       </div>
       
       <div className="px-4 mt-6">
