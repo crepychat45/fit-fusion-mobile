@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+
+import React, { useState, useEffect, useRef } from "react";
 import { 
   Card, 
   CardContent, 
@@ -12,13 +13,19 @@ import { ChatList } from "./chat-list";
 import { ChatMessage } from "./chat-message";
 import { ChatInput } from "./chat-input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MessageCircle, MessageSquare, Search, Settings, Users } from "lucide-react";
+import { MessageCircle, MessageSquare, Search, Settings, Users, Shield, Lock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { userProfile } from "@/data/user";
 import { ChatAttachment, ChatConversation, ChatMessage as ChatMessageType, ChatUser } from "@/types/chat";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Badge } from "@/components/ui/badge";
 
 // Mock data for chat
 const mockUsers: ChatUser[] = [
@@ -87,8 +94,7 @@ const generateMockConversations = (): ChatConversation[] => {
         {
           id: currentUserId,
           name: userProfile.name,
-          // Fix: Create a placeholder avatar for the current user
-          avatar: "/placeholder.svg"
+          avatar: userProfile.avatar || "/placeholder.svg"
         },
         user
       ],
@@ -107,8 +113,16 @@ export function FitfusionChat() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSending, setIsSending] = useState(false);
   const { toast } = useToast();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [privacyEnabled, setPrivacyEnabled] = useState(true);
+  const [encryptedChat, setEncryptedChat] = useState(true);
   
   const currentUserId = "current";
+  
+  // Scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
   
   useEffect(() => {
     if (selectedConversationId) {
@@ -181,7 +195,7 @@ export function FitfusionChat() {
   }, [selectedConversationId]);
   
   const handleSendMessage = (content: string, attachmentFiles: File[]) => {
-    if (!selectedConversationId) return;
+    if (!selectedConversationId || (!content.trim() && attachmentFiles.length === 0)) return;
     
     setIsSending(true);
     
@@ -217,7 +231,7 @@ export function FitfusionChat() {
           id: `new-msg-${Date.now()}`,
           senderId: currentUserId,
           receiverId: otherUser.id,
-          content,
+          content: content.trim(),
           timestamp: new Date(),
           isRead: false,
           attachments: attachments.length > 0 ? attachments : undefined
@@ -290,13 +304,80 @@ export function FitfusionChat() {
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
   const otherParticipant = selectedConversation?.participants.find(p => p.id !== currentUserId);
 
+  // Function to toggle privacy features
+  const togglePrivacy = () => {
+    setPrivacyEnabled(!privacyEnabled);
+    toast({
+      description: !privacyEnabled ? "Privacy features enabled" : "Privacy features disabled",
+    });
+  };
+
+  // Function to toggle encryption
+  const toggleEncryption = () => {
+    setEncryptedChat(!encryptedChat);
+    toast({
+      description: !encryptedChat ? "Encrypted chat enabled" : "Encrypted chat disabled",
+    });
+  };
+
   return (
     <Card className="w-full max-w-3xl mx-auto shadow-lg overflow-hidden">
       <CardHeader className="p-4 border-b">
-        <CardTitle className="flex items-center">
-          <MessageSquare className="mr-2 h-5 w-5" />
-          FitFusion Chat
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <MessageSquare className="mr-2 h-5 w-5" />
+            <CardTitle>FitFusion Chat</CardTitle>
+          </div>
+          <div className="flex gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Shield className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80">
+                <div className="space-y-4">
+                  <h4 className="font-medium">Privacy & Security</h4>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">Privacy Mode</p>
+                      <p className="text-xs text-muted-foreground">Hide sensitive information</p>
+                    </div>
+                    <Button 
+                      variant={privacyEnabled ? "default" : "outline"}
+                      size="sm"
+                      onClick={togglePrivacy}
+                    >
+                      {privacyEnabled ? "Enabled" : "Disabled"}
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">End-to-End Encryption</p>
+                      <p className="text-xs text-muted-foreground">Secure your messages</p>
+                    </div>
+                    <Button 
+                      variant={encryptedChat ? "default" : "outline"}
+                      size="sm"
+                      onClick={toggleEncryption}
+                    >
+                      {encryptedChat ? "Enabled" : "Disabled"}
+                    </Button>
+                  </div>
+                  <div className="rounded-md bg-muted p-3">
+                    <div className="flex items-center gap-2">
+                      <Lock className="h-4 w-4 text-green-500" />
+                      <p className="text-xs">Your fitness data and messages are protected</p>
+                    </div>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+            <Button variant="ghost" size="icon">
+              <Settings className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
       </CardHeader>
       
       <div className="grid md:grid-cols-3 h-[500px]">
@@ -359,7 +440,7 @@ export function FitfusionChat() {
                               {
                                 id: currentUserId,
                                 name: userProfile.name,
-                                avatar: userProfile.avatar
+                                avatar: userProfile.avatar || "/placeholder.svg"
                               },
                               user
                             ],
@@ -399,6 +480,9 @@ export function FitfusionChat() {
                           }
                         </p>
                       </div>
+                      {encryptedChat && (
+                        <Lock className="h-3 w-3 ml-auto text-green-500" />
+                      )}
                     </div>
                   ))}
                 </div>
@@ -433,16 +517,23 @@ export function FitfusionChat() {
                   </Avatar>
                   <div>
                     <h3 className="font-medium">{otherParticipant.name}</h3>
-                    <p className="text-xs text-muted-foreground">
-                      {otherParticipant.status === 'online' 
-                        ? 'Online' 
-                        : otherParticipant.status === 'away'
-                          ? 'Away'
-                          : otherParticipant.lastSeen 
-                            ? `Last seen ${new Date(otherParticipant.lastSeen).toLocaleString()}`
-                            : 'Offline'
-                      }
-                    </p>
+                    <div className="flex items-center gap-1">
+                      <p className="text-xs text-muted-foreground">
+                        {otherParticipant.status === 'online' 
+                          ? 'Online' 
+                          : otherParticipant.status === 'away'
+                            ? 'Away'
+                            : otherParticipant.lastSeen 
+                              ? `Last seen ${new Date(otherParticipant.lastSeen).toLocaleString()}`
+                              : 'Offline'
+                        }
+                      </p>
+                      {encryptedChat && (
+                        <Badge variant="outline" className="h-4 px-1 text-[10px] flex items-center gap-[2px]">
+                          <Lock className="h-2 w-2" /> Encrypted
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <Button variant="ghost" size="icon">
@@ -461,6 +552,7 @@ export function FitfusionChat() {
                       senderName={otherParticipant.name}
                     />
                   ))}
+                  <div ref={messagesEndRef} />
                 </div>
               </ScrollArea>
               
@@ -480,6 +572,12 @@ export function FitfusionChat() {
               <p className="text-muted-foreground text-center max-w-xs">
                 Connect with fitness buddies, trainers, and friends to share your fitness journey
               </p>
+              {encryptedChat && (
+                <div className="flex items-center gap-1 mt-2 text-xs text-primary">
+                  <Lock className="h-3 w-3" />
+                  <span>End-to-end encrypted</span>
+                </div>
+              )}
               <Button 
                 className="mt-4"
                 onClick={() => setActiveTab("contacts")}

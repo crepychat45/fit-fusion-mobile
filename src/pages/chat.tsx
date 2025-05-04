@@ -8,10 +8,10 @@ const ChatPage = () => {
     <div className="min-h-screen bg-background pb-16">
       <div className="fitness-gradient pt-12 pb-6 px-4">
         <h1 className="text-xl font-bold text-white">FitFusion Chat</h1>
-        <p className="text-white/80 text-sm">Connect with fitness friends</p>
+        <p className="text-white/80 text-sm">Connect with fitness friends securely</p>
       </div>
       
-      <div className="px-4 mt-6">
+      <div className="px-4 mt-6 pb-20">
         <FitfusionChat />
       </div>
       
