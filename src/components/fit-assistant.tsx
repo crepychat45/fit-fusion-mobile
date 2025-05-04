@@ -15,7 +15,14 @@ import {
   Calendar,
   Heart,
   BarChart,
-  RefreshCw
+  RefreshCw,
+  Image,
+  Paperclip,
+  Download,
+  Trash2,
+  FileText,
+  X as XIcon,
+  Info
 } from "lucide-react";
 import { 
   Dialog, 
@@ -30,6 +37,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/contexts/theme-context";
 import { useToast } from "@/components/ui/use-toast";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from "@/components/ui/tooltip";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface Message {
   id: string;
@@ -37,6 +55,15 @@ interface Message {
   sender: 'user' | 'assistant';
   timestamp: Date;
   isTyping?: boolean;
+  media?: MediaItem[];
+}
+
+interface MediaItem {
+  id: string;
+  type: 'image' | 'document';
+  url: string;
+  name: string;
+  size?: number;
 }
 
 const predefinedResponses: Record<string, string[]> = {
@@ -113,6 +140,10 @@ const generateResponse = (message: string): string => {
     return "You're welcome! I'm here to help on your fitness journey. Let me know if you have any other questions.";
   } else if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
     return "Hello there! How can I assist with your fitness goals today?";
+  } else if (lowerMessage.includes('image') || lowerMessage.includes('photo') || lowerMessage.includes('picture') || lowerMessage.includes('upload')) {
+    return "You can share photos or documents with me using the attachment button. This helps me provide more personalized fitness guidance.";
+  } else if (lowerMessage.includes('file') || lowerMessage.includes('document') || lowerMessage.includes('download')) {
+    return "You can share workout plans or nutrition documents with me. I can help you analyze them or you can save my responses for future reference.";
   } else {
     return "I'm not sure I understand. Could you rephrase your question about workouts, nutrition, or fitness goals?";
   }
@@ -124,6 +155,11 @@ export function FitAssistant() {
   const [inputMessage, setInputMessage] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [isTyping, setIsTyping] = useState(false);
+  const [isAttachmentMenuOpen, setIsAttachmentMenuOpen] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previewMedia, setPreviewMedia] = useState<MediaItem | null>(null);
+  const [showImageFullscreen, setShowImageFullscreen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
   const { toast } = useToast();
@@ -137,20 +173,67 @@ export function FitAssistant() {
       }, 100);
     }
   }, [messages]);
+
+  const handleFileSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      if (files.length > 0) {
+        // Check file size (limit to 5MB per file)
+        const oversizedFiles = files.filter(file => file.size > 5 * 1024 * 1024);
+        if (oversizedFiles.length > 0) {
+          toast({
+            title: "File too large",
+            description: "Files must be less than 5MB",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        setSelectedFiles(prev => [...prev, ...files]);
+      }
+    }
+  };
+  
+  const removeSelectedFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
   
   const handleSend = () => {
-    if (!inputMessage.trim()) return;
+    if (!inputMessage.trim() && selectedFiles.length === 0) return;
+    
+    // Create media items from selected files
+    const mediaItems: MediaItem[] = [];
+    
+    // Process files if any
+    if (selectedFiles.length > 0) {
+      selectedFiles.forEach(file => {
+        // In a real app, you would upload these files to a server
+        // Here we're using object URLs for demo purposes
+        const fileType = file.type.startsWith('image/') ? 'image' : 'document';
+        const fileUrl = URL.createObjectURL(file);
+        
+        mediaItems.push({
+          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+          type: fileType,
+          url: fileUrl,
+          name: file.name,
+          size: file.size
+        });
+      });
+    }
     
     // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
       content: inputMessage,
       sender: 'user',
-      timestamp: new Date()
+      timestamp: new Date(),
+      media: mediaItems.length > 0 ? mediaItems : undefined
     };
     
     setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
+    setSelectedFiles([]);
     
     // Add typing indicator
     setIsTyping(true);
@@ -178,6 +261,38 @@ export function FitAssistant() {
       
       setMessages(prev => [...prev, botResponse]);
     }, Math.random() * 1000 + 800); // Random delay between 800-1800ms for more natural feel
+  };
+  
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return bytes + ' bytes';
+    else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    else return (bytes / 1048576).toFixed(1) + ' MB';
+  };
+  
+  const handleOpenFileInput = () => {
+    fileInputRef.current?.click();
+    setIsAttachmentMenuOpen(false);
+  };
+  
+  const openMediaPreview = (media: MediaItem) => {
+    setPreviewMedia(media);
+    if (media.type === 'image') {
+      setShowImageFullscreen(true);
+    }
+  };
+  
+  const downloadMedia = (media: MediaItem) => {
+    const link = document.createElement('a');
+    link.href = media.url;
+    link.download = media.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+      title: "Download started",
+      description: `Downloading ${media.name}`,
+    });
   };
   
   const categories = [
@@ -275,6 +390,41 @@ export function FitAssistant() {
                           </div>
                         )}
                         <p>{message.content}</p>
+                        
+                        {/* Media attachments */}
+                        {message.media && message.media.length > 0 && (
+                          <div className="mt-2 space-y-2">
+                            {message.media.map((item) => (
+                              <div 
+                                key={item.id} 
+                                className={`rounded-md overflow-hidden border ${message.sender === 'user' ? 'border-primary-foreground/20' : 'border-border'}`}
+                                onClick={() => openMediaPreview(item)}
+                              >
+                                {item.type === 'image' ? (
+                                  <div className="relative group cursor-pointer">
+                                    <img 
+                                      src={item.url} 
+                                      alt={item.name} 
+                                      className="max-h-40 w-auto object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                      <Image className="h-6 w-6 text-white" />
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="p-3 flex items-center gap-3 cursor-pointer hover:bg-muted/60 transition-colors">
+                                    <FileText className={`h-8 w-8 ${message.sender === 'user' ? 'text-primary-foreground' : 'text-primary'}`} />
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-xs font-medium truncate">{item.name}</p>
+                                      {item.size && <p className="text-xs opacity-70">{formatFileSize(item.size)}</p>}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        
                         <div className="text-right mt-1">
                           <span className="text-xs opacity-70">
                             {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -289,6 +439,43 @@ export function FitAssistant() {
           </ScrollArea>
           
           <div className="p-3 border-t">
+            {/* Selected files preview */}
+            {selectedFiles.length > 0 && (
+              <div className="mb-3 flex flex-wrap gap-2">
+                {selectedFiles.map((file, index) => (
+                  <div key={index} className="relative group">
+                    <div className="border rounded-md p-2 pr-8 bg-background">
+                      <div className="flex items-center gap-2">
+                        {file.type.startsWith('image/') ? (
+                          <div className="h-10 w-10 rounded overflow-hidden bg-muted flex items-center justify-center">
+                            <img 
+                              src={URL.createObjectURL(file)} 
+                              alt={file.name} 
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <FileText className="h-6 w-6 text-primary" />
+                        )}
+                        <div className="overflow-hidden">
+                          <p className="text-xs font-medium truncate max-w-[100px]">{file.name}</p>
+                          <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="h-5 w-5 absolute top-1 right-1 p-0"
+                      onClick={() => removeSelectedFile(index)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {messages.length <= 2 && (
               <div className="mb-3">
                 <div className="flex items-center justify-between mb-2">
@@ -349,6 +536,45 @@ export function FitAssistant() {
             </div>
             
             <div className="flex items-center gap-2">
+              <Popover open={isAttachmentMenuOpen} onOpenChange={setIsAttachmentMenuOpen}>
+                <PopoverTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="rounded-full shrink-0"
+                  >
+                    <Paperclip className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-48 p-2">
+                  <div className="space-y-1">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-sm" 
+                      onClick={handleOpenFileInput}
+                    >
+                      <Image className="mr-2 h-4 w-4" /> Upload image
+                    </Button>
+                    <Button 
+                      variant="ghost"
+                      className="w-full justify-start text-sm"
+                      onClick={handleOpenFileInput}
+                    >
+                      <FileText className="mr-2 h-4 w-4" /> Upload document
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
+              
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                onChange={handleFileSelection}
+                accept="image/*,.pdf,.doc,.docx,.txt"
+                multiple
+              />
+              
               <Input
                 placeholder="Type a message..."
                 value={inputMessage}
@@ -362,11 +588,57 @@ export function FitAssistant() {
                 size="icon" 
                 className="rounded-full shrink-0" 
                 onClick={handleSend}
-                disabled={!inputMessage.trim() || isTyping}
+                disabled={(!inputMessage.trim() && selectedFiles.length === 0) || isTyping}
               >
                 <Send className="h-4 w-4" />
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Media preview dialog */}
+      <Dialog open={showImageFullscreen} onOpenChange={setShowImageFullscreen}>
+        <DialogContent className="max-w-3xl h-auto max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex justify-between items-center">
+              <span className="truncate">{previewMedia?.name}</span>
+              <div className="flex items-center gap-2">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="sm" onClick={() => downloadMedia(previewMedia!)}>
+                        <Download className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Download</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="sm" onClick={() => setShowImageFullscreen(false)}>
+                        <XIcon className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Close</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex items-center justify-center overflow-auto h-full">
+            {previewMedia?.type === 'image' && (
+              <img 
+                src={previewMedia.url} 
+                alt={previewMedia.name} 
+                className="max-w-full max-h-[60vh] object-contain" 
+              />
+            )}
           </div>
         </DialogContent>
       </Dialog>
