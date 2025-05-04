@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/components/ui/use-toast";
 import { useSettings } from "@/contexts/settings-context";
 import { useLanguage } from "@/contexts/language-context";
-import { Languages } from "@/data/languages";
+import { Languages, getFlagEmoji, getLanguageByCode } from "@/data/languages";
 import { 
   Tabs, 
   TabsContent, 
@@ -26,7 +26,12 @@ import {
   Shield, 
   CreditCard, 
   Watch,
-  HelpCircle
+  HelpCircle,
+  Globe,
+  Lock,
+  BellRing,
+  Gauge,
+  Eye
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +43,7 @@ const Settings = () => {
 
   const [isClearingData, setIsClearingData] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [activeTab, setActiveTab] = useState("appearance");
 
   const {
     theme,
@@ -63,6 +69,8 @@ const Settings = () => {
     addProgrammingLanguage,
     removeProgrammingLanguage
   } = useSettings();
+
+  const currentLanguage = useMemo(() => getLanguageByCode(language), [language]);
 
   const handleClearData = async () => {
     setIsClearingData(true);
@@ -101,12 +109,28 @@ const Settings = () => {
       </div>
       
       <div className="px-4 py-6">
-        <Tabs defaultValue="appearance" className="w-full">
-          <TabsList className="grid grid-cols-4">
-            <TabsTrigger value="appearance">Display</TabsTrigger>
-            <TabsTrigger value="account">Account</TabsTrigger>
-            <TabsTrigger value="developer">Developer</TabsTrigger>
-            <TabsTrigger value="about">About</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-5">
+            <TabsTrigger value="appearance">
+              <Eye className="h-4 w-4 mr-1 md:mr-2" />
+              <span className="hidden md:inline">Display</span>
+            </TabsTrigger>
+            <TabsTrigger value="account">
+              <User className="h-4 w-4 mr-1 md:mr-2" />
+              <span className="hidden md:inline">Account</span>
+            </TabsTrigger>
+            <TabsTrigger value="privacy">
+              <Lock className="h-4 w-4 mr-1 md:mr-2" />
+              <span className="hidden md:inline">Privacy</span>
+            </TabsTrigger>
+            <TabsTrigger value="developer">
+              <Gauge className="h-4 w-4 mr-1 md:mr-2" />
+              <span className="hidden md:inline">Developer</span>
+            </TabsTrigger>
+            <TabsTrigger value="about">
+              <HelpCircle className="h-4 w-4 mr-1 md:mr-2" />
+              <span className="hidden md:inline">About</span>
+            </TabsTrigger>
           </TabsList>
           
           {/* Appearance Tab */}
@@ -119,17 +143,21 @@ const Settings = () => {
                 <div className="flex items-center justify-between">
                   <Label htmlFor="theme">Theme</Label>
                   <Select value={theme} onValueChange={setTheme}>
-                    <SelectTrigger id="theme">
+                    <SelectTrigger id="theme" className="w-[180px]">
                       <SelectValue placeholder="Select theme" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="light">
-                        <Sun className="mr-2 h-4 w-4" />
-                        Light
+                        <div className="flex items-center">
+                          <Sun className="mr-2 h-4 w-4" />
+                          <span>Light</span>
+                        </div>
                       </SelectItem>
                       <SelectItem value="dark">
-                        <Moon className="mr-2 h-4 w-4" />
-                        Dark
+                        <div className="flex items-center">
+                          <Moon className="mr-2 h-4 w-4" />
+                          <span>Dark</span>
+                        </div>
                       </SelectItem>
                       <SelectItem value="system">System</SelectItem>
                     </SelectContent>
@@ -137,15 +165,31 @@ const Settings = () => {
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="language">Language</Label>
+                  <Label htmlFor="language" className="flex items-center">
+                    <Globe className="h-4 w-4 mr-2" />
+                    Language
+                  </Label>
                   <Select value={language} onValueChange={setLanguage}>
-                    <SelectTrigger id="language">
-                      <SelectValue placeholder="Select language" />
+                    <SelectTrigger id="language" className="w-[180px]">
+                      <SelectValue>
+                        <div className="flex items-center">
+                          <span className="mr-2">{getFlagEmoji(currentLanguage.code)}</span>
+                          <span>{currentLanguage.name}</span>
+                        </div>
+                      </SelectValue>
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-[300px]">
                       {Languages.map((lang) => (
                         <SelectItem key={lang.code} value={lang.code}>
-                          {lang.name}
+                          <div className="flex items-center">
+                            <span className="mr-2">{getFlagEmoji(lang.code)}</span>
+                            <span>{lang.name}</span>
+                            {lang.nativeName && lang.nativeName !== lang.name && (
+                              <span className="ml-1 text-xs text-muted-foreground">
+                                ({lang.nativeName})
+                              </span>
+                            )}
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -155,7 +199,7 @@ const Settings = () => {
                 <div className="flex items-center justify-between">
                   <Label htmlFor="unit-system">Unit System</Label>
                   <Select value={unitSystem} onValueChange={setUnitSystem}>
-                    <SelectTrigger id="unit-system">
+                    <SelectTrigger id="unit-system" className="w-[180px]">
                       <SelectValue placeholder="Select unit system" />
                     </SelectTrigger>
                     <SelectContent>
@@ -288,6 +332,18 @@ const Settings = () => {
                     </div>
                     <ChevronRight className="h-4 w-4" />
                   </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-between"
+                    onClick={() => navigate("/notifications")}
+                  >
+                    <div className="flex items-center gap-3">
+                      <BellRing className="h-5 w-5 text-muted-foreground" />
+                      <span>Notifications</span>
+                    </div>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -313,6 +369,82 @@ const Settings = () => {
                   disabled={isLoggingOut}
                 >
                   {isLoggingOut ? "Logging Out..." : "Logout"}
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          {/* Privacy Tab */}
+          <TabsContent value="privacy" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Privacy & Security</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="data-collection" className="block">Data Collection</Label>
+                    <p className="text-xs text-muted-foreground">Allow anonymous usage data collection</p>
+                  </div>
+                  <Switch id="data-collection" defaultChecked />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="biometric-login" className="block">Biometric Login</Label>
+                    <p className="text-xs text-muted-foreground">Use fingerprint or face recognition</p>
+                  </div>
+                  <Switch id="biometric-login" defaultChecked />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="secure-chat" className="block">Enhanced Chat Security</Label>
+                    <p className="text-xs text-muted-foreground">Enable end-to-end encryption for AI chats</p>
+                  </div>
+                  <Switch id="secure-chat" defaultChecked />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="location-tracking" className="block">Location Services</Label>
+                    <p className="text-xs text-muted-foreground">Allow location tracking for workouts</p>
+                  </div>
+                  <Switch id="location-tracking" defaultChecked />
+                </div>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between"
+                  onClick={() => navigate("/privacy")}
+                >
+                  <div className="flex items-center gap-3">
+                    <Lock className="h-5 w-5 text-muted-foreground" />
+                    <span>Advanced Privacy Settings</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Data Access</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => navigate("/export-data")}
+                >
+                  Download My Data
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                >
+                  Request Account Deletion
                 </Button>
               </CardContent>
             </Card>
@@ -383,9 +515,28 @@ const Settings = () => {
                 <CardTitle>About FitFusion</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="text-center py-4">
+                  <div className="bg-primary/10 inline-flex rounded-full p-4 mb-3">
+                    <Dumbbell className="h-8 w-8 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-bold">FitFusion</h3>
+                  <p className="text-sm text-muted-foreground">Version 3.5.2</p>
+                </div>
+                
                 <p>
-                  {t('settings.about.description')}
+                  FitFusion is a comprehensive fitness platform designed to help you track your workouts, monitor your progress, and achieve your fitness goals with personalized guidance.
                 </p>
+                
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium">New in Version 3.5.2:</h4>
+                  <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
+                    <li>Enhanced security features</li>
+                    <li>Improved AI assistant</li>
+                    <li>Added language preferences</li>
+                    <li>New unit system options</li>
+                    <li>Performance improvements</li>
+                  </ul>
+                </div>
                 
                 <div className="space-y-2">
                   <h4 className="text-sm font-medium">Contact Us</h4>

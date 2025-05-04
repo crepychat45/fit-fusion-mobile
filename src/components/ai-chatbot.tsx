@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, Loader2, MessageSquare, Search, Brain, Sparkles, Info, BarChart, Dumbbell, Calendar, Lock, Shield, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/contexts/theme-context";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useSettings } from "@/contexts/settings-context";
 
 interface Message {
   text: string;
@@ -17,6 +19,7 @@ interface Message {
   timestamp: Date;
   isThinking?: boolean;
   isSecure?: boolean;
+  isEncrypted?: boolean;
 }
 
 const initialMessages: Message[] = [
@@ -24,7 +27,8 @@ const initialMessages: Message[] = [
     text: `Hi there, ${userProfile.name}! I'm your FitFusion assistant (v3.5.2). How can I help you today with your fitness journey?`,
     isBot: true,
     timestamp: new Date(),
-    isSecure: true
+    isSecure: true,
+    isEncrypted: true
   }
 ];
 
@@ -62,9 +66,11 @@ export function AIChatbot() {
   const [isTyping, setIsTyping] = useState(false);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [secureMode, setSecureMode] = useState(true);
+  const [encryptionEnabled, setEncryptionEnabled] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { theme } = useTheme();
+  const { language } = useSettings();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -102,7 +108,8 @@ export function AIChatbot() {
     const userMessage: Message = {
       text: input,
       isBot: false,
-      timestamp: new Date()
+      timestamp: new Date(),
+      isEncrypted: encryptionEnabled
     };
     
     setMessages(prev => [...prev, userMessage]);
@@ -115,7 +122,9 @@ export function AIChatbot() {
       text: "",
       isBot: true,
       timestamp: new Date(),
-      isThinking: true
+      isThinking: true,
+      isSecure: secureMode,
+      isEncrypted: encryptionEnabled
     };
     setMessages(prev => [...prev, thinkingMessage]);
     
@@ -151,6 +160,10 @@ export function AIChatbot() {
         responseText = `FitFusion is currently running version 3.5.2, with enhanced security, improved performance, and new features.`;
       } else if (lowercaseInput.includes("subscription") || lowercaseInput.includes("plan") || lowercaseInput.includes("premium")) {
         responseText = `FitFusion offers several subscription plans: Free (limited features), Basic (₹500/month), Super (₹1000/month), and Advance (₹1700/month). Each plan offers different features to support your fitness journey. Check the Subscription page for more details.`;
+      } else if (lowercaseInput.includes("language") || lowercaseInput.includes("languages")) {
+        responseText = `You can change the app language in Settings > Display > Language. We support multiple languages including English, Spanish, French, German, and many more!`;
+      } else if (lowercaseInput.includes("security") || lowercaseInput.includes("secure") || lowercaseInput.includes("encryption")) {
+        responseText = `FitFusion takes your security seriously. All messages in this chat are end-to-end encrypted, and we use industry-standard encryption for all your personal data. You can manage security settings in Settings > Privacy & Security.`;
       }
       
       // Message received sound
@@ -162,7 +175,8 @@ export function AIChatbot() {
         text: responseText,
         isBot: true,
         timestamp: new Date(),
-        isSecure
+        isSecure,
+        isEncrypted: encryptionEnabled
       };
       
       setIsTyping(false);
@@ -199,14 +213,32 @@ export function AIChatbot() {
     // Add system message about secure mode change
     const modeMessage: Message = {
       text: secureMode 
-        ? "Secure mode disabled. Messages are not end-to-end encrypted."
-        : "Secure mode enabled. Messages are end-to-end encrypted.",
+        ? "Secure mode disabled. Messages are not protected."
+        : "Secure mode enabled. Messages are protected.",
       isBot: true,
       timestamp: new Date(),
-      isSecure: !secureMode
+      isSecure: !secureMode,
+      isEncrypted: encryptionEnabled
     };
     
     setMessages(prev => [...prev, modeMessage]);
+  };
+
+  const toggleEncryption = () => {
+    setEncryptionEnabled(!encryptionEnabled);
+    
+    // Add system message about encryption change
+    const encryptionMessage: Message = {
+      text: encryptionEnabled 
+        ? "End-to-end encryption disabled. Your messages are not encrypted."
+        : "End-to-end encryption enabled. Your messages are now encrypted.",
+      isBot: true,
+      timestamp: new Date(),
+      isSecure: secureMode,
+      isEncrypted: !encryptionEnabled
+    };
+    
+    setMessages(prev => [...prev, encryptionMessage]);
   };
 
   // New feature - Quick action buttons
@@ -229,27 +261,51 @@ export function AIChatbot() {
             <p className="text-xs text-muted-foreground">v3.5.2</p>
           </div>
         </div>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 w-8 p-0" 
-                onClick={toggleSecureMode}
-              >
-                {secureMode ? (
-                  <Lock className="h-4 w-4 text-green-500" />
-                ) : (
-                  <Lock className="h-4 w-4 text-muted-foreground" />
-                )}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{secureMode ? "Secure mode active" : "Secure mode inactive"}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <div className="flex items-center">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0 mx-1" 
+                  onClick={toggleEncryption}
+                >
+                  {encryptionEnabled ? (
+                    <Shield className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <Shield className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{encryptionEnabled ? "End-to-end encryption active" : "End-to-end encryption inactive"}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0" 
+                  onClick={toggleSecureMode}
+                >
+                  {secureMode ? (
+                    <Lock className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <Lock className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{secureMode ? "Secure mode active" : "Secure mode inactive"}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       </CardHeader>
       
       <CardContent className="p-4 flex-1 overflow-hidden">
@@ -297,11 +353,14 @@ export function AIChatbot() {
                           </div>
                           <span className="text-xs">{msg.isBot ? 'Assistant' : 'You'}</span>
                         </div>
-                        {msg.isBot && msg.isSecure !== undefined && (
-                          <div className="ml-2">
-                            {msg.isSecure ? (
+                        {msg.isBot && (
+                          <div className="flex space-x-1 ml-2">
+                            {msg.isSecure && (
                               <Lock className="h-3 w-3 text-green-500" />
-                            ) : null}
+                            )}
+                            {msg.isEncrypted && (
+                              <Shield className="h-3 w-3 text-green-500" />
+                            )}
                           </div>
                         )}
                       </div>
