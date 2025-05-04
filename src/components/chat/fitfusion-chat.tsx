@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { 
   Card, 
@@ -13,7 +12,7 @@ import { ChatList } from "./chat-list";
 import { ChatMessage } from "./chat-message";
 import { ChatInput } from "./chat-input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Chat, MessageSquare, Search, Settings, Users } from "lucide-react";
+import { MessageCircle, MessageSquare, Search, Settings, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { userProfile } from "@/data/user";
@@ -88,7 +87,8 @@ const generateMockConversations = (): ChatConversation[] => {
         {
           id: currentUserId,
           name: userProfile.name,
-          avatar: userProfile.avatar
+          // Fix: Create a placeholder avatar for the current user
+          avatar: "/placeholder.svg"
         },
         user
       ],
@@ -308,7 +308,7 @@ export function FitfusionChat() {
             <div className="p-2 border-b">
               <TabsList className="w-full grid grid-cols-2">
                 <TabsTrigger value="chats">
-                  <Chat className="h-4 w-4 mr-2" />
+                  <MessageCircle className="h-4 w-4 mr-2" />
                   Chats
                 </TabsTrigger>
                 <TabsTrigger value="contacts">
@@ -421,7 +421,7 @@ export function FitfusionChat() {
                     className="md:hidden mr-2"
                     onClick={() => setSelectedConversationId(undefined)}
                   >
-                    <Chat className="h-4 w-4" />
+                    <MessageCircle className="h-4 w-4" />
                   </Button>
                   <Avatar className="h-8 w-8 mr-2 relative">
                     <AvatarImage src={otherParticipant.avatar} alt={otherParticipant.name} />

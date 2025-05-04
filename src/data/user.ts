@@ -6,6 +6,7 @@ export interface UserProfile {
   level: string;
   lastWorkout: string;
   isPro: boolean;
+  avatar?: string; // Added avatar property as optional
   stats: {
     workoutsCompleted: number;
     streakDays: number;
@@ -53,6 +54,7 @@ export const userProfile: UserProfile = {
   level: "Intermediate",
   lastWorkout: "Upper Body",
   isPro: true,
+  avatar: "/placeholder.svg", // Added default avatar
   stats: {
     workoutsCompleted: 27,
     streakDays: 5,
