@@ -31,7 +31,8 @@ import {
   Lock,
   BellRing,
   Gauge,
-  Eye
+  Eye,
+  Dumbbell
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
