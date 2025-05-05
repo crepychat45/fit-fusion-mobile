@@ -30,7 +30,9 @@ import {
   ArrowLeft,
   Key,
   Fingerprint,
-  ShieldCheck
+  ShieldCheck,
+  Maximize,
+  Minimize
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -172,8 +174,21 @@ export function FitfusionChat() {
   const [dataRetentionPeriod, setDataRetentionPeriod] = useState("30 days");
   const [showBiometricPrompt, setShowBiometricPrompt] = useState(false);
   const [awaitingBiometricVerification, setAwaitingBiometricVerification] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
   
   const currentUserId = "current";
+  
+  // Enter fullscreen mode
+  const enterFullScreen = () => {
+    setIsFullScreen(true);
+    document.documentElement.style.overflow = 'hidden';
+  };
+
+  // Exit fullscreen mode
+  const exitFullScreen = () => {
+    setIsFullScreen(false);
+    document.documentElement.style.overflow = '';
+  };
   
   // Scroll to bottom when new messages arrive
   useEffect(() => {
@@ -622,25 +637,44 @@ export function FitfusionChat() {
     );
   }
 
+  const chatContainerClasses = cn(
+    isFullScreen 
+      ? "fixed inset-0 z-50 bg-background flex flex-col" 
+      : "w-full max-w-4xl mx-auto shadow-lg overflow-hidden",
+    "h-[600px]"
+  );
+
   return (
-    <Card className="w-full max-w-4xl mx-auto shadow-lg overflow-hidden h-[600px]">
+    <Card className={chatContainerClasses}>
       <CardHeader className="p-4 border-b">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="mr-2" 
-              onClick={() => navigate(-1)}
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
+            {!isFullScreen && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="mr-2" 
+                onClick={() => navigate(-1)}
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            )}
             <div>
               <CardTitle>FitFusion Chat</CardTitle>
               <p className="text-xs text-muted-foreground">Connect with fitness friends securely</p>
             </div>
           </div>
           <div className="flex gap-2">
+            {/* Fullscreen toggle button */}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={isFullScreen ? exitFullScreen : enterFullScreen}
+              title={isFullScreen ? "Exit fullscreen" : "Enter fullscreen"}
+            >
+              {isFullScreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+            </Button>
+            
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="ghost" size="icon">
@@ -919,13 +953,24 @@ export function FitfusionChat() {
                     </Button>
                   </div>
                 </div>
+                
+                {isFullScreen && (
+                  <SheetFooter className="mt-6">
+                    <Button onClick={exitFullScreen} variant="outline">
+                      <Minimize className="mr-2 h-4 w-4" /> Exit Fullscreen
+                    </Button>
+                  </SheetFooter>
+                )}
               </SheetContent>
             </Sheet>
           </div>
         </div>
       </CardHeader>
       
-      <div className="grid md:grid-cols-3 h-[536px]">
+      <div className={cn(
+        "grid md:grid-cols-3",
+        isFullScreen ? "flex-1" : "h-[536px]"
+      )}>
         <div className={cn(
           "border-r",
           selectedConversationId ? "hidden md:block" : "block"
@@ -966,7 +1011,7 @@ export function FitfusionChat() {
             </TabsContent>
             
             <TabsContent value="contacts" className="m-0">
-              <ScrollArea className="h-[408px]">
+              <ScrollArea className={cn("h-[408px]", isFullScreen && "h-[calc(100vh-200px)]")}>
                 <div className="p-4 space-y-4">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="text-sm font-medium">Your Contacts</h3>
@@ -1126,7 +1171,10 @@ export function FitfusionChat() {
                 </div>
               </div>
               
-              <div className="flex-1 overflow-hidden">
+              <div className={cn(
+                "flex-1 overflow-hidden",
+                isFullScreen ? "h-[calc(100vh-230px)]" : ""
+              )}>
                 <ScrollArea 
                   className="h-full p-4" 
                   ref={messagesContainerRef}
@@ -1142,8 +1190,12 @@ export function FitfusionChat() {
                           key={message.id}
                           message={message}
                           isCurrentUser={message.senderId === currentUserId}
-                          senderAvatar={otherParticipant.avatar}
-                          senderName={otherParticipant.name}
+                          senderAvatar={message.senderId === currentUserId 
+                            ? userProfile.avatar || "/placeholder.svg"
+                            : otherParticipant.avatar}
+                          senderName={message.senderId === currentUserId 
+                            ? userProfile.name 
+                            : otherParticipant.name}
                         />
                       ))
                     )}
@@ -1240,3 +1292,4 @@ export function FitfusionChat() {
     </Card>
   );
 }
+

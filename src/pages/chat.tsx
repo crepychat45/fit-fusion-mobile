@@ -57,37 +57,28 @@ const ChatPage = () => {
 
   return (
     <div className="min-h-screen bg-background pb-16">
-      <div className="fitness-gradient pt-12 pb-6 px-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="mr-2 text-white" 
-              onClick={() => navigate(-1)}
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <h1 className="text-xl font-bold text-white">FitFusion Chat</h1>
-              <p className="text-white/80 text-sm">Connect with fitness friends securely</p>
+      {!isAuthenticated && (
+        <div className="fitness-gradient pt-12 pb-6 px-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="mr-2 text-white" 
+                onClick={() => navigate(-1)}
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div>
+                <h1 className="text-xl font-bold text-white">FitFusion Chat</h1>
+                <p className="text-white/80 text-sm">Connect with fitness friends securely</p>
+              </div>
             </div>
           </div>
-          
-          {isAuthenticated && (
-            <div className="flex items-center space-x-2">
-              <div className="bg-white/10 rounded-full p-1">
-                <KeyRound className="h-4 w-4 text-white" />
-              </div>
-              <div className="bg-white/10 rounded-full p-1">
-                <ShieldCheck className="h-4 w-4 text-white" />
-              </div>
-            </div>
-          )}
         </div>
-      </div>
+      )}
       
-      <div className="px-4 mt-6 pb-20">
+      <div className={`px-4 ${isAuthenticated ? 'pt-4' : 'mt-6'} pb-20`}>
         {isAuthenticated ? (
           <FitfusionChat />
         ) : (
