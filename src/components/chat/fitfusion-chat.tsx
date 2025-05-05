@@ -60,6 +60,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { useNavigate } from "react-router-dom";
 
 // Mock data for chat
 const mockUsers: ChatUser[] = [
@@ -148,6 +149,7 @@ export function FitfusionChat() {
   const [isSending, setIsSending] = useState(false);
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
   const [privacyEnabled, setPrivacyEnabled] = useState(true);
   const [encryptedChat, setEncryptedChat] = useState(true);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -393,8 +395,18 @@ export function FitfusionChat() {
       <CardHeader className="p-4 border-b">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <MessageSquare className="mr-2 h-5 w-5" />
-            <CardTitle>FitFusion Chat</CardTitle>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="mr-2" 
+              onClick={() => navigate(-1)}
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <CardTitle>FitFusion Chat</CardTitle>
+              <p className="text-xs text-muted-foreground">Connect with your fitness community</p>
+            </div>
           </div>
           <div className="flex gap-2">
             <Popover>
@@ -740,7 +752,7 @@ export function FitfusionChat() {
                           : otherParticipant.status === 'away'
                             ? 'Away'
                             : otherParticipant.lastSeen 
-                              ? `Last seen ${new Date(otherParticipant.lastSeen).toLocaleString()}`
+                              ? `Last seen ${new Date(otherParticipant.lastSeen).toLocaleDateString()} at ${new Date(otherParticipant.lastSeen).toLocaleTimeString()}`
                               : 'Offline'
                         }
                       </p>
@@ -804,7 +816,7 @@ export function FitfusionChat() {
                 </div>
               </ScrollArea>
               
-              <CardFooter className="p-0">
+              <CardFooter className="p-0 border-t">
                 <ChatInput 
                   onSendMessage={handleSendMessage} 
                   isLoading={isSending} 

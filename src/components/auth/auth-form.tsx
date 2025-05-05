@@ -9,7 +9,11 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Eye, EyeOff, ArrowRight, Mail, Lock, UserPlus, LogIn } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
-export function AuthForm() {
+interface AuthFormProps {
+  onSuccess?: () => void;
+}
+
+export function AuthForm({ onSuccess }: AuthFormProps) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -34,6 +38,11 @@ export function AuthForm() {
           ? "Your account has been created successfully." 
           : "You have been logged in successfully.",
       });
+      
+      // Call onSuccess callback if provided
+      if (onSuccess) {
+        onSuccess();
+      }
     }, 1500);
   };
   
