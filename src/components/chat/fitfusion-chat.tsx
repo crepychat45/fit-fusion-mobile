@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { 
   Card, 
@@ -149,19 +150,22 @@ export function FitfusionChat() {
   const [isSending, setIsSending] = useState(false);
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const [privacyEnabled, setPrivacyEnabled] = useState(true);
   const [encryptedChat, setEncryptedChat] = useState(true);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
   const [chatBackupEnabled, setChatBackupEnabled] = useState(true);
+  const [biometricLockEnabled, setBiometricLockEnabled] = useState(false);
+  const [dataRetentionPeriod, setDataRetentionPeriod] = useState("30 days");
   
   const currentUserId = "current";
   
   // Scroll to bottom when new messages arrive
   useEffect(() => {
-    if (autoScrollEnabled) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (autoScrollEnabled && messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, autoScrollEnabled]);
   
@@ -229,6 +233,13 @@ export function FitfusionChat() {
         // Sort messages by timestamp
         mockMessages.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
         setMessages(mockMessages);
+        
+        // Ensure scroll to bottom after messages load
+        setTimeout(() => {
+          if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+          }
+        }, 100);
       }
     } else {
       setMessages([]);
@@ -302,6 +313,13 @@ export function FitfusionChat() {
         
         setIsSending(false);
         
+        // Ensure scroll to bottom after sending
+        setTimeout(() => {
+          if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+          }
+        }, 100);
+        
         // Simulate reply after 1-3 seconds
         setTimeout(() => {
           const replyMessage: ChatMessageType = {
@@ -331,6 +349,13 @@ export function FitfusionChat() {
                 : c
             ).sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
           );
+          
+          // Ensure scroll to bottom after reply
+          setTimeout(() => {
+            if (messagesEndRef.current) {
+              messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+            }
+          }, 100);
         }, Math.random() * 2000 + 1000);
       }
     }, 500);
@@ -366,6 +391,14 @@ export function FitfusionChat() {
     setNotificationsEnabled(!notificationsEnabled);
     toast({
       description: !notificationsEnabled ? "Chat notifications enabled" : "Chat notifications disabled",
+    });
+  };
+
+  // Function to toggle biometric lock
+  const toggleBiometricLock = () => {
+    setBiometricLockEnabled(!biometricLockEnabled);
+    toast({
+      description: !biometricLockEnabled ? "Biometric lock enabled" : "Biometric lock disabled",
     });
   };
 
@@ -444,6 +477,19 @@ export function FitfusionChat() {
                       {encryptedChat ? "Enabled" : "Disabled"}
                     </Button>
                   </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">Biometric Lock</p>
+                      <p className="text-xs text-muted-foreground">Require authentication to access</p>
+                    </div>
+                    <Button 
+                      variant={biometricLockEnabled ? "default" : "outline"}
+                      size="sm"
+                      onClick={toggleBiometricLock}
+                    >
+                      {biometricLockEnabled ? "Enabled" : "Disabled"}
+                    </Button>
+                  </div>
                   <div className="rounded-md bg-muted p-3">
                     <div className="flex items-center gap-2">
                       <Lock className="h-4 w-4 text-green-500" />
@@ -466,7 +512,7 @@ export function FitfusionChat() {
                     Configure your FitFusion chat experience
                   </SheetDescription>
                 </SheetHeader>
-                <div className="space-y-6 py-4">
+                <div className="space-y-6 py-4 overflow-y-auto max-h-[calc(100vh-150px)]">
                   <div className="space-y-4">
                     <h4 className="text-sm font-medium">Notifications</h4>
                     <div className="flex items-center justify-between">
@@ -512,6 +558,37 @@ export function FitfusionChat() {
                         onCheckedChange={toggleEncryption}
                       />
                     </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col space-y-1">
+                        <Label htmlFor="biometric">Biometric Lock</Label>
+                        <span className="text-xs text-muted-foreground">
+                          Require biometric authentication
+                        </span>
+                      </div>
+                      <Switch 
+                        id="biometric" 
+                        checked={biometricLockEnabled}
+                        onCheckedChange={toggleBiometricLock}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="data-retention">Data Retention</Label>
+                      <select
+                        id="data-retention"
+                        className="w-full rounded-md border border-input bg-background px-3 py-2"
+                        value={dataRetentionPeriod}
+                        onChange={(e) => setDataRetentionPeriod(e.target.value)}
+                      >
+                        <option value="7 days">7 days</option>
+                        <option value="30 days">30 days</option>
+                        <option value="90 days">90 days</option>
+                        <option value="1 year">1 year</option>
+                        <option value="forever">Keep forever</option>
+                      </select>
+                      <p className="text-xs text-muted-foreground">
+                        Messages older than this will be automatically deleted
+                      </p>
+                    </div>
                   </div>
                   <Separator />
                   <div className="space-y-4">
@@ -541,6 +618,29 @@ export function FitfusionChat() {
                         checked={chatBackupEnabled}
                         onCheckedChange={setChatBackupEnabled}
                       />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="theme">Chat Theme</Label>
+                      <select
+                        id="theme"
+                        className="w-full rounded-md border border-input bg-background px-3 py-2"
+                      >
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                        <option value="system">System Default</option>
+                        <option value="fitness">Fitness Theme</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="font-size">Font Size</Label>
+                      <select
+                        id="font-size"
+                        className="w-full rounded-md border border-input bg-background px-3 py-2"
+                      >
+                        <option value="small">Small</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="large">Large</option>
+                      </select>
                     </div>
                   </div>
                   <Separator />
@@ -801,20 +901,31 @@ export function FitfusionChat() {
                 </div>
               </div>
               
-              <ScrollArea className="flex-1 p-4">
-                <div className="space-y-4">
-                  {messages.map((message) => (
-                    <ChatMessage
-                      key={message.id}
-                      message={message}
-                      isCurrentUser={message.senderId === currentUserId}
-                      senderAvatar={otherParticipant.avatar}
-                      senderName={otherParticipant.name}
-                    />
-                  ))}
-                  <div ref={messagesEndRef} />
-                </div>
-              </ScrollArea>
+              <div className="flex-1 overflow-hidden">
+                <ScrollArea 
+                  className="h-full p-4" 
+                  ref={messagesContainerRef}
+                >
+                  <div className="space-y-4">
+                    {messages.length === 0 ? (
+                      <div className="flex justify-center items-center h-32 text-muted-foreground">
+                        No messages yet. Start the conversation!
+                      </div>
+                    ) : (
+                      messages.map((message) => (
+                        <ChatMessage
+                          key={message.id}
+                          message={message}
+                          isCurrentUser={message.senderId === currentUserId}
+                          senderAvatar={otherParticipant.avatar}
+                          senderName={otherParticipant.name}
+                        />
+                      ))
+                    )}
+                    <div ref={messagesEndRef} />
+                  </div>
+                </ScrollArea>
+              </div>
               
               <CardFooter className="p-0 border-t">
                 <ChatInput 
