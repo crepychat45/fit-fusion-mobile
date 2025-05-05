@@ -3,10 +3,12 @@ import React, { useEffect, useState } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { FitfusionChat } from "@/components/chat/fitfusion-chat";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Key, KeyRound, ShieldCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AuthForm } from "@/components/auth/auth-form";
 import { useToast } from "@/components/ui/use-toast";
+import { Separator } from "@/components/ui/separator";
+import { userProfile } from "@/data/user";
 
 const ChatPage = () => {
   const navigate = useNavigate();
@@ -56,19 +58,32 @@ const ChatPage = () => {
   return (
     <div className="min-h-screen bg-background pb-16">
       <div className="fitness-gradient pt-12 pb-6 px-4">
-        <div className="flex items-center">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="mr-2 text-white" 
-            onClick={() => navigate(-1)}
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-xl font-bold text-white">FitFusion Chat</h1>
-            <p className="text-white/80 text-sm">Connect with fitness friends securely</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="mr-2 text-white" 
+              onClick={() => navigate(-1)}
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-xl font-bold text-white">FitFusion Chat</h1>
+              <p className="text-white/80 text-sm">Connect with fitness friends securely</p>
+            </div>
           </div>
+          
+          {isAuthenticated && (
+            <div className="flex items-center space-x-2">
+              <div className="bg-white/10 rounded-full p-1">
+                <KeyRound className="h-4 w-4 text-white" />
+              </div>
+              <div className="bg-white/10 rounded-full p-1">
+                <ShieldCheck className="h-4 w-4 text-white" />
+              </div>
+            </div>
+          )}
         </div>
       </div>
       
@@ -83,6 +98,35 @@ const ChatPage = () => {
                 Connect with trainers and friends to discuss your fitness journey
               </p>
             </div>
+            
+            <div className="mb-6 bg-muted/30 p-4 rounded-lg border border-muted">
+              <div className="flex items-center mb-2">
+                <ShieldCheck className="h-5 w-5 text-primary mr-2" />
+                <h3 className="font-medium">Security Features</h3>
+              </div>
+              <Separator className="my-2" />
+              <div className="text-sm space-y-2">
+                <p className="flex items-center">
+                  <span className="bg-primary/10 p-1 rounded mr-2">
+                    <KeyRound className="h-3 w-3 text-primary" />
+                  </span>
+                  End-to-end encryption
+                </p>
+                <p className="flex items-center">
+                  <span className="bg-primary/10 p-1 rounded mr-2">
+                    <Key className="h-3 w-3 text-primary" />
+                  </span>
+                  Biometric & PIN protection
+                </p>
+                <p className="flex items-center">
+                  <span className="bg-primary/10 p-1 rounded mr-2">
+                    <ShieldCheck className="h-3 w-3 text-primary" />
+                  </span>
+                  Privacy controls
+                </p>
+              </div>
+            </div>
+            
             <AuthForm onSuccess={handleLogin} />
           </div>
         )}

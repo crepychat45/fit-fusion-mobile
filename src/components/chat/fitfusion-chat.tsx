@@ -27,7 +27,10 @@ import {
   UserPlus,
   Smartphone,
   LogOut,
-  ArrowLeft
+  ArrowLeft,
+  Key,
+  Fingerprint,
+  ShieldCheck
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -48,6 +51,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
+  SheetFooter,
 } from "@/components/ui/sheet";
 import {
   Dialog,
@@ -158,7 +162,16 @@ export function FitfusionChat() {
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
   const [chatBackupEnabled, setChatBackupEnabled] = useState(true);
   const [biometricLockEnabled, setBiometricLockEnabled] = useState(false);
+  const [pinLockEnabled, setPinLockEnabled] = useState(false);
+  const [pin, setPin] = useState<string>("");
+  const [pinConfirm, setPinConfirm] = useState<string>("");
+  const [showPinDialog, setShowPinDialog] = useState(false);
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [isPinLocked, setIsPinLocked] = useState(false);
+  const [enteredPin, setEnteredPin] = useState<string>("");
   const [dataRetentionPeriod, setDataRetentionPeriod] = useState("30 days");
+  const [showBiometricPrompt, setShowBiometricPrompt] = useState(false);
+  const [awaitingBiometricVerification, setAwaitingBiometricVerification] = useState(false);
   
   const currentUserId = "current";
   
@@ -396,10 +409,77 @@ export function FitfusionChat() {
 
   // Function to toggle biometric lock
   const toggleBiometricLock = () => {
-    setBiometricLockEnabled(!biometricLockEnabled);
+    if (biometricLockEnabled) {
+      setBiometricLockEnabled(false);
+      toast({
+        description: "Biometric lock disabled",
+      });
+    } else {
+      // Simulate biometric verification
+      setShowBiometricPrompt(true);
+      setAwaitingBiometricVerification(true);
+      
+      // Simulate successful verification after 2 seconds
+      setTimeout(() => {
+        setBiometricLockEnabled(true);
+        setShowBiometricPrompt(false);
+        setAwaitingBiometricVerification(false);
+        toast({
+          description: "Biometric lock enabled successfully",
+        });
+      }, 2000);
+    }
+  };
+  
+  // Function to set PIN
+  const handleSetPin = () => {
+    if (pin.length < 4) {
+      setPinError("PIN must be at least 4 digits");
+      return;
+    }
+    
+    if (pin !== pinConfirm) {
+      setPinError("PINs do not match");
+      return;
+    }
+    
+    setPinLockEnabled(true);
+    setShowPinDialog(false);
+    setPinError(null);
     toast({
-      description: !biometricLockEnabled ? "Biometric lock enabled" : "Biometric lock disabled",
+      description: "PIN lock enabled successfully",
     });
+  };
+  
+  // Function to verify PIN
+  const verifyPin = () => {
+    if (enteredPin === pin) {
+      setIsPinLocked(false);
+      setEnteredPin("");
+      toast({
+        description: "PIN verified successfully",
+      });
+    } else {
+      toast({
+        description: "Incorrect PIN. Please try again.",
+        variant: "destructive",
+      });
+      setEnteredPin("");
+    }
+  };
+  
+  // Toggle PIN lock
+  const togglePinLock = () => {
+    if (pinLockEnabled) {
+      setPinLockEnabled(false);
+      setPin("");
+      setPinConfirm("");
+      toast({
+        description: "PIN lock disabled",
+      });
+    } else {
+      setShowPinDialog(true);
+    }
   };
 
   // Function to clear chat history
@@ -429,9 +509,121 @@ export function FitfusionChat() {
       setSelectedConversationId(conversations[0].id);
     }
   }, [conversations, selectedConversationId]);
+  
+  // If PIN lock is enabled and locked, show PIN verification dialog
+  if (pinLockEnabled && isPinLocked) {
+    return (
+      <div className="min-h-[500px] flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle>Enter PIN</CardTitle>
+            <p className="text-muted-foreground">Enter your PIN to unlock the chat</p>
+          </CardHeader>
+          <CardContent>
+            <div className="flex justify-center mb-4">
+              <div className="flex gap-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div 
+                    key={i} 
+                    className={`w-12 h-12 border-2 rounded-md flex items-center justify-center text-xl font-bold ${
+                      enteredPin.length > i ? "border-primary bg-primary/10" : "border-gray-300"
+                    }`}
+                  >
+                    {enteredPin.length > i ? "•" : ""}
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-3 gap-2">
+              {Array.from({ length: 9 }).map((_, i) => (
+                <Button
+                  key={i}
+                  variant="outline"
+                  className="h-14 text-xl font-semibold"
+                  onClick={() => {
+                    if (enteredPin.length < 4) {
+                      setEnteredPin(prev => prev + (i + 1));
+                    }
+                  }}
+                >
+                  {i + 1}
+                </Button>
+              ))}
+              <Button
+                variant="outline"
+                className="h-14 text-xl font-semibold"
+                onClick={() => {
+                  setEnteredPin(prev => prev.slice(0, -1));
+                }}
+              >
+                ←
+              </Button>
+              <Button
+                variant="outline"
+                className="h-14 text-xl font-semibold"
+                onClick={() => {
+                  if (enteredPin.length < 4) {
+                    setEnteredPin(prev => prev + "0");
+                  }
+                }}
+              >
+                0
+              </Button>
+              <Button
+                variant="default"
+                className="h-14"
+                onClick={verifyPin}
+                disabled={enteredPin.length !== 4}
+              >
+                Verify
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+  
+  // If biometric prompt is shown
+  if (showBiometricPrompt) {
+    return (
+      <div className="min-h-[500px] flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle>Biometric Verification</CardTitle>
+            <p className="text-muted-foreground">
+              {awaitingBiometricVerification 
+                ? "Scanning fingerprint..." 
+                : "Use your fingerprint to enable biometric lock"}
+            </p>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center">
+            <div className="mb-6">
+              <Fingerprint className="h-20 w-20 text-primary animate-pulse" />
+            </div>
+            
+            {awaitingBiometricVerification && (
+              <div className="h-2 w-full bg-muted overflow-hidden rounded-full">
+                <div className="h-full bg-primary animate-progress"></div>
+              </div>
+            )}
+            
+            <Button 
+              variant="outline" 
+              className="mt-6"
+              onClick={() => setShowBiometricPrompt(false)}
+            >
+              Cancel
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <Card className="w-full max-w-3xl mx-auto shadow-lg overflow-hidden">
+    <Card className="w-full max-w-4xl mx-auto shadow-lg overflow-hidden h-[600px]">
       <CardHeader className="p-4 border-b">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
@@ -445,7 +637,7 @@ export function FitfusionChat() {
             </Button>
             <div>
               <CardTitle>FitFusion Chat</CardTitle>
-              <p className="text-xs text-muted-foreground">Connect with your fitness community</p>
+              <p className="text-xs text-muted-foreground">Connect with fitness friends securely</p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -495,6 +687,19 @@ export function FitfusionChat() {
                       onClick={toggleBiometricLock}
                     >
                       {biometricLockEnabled ? "Enabled" : "Disabled"}
+                    </Button>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">PIN Lock</p>
+                      <p className="text-xs text-muted-foreground">Protect with PIN code</p>
+                    </div>
+                    <Button 
+                      variant={pinLockEnabled ? "default" : "outline"}
+                      size="sm"
+                      onClick={togglePinLock}
+                    >
+                      {pinLockEnabled ? "Enabled" : "Disabled"}
                     </Button>
                   </div>
                   <div className="rounded-md bg-muted p-3">
@@ -576,6 +781,19 @@ export function FitfusionChat() {
                         id="biometric" 
                         checked={biometricLockEnabled}
                         onCheckedChange={toggleBiometricLock}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col space-y-1">
+                        <Label htmlFor="pin-lock">PIN Lock</Label>
+                        <span className="text-xs text-muted-foreground">
+                          Protect chat with PIN code
+                        </span>
+                      </div>
+                      <Switch 
+                        id="pin-lock" 
+                        checked={pinLockEnabled}
+                        onCheckedChange={togglePinLock}
                       />
                     </div>
                     <div className="space-y-2">
@@ -707,7 +925,7 @@ export function FitfusionChat() {
         </div>
       </CardHeader>
       
-      <div className="grid md:grid-cols-3 h-[500px]">
+      <div className="grid md:grid-cols-3 h-[536px]">
         <div className={cn(
           "border-r",
           selectedConversationId ? "hidden md:block" : "block"
@@ -748,7 +966,7 @@ export function FitfusionChat() {
             </TabsContent>
             
             <TabsContent value="contacts" className="m-0">
-              <ScrollArea className="h-[372px]">
+              <ScrollArea className="h-[408px]">
                 <div className="p-4 space-y-4">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="text-sm font-medium">Your Contacts</h3>
@@ -842,7 +1060,7 @@ export function FitfusionChat() {
                   >
                     <ArrowLeft className="h-4 w-4" />
                   </Button>
-                  <Avatar className="h-8 w-8 mr-2 relative">
+                  <Avatar className="h-10 w-10 mr-3 relative">
                     <AvatarImage src={otherParticipant.avatar} alt={otherParticipant.name} />
                     <AvatarFallback>{otherParticipant.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                     
@@ -851,7 +1069,7 @@ export function FitfusionChat() {
                     )}
                   </Avatar>
                   <div>
-                    <h3 className="font-medium">{otherParticipant.name}</h3>
+                    <h3 className="font-medium text-base">{otherParticipant.name}</h3>
                     <div className="flex items-center gap-1">
                       <p className="text-xs text-muted-foreground">
                         {otherParticipant.status === 'online' 
@@ -966,6 +1184,59 @@ export function FitfusionChat() {
           )}
         </div>
       </div>
+      
+      {/* PIN setup dialog */}
+      <Dialog open={showPinDialog} onOpenChange={setShowPinDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Set PIN Lock</DialogTitle>
+            <DialogDescription>
+              Create a PIN to secure your chats
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="pin">Enter PIN (minimum 4 digits)</Label>
+              <Input
+                id="pin"
+                type="password"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={pin}
+                onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                maxLength={8}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="pin-confirm">Confirm PIN</Label>
+              <Input
+                id="pin-confirm"
+                type="password"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={pinConfirm}
+                onChange={(e) => setPinConfirm(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                maxLength={8}
+              />
+            </div>
+            
+            {pinError && (
+              <p className="text-sm text-destructive">{pinError}</p>
+            )}
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPinDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSetPin}>
+              Set PIN
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
