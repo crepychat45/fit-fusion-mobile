@@ -423,6 +423,13 @@ export function FitfusionChat() {
     });
   };
 
+  // Select a default conversation if none is selected
+  useEffect(() => {
+    if (!selectedConversationId && conversations.length > 0) {
+      setSelectedConversationId(conversations[0].id);
+    }
+  }, [conversations, selectedConversationId]);
+
   return (
     <Card className="w-full max-w-3xl mx-auto shadow-lg overflow-hidden">
       <CardHeader className="p-4 border-b">

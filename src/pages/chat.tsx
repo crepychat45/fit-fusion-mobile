@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { FitfusionChat } from "@/components/chat/fitfusion-chat";
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,8 @@ const ChatPage = () => {
   const { toast } = useToast();
   
   // Simulate authentication state
-  const [isAuthenticated, setIsAuthenticated] = React.useState<boolean>(false);
-  const [isLoading, setIsLoading] = React.useState<boolean>(true);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   
   // Check authentication status on mount
   useEffect(() => {
