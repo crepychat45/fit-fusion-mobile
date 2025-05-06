@@ -65,7 +65,7 @@ const ChatPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       {!isAuthenticated && (
         <div className="fitness-gradient pt-12 pb-6 px-4">
           <div className="flex items-center justify-between">
@@ -87,13 +87,13 @@ const ChatPage = () => {
         </div>
       )}
       
-      <div className={`px-4 ${isAuthenticated ? 'pt-4' : 'mt-6'} pb-20`}>
+      <div className={`flex-1 flex flex-col ${isAuthenticated ? '' : 'mt-6'} pb-20`}>
         {isAuthenticated ? (
-          <div className="w-full h-[calc(100vh-155px)]">
+          <div className="w-full h-full flex-1">
             <FitfusionChat onLogout={handleLogout} />
           </div>
         ) : (
-          <div className="max-w-md mx-auto">
+          <div className="max-w-md mx-auto px-4">
             <div className="mb-6 text-center">
               <h2 className="text-2xl font-bold mb-2">Sign in to FitFusion Chat</h2>
               <p className="text-muted-foreground">

@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger, SheetFooter } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -142,6 +142,7 @@ export function FitfusionChat({
       });
     }
   }, [messages, autoScrollEnabled]);
+  
   useEffect(() => {
     if (selectedConversationId) {
       // In a real app, we would fetch messages from an API
@@ -209,6 +210,7 @@ export function FitfusionChat({
       setMessages([]);
     }
   }, [selectedConversationId]);
+  
   const handleSendMessage = (content: string, attachmentFiles: File[]) => {
     if (!selectedConversationId || !content.trim() && attachmentFiles.length === 0) return;
     setIsSending(true);
@@ -301,11 +303,13 @@ export function FitfusionChat({
       }
     }, 500);
   };
+  
   const filteredConversations = conversations.filter(conversation => {
     if (!searchQuery) return true;
     const otherParticipant = conversation.participants.find(p => p.id !== currentUserId);
     return otherParticipant?.name.toLowerCase().includes(searchQuery.toLowerCase());
   });
+  
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
   const otherParticipant = selectedConversation?.participants.find(p => p.id !== currentUserId);
 
@@ -808,10 +812,11 @@ export function FitfusionChat({
       </CardHeader>
       
       <div className={cn(
-        "grid md:grid-cols-3 relative", 
-        isFullScreen ? "flex-1" : "h-[calc(100vh-230px)]"
+        "grid grid-cols-1 md:grid-cols-3 h-full flex-1 relative", 
+        isFullScreen ? "flex-grow" : ""
       )}>
-        <div className="border-r">
+        {/* Chat Sidebar - People List */}
+        <div className="border-r md:block" style={{ height: isFullScreen ? 'calc(100vh - 73px)' : 'calc(100vh - 200px)' }}>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <div className="p-2 border-b">
               <TabsList className="w-full grid grid-cols-2">
@@ -848,7 +853,7 @@ export function FitfusionChat({
             </TabsContent>
             
             <TabsContent value="contacts" className="m-0">
-              <ScrollArea className={cn("h-[408px]", isFullScreen && "h-[calc(100vh-200px)]")}>
+              <ScrollArea className="h-[400px] md:h-[calc(100vh-230px)]">
                 <div className="p-4 space-y-4">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="text-sm font-medium">Your Contacts</h3>
@@ -899,10 +904,11 @@ export function FitfusionChat({
           </Tabs>
         </div>
         
+        {/* Chat Main Area */}
         <div className={cn(
-          "md:col-span-2 flex flex-col border-l", 
+          "md:col-span-2 flex flex-col border-l h-full", 
           selectedConversationId ? "block" : "hidden md:block"
-        )}>
+        )} style={{ height: isFullScreen ? 'calc(100vh - 73px)' : 'calc(100vh - 200px)' }}>
           {selectedConversationId && otherParticipant ? (
             <>
               <div className="p-4 border-b flex items-center justify-between">
@@ -968,9 +974,10 @@ export function FitfusionChat({
                 </div>
               </div>
               
+              {/* Messages Area */}
               <div className={cn(
-                "flex-1 overflow-hidden", 
-                isFullScreen ? "h-[calc(100vh-230px)]" : "h-[calc(100vh-340px)]"
+                "flex-1 overflow-hidden",
+                isFullScreen ? "h-[calc(100vh-180px)]" : "h-[calc(100vh-300px)]"
               )}>
                 <ScrollArea className="h-full p-4" ref={messagesContainerRef}>
                   <div className="space-y-4">
@@ -994,6 +1001,7 @@ export function FitfusionChat({
                 </ScrollArea>
               </div>
               
+              {/* Message Input Area */}
               <CardFooter className="p-0 border-t">
                 <ChatInput onSendMessage={handleSendMessage} isLoading={isSending} />
               </CardFooter>
