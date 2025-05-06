@@ -83,9 +83,11 @@ const generateMockConversations = (): ChatConversation[] => {
     };
   });
 };
+
 interface FitfusionChatProps {
   onLogout?: () => void;
 }
+
 export function FitfusionChat({
   onLogout
 }: FitfusionChatProps) {
@@ -440,42 +442,41 @@ export function FitfusionChat({
   // If PIN lock is enabled and locked, show PIN verification dialog
   if (pinLockEnabled && isPinLocked) {
     return <div className="min-h-[500px] flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle>Enter PIN</CardTitle>
-            <p className="text-muted-foreground">Enter your PIN to unlock the chat</p>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-center mb-4">
-              <div className="flex gap-2">
-                {Array.from({
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle>Enter PIN</CardTitle>
+          <p className="text-muted-foreground">Enter your PIN to unlock the chat</p>
+        </CardHeader>
+        <CardContent>
+          <div className="flex justify-center mb-4">
+            <div className="flex gap-2">
+              {Array.from({
                 length: 4
               }).map((_, i) => <div key={i} className={`w-12 h-12 border-2 rounded-md flex items-center justify-center text-xl font-bold ${enteredPin.length > i ? "border-primary bg-primary/10" : "border-gray-300"}`}>
-                    {enteredPin.length > i ? "•" : ""}
-                  </div>)}
-              </div>
+                {enteredPin.length > i ? "•" : ""}
+              </div>)}
             </div>
             
             <div className="grid grid-cols-3 gap-2">
               {Array.from({
-              length: 9
-            }).map((_, i) => <Button key={i} variant="outline" className="h-14 text-xl font-semibold" onClick={() => {
-              if (enteredPin.length < 4) {
-                setEnteredPin(prev => prev + (i + 1));
-              }
-            }}>
-                  {i + 1}
-                </Button>)}
+                length: 9
+              }).map((_, i) => <Button key={i} variant="outline" className="h-14 text-xl font-semibold" onClick={() => {
+                if (enteredPin.length < 4) {
+                  setEnteredPin(prev => prev + (i + 1));
+                }
+              }}>
+                {i + 1}
+              </Button>)}
               <Button variant="outline" className="h-14 text-xl font-semibold" onClick={() => {
-              setEnteredPin(prev => prev.slice(0, -1));
-            }}>
+                setEnteredPin(prev => prev.slice(0, -1));
+              }}>
                 ←
               </Button>
               <Button variant="outline" className="h-14 text-xl font-semibold" onClick={() => {
-              if (enteredPin.length < 4) {
-                setEnteredPin(prev => prev + "0");
-              }
-            }}>
+                if (enteredPin.length < 4) {
+                  setEnteredPin(prev => prev + "0");
+                }
+              }}>
                 0
               </Button>
               <Button variant="default" className="h-14" onClick={verifyPin} disabled={enteredPin.length !== 4}>
@@ -490,41 +491,54 @@ export function FitfusionChat({
   // If biometric prompt is shown
   if (showBiometricPrompt) {
     return <div className="min-h-[500px] flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle>Biometric Verification</CardTitle>
-            <p className="text-muted-foreground">
-              {awaitingBiometricVerification ? "Scanning fingerprint..." : "Use your fingerprint to enable biometric lock"}
-            </p>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center">
-            <div className="mb-6">
-              <Fingerprint className="h-20 w-20 text-primary animate-pulse" />
-            </div>
-            
-            {awaitingBiometricVerification && <div className="h-2 w-full bg-muted overflow-hidden rounded-full">
-                <div className="h-full bg-primary animate-progress"></div>
-              </div>}
-            
-            <Button variant="outline" className="mt-6" onClick={() => setShowBiometricPrompt(false)}>
-              Cancel
-            </Button>
-          </CardContent>
-        </Card>
-      </div>;
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle>Biometric Verification</CardTitle>
+          <p className="text-muted-foreground">
+            {awaitingBiometricVerification ? "Scanning fingerprint..." : "Use your fingerprint to enable biometric lock"}
+          </p>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center">
+          <div className="mb-6">
+            <Fingerprint className="h-20 w-20 text-primary animate-pulse" />
+          </div>
+          
+          {awaitingBiometricVerification && <div className="h-2 w-full bg-muted overflow-hidden rounded-full">
+              <div className="h-full bg-primary animate-progress"></div>
+            </div>}
+          
+          <Button variant="outline" className="mt-6" onClick={() => setShowBiometricPrompt(false)}>
+            Cancel
+          </Button>
+        </CardContent>
+      </Card>
+    </div>;
   }
-  const chatContainerClasses = cn(isFullScreen ? "fixed inset-0 z-50 bg-background flex flex-col" : "w-full max-w-4xl mx-auto shadow-lg overflow-hidden rounded-lg", "h-[600px]");
-  return <Card className={chatContainerClasses}>
+
+  const chatContainerClasses = cn(
+    isFullScreen 
+      ? "fixed inset-0 z-50 bg-background flex flex-col" 
+      : "w-full mx-auto rounded-lg overflow-hidden border", 
+    "h-full"
+  );
+
+  return (
+    <Card className={chatContainerClasses}>
       <CardHeader className="p-4 border-b">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <Button variant="ghost" size="icon" className="mr-2" onClick={() => {
-            if (isFullScreen) {
-              exitFullScreen();
-            } else {
-              navigate("/");
-            }
-          }}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="mr-2" 
+              onClick={() => {
+                if (isFullScreen) {
+                  exitFullScreen();
+                } else {
+                  navigate("/");
+                }
+              }}
+            >
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
@@ -534,10 +548,16 @@ export function FitfusionChat({
           </div>
           <div className="flex gap-2">
             {/* Fullscreen toggle button */}
-            <Button variant="ghost" size="icon" onClick={isFullScreen ? exitFullScreen : enterFullScreen} title={isFullScreen ? "Exit fullscreen" : "Enter fullscreen"}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={isFullScreen ? exitFullScreen : enterFullScreen} 
+              title={isFullScreen ? "Exit fullscreen" : "Enter fullscreen"}
+            >
               {isFullScreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
             </Button>
             
+            {/* Security and settings buttons */}
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="ghost" size="icon">
@@ -776,8 +796,11 @@ export function FitfusionChat({
         </div>
       </CardHeader>
       
-      <div className={cn("grid md:grid-cols-3", isFullScreen ? "flex-1" : "h-[536px]")}>
-        <div className="">
+      <div className={cn(
+        "grid md:grid-cols-3 relative", 
+        isFullScreen ? "flex-1" : "h-[calc(100vh-230px)]"
+      )}>
+        <div className="border-r">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <div className="p-2 border-b">
               <TabsList className="w-full grid grid-cols-2">
@@ -795,12 +818,22 @@ export function FitfusionChat({
             <div className="p-2 border-b">
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search..." className="pl-8" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+                <Input 
+                  placeholder="Search..." 
+                  className="pl-8" 
+                  value={searchQuery} 
+                  onChange={e => setSearchQuery(e.target.value)} 
+                />
               </div>
             </div>
             
             <TabsContent value="chats" className="m-0 p-0">
-              <ChatList conversations={filteredConversations} currentUserId={currentUserId} onSelectConversation={setSelectedConversationId} selectedConversationId={selectedConversationId} />
+              <ChatList 
+                conversations={filteredConversations} 
+                currentUserId={currentUserId} 
+                onSelectConversation={setSelectedConversationId} 
+                selectedConversationId={selectedConversationId} 
+              />
             </TabsContent>
             
             <TabsContent value="contacts" className="m-0">
@@ -855,18 +888,29 @@ export function FitfusionChat({
           </Tabs>
         </div>
         
-        <div className={cn("md:col-span-2 flex flex-col", selectedConversationId ? "block" : "hidden md:block")}>
-          {selectedConversationId && otherParticipant ? <>
+        <div className={cn(
+          "md:col-span-2 flex flex-col border-l", 
+          selectedConversationId ? "block" : "hidden md:block"
+        )}>
+          {selectedConversationId && otherParticipant ? (
+            <>
               <div className="p-4 border-b flex items-center justify-between">
                 <div className="flex items-center">
-                  <Button variant="ghost" size="icon" className="md:hidden mr-2" onClick={() => setSelectedConversationId(undefined)}>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="md:hidden mr-2" 
+                    onClick={() => setSelectedConversationId(undefined)}
+                  >
                     <ArrowLeft className="h-4 w-4" />
                   </Button>
                   <Avatar className="h-10 w-10 mr-3 relative">
                     <AvatarImage src={otherParticipant.avatar} alt={otherParticipant.name} />
                     <AvatarFallback>{otherParticipant.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                     
-                    {otherParticipant.status === 'online' && <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full bg-green-500 border-2 border-background"></span>}
+                    {otherParticipant.status === 'online' && (
+                      <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full bg-green-500 border-2 border-background"></span>
+                    )}
                   </Avatar>
                   <div>
                     <h3 className="font-medium text-base">{otherParticipant.name}</h3>
@@ -874,12 +918,15 @@ export function FitfusionChat({
                       <p className="text-xs text-muted-foreground">
                         {otherParticipant.status === 'online' ? 'Online' : otherParticipant.status === 'away' ? 'Away' : otherParticipant.lastSeen ? `Last seen ${new Date(otherParticipant.lastSeen).toLocaleDateString()} at ${new Date(otherParticipant.lastSeen).toLocaleTimeString()}` : 'Offline'}
                       </p>
-                      {encryptedChat && <Badge variant="outline" className="h-4 px-1 text-[10px] flex items-center gap-[2px]">
+                      {encryptedChat && (
+                        <Badge variant="outline" className="h-4 px-1 text-[10px] flex items-center gap-[2px]">
                           <Lock className="h-2 w-2" /> Encrypted
-                        </Badge>}
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 </div>
+                {/* Chat header options */}
                 <div className="flex items-center">
                   <Button variant="ghost" size="icon" onClick={toggleNotifications} title={notificationsEnabled ? "Mute notifications" : "Enable notifications"}>
                     {notificationsEnabled ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
@@ -910,12 +957,27 @@ export function FitfusionChat({
                 </div>
               </div>
               
-              <div className={cn("flex-1 overflow-hidden", isFullScreen ? "h-[calc(100vh-230px)]" : "")}>
+              <div className={cn(
+                "flex-1 overflow-hidden", 
+                isFullScreen ? "h-[calc(100vh-230px)]" : "h-[calc(100vh-340px)]"
+              )}>
                 <ScrollArea className="h-full p-4" ref={messagesContainerRef}>
                   <div className="space-y-4">
-                    {messages.length === 0 ? <div className="flex justify-center items-center h-32 text-muted-foreground">
+                    {messages.length === 0 ? (
+                      <div className="flex justify-center items-center h-32 text-muted-foreground">
                         No messages yet. Start the conversation!
-                      </div> : messages.map(message => <ChatMessage key={message.id} message={message} isCurrentUser={message.senderId === currentUserId} senderAvatar={message.senderId === currentUserId ? userProfile.avatar || "/placeholder.svg" : otherParticipant.avatar} senderName={message.senderId === currentUserId ? userProfile.name : otherParticipant.name} />)}
+                      </div>
+                    ) : (
+                      messages.map(message => (
+                        <ChatMessage 
+                          key={message.id} 
+                          message={message} 
+                          isCurrentUser={message.senderId === currentUserId} 
+                          senderAvatar={message.senderId === currentUserId ? userProfile.avatar || "/placeholder.svg" : otherParticipant.avatar} 
+                          senderName={message.senderId === currentUserId ? userProfile.name : otherParticipant.name} 
+                        />
+                      ))
+                    )}
                     <div ref={messagesEndRef} />
                   </div>
                 </ScrollArea>
@@ -924,7 +986,9 @@ export function FitfusionChat({
               <CardFooter className="p-0 border-t">
                 <ChatInput onSendMessage={handleSendMessage} isLoading={isSending} />
               </CardFooter>
-            </> : <div className="flex-1 flex flex-col items-center justify-center p-4">
+            </>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center p-4">
               <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                 <MessageSquare className="h-10 w-10 text-primary" />
               </div>
@@ -932,14 +996,17 @@ export function FitfusionChat({
               <p className="text-muted-foreground text-center max-w-xs">
                 Connect with fitness buddies, trainers, and friends to share your fitness journey
               </p>
-              {encryptedChat && <div className="flex items-center gap-1 mt-2 text-xs text-primary">
+              {encryptedChat && (
+                <div className="flex items-center gap-1 mt-2 text-xs text-primary">
                   <Lock className="h-3 w-3" />
                   <span>End-to-end encrypted</span>
-                </div>}
+                </div>
+              )}
               <Button className="mt-4" onClick={() => setActiveTab("contacts")}>
                 Start a Conversation
               </Button>
-            </div>}
+            </div>
+          )}
         </div>
       </div>
       
@@ -977,5 +1044,6 @@ export function FitfusionChat({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </Card>;
+    </Card>
+  );
 }

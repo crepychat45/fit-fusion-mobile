@@ -32,7 +32,7 @@ const ChatPage = () => {
     // Simulate API call delay
     const timer = setTimeout(() => {
       checkAuth();
-    }, 500);
+    }, 300); // Reduced delay for better UX
     
     return () => clearTimeout(timer);
   }, []);
@@ -65,7 +65,7 @@ const ChatPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-16">
+    <div className="min-h-screen bg-background">
       {!isAuthenticated && (
         <div className="fitness-gradient pt-12 pb-6 px-4">
           <div className="flex items-center justify-between">
@@ -89,7 +89,9 @@ const ChatPage = () => {
       
       <div className={`px-4 ${isAuthenticated ? 'pt-4' : 'mt-6'} pb-20`}>
         {isAuthenticated ? (
-          <FitfusionChat onLogout={handleLogout} />
+          <div className="w-full h-[calc(100vh-155px)]">
+            <FitfusionChat onLogout={handleLogout} />
+          </div>
         ) : (
           <div className="max-w-md mx-auto">
             <div className="mb-6 text-center">
