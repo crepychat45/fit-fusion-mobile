@@ -14,8 +14,12 @@ export interface ChatUser {
     privacy?: {
       showStatus?: boolean;
       showLastSeen?: boolean;
+      readReceipts?: boolean;
+      allowMessageRequests?: boolean;
     }
   };
+  blockedUsers?: string[];
+  isVerified?: boolean;
 }
 
 export interface ChatAttachment {
@@ -28,6 +32,8 @@ export interface ChatAttachment {
   storagePath?: string;
   mimeType?: string;
   createdAt?: Date;
+  encryptionKey?: string;
+  securityLevel?: 'standard' | 'encrypted' | 'ephemeral';
 }
 
 export interface ChatMessage {
@@ -48,9 +54,19 @@ export interface ChatMessage {
     deletedAt?: Date;
     ipAddress?: string;
     deviceInfo?: string;
+    isEncrypted?: boolean;
+    expiresAt?: Date;
+    forwardedFrom?: string;
   };
   conversationId?: string;
   replyToMessageId?: string;
+  isForwarded?: boolean;
+  isPinned?: boolean;
+  translation?: {
+    content: string;
+    language: string;
+  };
+  securityLevel?: 'standard' | 'encrypted' | 'private' | 'ephemeral';
 }
 
 export interface ChatReaction {
@@ -77,5 +93,29 @@ export interface ChatConversation {
     totalMessages?: number;
     totalAttachments?: number;
     lastReadTimestamp?: Record<string, Date>;
+    encryptionEnabled?: boolean;
+    autoDeletePeriod?: number; // in days
+    isSecure?: boolean;
+    category?: 'personal' | 'work' | 'fitness' | 'social' | 'family';
   };
+  securitySettings?: {
+    encryptionEnabled: boolean;
+    disappearingMessages?: boolean;
+    disappearingMessageTimeout?: number; // in seconds
+    screenshotDetection?: boolean;
+    mediaProtection?: boolean;
+  };
+}
+
+export interface ChatSettings {
+  encryption: boolean;
+  readReceipts: boolean;
+  showTypingIndicator: boolean;
+  notificationsEnabled: boolean;
+  autoTranslate: boolean;
+  defaultSecurityLevel: 'standard' | 'encrypted' | 'private' | 'ephemeral';
+  autoDeletePeriod?: number;
+  mediaQuality: 'low' | 'medium' | 'high' | 'original';
+  cloudBackupEnabled: boolean;
+  blockUnknownSenders: boolean;
 }

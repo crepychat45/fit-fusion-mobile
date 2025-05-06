@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { Button } from "@/components/ui/button";
@@ -32,7 +31,11 @@ import {
   BellRing,
   Gauge,
   Eye,
-  Dumbbell
+  Dumbbell,
+  MessageSquare,
+  AlertTriangle,
+  Eraser,
+  Users
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
@@ -45,6 +48,16 @@ const Settings = () => {
   const [isClearingData, setIsClearingData] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [activeTab, setActiveTab] = useState("appearance");
+
+  // Chat settings states
+  const [chatEncryption, setChatEncryption] = useState(true);
+  const [autoDeleteChats, setAutoDeleteChats] = useState(false);
+  const [chatBackup, setChatBackup] = useState(true);
+  const [showTypingIndicator, setShowTypingIndicator] = useState(true);
+  const [chatNotifications, setChatNotifications] = useState(true);
+  const [chatAutoTranslate, setChatAutoTranslate] = useState(false);
+  const [autoDeleteDays, setAutoDeleteDays] = useState("30");
+  const [mediaQuality, setMediaQuality] = useState("high");
 
   const {
     theme,
@@ -101,6 +114,21 @@ const Settings = () => {
     navigate("/login");
   };
 
+  const handleClearChatHistory = () => {
+    toast({
+      title: "Chat History Cleared",
+      description: "All your chat conversations have been deleted.",
+    });
+  };
+
+  const handleExportChats = () => {
+    toast({
+      title: "Chats Export Started",
+      description: "Your chat history will be downloaded as a JSON file.",
+    });
+    // In a real app, this would generate and download a file
+  };
+
   return (
     <div className="min-h-screen bg-background pb-16">
       {/* Header */}
@@ -111,7 +139,7 @@ const Settings = () => {
       
       <div className="px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-5">
+          <TabsList className="grid grid-cols-6">
             <TabsTrigger value="appearance">
               <Eye className="h-4 w-4 mr-1 md:mr-2" />
               <span className="hidden md:inline">Display</span>
@@ -123,6 +151,10 @@ const Settings = () => {
             <TabsTrigger value="privacy">
               <Lock className="h-4 w-4 mr-1 md:mr-2" />
               <span className="hidden md:inline">Privacy</span>
+            </TabsTrigger>
+            <TabsTrigger value="chat">
+              <MessageSquare className="h-4 w-4 mr-1 md:mr-2" />
+              <span className="hidden md:inline">Chat</span>
             </TabsTrigger>
             <TabsTrigger value="developer">
               <Gauge className="h-4 w-4 mr-1 md:mr-2" />
@@ -446,6 +478,212 @@ const Settings = () => {
                   className="w-full"
                 >
                   Request Account Deletion
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          {/* Chat Tab - New */}
+          <TabsContent value="chat" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Chat Settings</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="chat-encryption" className="block">End-to-End Encryption</Label>
+                    <p className="text-xs text-muted-foreground">Secure your conversations with encryption</p>
+                  </div>
+                  <Switch 
+                    id="chat-encryption" 
+                    checked={chatEncryption} 
+                    onCheckedChange={setChatEncryption} 
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="typing-indicator" className="block">Typing Indicator</Label>
+                    <p className="text-xs text-muted-foreground">Show when others are typing</p>
+                  </div>
+                  <Switch 
+                    id="typing-indicator" 
+                    checked={showTypingIndicator} 
+                    onCheckedChange={setShowTypingIndicator} 
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="chat-notifications" className="block">Chat Notifications</Label>
+                    <p className="text-xs text-muted-foreground">Enable notifications for new messages</p>
+                  </div>
+                  <Switch 
+                    id="chat-notifications" 
+                    checked={chatNotifications} 
+                    onCheckedChange={setChatNotifications} 
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="chat-backup" className="block">Cloud Backup</Label>
+                    <p className="text-xs text-muted-foreground">Automatically back up your chats</p>
+                  </div>
+                  <Switch 
+                    id="chat-backup" 
+                    checked={chatBackup} 
+                    onCheckedChange={setChatBackup} 
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="auto-translate" className="block">Auto-Translate Messages</Label>
+                    <p className="text-xs text-muted-foreground">Automatically translate messages to your language</p>
+                  </div>
+                  <Switch 
+                    id="auto-translate" 
+                    checked={chatAutoTranslate} 
+                    onCheckedChange={setChatAutoTranslate} 
+                  />
+                </div>
+                
+                <Separator />
+                
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="auto-delete">Auto-Delete Messages</Label>
+                  <div className="flex items-center gap-2">
+                    <Switch 
+                      id="auto-delete" 
+                      checked={autoDeleteChats} 
+                      onCheckedChange={setAutoDeleteChats} 
+                    />
+                    {autoDeleteChats && (
+                      <Select value={autoDeleteDays} onValueChange={setAutoDeleteDays}>
+                        <SelectTrigger className="w-[100px]">
+                          <SelectValue placeholder="Select days" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="7">7 Days</SelectItem>
+                          <SelectItem value="30">30 Days</SelectItem>
+                          <SelectItem value="90">90 Days</SelectItem>
+                          <SelectItem value="365">1 Year</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="media-quality">Media Quality</Label>
+                  <Select value={mediaQuality} onValueChange={setMediaQuality}>
+                    <SelectTrigger className="w-[120px]">
+                      <SelectValue placeholder="Select quality" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="original">Original</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Shield className="h-5 w-5 mr-2 text-primary" />
+                  <span>Privacy & Security</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="read-receipts" className="block">Read Receipts</Label>
+                    <p className="text-xs text-muted-foreground">Let others know when you've read their messages</p>
+                  </div>
+                  <Switch id="read-receipts" defaultChecked />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="online-status" className="block">Online Status</Label>
+                    <p className="text-xs text-muted-foreground">Show when you're active in chat</p>
+                  </div>
+                  <Switch id="online-status" defaultChecked />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="message-blocking" className="block">Message Blocking</Label>
+                    <p className="text-xs text-muted-foreground">Block messages from non-contacts</p>
+                  </div>
+                  <Switch id="message-blocking" />
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Users className="h-5 w-5 mr-2 text-primary" />
+                  <span>Contacts & Groups</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between"
+                  onClick={() => navigate("/chat/contacts")}
+                >
+                  <div className="flex items-center gap-3">
+                    <User className="h-5 w-5 text-muted-foreground" />
+                    <span>Manage Contacts</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between"
+                  onClick={() => navigate("/chat/blocked")}
+                >
+                  <div className="flex items-center gap-3">
+                    <AlertTriangle className="h-5 w-5 text-muted-foreground" />
+                    <span>Blocked Users</span>
+                  </div>
+                  <Badge className="ml-2 bg-destructive/10 text-destructive">3</Badge>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center text-destructive">
+                  <Eraser className="h-5 w-5 mr-2" />
+                  <span>Data Management</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={handleClearChatHistory}
+                >
+                  Clear Chat History
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={handleExportChats}
+                >
+                  Export Chat Data
                 </Button>
               </CardContent>
             </Card>
