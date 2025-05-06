@@ -441,32 +441,38 @@ export function FitfusionChat({
 
   // If PIN lock is enabled and locked, show PIN verification dialog
   if (pinLockEnabled && isPinLocked) {
-    return <div className="min-h-[500px] flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle>Enter PIN</CardTitle>
-          <p className="text-muted-foreground">Enter your PIN to unlock the chat</p>
-        </CardHeader>
-        <CardContent>
-          <div className="flex justify-center mb-4">
-            <div className="flex gap-2">
-              {Array.from({
-                length: 4
-              }).map((_, i) => <div key={i} className={`w-12 h-12 border-2 rounded-md flex items-center justify-center text-xl font-bold ${enteredPin.length > i ? "border-primary bg-primary/10" : "border-gray-300"}`}>
-                {enteredPin.length > i ? "•" : ""}
-              </div>)}
+    return (
+      <div className="min-h-[500px] flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle>Enter PIN</CardTitle>
+            <p className="text-muted-foreground">Enter your PIN to unlock the chat</p>
+          </CardHeader>
+          <CardContent>
+            <div className="flex justify-center mb-4">
+              <div className="flex gap-2">
+                {Array.from({
+                  length: 4
+                }).map((_, i) => (
+                  <div key={i} className={`w-12 h-12 border-2 rounded-md flex items-center justify-center text-xl font-bold ${enteredPin.length > i ? "border-primary bg-primary/10" : "border-gray-300"}`}>
+                    {enteredPin.length > i ? "•" : ""}
+                  </div>
+                ))}
+              </div>
             </div>
             
             <div className="grid grid-cols-3 gap-2">
               {Array.from({
                 length: 9
-              }).map((_, i) => <Button key={i} variant="outline" className="h-14 text-xl font-semibold" onClick={() => {
-                if (enteredPin.length < 4) {
-                  setEnteredPin(prev => prev + (i + 1));
-                }
-              }}>
-                {i + 1}
-              </Button>)}
+              }).map((_, i) => (
+                <Button key={i} variant="outline" className="h-14 text-xl font-semibold" onClick={() => {
+                  if (enteredPin.length < 4) {
+                    setEnteredPin(prev => prev + (i + 1));
+                  }
+                }}>
+                  {i + 1}
+                </Button>
+              ))}
               <Button variant="outline" className="h-14 text-xl font-semibold" onClick={() => {
                 setEnteredPin(prev => prev.slice(0, -1));
               }}>
@@ -485,34 +491,39 @@ export function FitfusionChat({
             </div>
           </CardContent>
         </Card>
-      </div>;
+      </div>
+    );
   }
 
   // If biometric prompt is shown
   if (showBiometricPrompt) {
-    return <div className="min-h-[500px] flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle>Biometric Verification</CardTitle>
-          <p className="text-muted-foreground">
-            {awaitingBiometricVerification ? "Scanning fingerprint..." : "Use your fingerprint to enable biometric lock"}
-          </p>
-        </CardHeader>
-        <CardContent className="flex flex-col items-center">
-          <div className="mb-6">
-            <Fingerprint className="h-20 w-20 text-primary animate-pulse" />
-          </div>
-          
-          {awaitingBiometricVerification && <div className="h-2 w-full bg-muted overflow-hidden rounded-full">
-              <div className="h-full bg-primary animate-progress"></div>
-            </div>}
-          
-          <Button variant="outline" className="mt-6" onClick={() => setShowBiometricPrompt(false)}>
-            Cancel
-          </Button>
-        </CardContent>
-      </Card>
-    </div>;
+    return (
+      <div className="min-h-[500px] flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle>Biometric Verification</CardTitle>
+            <p className="text-muted-foreground">
+              {awaitingBiometricVerification ? "Scanning fingerprint..." : "Use your fingerprint to enable biometric lock"}
+            </p>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center">
+            <div className="mb-6">
+              <Fingerprint className="h-20 w-20 text-primary animate-pulse" />
+            </div>
+            
+            {awaitingBiometricVerification && (
+              <div className="h-2 w-full bg-muted overflow-hidden rounded-full">
+                <div className="h-full bg-primary animate-progress"></div>
+              </div>
+            )}
+            
+            <Button variant="outline" className="mt-6" onClick={() => setShowBiometricPrompt(false)}>
+              Cancel
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   const chatContainerClasses = cn(
