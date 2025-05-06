@@ -47,6 +47,15 @@ const ChatPage = () => {
     });
   };
   
+  const handleLogout = () => {
+    localStorage.removeItem("auth_token");
+    setIsAuthenticated(false);
+    toast({
+      title: "Logged out",
+      description: "You've been logged out of FitFusion Chat."
+    });
+  };
+  
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -65,7 +74,7 @@ const ChatPage = () => {
                 variant="ghost" 
                 size="icon" 
                 className="mr-2 text-white" 
-                onClick={() => navigate(-1)}
+                onClick={() => navigate("/")}
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
@@ -80,7 +89,7 @@ const ChatPage = () => {
       
       <div className={`px-4 ${isAuthenticated ? 'pt-4' : 'mt-6'} pb-20`}>
         {isAuthenticated ? (
-          <FitfusionChat />
+          <FitfusionChat onLogout={handleLogout} />
         ) : (
           <div className="max-w-md mx-auto">
             <div className="mb-6 text-center">

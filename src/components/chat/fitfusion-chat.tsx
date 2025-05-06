@@ -147,7 +147,11 @@ const generateMockConversations = (): ChatConversation[] => {
   });
 };
 
-export function FitfusionChat() {
+interface FitfusionChatProps {
+  onLogout?: () => void;
+}
+
+export function FitfusionChat({ onLogout }: FitfusionChatProps) {
   const [activeTab, setActiveTab] = useState("chats");
   const [conversations, setConversations] = useState<ChatConversation[]>(generateMockConversations());
   const [selectedConversationId, setSelectedConversationId] = useState<string | undefined>();
@@ -518,6 +522,13 @@ export function FitfusionChat() {
     });
   };
 
+  // Handle logout
+  const handleLogout = () => {
+    if (onLogout) {
+      onLogout();
+    }
+  };
+
   // Select a default conversation if none is selected
   useEffect(() => {
     if (!selectedConversationId && conversations.length > 0) {
@@ -640,7 +651,7 @@ export function FitfusionChat() {
   const chatContainerClasses = cn(
     isFullScreen 
       ? "fixed inset-0 z-50 bg-background flex flex-col" 
-      : "w-full max-w-4xl mx-auto shadow-lg overflow-hidden",
+      : "w-full max-w-4xl mx-auto shadow-lg overflow-hidden rounded-lg",
     "h-[600px]"
   );
 
@@ -649,16 +660,20 @@ export function FitfusionChat() {
       <CardHeader className="p-4 border-b">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            {!isFullScreen && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="mr-2" 
-                onClick={() => navigate(-1)}
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            )}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="mr-2" 
+              onClick={() => {
+                if (isFullScreen) {
+                  exitFullScreen();
+                } else {
+                  navigate("/");
+                }
+              }}
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
             <div>
               <CardTitle>FitFusion Chat</CardTitle>
               <p className="text-xs text-muted-foreground">Connect with fitness friends securely</p>
@@ -954,13 +969,16 @@ export function FitfusionChat() {
                   </div>
                 </div>
                 
-                {isFullScreen && (
-                  <SheetFooter className="mt-6">
+                <SheetFooter className="mt-6">
+                  <Button onClick={handleLogout} variant="destructive">
+                    <LogOut className="mr-2 h-4 w-4" /> Log out
+                  </Button>
+                  {isFullScreen && (
                     <Button onClick={exitFullScreen} variant="outline">
                       <Minimize className="mr-2 h-4 w-4" /> Exit Fullscreen
                     </Button>
-                  </SheetFooter>
-                )}
+                  )}
+                </SheetFooter>
               </SheetContent>
             </Sheet>
           </div>
@@ -1292,4 +1310,3 @@ export function FitfusionChat() {
     </Card>
   );
 }
-
