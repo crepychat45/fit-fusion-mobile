@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -8,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Bell, Check, Download, Lock, RefreshCcw, Shield, Smartphone, AlertTriangle } from "lucide-react";
+import { Bell, Check, Download, Lock, RefreshCcw, Shield, Smartphone, AlertTriangle, CheckCircle } from "lucide-react";
 import { ChatSettings, ChatVersion } from "@/types/chat";
 
 export function ChatSettingsPanel() {
@@ -23,12 +22,12 @@ export function ChatSettingsPanel() {
     mediaQuality: 'high',
     cloudBackupEnabled: true,
     blockUnknownSenders: false,
-    version: '1.2.3',
+    version: '4.5.0',
   });
 
   const [versionInfo, setVersionInfo] = useState<ChatVersion>({
-    current: '1.2.3',
-    latest: '1.2.4',
+    current: '4.5.0',
+    latest: '4.5.0',
     updateAvailable: false,
     lastChecked: new Date(),
   });
@@ -36,6 +35,8 @@ export function ChatSettingsPanel() {
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
   const [updateProgress, setUpdateProgress] = useState(0);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showChangelog, setShowChangelog] = useState(false);
+  const [updateSuccess, setUpdateSuccess] = useState(false);
   
   const handleToggle = (key: keyof ChatSettings) => {
     setSettings(prev => ({
@@ -54,10 +55,10 @@ export function ChatSettingsPanel() {
     // Simulate checking for updates
     setTimeout(() => {
       setVersionInfo({
-        current: '1.2.3',
-        latest: '1.2.4',
+        current: '4.5.0',
+        latest: '4.5.1',
         updateAvailable: true,
-        releaseNotes: 'Added new security features and improved chat performance.',
+        releaseNotes: 'Added new security features, improved chat performance, fixed dark mode, and enhanced mobile layouts.',
         lastChecked: new Date(),
       });
       
@@ -72,6 +73,7 @@ export function ChatSettingsPanel() {
   
   const installUpdate = () => {
     setIsUpdating(true);
+    setUpdateProgress(0);
     
     // Simulate update progress
     const interval = setInterval(() => {
@@ -79,6 +81,7 @@ export function ChatSettingsPanel() {
         if (prev >= 100) {
           clearInterval(interval);
           setIsUpdating(false);
+          setUpdateSuccess(true);
           
           // Update version info after successful update
           setVersionInfo(prev => ({
@@ -92,12 +95,21 @@ export function ChatSettingsPanel() {
             title: "Update complete",
             description: "FitFusion Chat has been updated to the latest version.",
           });
+
+          // Reset update success message after 3 seconds
+          setTimeout(() => {
+            setUpdateSuccess(false);
+          }, 3000);
           
           return 0;
         }
         return prev + 10;
       });
     }, 300);
+  };
+
+  const handleViewChangelog = () => {
+    setShowChangelog(!showChangelog);
   };
   
   return (
@@ -109,7 +121,10 @@ export function ChatSettingsPanel() {
               <CardTitle>Chat Version</CardTitle>
               <CardDescription>View and manage app updates</CardDescription>
             </div>
-            <Badge variant="outline" className="h-6">v{versionInfo.current}</Badge>
+            <Badge variant="outline" className={cn("h-6", updateSuccess && "bg-green-100 text-green-800")}>
+              v{versionInfo.current}
+              {updateSuccess && <CheckCircle className="h-3 w-3 ml-1 text-green-600" />}
+            </Badge>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -154,8 +169,9 @@ export function ChatSettingsPanel() {
                   <Button 
                     size="sm"
                     onClick={installUpdate}
+                    className="flex items-center gap-1"
                   >
-                    <Download className="h-4 w-4 mr-2" />
+                    <Download className="h-4 w-4 mr-1" />
                     Install
                   </Button>
                 )}
@@ -165,10 +181,23 @@ export function ChatSettingsPanel() {
                 <Progress value={updateProgress} className="h-2 mt-2" />
               )}
               
-              {versionInfo.releaseNotes && !isUpdating && (
-                <div className="mt-2 text-sm text-muted-foreground">
-                  <p className="font-medium text-xs mb-1">What's new:</p>
-                  <p>{versionInfo.releaseNotes}</p>
+              {!isUpdating && (
+                <div className="mt-2">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-xs p-0 h-auto underline"
+                    onClick={handleViewChangelog}
+                  >
+                    {showChangelog ? "Hide changelog" : "View changelog"}
+                  </Button>
+                  
+                  {showChangelog && versionInfo.releaseNotes && (
+                    <div className="mt-2 text-sm bg-background/80 p-2 rounded border">
+                      <p className="font-medium text-xs mb-1">What's new in v{versionInfo.latest}:</p>
+                      <p className="text-xs">{versionInfo.releaseNotes}</p>
+                    </div>
+                  )}
                 </div>
               )}
               
@@ -180,6 +209,20 @@ export function ChatSettingsPanel() {
               )}
             </div>
           )}
+          
+          <div className="mt-4">
+            <h4 className="font-medium mb-2">v4.5.0 Release Notes</h4>
+            <div className="text-sm bg-muted/50 p-3 rounded border">
+              <ul className="space-y-1 list-disc list-inside text-xs">
+                <li>Enhanced mobile layouts and responsive design</li>
+                <li>Fixed dark mode issues across all screens</li>
+                <li>Improved chat security with end-to-end encryption</li>
+                <li>Added version checking with interactive animations</li>
+                <li>Performance optimizations for better speed</li>
+                <li>Bug fixes related to notifications</li>
+              </ul>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -384,3 +427,6 @@ export function ChatSettingsPanel() {
     </div>
   );
 }
+
+// Add the cn utility function for convenience
+const cn = (...classes: any[]) => classes.filter(Boolean).join(' ');

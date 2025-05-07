@@ -145,5 +145,13 @@ export interface ChatVersion {
   minRequiredVersion?: string;
   forceUpdate?: boolean;
   lastChecked: Date;
+  changelog?: VersionChange[];
 }
 
+export interface VersionChange {
+  version: string;
+  date: Date;
+  changes: string[];
+  isSecurityUpdate?: boolean;
+  requiresRestart?: boolean;
+}

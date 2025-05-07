@@ -69,7 +69,7 @@ const ChatPage = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {!isAuthenticated && (
-        <div className="fitness-gradient pt-12 pb-6 px-4">
+        <div className="fitness-gradient pt-8 pb-6 px-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <Button 
@@ -85,13 +85,16 @@ const ChatPage = () => {
                 <p className="text-white/80 text-sm">Connect with fitness friends securely</p>
               </div>
             </div>
+            <Badge variant="outline" className="text-white border-white/30">
+              v4.5.0
+            </Badge>
           </div>
         </div>
       )}
       
-      <div className={`flex-1 flex flex-col ${isAuthenticated ? '' : 'mt-6'} ${isMobile ? 'pb-24' : 'pb-20'}`}>
+      <div className={`flex-1 flex flex-col ${isAuthenticated ? '' : 'mt-4'} ${isMobile ? 'pb-20' : ''}`}>
         {isAuthenticated ? (
-          <div className="w-full h-full flex-1">
+          <div className="w-full h-full flex-1 overflow-hidden">
             <FitfusionChat onLogout={handleLogout} />
           </div>
         ) : (
@@ -140,5 +143,8 @@ const ChatPage = () => {
     </div>
   );
 };
+
+// Add the Badge component if not already imported
+import { Badge } from "@/components/ui/badge";
 
 export default ChatPage;
