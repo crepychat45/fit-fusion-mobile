@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Lock } from "lucide-react";
+import { Lock, Shield } from "lucide-react";
 
 interface ChatListProps {
   conversations: ChatConversation[];
@@ -43,6 +43,9 @@ export function ChatList({
             const otherUser = getOtherParticipant(conversation);
             const isSelected = selectedConversationId === conversation.id;
             const isSecure = conversation.securitySettings?.encryptionEnabled;
+            const securityLevel = conversation.securitySettings?.encryptionEnabled ? 
+              conversation.securitySettings?.disappearingMessages ? 'ephemeral' : 'encrypted' 
+              : 'standard';
             
             return (
               <div
@@ -69,16 +72,23 @@ export function ChatList({
                     <div className="font-medium flex items-center gap-1">
                       {otherUser.name}
                       {isSecure && (
-                        <Lock className={cn(
-                          "h-3 w-3 ml-1", 
-                          isSelected ? "text-primary-foreground" : "text-green-500"
-                        )} />
+                        securityLevel === 'ephemeral' ? (
+                          <Shield className={cn(
+                            "h-3 w-3 ml-1", 
+                            isSelected ? "text-primary-foreground" : "text-purple-500"
+                          )} />
+                        ) : (
+                          <Lock className={cn(
+                            "h-3 w-3 ml-1", 
+                            isSelected ? "text-primary-foreground" : "text-green-500"
+                          )} />
+                        )
                       )}
                     </div>
                     {conversation.lastMessage && (
                       <p className={cn(
                         "text-xs truncate",
-                        isMobile ? "max-w-[180px]" : "max-w-[150px]",
+                        isMobile ? "max-w-[200px]" : "max-w-[170px]",
                         isSelected 
                           ? "text-primary-foreground/80" 
                           : "text-muted-foreground"

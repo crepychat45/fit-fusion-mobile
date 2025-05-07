@@ -146,6 +146,9 @@ export interface ChatVersion {
   forceUpdate?: boolean;
   lastChecked: Date;
   changelog?: VersionChange[];
+  isCheckingUpdate?: boolean;
+  updateProgress?: number;
+  updateCompleted?: boolean;
 }
 
 export interface VersionChange {

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Bell, Check, Download, Lock, RefreshCcw, Shield, Smartphone, AlertTriangle, CheckCircle } from "lucide-react";
+import { Bell, Check, Download, Lock, RefreshCcw, Shield, Smartphone, AlertTriangle, CheckCircle, Clock, Info } from "lucide-react";
 import { ChatSettings, ChatVersion } from "@/types/chat";
 
 export function ChatSettingsPanel() {
@@ -30,12 +30,55 @@ export function ChatSettingsPanel() {
     latest: '4.5.0',
     updateAvailable: false,
     lastChecked: new Date(),
+    isCheckingUpdate: false,
+    updateProgress: 0,
+    updateCompleted: false,
+    changelog: [
+      {
+        version: '4.5.0',
+        date: new Date('2025-05-01'),
+        changes: [
+          'Enhanced mobile layouts and responsive design',
+          'Fixed dark mode issues across all screens',
+          'Improved chat security with end-to-end encryption',
+          'Added version checking with interactive animations',
+          'Performance optimizations for better speed',
+          'Bug fixes related to notifications'
+        ],
+        isSecurityUpdate: true,
+        requiresRestart: false
+      },
+      {
+        version: '4.4.0',
+        date: new Date('2025-04-15'),
+        changes: [
+          'Added group chat capabilities',
+          'Improved attachment handling',
+          'Enhanced user profiles',
+          'Fixed several UI bugs in dark mode'
+        ],
+        isSecurityUpdate: false,
+        requiresRestart: true
+      },
+      {
+        version: '4.3.5',
+        date: new Date('2025-03-28'),
+        changes: [
+          'Security patch for message encryption',
+          'Performance improvements for large chats',
+          'Fixed message delivery status indicators'
+        ],
+        isSecurityUpdate: true,
+        requiresRestart: false
+      }
+    ]
   });
 
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
   const [updateProgress, setUpdateProgress] = useState(0);
   const [isUpdating, setIsUpdating] = useState(false);
   const [showChangelog, setShowChangelog] = useState(false);
+  const [showFullChangelog, setShowFullChangelog] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
   
   const handleToggle = (key: keyof ChatSettings) => {
@@ -45,28 +88,38 @@ export function ChatSettingsPanel() {
     }));
 
     toast({
-      description: `${key} has been ${!settings[key as keyof ChatSettings] ? 'enabled' : 'disabled'}.`
+      description: `${key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')} has been ${!settings[key as keyof ChatSettings] ? 'enabled' : 'disabled'}.`
     });
   };
 
   const checkForUpdates = () => {
     setIsCheckingUpdate(true);
+    setVersionInfo(prev => ({...prev, isCheckingUpdate: true}));
+    
+    // Show checking animation
+    toast({
+      title: "Checking for updates...",
+      description: "Please wait while we check for the latest version.",
+    });
     
     // Simulate checking for updates
     setTimeout(() => {
-      setVersionInfo({
+      setVersionInfo(prev => ({
+        ...prev,
+        isCheckingUpdate: false,
         current: '4.5.0',
         latest: '4.5.1',
         updateAvailable: true,
         releaseNotes: 'Added new security features, improved chat performance, fixed dark mode, and enhanced mobile layouts.',
         lastChecked: new Date(),
-      });
+      }));
       
       setIsCheckingUpdate(false);
       
       toast({
         title: "Update available",
-        description: "A new version of FitFusion Chat is available.",
+        description: "Version 4.5.1 is now available with new features and improvements.",
+        variant: "default",
       });
     }, 2000);
   };
@@ -74,42 +127,76 @@ export function ChatSettingsPanel() {
   const installUpdate = () => {
     setIsUpdating(true);
     setUpdateProgress(0);
+    setVersionInfo(prev => ({...prev, updateProgress: 0}));
+    
+    toast({
+      title: "Installing update",
+      description: "Starting download of version 4.5.1...",
+    });
     
     // Simulate update progress
     const interval = setInterval(() => {
       setUpdateProgress(prev => {
-        if (prev >= 100) {
+        const newProgress = prev + 10;
+        setVersionInfo(currentInfo => ({...currentInfo, updateProgress: newProgress}));
+        
+        if (newProgress >= 100) {
           clearInterval(interval);
           setIsUpdating(false);
           setUpdateSuccess(true);
-          
-          // Update version info after successful update
-          setVersionInfo(prev => ({
-            ...prev,
-            current: prev.latest || prev.current,
+          setVersionInfo(currentInfo => ({
+            ...currentInfo, 
+            updateProgress: 100,
+            updateCompleted: true,
+            current: currentInfo.latest || currentInfo.current,
             updateAvailable: false,
             lastChecked: new Date(),
           }));
           
           toast({
             title: "Update complete",
-            description: "FitFusion Chat has been updated to the latest version.",
+            description: "FitFusion Chat has been updated to version 4.5.1.",
+            variant: "success",
           });
 
           // Reset update success message after 3 seconds
           setTimeout(() => {
             setUpdateSuccess(false);
+            setVersionInfo(currentInfo => ({...currentInfo, updateCompleted: false, updateProgress: 0}));
           }, 3000);
           
           return 0;
         }
-        return prev + 10;
+        
+        // Show progress toasts at specific intervals
+        if (newProgress === 30) {
+          toast({
+            title: "Download progress: 30%",
+            description: "Downloading update files...",
+          });
+        } else if (newProgress === 60) {
+          toast({
+            title: "Download progress: 60%",
+            description: "Preparing to install...",
+          });
+        } else if (newProgress === 90) {
+          toast({
+            title: "Download progress: 90%",
+            description: "Almost done...",
+          });
+        }
+        
+        return newProgress;
       });
-    }, 300);
+    }, 500);
   };
 
   const handleViewChangelog = () => {
     setShowChangelog(!showChangelog);
+  };
+  
+  const handleToggleFullChangelog = () => {
+    setShowFullChangelog(!showFullChangelog);
   };
   
   return (
@@ -121,9 +208,17 @@ export function ChatSettingsPanel() {
               <CardTitle>Chat Version</CardTitle>
               <CardDescription>View and manage app updates</CardDescription>
             </div>
-            <Badge variant="outline" className={cn("h-6", updateSuccess && "bg-green-100 text-green-800")}>
+            <Badge 
+              variant="outline" 
+              className={cn(
+                "h-6 transition-all duration-300", 
+                updateSuccess ? "bg-green-100 text-green-800" : "",
+                versionInfo.updateAvailable ? "bg-amber-100 text-amber-800" : ""
+              )}
+            >
               v{versionInfo.current}
               {updateSuccess && <CheckCircle className="h-3 w-3 ml-1 text-green-600" />}
+              {versionInfo.updateAvailable && !updateSuccess && <AlertTriangle className="h-3 w-3 ml-1 text-amber-600" />}
             </Badge>
           </div>
         </CardHeader>
@@ -131,15 +226,16 @@ export function ChatSettingsPanel() {
           <div className="flex justify-between items-center">
             <div>
               <h4 className="font-medium">Current version</h4>
-              <p className="text-sm text-muted-foreground">
-                Last checked: {versionInfo.lastChecked.toLocaleDateString()}
+              <p className="text-sm text-muted-foreground flex items-center">
+                <Clock className="h-3.5 w-3.5 mr-1 inline" />
+                Last checked: {versionInfo.lastChecked.toLocaleDateString()} {versionInfo.lastChecked.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
               </p>
             </div>
             <Button 
               variant="outline" 
               size="sm" 
               onClick={checkForUpdates} 
-              disabled={isCheckingUpdate}
+              disabled={isCheckingUpdate || isUpdating}
               className="gap-2"
             >
               {isCheckingUpdate ? (
@@ -157,7 +253,7 @@ export function ChatSettingsPanel() {
           </div>
           
           {versionInfo.updateAvailable && (
-            <div className="mt-4 bg-muted p-3 rounded-md">
+            <div className="mt-4 bg-muted/50 p-3 rounded-md border border-amber-200 animate-fade-in">
               <div className="flex justify-between items-center">
                 <div className="flex items-center">
                   <AlertTriangle className="h-4 w-4 text-amber-500 mr-2" />
@@ -169,7 +265,7 @@ export function ChatSettingsPanel() {
                   <Button 
                     size="sm"
                     onClick={installUpdate}
-                    className="flex items-center gap-1"
+                    className="flex items-center gap-1 animate-pulse"
                   >
                     <Download className="h-4 w-4 mr-1" />
                     Install
@@ -178,7 +274,7 @@ export function ChatSettingsPanel() {
               </div>
               
               {isUpdating && (
-                <Progress value={updateProgress} className="h-2 mt-2" />
+                <Progress value={updateProgress} className="h-2 mt-2 animate-pulse" />
               )}
               
               {!isUpdating && (
@@ -193,7 +289,7 @@ export function ChatSettingsPanel() {
                   </Button>
                   
                   {showChangelog && versionInfo.releaseNotes && (
-                    <div className="mt-2 text-sm bg-background/80 p-2 rounded border">
+                    <div className="mt-2 text-sm bg-background/80 p-2 rounded border animate-fade-in">
                       <p className="font-medium text-xs mb-1">What's new in v{versionInfo.latest}:</p>
                       <p className="text-xs">{versionInfo.releaseNotes}</p>
                     </div>
@@ -202,7 +298,7 @@ export function ChatSettingsPanel() {
               )}
               
               {updateProgress === 100 && (
-                <div className="mt-2 flex items-center text-green-500">
+                <div className="mt-2 flex items-center text-green-500 animate-fade-in">
                   <Check className="h-4 w-4 mr-1" />
                   <span className="text-sm">Update completed! Restarting...</span>
                 </div>
@@ -210,17 +306,50 @@ export function ChatSettingsPanel() {
             </div>
           )}
           
-          <div className="mt-4">
-            <h4 className="font-medium mb-2">v4.5.0 Release Notes</h4>
-            <div className="text-sm bg-muted/50 p-3 rounded border">
-              <ul className="space-y-1 list-disc list-inside text-xs">
-                <li>Enhanced mobile layouts and responsive design</li>
-                <li>Fixed dark mode issues across all screens</li>
-                <li>Improved chat security with end-to-end encryption</li>
-                <li>Added version checking with interactive animations</li>
-                <li>Performance optimizations for better speed</li>
-                <li>Bug fixes related to notifications</li>
-              </ul>
+          <div className="mt-6">
+            <div className="flex justify-between items-center mb-2">
+              <h4 className="font-medium">Version History</h4>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-xs h-8"
+                onClick={handleToggleFullChangelog}
+              >
+                {showFullChangelog ? "Show Less" : "Show All"}
+              </Button>
+            </div>
+            
+            <div className="space-y-3 text-sm bg-muted/50 p-3 rounded border">
+              {versionInfo.changelog?.slice(0, showFullChangelog ? undefined : 1).map((version, index) => (
+                <div key={index} className={index > 0 ? "pt-3 border-t" : ""}>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-1">
+                      <Badge variant="outline" className={version.isSecurityUpdate ? "bg-green-100 text-green-800" : ""}>
+                        v{version.version}
+                      </Badge>
+                      {version.isSecurityUpdate && (
+                        <Badge variant="secondary" className="text-[10px] h-5">Security Update</Badge>
+                      )}
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {version.date.toLocaleDateString()}
+                    </span>
+                  </div>
+                  
+                  <ul className="space-y-1 list-disc list-inside text-xs ml-1">
+                    {version.changes.map((change, changeIndex) => (
+                      <li key={changeIndex}>{change}</li>
+                    ))}
+                  </ul>
+                  
+                  {version.requiresRestart && (
+                    <p className="text-xs text-amber-600 mt-1 flex items-center">
+                      <Info className="h-3.5 w-3.5 mr-1" />
+                      This update requires app restart
+                    </p>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </CardContent>
