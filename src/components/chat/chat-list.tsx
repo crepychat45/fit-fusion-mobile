@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Lock, Shield } from "lucide-react";
+import { Lock, Shield, CheckCircle } from "lucide-react";
 
 interface ChatListProps {
   conversations: ChatConversation[];
@@ -31,7 +31,7 @@ export function ChatList({
   return (
     <ScrollArea className={cn(
       "pr-4",
-      isMobile ? "h-[calc(100vh-240px)]" : "h-[calc(100vh-220px)]" 
+      isMobile ? "h-[calc(100vh-200px)]" : "h-[calc(100vh-180px)]" 
     )}>
       <div className="space-y-2 py-2">
         {conversations.length === 0 ? (
@@ -59,7 +59,7 @@ export function ChatList({
                 onClick={() => onSelectConversation(conversation.id)}
               >
                 <div className="flex items-center space-x-3">
-                  <Avatar className="h-9 w-9 relative">
+                  <Avatar className="h-10 w-10 relative">
                     <AvatarImage src={otherUser.avatar} alt={otherUser.name} />
                     <AvatarFallback>
                       {otherUser.name.substring(0, 2).toUpperCase()}
@@ -69,17 +69,17 @@ export function ChatList({
                     )}
                   </Avatar>
                   <div>
-                    <div className="font-medium flex items-center gap-1">
+                    <div className="font-medium flex items-center gap-1 text-base">
                       {otherUser.name}
                       {isSecure && (
                         securityLevel === 'ephemeral' ? (
                           <Shield className={cn(
-                            "h-3 w-3 ml-1", 
+                            "h-3.5 w-3.5 ml-1", 
                             isSelected ? "text-primary-foreground" : "text-purple-500"
                           )} />
                         ) : (
                           <Lock className={cn(
-                            "h-3 w-3 ml-1", 
+                            "h-3.5 w-3.5 ml-1", 
                             isSelected ? "text-primary-foreground" : "text-green-500"
                           )} />
                         )
@@ -87,8 +87,8 @@ export function ChatList({
                     </div>
                     {conversation.lastMessage && (
                       <p className={cn(
-                        "text-xs truncate",
-                        isMobile ? "max-w-[200px]" : "max-w-[170px]",
+                        "text-sm truncate",
+                        isMobile ? "max-w-[220px]" : "max-w-[200px]",
                         isSelected 
                           ? "text-primary-foreground/80" 
                           : "text-muted-foreground"
@@ -101,7 +101,7 @@ export function ChatList({
                 <div className="flex flex-col items-end space-y-1">
                   {conversation.lastMessage && (
                     <span className={cn(
-                      "text-[10px]",
+                      "text-xs",
                       isSelected 
                         ? "text-primary-foreground/70" 
                         : "text-muted-foreground"
@@ -111,11 +111,17 @@ export function ChatList({
                   )}
                   {conversation.unreadCount > 0 && (
                     <Badge variant={isSelected ? "outline" : "default"} className={cn(
-                      "text-xs h-4 min-w-[18px] flex items-center justify-center",
+                      "text-xs h-5 min-w-[20px] flex items-center justify-center",
                       isSelected && "border-primary-foreground text-primary-foreground"
                     )}>
                       {conversation.unreadCount}
                     </Badge>
+                  )}
+                  {conversation.verified && (
+                    <CheckCircle className={cn(
+                      "h-3.5 w-3.5", 
+                      isSelected ? "text-primary-foreground/80" : "text-blue-500"
+                    )} />
                   )}
                 </div>
               </div>

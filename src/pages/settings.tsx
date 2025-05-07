@@ -35,10 +35,15 @@ import {
   MessageSquare,
   AlertTriangle,
   Eraser,
-  Users
+  Users,
+  RefreshCcw,
+  CheckCircle,
+  Download,
+  Info
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -48,6 +53,7 @@ const Settings = () => {
   const [isClearingData, setIsClearingData] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [activeTab, setActiveTab] = useState("appearance");
+  const appVersion = "4.5.0"; // Updated version
 
   // Chat settings states
   const [chatEncryption, setChatEncryption] = useState(true);
@@ -58,6 +64,20 @@ const Settings = () => {
   const [chatAutoTranslate, setChatAutoTranslate] = useState(false);
   const [autoDeleteDays, setAutoDeleteDays] = useState("30");
   const [mediaQuality, setMediaQuality] = useState("high");
+  
+  // New version check states
+  const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
+  const [updateProgress, setUpdateProgress] = useState(0);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [lastChecked, setLastChecked] = useState(new Date());
+  const [showChangelog, setShowChangelog] = useState(false);
+
+  // New privacy settings
+  const [biometricEnabled, setBiometricEnabled] = useState(false);
+  const [twoFactorAuth, setTwoFactorAuth] = useState(false);
+  const [screenshotBlocking, setScreenshotBlocking] = useState(false);
+  const [secureStorage, setSecureStorage] = useState(true);
 
   const {
     theme,
@@ -128,13 +148,87 @@ const Settings = () => {
     });
     // In a real app, this would generate and download a file
   };
+  
+  const checkForUpdates = () => {
+    setIsCheckingUpdate(true);
+    
+    // Show checking animation
+    toast({
+      title: "Checking for updates...",
+      description: "Please wait while we check for the latest version.",
+    });
+    
+    // Simulate checking for updates
+    setTimeout(() => {
+      setIsCheckingUpdate(false);
+      setLastChecked(new Date());
+      setUpdateAvailable(true);
+      
+      toast({
+        title: "Update available",
+        description: "Version 4.5.1 is now available with new features.",
+        variant: "default",
+      });
+    }, 2000);
+  };
+  
+  const installUpdate = () => {
+    setIsUpdating(true);
+    setUpdateProgress(0);
+    
+    toast({
+      title: "Installing update",
+      description: "Starting download of version 4.5.1...",
+    });
+    
+    // Simulate update progress
+    const interval = setInterval(() => {
+      setUpdateProgress(prev => {
+        const newProgress = prev + 10;
+        
+        if (newProgress >= 100) {
+          clearInterval(interval);
+          setIsUpdating(false);
+          setUpdateAvailable(false);
+          
+          toast({
+            title: "Update complete",
+            description: "FitFusion has been updated to version 4.5.1.",
+            variant: "default",
+          });
+          
+          return 0;
+        }
+        
+        // Show progress toasts at specific intervals
+        if (newProgress === 30) {
+          toast({
+            title: "Download progress: 30%",
+            description: "Downloading update files...",
+          });
+        } else if (newProgress === 60) {
+          toast({
+            title: "Download progress: 60%",
+            description: "Preparing to install...",
+          });
+        } else if (newProgress === 90) {
+          toast({
+            title: "Download progress: 90%",
+            description: "Almost done...",
+          });
+        }
+        
+        return newProgress;
+      });
+    }, 500);
+  };
 
   return (
     <div className="min-h-screen bg-background pb-16">
       {/* Header */}
       <div className="fitness-gradient pt-12 pb-6 px-4">
         <h1 className="text-3xl font-bold text-white">Settings</h1>
-        <p className="text-white/80 text-sm mt-1">App Version 3.5.2</p>
+        <p className="text-white/80 text-sm mt-1">App Version {appVersion}</p>
       </div>
       
       <div className="px-4 py-6">
@@ -407,7 +501,7 @@ const Settings = () => {
             </Card>
           </TabsContent>
           
-          {/* Privacy Tab */}
+          {/* Privacy Tab - Enhanced */}
           <TabsContent value="privacy" className="space-y-4">
             <Card>
               <CardHeader>
@@ -427,7 +521,11 @@ const Settings = () => {
                     <Label htmlFor="biometric-login" className="block">Biometric Login</Label>
                     <p className="text-xs text-muted-foreground">Use fingerprint or face recognition</p>
                   </div>
-                  <Switch id="biometric-login" defaultChecked />
+                  <Switch 
+                    id="biometric-login" 
+                    checked={biometricEnabled} 
+                    onCheckedChange={setBiometricEnabled} 
+                  />
                 </div>
                 
                 <div className="flex items-center justify-between">
@@ -444,6 +542,43 @@ const Settings = () => {
                     <p className="text-xs text-muted-foreground">Allow location tracking for workouts</p>
                   </div>
                   <Switch id="location-tracking" defaultChecked />
+                </div>
+                
+                {/* New Privacy Options */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="two-factor-auth" className="block">Two-Factor Authentication</Label>
+                    <p className="text-xs text-muted-foreground">Require verification code at login</p>
+                  </div>
+                  <Switch 
+                    id="two-factor-auth" 
+                    checked={twoFactorAuth} 
+                    onCheckedChange={setTwoFactorAuth} 
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="screenshot-blocking" className="block">Screenshot Blocking</Label>
+                    <p className="text-xs text-muted-foreground">Prevent screenshots of sensitive data</p>
+                  </div>
+                  <Switch 
+                    id="screenshot-blocking" 
+                    checked={screenshotBlocking} 
+                    onCheckedChange={setScreenshotBlocking} 
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="secure-storage" className="block">Secure Storage</Label>
+                    <p className="text-xs text-muted-foreground">Encrypt all local data on device</p>
+                  </div>
+                  <Switch 
+                    id="secure-storage" 
+                    checked={secureStorage} 
+                    onCheckedChange={setSecureStorage} 
+                  />
                 </div>
                 
                 <Button 
@@ -747,7 +882,7 @@ const Settings = () => {
             </Card>
           </TabsContent>
           
-          {/* About Tab */}
+          {/* About Tab - Enhanced with changelog and version check */}
           <TabsContent value="about" className="space-y-4">
             <Card>
               <CardHeader>
@@ -759,25 +894,146 @@ const Settings = () => {
                     <Dumbbell className="h-8 w-8 text-primary" />
                   </div>
                   <h3 className="text-xl font-bold">FitFusion</h3>
-                  <p className="text-sm text-muted-foreground">Version 3.5.2</p>
+                  <p className="text-sm text-muted-foreground">Version {appVersion}</p>
                 </div>
                 
-                <p>
-                  FitFusion is a comprehensive fitness platform designed to help you track your workouts, monitor your progress, and achieve your fitness goals with personalized guidance.
-                </p>
-                
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium">New in Version 3.5.2:</h4>
-                  <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
-                    <li>Enhanced security features</li>
-                    <li>Improved AI assistant</li>
-                    <li>Added language preferences</li>
-                    <li>New unit system options</li>
-                    <li>Performance improvements</li>
-                  </ul>
+                <div className="flex justify-between items-center py-2">
+                  <div>
+                    <h4 className="font-medium">Current version</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Last checked: {lastChecked.toLocaleDateString()} {lastChecked.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    </p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={checkForUpdates} 
+                    disabled={isCheckingUpdate || isUpdating}
+                    className="gap-2"
+                  >
+                    {isCheckingUpdate ? (
+                      <>
+                        <RefreshCcw className="h-4 w-4 animate-spin" />
+                        Checking...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCcw className="h-4 w-4" />
+                        Check for updates
+                      </>
+                    )}
+                  </Button>
                 </div>
                 
-                <div className="space-y-2">
+                {updateAvailable && (
+                  <div className="bg-muted/50 p-3 rounded-md border border-amber-200">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center">
+                        <AlertTriangle className="h-4 w-4 text-amber-500 mr-2" />
+                        <span className="font-medium">Update available: v4.5.1</span>
+                      </div>
+                      {isUpdating ? (
+                        <span className="text-xs text-muted-foreground">{updateProgress}%</span>
+                      ) : (
+                        <Button 
+                          size="sm"
+                          onClick={installUpdate}
+                          className="flex items-center gap-1"
+                        >
+                          <Download className="h-4 w-4 mr-1" />
+                          Install
+                        </Button>
+                      )}
+                    </div>
+                    
+                    {isUpdating && (
+                      <Progress value={updateProgress} className="h-2 mt-2" />
+                    )}
+                    
+                    {!isUpdating && (
+                      <div className="mt-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-xs p-0 h-auto underline"
+                          onClick={() => setShowChangelog(!showChangelog)}
+                        >
+                          {showChangelog ? "Hide changelog" : "View changelog"}
+                        </Button>
+                        
+                        {showChangelog && (
+                          <div className="mt-2 text-sm bg-background/80 p-2 rounded border">
+                            <p className="font-medium text-xs mb-1">What's new in v4.5.1:</p>
+                            <ul className="text-xs space-y-1 list-disc ml-4">
+                              <li>Enhanced security features and dark mode optimization</li>
+                              <li>Improved chat performance on all devices</li>
+                              <li>Fixed display issues in mobile view</li>
+                              <li>Added new profile features and updated workout tracking</li>
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
+                    {updateProgress === 100 && (
+                      <div className="mt-2 flex items-center text-green-500">
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        <span className="text-sm">Update completed! Restarting...</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                <div className="space-y-4 mt-4">
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium">New in Version {appVersion}:</h4>
+                    <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
+                      <li>Enhanced mobile layouts and responsive design</li>
+                      <li>Fixed dark mode issues across all screens</li>
+                      <li>Improved chat security with end-to-end encryption</li>
+                      <li>Added version checking with interactive animations</li>
+                      <li>Performance optimizations for better speed</li>
+                      <li>Bug fixes related to notifications</li>
+                    </ul>
+                  </div>
+                  
+                  <div className="pt-3 border-t">
+                    <h4 className="text-sm font-medium">Previous Updates:</h4>
+                    <div className="mt-2 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          <Badge variant="outline">v4.4.0</Badge>
+                          <span className="text-xs text-muted-foreground">(Apr 15, 2025)</span>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-xs h-6"
+                        >
+                          Details
+                        </Button>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          <Badge variant="outline" className="bg-green-100 text-green-800">
+                            v4.3.5
+                          </Badge>
+                          <Badge variant="secondary" className="text-[10px] h-5">Security Update</Badge>
+                          <span className="text-xs text-muted-foreground">(Mar 28, 2025)</span>
+                        </div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-xs h-6"
+                        >
+                          Details
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2 pt-3 border-t">
                   <h4 className="text-sm font-medium">Contact Us</h4>
                   <p className="text-muted-foreground">
                     {t('settings.about.contact')}
