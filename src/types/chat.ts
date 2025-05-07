@@ -67,6 +67,12 @@ export interface ChatMessage {
     language: string;
   };
   securityLevel?: 'standard' | 'encrypted' | 'private' | 'ephemeral';
+  serverReceipt?: {
+    deliveredToServer: boolean;
+    timestamp?: Date;
+    serverSignature?: string;
+  };
+  backupStatus?: 'pending' | 'completed' | 'failed' | 'excluded';
 }
 
 export interface ChatReaction {
@@ -105,6 +111,8 @@ export interface ChatConversation {
     screenshotDetection?: boolean;
     mediaProtection?: boolean;
   };
+  databaseId?: string; // Reference to database record
+  syncStatus?: 'synced' | 'pending' | 'failed';
 }
 
 export interface ChatSettings {
@@ -118,4 +126,24 @@ export interface ChatSettings {
   mediaQuality: 'low' | 'medium' | 'high' | 'original';
   cloudBackupEnabled: boolean;
   blockUnknownSenders: boolean;
+  version?: string;
+  lastUpdateChecked?: Date;
+  updateAvailable?: boolean;
+  dataStorage?: {
+    localStorageLimit?: number; // in MB
+    cloudStorageLimit?: number; // in MB
+    autoCleanup?: boolean;
+    cleanupThreshold?: number; // percentage
+  };
 }
+
+export interface ChatVersion {
+  current: string;
+  latest?: string;
+  updateAvailable: boolean;
+  releaseNotes?: string;
+  minRequiredVersion?: string;
+  forceUpdate?: boolean;
+  lastChecked: Date;
+}
+

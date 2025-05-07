@@ -21,6 +21,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Mock data for chat
 const mockUsers: ChatUser[] = [{
@@ -121,6 +122,7 @@ export function FitfusionChat({
   const [awaitingBiometricVerification, setAwaitingBiometricVerification] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const currentUserId = "current";
+  const isMobile = useIsMobile();
 
   // Enter fullscreen mode
   const enterFullScreen = () => {
@@ -537,6 +539,19 @@ export function FitfusionChat({
     "h-full"
   );
 
+  // Calculate dynamic heights based on device and fullscreen state
+  const chatSidebarHeight = isFullScreen 
+    ? 'calc(100vh - 73px)' 
+    : isMobile 
+      ? 'calc(100vh - 170px)' 
+      : 'calc(100vh - 200px)';
+
+  const chatMessageAreaHeight = isFullScreen 
+    ? 'calc(100vh - 180px)' 
+    : isMobile 
+      ? 'calc(100vh - 250px)' 
+      : 'calc(100vh - 300px)';
+
   return (
     <Card className={chatContainerClasses}>
       <CardHeader className="p-4 border-b">
@@ -816,7 +831,8 @@ export function FitfusionChat({
         isFullScreen ? "flex-grow" : ""
       )}>
         {/* Chat Sidebar - People List */}
-        <div className="border-r md:block" style={{ height: isFullScreen ? 'calc(100vh - 73px)' : 'calc(100vh - 200px)' }}>
+        <div className={cn("border-r md:block", isMobile && !selectedConversationId ? "block" : isMobile && selectedConversationId ? "hidden" : "block")} 
+            style={{ height: chatSidebarHeight }}>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <div className="p-2 border-b">
               <TabsList className="w-full grid grid-cols-2">
@@ -853,7 +869,7 @@ export function FitfusionChat({
             </TabsContent>
             
             <TabsContent value="contacts" className="m-0">
-              <ScrollArea className="h-[400px] md:h-[calc(100vh-230px)]">
+              <ScrollArea className={`h-[400px] md:h-[calc(100vh-230px)] ${isMobile ? 'h-[calc(100vh-230px)]' : ''}`}>
                 <div className="p-4 space-y-4">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="text-sm font-medium">Your Contacts</h3>
@@ -907,8 +923,9 @@ export function FitfusionChat({
         {/* Chat Main Area */}
         <div className={cn(
           "md:col-span-2 flex flex-col border-l h-full", 
-          selectedConversationId ? "block" : "hidden md:block"
-        )} style={{ height: isFullScreen ? 'calc(100vh - 73px)' : 'calc(100vh - 200px)' }}>
+          selectedConversationId ? "block" : "hidden md:block",
+          isMobile && selectedConversationId ? "block" : ""
+        )} style={{ height: chatSidebarHeight }}>
           {selectedConversationId && otherParticipant ? (
             <>
               <div className="p-4 border-b flex items-center justify-between">
@@ -916,7 +933,7 @@ export function FitfusionChat({
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="md:hidden mr-2" 
+                    className="mr-2" 
                     onClick={() => setSelectedConversationId(undefined)}
                   >
                     <ArrowLeft className="h-4 w-4" />
@@ -977,7 +994,7 @@ export function FitfusionChat({
               {/* Messages Area */}
               <div className={cn(
                 "flex-1 overflow-hidden",
-                isFullScreen ? "h-[calc(100vh-180px)]" : "h-[calc(100vh-300px)]"
+                chatMessageAreaHeight ? `h-[${chatMessageAreaHeight}]` : ""
               )}>
                 <ScrollArea className="h-full p-4" ref={messagesContainerRef}>
                   <div className="space-y-4">

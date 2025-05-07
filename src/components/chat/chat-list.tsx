@@ -6,6 +6,8 @@ import { formatDistanceToNow } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Lock } from "lucide-react";
 
 interface ChatListProps {
   conversations: ChatConversation[];
@@ -23,9 +25,14 @@ export function ChatList({
   const getOtherParticipant = (conversation: ChatConversation): ChatUser => {
     return conversation.participants.find(p => p.id !== currentUserId) || conversation.participants[0];
   };
+  
+  const isMobile = useIsMobile();
 
   return (
-    <ScrollArea className="h-[400px] md:h-[calc(100vh-230px)] pr-4">
+    <ScrollArea className={cn(
+      "pr-4",
+      isMobile ? "h-[calc(100vh-230px)]" : "h-[400px] md:h-[calc(100vh-230px)]" 
+    )}>
       <div className="space-y-2 py-2">
         {conversations.length === 0 ? (
           <div className="flex justify-center items-center h-32 text-muted-foreground p-4">
@@ -35,6 +42,7 @@ export function ChatList({
           conversations.map((conversation) => {
             const otherUser = getOtherParticipant(conversation);
             const isSelected = selectedConversationId === conversation.id;
+            const isSecure = conversation.securitySettings?.encryptionEnabled;
             
             return (
               <div
@@ -58,10 +66,19 @@ export function ChatList({
                     )}
                   </Avatar>
                   <div>
-                    <div className="font-medium">{otherUser.name}</div>
+                    <div className="font-medium flex items-center gap-1">
+                      {otherUser.name}
+                      {isSecure && (
+                        <Lock className={cn(
+                          "h-3 w-3 ml-1", 
+                          isSelected ? "text-primary-foreground" : "text-green-500"
+                        )} />
+                      )}
+                    </div>
                     {conversation.lastMessage && (
                       <p className={cn(
-                        "text-xs truncate max-w-[150px]",
+                        "text-xs truncate",
+                        isMobile ? "max-w-[200px]" : "max-w-[150px]",
                         isSelected 
                           ? "text-primary-foreground/80" 
                           : "text-muted-foreground"

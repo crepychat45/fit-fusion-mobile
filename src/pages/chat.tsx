@@ -9,10 +9,12 @@ import { AuthForm } from "@/components/auth/auth-form";
 import { useToast } from "@/components/ui/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { userProfile } from "@/data/user";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const ChatPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   
   // Simulate authentication state
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -87,7 +89,7 @@ const ChatPage = () => {
         </div>
       )}
       
-      <div className={`flex-1 flex flex-col ${isAuthenticated ? '' : 'mt-6'} pb-20`}>
+      <div className={`flex-1 flex flex-col ${isAuthenticated ? '' : 'mt-6'} ${isMobile ? 'pb-24' : 'pb-20'}`}>
         {isAuthenticated ? (
           <div className="w-full h-full flex-1">
             <FitfusionChat onLogout={handleLogout} />
