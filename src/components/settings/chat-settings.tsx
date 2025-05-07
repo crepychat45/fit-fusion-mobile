@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -156,7 +157,8 @@ export function ChatSettingsPanel() {
           toast({
             title: "Update complete",
             description: "FitFusion Chat has been updated to version 4.5.1.",
-            variant: "success",
+            // The error is here - changing from 'success' to 'default'
+            variant: "default", 
           });
 
           // Reset update success message after 3 seconds
