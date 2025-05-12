@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Eye, EyeOff, ArrowRight, Mail, Lock, UserPlus, LogIn } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 interface AuthFormProps {
   onSuccess?: () => void;
@@ -19,11 +20,29 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   // Form states
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        // User is already logged in, redirect or call onSuccess
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          navigate("/");
+        }
+      }
+    };
+    
+    checkAuth();
+  }, [navigate, onSuccess]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +50,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
     
     try {
       if (isSignUp) {
-        // Handle signup
+        // Handle signup - don't throw error immediately
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -41,12 +60,41 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
           }
         });
         
-        if (error) throw error;
+        if (error) {
+          console.error("Signup error:", error);
+          let errorMessage = error.message;
+          
+          // Handle specific error messages
+          if (error.message.includes("User already registered")) {
+            errorMessage = "This email is already registered. Please try logging in instead.";
+          }
+          
+          toast({
+            title: "Signup Failed",
+            description: errorMessage,
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
         
-        toast({
-          title: "Account created",
-          description: "Please check your email for verification instructions.",
-        });
+        // Check if user is created but needs email confirmation
+        if (data?.user?.identities?.length === 0) {
+          toast({
+            title: "Email already registered",
+            description: "This email is already registered. Please try logging in instead.",
+          });
+        } else {
+          toast({
+            title: "Account created",
+            description: "Please check your email for verification instructions.",
+          });
+        }
+        
+        // Call onSuccess callback only if we actually created a user successfully
+        if (data?.user && onSuccess) {
+          onSuccess();
+        }
       } else {
         // Handle login
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -54,19 +102,41 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
           password,
         });
         
-        if (error) throw error;
+        if (error) {
+          console.error("Login error:", error);
+          let errorMessage = error.message;
+          
+          // Better error messages for login failures
+          if (error.message.includes("Invalid login credentials")) {
+            errorMessage = "Invalid email or password. Please check your credentials and try again.";
+          } else if (error.message.includes("Email not confirmed")) {
+            errorMessage = "Please confirm your email before logging in.";
+          }
+          
+          toast({
+            title: "Login Failed",
+            description: errorMessage,
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
         
+        // Successful login
         toast({
           title: "Welcome back!",
           description: "You have been logged in successfully.",
         });
-      }
-      
-      // Call onSuccess callback if provided
-      if (onSuccess) {
-        onSuccess();
+        
+        // Call onSuccess callback if provided or navigate to home
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          navigate("/");
+        }
       }
     } catch (error: any) {
+      console.error("Auth error:", error);
       toast({
         title: isSignUp ? "Signup Failed" : "Login Failed",
         description: error.message || "There was a problem with authentication.",
@@ -74,6 +144,32 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
       });
     } finally {
       setLoading(false);
+    }
+  };
+  
+  // Handle social auth methods
+  const handleSocialAuth = async (provider: "google" | "apple" | "facebook") => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`
+        }
+      });
+      
+      if (error) {
+        toast({
+          title: "Social Login Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Social Login Failed",
+        description: error.message || "There was a problem with authentication.",
+        variant: "destructive",
+      });
     }
   };
   
@@ -137,6 +233,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
+                    minLength={6}
                     className="pl-10"
                   />
                   <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
@@ -162,7 +259,41 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
                     <Checkbox id="remember" />
                     <Label htmlFor="remember" className="text-sm">Remember me</Label>
                   </div>
-                  <Button variant="link" size="sm" className="px-0 text-sm">
+                  <Button 
+                    variant="link" 
+                    size="sm"
+                    type="button" 
+                    className="px-0 text-sm"
+                    onClick={async () => {
+                      if (!email) {
+                        toast({
+                          title: "Email Required",
+                          description: "Please enter your email address to reset your password.",
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                      
+                      try {
+                        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                          redirectTo: `${window.location.origin}/reset-password`,
+                        });
+                        
+                        if (error) throw error;
+                        
+                        toast({
+                          title: "Password Reset Email Sent",
+                          description: "Check your email for the password reset link.",
+                        });
+                      } catch (error: any) {
+                        toast({
+                          title: "Reset Failed",
+                          description: error.message || "Failed to send reset email.",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                  >
                     Forgot password?
                   </Button>
                 </div>
@@ -188,7 +319,11 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
           
           <TabsContent value="social">
             <div className="space-y-3">
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start" 
+                onClick={() => handleSocialAuth("google")}
+              >
                 <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                   <path
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -211,14 +346,22 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
                 Continue with Google
               </Button>
               
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => handleSocialAuth("apple")}
+              >
                 <svg className="mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.613 0 2.886.06 4.374 2.19-.13.09-2.383 1.37-2.383 4.19 0 3.26 2.854 4.42 2.955 4.45z" />
                 </svg>
                 Continue with Apple
               </Button>
               
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => handleSocialAuth("facebook")}
+              >
                 <svg className="mr-2 h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" />
                 </svg>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,13 +12,14 @@ export function VersionManager() {
   const latestVersion = "4.6.0";
   const [latestVersionAvailable, setLatestVersion] = useState(currentVersion);
   const [updateAvailable, setUpdateAvailable] = useState(false);
-  const [updateProgress, setUpdateProgress] = useState(0);
+  const [updateProgress, setUpdateProgress] = useState<number>(0);
   const [isUpdating, setIsUpdating] = useState(false);
   
   useEffect(() => {
     // Simulate checking for updates
     setTimeout(() => {
-      setUpdateAvailable(true);
+      setLatestVersion(latestVersion);
+      setUpdateAvailable(latestVersion !== currentVersion);
     }, 2000);
   }, []);
   
@@ -25,25 +27,26 @@ export function VersionManager() {
     setIsUpdating(true);
     setUpdateProgress(0);
     
-    // Using numbers for progress to fix the type error
+    // Using a variable for progress tracking to avoid type issues
+    let progress = 0;
     const timer = setInterval(() => {
-      setUpdateProgress(prev => {
-        const nextProgress = prev + 10;
-        if (nextProgress >= 100) {
-          clearInterval(timer);
-          setTimeout(() => {
-            setIsUpdating(false);
-            setLatestVersion(currentVersion);
-            setUpdateAvailable(false);
-            toast({
-              title: "Update Complete",
-              description: `Successfully updated to version ${currentVersion}`,
-            });
-          }, 500);
-          return 100;
-        }
-        return nextProgress;
-      });
+      progress += 10;
+      
+      // Update state with the new progress value
+      setUpdateProgress(progress);
+      
+      if (progress >= 100) {
+        clearInterval(timer);
+        setTimeout(() => {
+          setIsUpdating(false);
+          setLatestVersion(currentVersion);
+          setUpdateAvailable(false);
+          toast({
+            title: "Update Complete",
+            description: `Successfully updated to version ${latestVersion}`,
+          });
+        }, 500);
+      }
     }, 500);
   };
   
