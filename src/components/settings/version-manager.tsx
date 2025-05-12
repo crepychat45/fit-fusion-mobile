@@ -84,6 +84,8 @@ export function VersionManager({ initialVersion }: VersionManagerProps) {
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [changelogDialogOpen, setChangelogDialogOpen] = useState(false);
   const [selectedVersion, setSelectedVersion] = useState<VersionChange | null>(null);
+  // Add a separate state for local update progress tracking
+  const [localUpdateProgress, setLocalUpdateProgress] = useState(0);
 
   // Load version info from localStorage
   useEffect(() => {
@@ -177,7 +179,7 @@ export function VersionManager({ initialVersion }: VersionManagerProps) {
 
   const installUpdate = () => {
     setIsUpdating(true);
-    setUpdateProgress(0);
+    setLocalUpdateProgress(0);
     setVersionInfo(prev => ({
       ...prev, 
       updateProgress: 0, 
@@ -191,71 +193,67 @@ export function VersionManager({ initialVersion }: VersionManagerProps) {
     
     // Simulate update progress
     const interval = setInterval(() => {
-      setUpdateProgress(prev => {
-        const newProgress = prev + 10;
+      const newProgress = localUpdateProgress + 10;
+      setLocalUpdateProgress(newProgress);
+      
+      setVersionInfo(currentInfo => ({
+        ...currentInfo, 
+        updateProgress: newProgress,
+        updateStatus: newProgress < 50 ? 'downloading' : 'installing'
+      }));
+      
+      if (newProgress >= 100) {
+        clearInterval(interval);
+        setIsUpdating(false);
+        setUpdateSuccess(true);
+        
+        // Important: Update the current version to match the latest version
         setVersionInfo(currentInfo => ({
           ...currentInfo, 
-          updateProgress: newProgress,
-          updateStatus: newProgress < 50 ? 'downloading' : 'installing'
+          updateProgress: 100,
+          updateCompleted: true,
+          current: currentInfo.latest || currentInfo.current,
+          updateAvailable: false,
+          lastChecked: new Date(),
+          updateStatus: 'completed',
+          updateInstalled: true,
+          installationDate: new Date()
         }));
         
-        if (newProgress >= 100) {
-          clearInterval(interval);
-          setIsUpdating(false);
-          setUpdateSuccess(true);
-          
-          // Important: Update the current version to match the latest version
+        toast({
+          title: "Update complete",
+          description: `FitFusion Chat has been updated to version ${versionInfo.latest}.`,
+          variant: "default", 
+        });
+
+        // Reset update success message after 3 seconds
+        setTimeout(() => {
+          setUpdateSuccess(false);
           setVersionInfo(currentInfo => ({
             ...currentInfo, 
-            updateProgress: 100,
-            updateCompleted: true,
-            current: currentInfo.latest || currentInfo.current,
-            updateAvailable: false,
-            lastChecked: new Date(),
-            updateStatus: 'completed',
-            updateInstalled: true,
-            installationDate: new Date()
+            updateCompleted: false, 
+            updateProgress: 0
           }));
-          
-          toast({
-            title: "Update complete",
-            description: `FitFusion Chat has been updated to version ${versionInfo.latest}.`,
-            variant: "default", 
-          });
-
-          // Reset update success message after 3 seconds
-          setTimeout(() => {
-            setUpdateSuccess(false);
-            setVersionInfo(currentInfo => ({
-              ...currentInfo, 
-              updateCompleted: false, 
-              updateProgress: 0
-            }));
-          }, 3000);
-          
-          return newProgress;
-        }
-        
-        // Show progress toasts at specific intervals
-        if (newProgress === 30) {
-          toast({
-            title: "Download progress: 30%",
-            description: "Downloading update files...",
-          });
-        } else if (newProgress === 60) {
-          toast({
-            title: "Installing: 60%",
-            description: "Preparing to install...",
-          });
-        } else if (newProgress === 90) {
-          toast({
-            title: "Installing: 90%",
-            description: "Almost done...",
-          });
-        }
-        
-        return newProgress;
-      });
+        }, 3000);
+      }
+      
+      // Show progress toasts at specific intervals
+      if (newProgress === 30) {
+        toast({
+          title: "Download progress: 30%",
+          description: "Downloading update files...",
+        });
+      } else if (newProgress === 60) {
+        toast({
+          title: "Installing: 60%",
+          description: "Preparing to install...",
+        });
+      } else if (newProgress === 90) {
+        toast({
+          title: "Installing: 90%",
+          description: "Almost done...",
+        });
+      }
     }, 500);
   };
 
