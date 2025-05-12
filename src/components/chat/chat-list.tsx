@@ -117,7 +117,7 @@ export function ChatList({
                       {conversation.unreadCount}
                     </Badge>
                   )}
-                  {conversation.verified && (
+                  {otherUser.isVerified && (
                     <CheckCircle className={cn(
                       "h-3.5 w-3.5", 
                       isSelected ? "text-primary-foreground/80" : "text-blue-500"
