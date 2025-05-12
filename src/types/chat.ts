@@ -1,10 +1,10 @@
-
 export interface ChatUser {
   id: string;
   name: string;
   avatar?: string;
   status?: 'online' | 'offline' | 'away';
   lastSeen?: Date;
+  isVerified?: boolean;
   email?: string;
   phoneNumber?: string;
   bio?: string;
@@ -19,7 +19,6 @@ export interface ChatUser {
     }
   };
   blockedUsers?: string[];
-  isVerified?: boolean;
 }
 
 export interface ChatAttachment {
