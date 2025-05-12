@@ -1,3 +1,4 @@
+
 export interface ChatUser {
   id: string;
   name: string;
@@ -19,6 +20,9 @@ export interface ChatUser {
     }
   };
   blockedUsers?: string[];
+  securityLevel?: 'standard' | 'enhanced' | 'maximum';
+  twoFactorEnabled?: boolean;
+  lastSecurityCheck?: Date;
 }
 
 export interface ChatAttachment {
@@ -33,6 +37,8 @@ export interface ChatAttachment {
   createdAt?: Date;
   encryptionKey?: string;
   securityLevel?: 'standard' | 'encrypted' | 'ephemeral';
+  virusScanStatus?: 'pending' | 'clean' | 'infected';
+  hashSignature?: string;
 }
 
 export interface ChatMessage {
@@ -72,6 +78,7 @@ export interface ChatMessage {
     serverSignature?: string;
   };
   backupStatus?: 'pending' | 'completed' | 'failed' | 'excluded';
+  validationStatus?: 'valid' | 'invalid' | 'pending';
 }
 
 export interface ChatReaction {
@@ -109,6 +116,8 @@ export interface ChatConversation {
     disappearingMessageTimeout?: number; // in seconds
     screenshotDetection?: boolean;
     mediaProtection?: boolean;
+    endToEndEncryption?: boolean;
+    encryptionProtocol?: string;
   };
   databaseId?: string; // Reference to database record
   syncStatus?: 'synced' | 'pending' | 'failed';
@@ -134,6 +143,12 @@ export interface ChatSettings {
     autoCleanup?: boolean;
     cleanupThreshold?: number; // percentage
   };
+  privacySettings?: {
+    linkPreviews?: boolean;
+    messageValidation?: boolean;
+    mediaScanning?: boolean;
+    autoBlockSuspicious?: boolean;
+  };
 }
 
 export interface ChatVersion {
@@ -148,6 +163,10 @@ export interface ChatVersion {
   isCheckingUpdate?: boolean;
   updateProgress?: number;
   updateCompleted?: boolean;
+  updateInstalled?: boolean;
+  installationDate?: Date;
+  updateError?: string;
+  updateStatus?: 'not_started' | 'downloading' | 'installing' | 'completed' | 'failed';
 }
 
 export interface VersionChange {

@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Bell, Check, Download, Lock, RefreshCcw, Shield, Smartphone, AlertTriangle, CheckCircle, Clock, Info } from "lucide-react";
 import { ChatSettings, ChatVersion } from "@/types/chat";
+import { supabase } from "@/integrations/supabase/client";
 
 export function ChatSettingsPanel() {
   const { toast } = useToast();
@@ -24,6 +25,12 @@ export function ChatSettingsPanel() {
     cloudBackupEnabled: true,
     blockUnknownSenders: false,
     version: '4.5.0',
+    privacySettings: {
+      linkPreviews: true,
+      messageValidation: true,
+      mediaScanning: true,
+      autoBlockSuspicious: false
+    }
   });
 
   const [versionInfo, setVersionInfo] = useState<ChatVersion>({
@@ -34,6 +41,8 @@ export function ChatSettingsPanel() {
     isCheckingUpdate: false,
     updateProgress: 0,
     updateCompleted: false,
+    updateInstalled: false,
+    updateStatus: 'not_started',
     changelog: [
       {
         version: '4.5.0',
@@ -82,6 +91,43 @@ export function ChatSettingsPanel() {
   const [showFullChangelog, setShowFullChangelog] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
   
+  // Load saved settings from localStorage on component mount
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('chat-settings');
+    if (savedSettings) {
+      setSettings(JSON.parse(savedSettings));
+    }
+    
+    const savedVersionInfo = localStorage.getItem('chat-version-info');
+    if (savedVersionInfo) {
+      const parsedInfo = JSON.parse(savedVersionInfo);
+      // Convert string dates back to Date objects
+      if (parsedInfo.lastChecked) {
+        parsedInfo.lastChecked = new Date(parsedInfo.lastChecked);
+      }
+      if (parsedInfo.installationDate) {
+        parsedInfo.installationDate = new Date(parsedInfo.installationDate);
+      }
+      if (parsedInfo.changelog) {
+        parsedInfo.changelog = parsedInfo.changelog.map((change: any) => ({
+          ...change,
+          date: new Date(change.date)
+        }));
+      }
+      setVersionInfo(parsedInfo);
+    }
+  }, []);
+  
+  // Save settings to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem('chat-settings', JSON.stringify(settings));
+  }, [settings]);
+  
+  // Save version info to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('chat-version-info', JSON.stringify(versionInfo));
+  }, [versionInfo]);
+  
   const handleToggle = (key: keyof ChatSettings) => {
     setSettings(prev => ({
       ...prev,
@@ -97,13 +143,12 @@ export function ChatSettingsPanel() {
     setIsCheckingUpdate(true);
     setVersionInfo(prev => ({...prev, isCheckingUpdate: true}));
     
-    // Show checking animation
     toast({
       title: "Checking for updates...",
       description: "Please wait while we check for the latest version.",
     });
     
-    // Simulate checking for updates
+    // Simulate a server call to check for updates
     setTimeout(() => {
       setVersionInfo(prev => ({
         ...prev,
@@ -113,6 +158,7 @@ export function ChatSettingsPanel() {
         updateAvailable: true,
         releaseNotes: 'Added new security features, improved chat performance, fixed dark mode, and enhanced mobile layouts.',
         lastChecked: new Date(),
+        updateStatus: 'not_started'
       }));
       
       setIsCheckingUpdate(false);
@@ -128,7 +174,11 @@ export function ChatSettingsPanel() {
   const installUpdate = () => {
     setIsUpdating(true);
     setUpdateProgress(0);
-    setVersionInfo(prev => ({...prev, updateProgress: 0}));
+    setVersionInfo(prev => ({
+      ...prev, 
+      updateProgress: 0, 
+      updateStatus: 'downloading'
+    }));
     
     toast({
       title: "Installing update",
@@ -139,12 +189,18 @@ export function ChatSettingsPanel() {
     const interval = setInterval(() => {
       setUpdateProgress(prev => {
         const newProgress = prev + 10;
-        setVersionInfo(currentInfo => ({...currentInfo, updateProgress: newProgress}));
+        setVersionInfo(currentInfo => ({
+          ...currentInfo, 
+          updateProgress: newProgress,
+          updateStatus: newProgress < 50 ? 'downloading' : 'installing'
+        }));
         
         if (newProgress >= 100) {
           clearInterval(interval);
           setIsUpdating(false);
           setUpdateSuccess(true);
+          
+          // Important: Update the current version to match the latest version
           setVersionInfo(currentInfo => ({
             ...currentInfo, 
             updateProgress: 100,
@@ -152,19 +208,32 @@ export function ChatSettingsPanel() {
             current: currentInfo.latest || currentInfo.current,
             updateAvailable: false,
             lastChecked: new Date(),
+            updateStatus: 'completed',
+            updateInstalled: true,
+            installationDate: new Date()
+          }));
+          
+          // Update the settings version to match the latest version
+          setSettings(currentSettings => ({
+            ...currentSettings,
+            version: versionInfo.latest || currentSettings.version,
+            lastUpdateChecked: new Date()
           }));
           
           toast({
             title: "Update complete",
-            description: "FitFusion Chat has been updated to version 4.5.1.",
-            // The error is here - changing from 'success' to 'default'
+            description: `FitFusion Chat has been updated to version ${versionInfo.latest}.`,
             variant: "default", 
           });
 
           // Reset update success message after 3 seconds
           setTimeout(() => {
             setUpdateSuccess(false);
-            setVersionInfo(currentInfo => ({...currentInfo, updateCompleted: false, updateProgress: 0}));
+            setVersionInfo(currentInfo => ({
+              ...currentInfo, 
+              updateCompleted: false, 
+              updateProgress: 0
+            }));
           }, 3000);
           
           return 0;
@@ -178,12 +247,12 @@ export function ChatSettingsPanel() {
           });
         } else if (newProgress === 60) {
           toast({
-            title: "Download progress: 60%",
+            title: "Installing: 60%",
             description: "Preparing to install...",
           });
         } else if (newProgress === 90) {
           toast({
-            title: "Download progress: 90%",
+            title: "Installing: 90%",
             description: "Almost done...",
           });
         }
@@ -199,6 +268,22 @@ export function ChatSettingsPanel() {
   
   const handleToggleFullChangelog = () => {
     setShowFullChangelog(!showFullChangelog);
+  };
+
+  const handlePrivacySettingToggle = (setting: keyof ChatSettings['privacySettings']) => {
+    if (settings.privacySettings) {
+      setSettings(prev => ({
+        ...prev,
+        privacySettings: {
+          ...prev.privacySettings,
+          [setting]: !prev.privacySettings?.[setting]
+        }
+      }));
+
+      toast({
+        description: `${setting.charAt(0).toUpperCase() + setting.slice(1).replace(/([A-Z])/g, ' $1')} has been ${!settings.privacySettings[setting] ? 'enabled' : 'disabled'}.`
+      });
+    }
   };
   
   return (
@@ -232,6 +317,12 @@ export function ChatSettingsPanel() {
                 <Clock className="h-3.5 w-3.5 mr-1 inline" />
                 Last checked: {versionInfo.lastChecked.toLocaleDateString()} {versionInfo.lastChecked.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
               </p>
+              {versionInfo.updateInstalled && versionInfo.installationDate && (
+                <p className="text-xs text-green-600 flex items-center mt-1">
+                  <CheckCircle className="h-3 w-3 mr-1 inline" />
+                  Installed: {versionInfo.installationDate.toLocaleDateString()} {versionInfo.installationDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                </p>
+              )}
             </div>
             <Button 
               variant="outline" 
@@ -276,7 +367,14 @@ export function ChatSettingsPanel() {
               </div>
               
               {isUpdating && (
-                <Progress value={updateProgress} className="h-2 mt-2 animate-pulse" />
+                <div className="mt-2">
+                  <Progress value={updateProgress} className="h-2 animate-pulse" />
+                  <p className="text-xs text-center mt-1">
+                    {versionInfo.updateStatus === 'downloading' 
+                      ? 'Downloading update...' 
+                      : 'Installing update...'}
+                  </p>
+                </div>
               )}
               
               {!isUpdating && (
@@ -413,6 +511,36 @@ export function ChatSettingsPanel() {
               <option value="ephemeral">Ephemeral</option>
             </select>
           </div>
+          
+          {/* New security option - Message Validation */}
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col space-y-1">
+              <Label htmlFor="messageValidation">Message Validation</Label>
+              <span className="text-xs text-muted-foreground">
+                Verify authenticity of incoming messages
+              </span>
+            </div>
+            <Switch 
+              id="messageValidation" 
+              checked={settings.privacySettings?.messageValidation ?? true} 
+              onCheckedChange={() => handlePrivacySettingToggle('messageValidation')} 
+            />
+          </div>
+          
+          {/* New security option - Media Scanning */}
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col space-y-1">
+              <Label htmlFor="mediaScanning">Media Scanning</Label>
+              <span className="text-xs text-muted-foreground">
+                Scan attachments for viruses and malware
+              </span>
+            </div>
+            <Switch 
+              id="mediaScanning" 
+              checked={settings.privacySettings?.mediaScanning ?? true} 
+              onCheckedChange={() => handlePrivacySettingToggle('mediaScanning')} 
+            />
+          </div>
         </CardContent>
         <CardFooter className="flex justify-between border-t pt-4">
           <div className="flex items-center text-sm text-muted-foreground">
@@ -543,6 +671,21 @@ export function ChatSettingsPanel() {
               <option value="30">30 days</option>
               <option value="90">90 days</option>
             </select>
+          </div>
+          
+          {/* New option - Link Previews */}
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col space-y-1">
+              <Label htmlFor="linkPreviews">Link Previews</Label>
+              <span className="text-xs text-muted-foreground">
+                Show previews for links shared in chat
+              </span>
+            </div>
+            <Switch 
+              id="linkPreviews" 
+              checked={settings.privacySettings?.linkPreviews ?? true} 
+              onCheckedChange={() => handlePrivacySettingToggle('linkPreviews')} 
+            />
           </div>
         </CardContent>
         <CardFooter className="flex justify-between border-t pt-4">

@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from "react";
+
+import React, { useState, useMemo, useEffect } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,6 +45,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { ChatSettingsPanel } from "@/components/settings/chat-settings";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -72,6 +74,8 @@ const Settings = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [lastChecked, setLastChecked] = useState(new Date());
   const [showChangelog, setShowChangelog] = useState(false);
+  const [updateInstalled, setUpdateInstalled] = useState(false);
+  const [installationDate, setInstallationDate] = useState<Date | null>(null);
 
   // New privacy settings
   const [biometricEnabled, setBiometricEnabled] = useState(false);
@@ -105,6 +109,37 @@ const Settings = () => {
   } = useSettings();
 
   const currentLanguage = useMemo(() => getLanguageByCode(language), [language]);
+
+  // Load saved version info from localStorage on component mount
+  useEffect(() => {
+    const savedVersionInfo = localStorage.getItem('app-version-info');
+    if (savedVersionInfo) {
+      const parsedInfo = JSON.parse(savedVersionInfo);
+      if (parsedInfo.updateInstalled) {
+        setUpdateInstalled(parsedInfo.updateInstalled);
+      }
+      if (parsedInfo.installationDate) {
+        setInstallationDate(new Date(parsedInfo.installationDate));
+      }
+      if (parsedInfo.lastChecked) {
+        setLastChecked(new Date(parsedInfo.lastChecked));
+      }
+      if (parsedInfo.updateAvailable !== undefined) {
+        setUpdateAvailable(parsedInfo.updateAvailable);
+      }
+    }
+  }, []);
+  
+  // Save version info to localStorage when relevant states change
+  useEffect(() => {
+    const versionInfo = {
+      updateInstalled,
+      installationDate,
+      lastChecked,
+      updateAvailable
+    };
+    localStorage.setItem('app-version-info', JSON.stringify(versionInfo));
+  }, [updateInstalled, installationDate, lastChecked, updateAvailable]);
 
   const handleClearData = async () => {
     setIsClearingData(true);
@@ -190,6 +225,8 @@ const Settings = () => {
           clearInterval(interval);
           setIsUpdating(false);
           setUpdateAvailable(false);
+          setUpdateInstalled(true);
+          setInstallationDate(new Date());
           
           toast({
             title: "Update complete",
@@ -618,210 +655,9 @@ const Settings = () => {
             </Card>
           </TabsContent>
           
-          {/* Chat Tab - New */}
+          {/* Chat Tab */}
           <TabsContent value="chat" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Chat Settings</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="chat-encryption" className="block">End-to-End Encryption</Label>
-                    <p className="text-xs text-muted-foreground">Secure your conversations with encryption</p>
-                  </div>
-                  <Switch 
-                    id="chat-encryption" 
-                    checked={chatEncryption} 
-                    onCheckedChange={setChatEncryption} 
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="typing-indicator" className="block">Typing Indicator</Label>
-                    <p className="text-xs text-muted-foreground">Show when others are typing</p>
-                  </div>
-                  <Switch 
-                    id="typing-indicator" 
-                    checked={showTypingIndicator} 
-                    onCheckedChange={setShowTypingIndicator} 
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="chat-notifications" className="block">Chat Notifications</Label>
-                    <p className="text-xs text-muted-foreground">Enable notifications for new messages</p>
-                  </div>
-                  <Switch 
-                    id="chat-notifications" 
-                    checked={chatNotifications} 
-                    onCheckedChange={setChatNotifications} 
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="chat-backup" className="block">Cloud Backup</Label>
-                    <p className="text-xs text-muted-foreground">Automatically back up your chats</p>
-                  </div>
-                  <Switch 
-                    id="chat-backup" 
-                    checked={chatBackup} 
-                    onCheckedChange={setChatBackup} 
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="auto-translate" className="block">Auto-Translate Messages</Label>
-                    <p className="text-xs text-muted-foreground">Automatically translate messages to your language</p>
-                  </div>
-                  <Switch 
-                    id="auto-translate" 
-                    checked={chatAutoTranslate} 
-                    onCheckedChange={setChatAutoTranslate} 
-                  />
-                </div>
-                
-                <Separator />
-                
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="auto-delete">Auto-Delete Messages</Label>
-                  <div className="flex items-center gap-2">
-                    <Switch 
-                      id="auto-delete" 
-                      checked={autoDeleteChats} 
-                      onCheckedChange={setAutoDeleteChats} 
-                    />
-                    {autoDeleteChats && (
-                      <Select value={autoDeleteDays} onValueChange={setAutoDeleteDays}>
-                        <SelectTrigger className="w-[100px]">
-                          <SelectValue placeholder="Select days" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="7">7 Days</SelectItem>
-                          <SelectItem value="30">30 Days</SelectItem>
-                          <SelectItem value="90">90 Days</SelectItem>
-                          <SelectItem value="365">1 Year</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="media-quality">Media Quality</Label>
-                  <Select value={mediaQuality} onValueChange={setMediaQuality}>
-                    <SelectTrigger className="w-[120px]">
-                      <SelectValue placeholder="Select quality" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="low">Low</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
-                      <SelectItem value="original">Original</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Shield className="h-5 w-5 mr-2 text-primary" />
-                  <span>Privacy & Security</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="read-receipts" className="block">Read Receipts</Label>
-                    <p className="text-xs text-muted-foreground">Let others know when you've read their messages</p>
-                  </div>
-                  <Switch id="read-receipts" defaultChecked />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="online-status" className="block">Online Status</Label>
-                    <p className="text-xs text-muted-foreground">Show when you're active in chat</p>
-                  </div>
-                  <Switch id="online-status" defaultChecked />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="message-blocking" className="block">Message Blocking</Label>
-                    <p className="text-xs text-muted-foreground">Block messages from non-contacts</p>
-                  </div>
-                  <Switch id="message-blocking" />
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Users className="h-5 w-5 mr-2 text-primary" />
-                  <span>Contacts & Groups</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-between"
-                  onClick={() => navigate("/chat/contacts")}
-                >
-                  <div className="flex items-center gap-3">
-                    <User className="h-5 w-5 text-muted-foreground" />
-                    <span>Manage Contacts</span>
-                  </div>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-between"
-                  onClick={() => navigate("/chat/blocked")}
-                >
-                  <div className="flex items-center gap-3">
-                    <AlertTriangle className="h-5 w-5 text-muted-foreground" />
-                    <span>Blocked Users</span>
-                  </div>
-                  <Badge className="ml-2 bg-destructive/10 text-destructive">3</Badge>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center text-destructive">
-                  <Eraser className="h-5 w-5 mr-2" />
-                  <span>Data Management</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={handleClearChatHistory}
-                >
-                  Clear Chat History
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={handleExportChats}
-                >
-                  Export Chat Data
-                </Button>
-              </CardContent>
-            </Card>
+            <ChatSettingsPanel />
           </TabsContent>
           
           {/* Developer Tab */}
@@ -894,7 +730,15 @@ const Settings = () => {
                     <Dumbbell className="h-8 w-8 text-primary" />
                   </div>
                   <h3 className="text-xl font-bold">FitFusion</h3>
-                  <p className="text-sm text-muted-foreground">Version {appVersion}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Version {updateInstalled ? "4.5.1" : appVersion}
+                  </p>
+                  {updateInstalled && installationDate && (
+                    <p className="text-xs text-green-600 mt-1 flex items-center justify-center">
+                      <CheckCircle className="h-3 w-3 mr-1 inline" />
+                      Updated on {installationDate.toLocaleDateString()}
+                    </p>
+                  )}
                 </div>
                 
                 <div className="flex justify-between items-center py-2">
@@ -986,7 +830,7 @@ const Settings = () => {
                 
                 <div className="space-y-4 mt-4">
                   <div className="space-y-2">
-                    <h4 className="text-sm font-medium">New in Version {appVersion}:</h4>
+                    <h4 className="text-sm font-medium">New in {updateInstalled ? "Version 4.5.1" : `Version ${appVersion}`}:</h4>
                     <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-1">
                       <li>Enhanced mobile layouts and responsive design</li>
                       <li>Fixed dark mode issues across all screens</li>
