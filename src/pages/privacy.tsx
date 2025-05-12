@@ -1,55 +1,31 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { 
   Shield, Lock, FileText, CloudOff, Share2, MapPin, 
   Bell, Trash2, Info, ChevronRight, ArrowUpRight, Download,
-  User, Fingerprint, Eye, Key, AlertTriangle, Settings, 
-  ChevronLeft, Code, FileCode2, Cpu, Database, Radio, 
-  Smartphone, CircleSlash, Cloud, RefreshCcw
+  User, Fingerprint, Eye, Key, AlertTriangle, 
+  ChevronLeft, FileCode2, Cpu, Radio
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { useLanguage } from "@/contexts/language-context";
-import { useSettings } from "@/contexts/settings-context";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogDescription,
-  DialogFooter,
-  DialogClose
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { 
-  Tabs, 
-  TabsContent, 
-  TabsList, 
-  TabsTrigger 
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { exportUserData, getEstimatedFileSize, downloadFile } from "@/utils/sound-exports";
+import { PrivacySettings } from "@/components/settings/privacy-settings";
 
 const Privacy = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
-  const { 
-    codeEditorEnabled, 
-    setCCodeEditorEnabled: setCodeEditorEnabled
-  } = useSettings();
   
   const [locationEnabled, setLocationEnabled] = useState(true);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -58,6 +34,7 @@ const Privacy = () => {
   const [runwaysEnabled, setRunwaysEnabled] = useState(false);
   const [aiAssistance, setAiAssistance] = useState(true);
   const [dataEncryption, setDataEncryption] = useState(true);
+  const [codeEditorEnabled, setCCodeEditorEnabled] = useState(false);
   
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [exportFormat, setExportFormat] = useState("json");
@@ -66,7 +43,35 @@ const Privacy = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   
+  const [showFullSettings, setShowFullSettings] = useState(false);
+  
   const handleToggle = (setting: string, value: boolean) => {
+    switch (setting) {
+      case "Location Services":
+        setLocationEnabled(value);
+        break;
+      case "Notifications":
+        setNotificationsEnabled(value);
+        break;
+      case "Data Synchronization":
+        setDataSync(value);
+        break;
+      case "Biometric Authentication":
+        setBiometricAuth(value);
+        break;
+      case "Runways Design":
+        setRunwaysEnabled(value);
+        break;
+      case "AI Assistant":
+        setAiAssistance(value);
+        break;
+      case "Code Editor":
+        setCCodeEditorEnabled(value);
+        break;
+      default:
+        break;
+    }
+    
     toast({
       title: `${setting} ${value ? 'Enabled' : 'Disabled'}`,
       description: `Your privacy settings have been updated.`,
@@ -79,7 +84,13 @@ const Privacy = () => {
         setExportDialogOpen(true);
         break;
       case "Privacy Policy":
-        window.open("https://example.com/privacy-policy", "_blank");
+        toast({
+          title: "Privacy Policy",
+          description: "Opening privacy policy document...",
+        });
+        setTimeout(() => {
+          window.open("https://example.com/privacy-policy", "_blank");
+        }, 500);
         break;
       case "Data Encryption":
         setDataEncryption(!dataEncryption);
@@ -95,19 +106,24 @@ const Privacy = () => {
         break;
       case "Clear Cached Data":
         toast({
-          title: "Data Purged",
-          description: "Cached data has been cleared from your device.",
+          title: "Clearing Cache",
+          description: "Removing temporary data from your device...",
         });
+        setTimeout(() => {
+          toast({
+            title: "Cache Cleared",
+            description: "All temporary data has been removed from your device.",
+          });
+        }, 1500);
         break;
       case "Manage Third-Party Access":
         toast({
           title: "Third-Party Data Access",
-          description: "Manage which services can access your data.",
+          description: "Managing connected services...",
         });
-        // Simulate opening a management page
         setTimeout(() => {
           toast({
-            title: "No connected services",
+            title: "No Connected Services",
             description: "You haven't granted access to any third-party services.",
           });
         }, 1500);
@@ -141,36 +157,49 @@ const Privacy = () => {
         anonymized: false
       };
       
-      const url = await exportUserData(config);
-      setDownloadUrl(url);
-      
-      setIsExporting(false);
-      
-      toast({
-        title: "Data Export Ready",
-        description: "Your data has been exported successfully. Click to download.",
-        action: (
-          <Button 
-            size="sm" 
-            variant="outline"
-            onClick={() => {
-              if (downloadUrl) {
-                const fileName = `fitfusion-export-${new Date().toISOString().slice(0, 10)}.${exportFormat}`;
-                downloadFile(downloadUrl, fileName);
-              }
-            }}
-          >
-            Download
-          </Button>
-        ),
-      });
+      // Simulate export process with delay
+      setTimeout(async () => {
+        try {
+          const url = await exportUserData(config);
+          setDownloadUrl(url);
+          setIsExporting(false);
+          
+          toast({
+            title: "Data Export Ready",
+            description: "Your data has been exported successfully. Click to download.",
+            action: (
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={() => {
+                  if (downloadUrl) {
+                    const fileName = `fitfusion-export-${new Date().toISOString().slice(0, 10)}.${exportFormat}`;
+                    downloadFile(downloadUrl, fileName);
+                  }
+                }}
+              >
+                Download
+              </Button>
+            ),
+          });
+        } catch (error) {
+          console.error("Export error:", error);
+          setIsExporting(false);
+          
+          toast({
+            title: "Export Failed",
+            description: "There was an error exporting your data. Please try again.",
+            variant: "destructive",
+          });
+        }
+      }, 2000);
     } catch (error) {
-      console.error("Export error:", error);
+      console.error("Export setup error:", error);
       setIsExporting(false);
       
       toast({
         title: "Export Failed",
-        description: "There was an error exporting your data. Please try again.",
+        description: "There was an error setting up the export. Please try again.",
         variant: "destructive",
       });
     }
@@ -245,279 +274,304 @@ const Privacy = () => {
           </Badge>
         </div>
         
-        <div className="space-y-6">
-          {/* Permissions Section */}
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground mb-3">PERMISSIONS</h3>
+        {showFullSettings ? (
+          <div className="space-y-6">
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="mb-4" 
+              onClick={() => setShowFullSettings(false)}
+            >
+              <ChevronLeft className="h-4 w-4 mr-2" />
+              Back to Basic Settings
+            </Button>
+            <PrivacySettings />
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {/* Permissions Section */}
+            <div>
+              <h3 className="text-sm font-medium text-muted-foreground mb-3">PERMISSIONS</h3>
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <MapPin className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">Location Services</p>
+                      <p className="text-xs text-muted-foreground">Used for workout tracking</p>
+                    </div>
+                  </div>
+                  <Switch 
+                    checked={locationEnabled} 
+                    onCheckedChange={(checked) => {
+                      handleToggle("Location Services", checked);
+                    }} 
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Bell className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">Notifications</p>
+                      <p className="text-xs text-muted-foreground">Workout reminders and updates</p>
+                    </div>
+                  </div>
+                  <Switch 
+                    checked={notificationsEnabled} 
+                    onCheckedChange={(checked) => {
+                      handleToggle("Notifications", checked);
+                    }} 
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <CloudOff className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">Data Synchronization</p>
+                      <p className="text-xs text-muted-foreground">Sync data across devices</p>
+                    </div>
+                  </div>
+                  <Switch 
+                    checked={dataSync} 
+                    onCheckedChange={(checked) => {
+                      handleToggle("Data Synchronization", checked);
+                    }} 
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Fingerprint className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">Biometric Authentication</p>
+                      <p className="text-xs text-muted-foreground">Use fingerprint or Face ID</p>
+                    </div>
+                  </div>
+                  <Switch 
+                    checked={biometricAuth} 
+                    onCheckedChange={(checked) => {
+                      handleToggle("Biometric Authentication", checked);
+                    }} 
+                  />
+                </div>
+                
+                {/* Developer Features Section */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <FileCode2 className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">Code Editor</p>
+                      <p className="text-xs text-muted-foreground">JavaScript, Python, C++, HTML/CSS</p>
+                    </div>
+                  </div>
+                  <Switch 
+                    checked={codeEditorEnabled} 
+                    onCheckedChange={(checked) => {
+                      handleToggle("Code Editor", checked);
+                    }} 
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Cpu className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">AI Assistant</p>
+                      <p className="text-xs text-muted-foreground">Personalized workout assistance</p>
+                    </div>
+                  </div>
+                  <Switch 
+                    checked={aiAssistance} 
+                    onCheckedChange={(checked) => {
+                      handleToggle("AI Assistant", checked);
+                    }} 
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Radio className="h-5 w-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium">Runways Design</p>
+                      <p className="text-xs text-muted-foreground">Advanced UI customization</p>
+                    </div>
+                  </div>
+                  <Switch 
+                    checked={runwaysEnabled} 
+                    onCheckedChange={(checked) => {
+                      handleToggle("Runways Design", checked);
+                    }} 
+                  />
+                </div>
+              </div>
+            </div>
             
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <MapPin className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">Location Services</p>
-                    <p className="text-xs text-muted-foreground">Used for workout tracking</p>
-                  </div>
-                </div>
-                <Switch 
-                  checked={locationEnabled} 
-                  onCheckedChange={(checked) => {
-                    setLocationEnabled(checked);
-                    handleToggle("Location Services", checked);
-                  }} 
-                />
-              </div>
+            {/* Data & Privacy Section */}
+            <div>
+              <h3 className="text-sm font-medium text-muted-foreground mb-3">DATA & PRIVACY</h3>
               
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Bell className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">Notifications</p>
-                    <p className="text-xs text-muted-foreground">Workout reminders and updates</p>
+              <div className="space-y-3">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between" 
+                  onClick={() => handleAction("Download Your Data")}
+                >
+                  <div className="flex items-center gap-3">
+                    <Download className="h-5 w-5 text-muted-foreground" />
+                    <span>Download Your Data</span>
                   </div>
-                </div>
-                <Switch 
-                  checked={notificationsEnabled} 
-                  onCheckedChange={(checked) => {
-                    setNotificationsEnabled(checked);
-                    handleToggle("Notifications", checked);
-                  }} 
-                />
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between"
+                  onClick={() => setShowFullSettings(true)}
+                >
+                  <div className="flex items-center gap-3">
+                    <Eye className="h-5 w-5 text-muted-foreground" />
+                    <span>Advanced Privacy Settings</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between"
+                  onClick={() => handleAction("Privacy Policy")}
+                >
+                  <div className="flex items-center gap-3">
+                    <FileText className="h-5 w-5 text-muted-foreground" />
+                    <span>Privacy Policy</span>
+                  </div>
+                  <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between"
+                  onClick={() => handleAction("Data Encryption")} 
+                >
+                  <div className="flex items-center gap-3">
+                    <Lock className="h-5 w-5 text-muted-foreground" />
+                    <span>Data Encryption</span>
+                  </div>
+                  <Badge variant="outline" className="rounded-full text-xs">
+                    {dataEncryption ? 'Enabled' : 'Disabled'}
+                  </Badge>
+                </Button>
+                
+                {/* New Data Control Options */}
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between"
+                  onClick={() => handleAction("Clear Cached Data")}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-5 w-5 flex items-center justify-center text-muted-foreground">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 2v4" />
+                        <path d="M12 18v4" />
+                        <path d="m4.93 4.93 2.83 2.83" />
+                        <path d="m16.24 16.24 2.83 2.83" />
+                        <path d="M2 12h4" />
+                        <path d="M18 12h4" />
+                        <path d="m4.93 19.07 2.83-2.83" />
+                        <path d="m16.24 7.76 2.83-2.83" />
+                      </svg>
+                    </div>
+                    <span>Clear Cached Data</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between"
+                  onClick={() => handleAction("Manage Third-Party Access")}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-5 w-5 flex items-center justify-center text-muted-foreground">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="m15 9-6 6" />
+                        <path d="m9 9 6 6" />
+                      </svg>
+                    </div>
+                    <span>Manage Third-Party Access</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </Button>
               </div>
+            </div>
+            
+            {/* Account Section */}
+            <div>
+              <h3 className="text-sm font-medium text-muted-foreground mb-3">ACCOUNT</h3>
               
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <CloudOff className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">Data Synchronization</p>
-                    <p className="text-xs text-muted-foreground">Sync data across devices</p>
+              <div className="space-y-3">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between"
+                  onClick={() => handleAction("Change Password")}
+                >
+                  <div className="flex items-center gap-3">
+                    <Key className="h-5 w-5 text-muted-foreground" />
+                    <span>Change Password</span>
                   </div>
-                </div>
-                <Switch 
-                  checked={dataSync} 
-                  onCheckedChange={(checked) => {
-                    setDataSync(checked);
-                    handleToggle("Data Synchronization", checked);
-                  }} 
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Fingerprint className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">Biometric Authentication</p>
-                    <p className="text-xs text-muted-foreground">Use fingerprint or Face ID</p>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between"
+                  onClick={() => navigate("/wearables")}
+                >
+                  <div className="flex items-center gap-3">
+                    <Share2 className="h-5 w-5 text-muted-foreground" />
+                    <span>Connected Accounts</span>
                   </div>
-                </div>
-                <Switch 
-                  checked={biometricAuth} 
-                  onCheckedChange={(checked) => {
-                    setBiometricAuth(checked);
-                    handleToggle("Biometric Authentication", checked);
-                  }} 
-                />
-              </div>
-              
-              {/* New Developer Features Section */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <FileCode2 className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">Code Editor</p>
-                    <p className="text-xs text-muted-foreground">JavaScript, Python, C++, HTML/CSS</p>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between"
+                  onClick={() => handleAction("Device Access Log")}
+                >
+                  <div className="flex items-center gap-3">
+                    <User className="h-5 w-5 text-muted-foreground" />
+                    <span>Device Access Log</span>
                   </div>
-                </div>
-                <Switch 
-                  checked={codeEditorEnabled} 
-                  onCheckedChange={(checked) => {
-                    setCodeEditorEnabled(checked);
-                    handleToggle("Code Editor", checked);
-                  }} 
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Cpu className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">AI Assistant</p>
-                    <p className="text-xs text-muted-foreground">Personalized workout assistance</p>
+                  <Badge className="rounded-full bg-gray-100 text-gray-600 text-xs">
+                    New
+                  </Badge>
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-between text-destructive hover:text-destructive"
+                  onClick={() => {
+                    toast({
+                      title: "Account Deletion Requested",
+                      description: "Please check your email to confirm account deletion.",
+                      variant: "destructive"
+                    });
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <Trash2 className="h-5 w-5" />
+                    <span>Delete Account</span>
                   </div>
-                </div>
-                <Switch 
-                  checked={aiAssistance} 
-                  onCheckedChange={(checked) => {
-                    setAiAssistance(checked);
-                    handleToggle("AI Assistant", checked);
-                  }} 
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Radio className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">Runways Design</p>
-                    <p className="text-xs text-muted-foreground">Advanced UI customization</p>
-                  </div>
-                </div>
-                <Switch 
-                  checked={runwaysEnabled} 
-                  onCheckedChange={(checked) => {
-                    setRunwaysEnabled(checked);
-                    handleToggle("Runways Design", checked);
-                  }} 
-                />
+                  <AlertTriangle className="h-4 w-4" />
+                </Button>
               </div>
             </div>
           </div>
-          
-          {/* Data & Privacy Section */}
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground mb-3">DATA & PRIVACY</h3>
-            
-            <div className="space-y-3">
-              <Button 
-                variant="outline" 
-                className="w-full justify-between" 
-                onClick={() => handleAction("Download Your Data")}
-              >
-                <div className="flex items-center gap-3">
-                  <Download className="h-5 w-5 text-muted-foreground" />
-                  <span>Download Your Data</span>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="w-full justify-between"
-                onClick={() => navigate("/settings")}
-              >
-                <div className="flex items-center gap-3">
-                  <Eye className="h-5 w-5 text-muted-foreground" />
-                  <span>Privacy Settings</span>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="w-full justify-between"
-                onClick={() => handleAction("Privacy Policy")}
-              >
-                <div className="flex items-center gap-3">
-                  <FileText className="h-5 w-5 text-muted-foreground" />
-                  <span>Privacy Policy</span>
-                </div>
-                <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="w-full justify-between"
-                onClick={() => handleAction("Data Encryption")} 
-              >
-                <div className="flex items-center gap-3">
-                  <Lock className="h-5 w-5 text-muted-foreground" />
-                  <span>Data Encryption</span>
-                </div>
-                <Badge variant="outline" className="rounded-full text-xs">
-                  {dataEncryption ? 'Enabled' : 'Disabled'}
-                </Badge>
-              </Button>
-              
-              {/* New Data Control Options */}
-              <Button 
-                variant="outline" 
-                className="w-full justify-between"
-                onClick={() => handleAction("Clear Cached Data")}
-              >
-                <div className="flex items-center gap-3">
-                  <RefreshCcw className="h-5 w-5 text-muted-foreground" />
-                  <span>Clear Cached Data</span>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="w-full justify-between"
-                onClick={() => handleAction("Manage Third-Party Access")}
-              >
-                <div className="flex items-center gap-3">
-                  <CircleSlash className="h-5 w-5 text-muted-foreground" />
-                  <span>Manage Third-Party Access</span>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </Button>
-            </div>
-          </div>
-          
-          {/* Account Section */}
-          <div>
-            <h3 className="text-sm font-medium text-muted-foreground mb-3">ACCOUNT</h3>
-            
-            <div className="space-y-3">
-              <Button 
-                variant="outline" 
-                className="w-full justify-between"
-                onClick={() => handleAction("Change Password")}
-              >
-                <div className="flex items-center gap-3">
-                  <Key className="h-5 w-5 text-muted-foreground" />
-                  <span>Change Password</span>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="w-full justify-between"
-                onClick={() => navigate("/wearables")}
-              >
-                <div className="flex items-center gap-3">
-                  <Share2 className="h-5 w-5 text-muted-foreground" />
-                  <span>Connected Accounts</span>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="w-full justify-between"
-                onClick={() => handleAction("Device Access Log")}
-              >
-                <div className="flex items-center gap-3">
-                  <Smartphone className="h-5 w-5 text-muted-foreground" />
-                  <span>Device Access Log</span>
-                </div>
-                <Badge className="rounded-full bg-gray-100 text-gray-600 text-xs">
-                  New
-                </Badge>
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                className="w-full justify-between text-destructive hover:text-destructive"
-                onClick={() => {
-                  toast({
-                    title: "Account Deletion Requested",
-                    description: "Please check your email to confirm account deletion.",
-                    variant: "destructive"
-                  });
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  <Trash2 className="h-5 w-5" />
-                  <span>Delete Account</span>
-                </div>
-                <AlertTriangle className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
       
       {/* Data Export Dialog */}

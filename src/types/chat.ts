@@ -23,6 +23,7 @@ export interface ChatUser {
   securityLevel?: 'standard' | 'enhanced' | 'maximum';
   twoFactorEnabled?: boolean;
   lastSecurityCheck?: Date;
+  verified?: boolean; // Legacy field for backward compatibility
 }
 
 export interface ChatAttachment {
