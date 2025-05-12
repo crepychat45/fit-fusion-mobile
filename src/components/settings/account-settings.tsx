@@ -108,14 +108,9 @@ export function AccountSettings() {
     setIsLoading(true);
     
     try {
-      // Fixed authentication by removing captcha requirement
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
-        options: {
-          // Fix for captcha verification issue
-          captchaToken: "bypass" 
-        }
       });
       
       if (error) {
@@ -154,7 +149,6 @@ export function AccountSettings() {
     setIsLoading(true);
     
     try {
-      // Fixed authentication by removing captcha requirement
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -162,8 +156,7 @@ export function AccountSettings() {
           data: {
             name,
           },
-          // Fix for captcha verification issue
-          captchaToken: "bypass"
+          emailRedirectTo: window.location.origin,
         },
       });
       
@@ -173,7 +166,7 @@ export function AccountSettings() {
       
       toast({
         title: "Account Created",
-        description: "Your account has been created successfully.",
+        description: "Your account has been created successfully. Please check your email for verification.",
       });
       
       setPassword("");
@@ -204,7 +197,6 @@ export function AccountSettings() {
     setIsLoading(true);
     
     try {
-      // First verify current password by attempting a login
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -214,7 +206,6 @@ export function AccountSettings() {
         throw new Error("Current password is incorrect");
       }
       
-      // Then update password
       const { error } = await supabase.auth.updateUser({
         password: newPassword,
       });

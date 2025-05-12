@@ -8,6 +8,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Eye, EyeOff, ArrowRight, Mail, Lock, UserPlus, LogIn } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AuthFormProps {
   onSuccess?: () => void;
@@ -24,26 +25,56 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
-    // Simulate authentication
-    setTimeout(() => {
-      setLoading(false);
-      
-      toast({
-        title: isSignUp ? "Account created" : "Welcome back!",
-        description: isSignUp 
-          ? "Your account has been created successfully." 
-          : "You have been logged in successfully.",
-      });
+    try {
+      if (isSignUp) {
+        // Handle signup
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { name },
+            emailRedirectTo: window.location.origin,
+          }
+        });
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Account created",
+          description: "Please check your email for verification instructions.",
+        });
+      } else {
+        // Handle login
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        
+        if (error) throw error;
+        
+        toast({
+          title: "Welcome back!",
+          description: "You have been logged in successfully.",
+        });
+      }
       
       // Call onSuccess callback if provided
       if (onSuccess) {
         onSuccess();
       }
-    }, 1500);
+    } catch (error: any) {
+      toast({
+        title: isSignUp ? "Signup Failed" : "Login Failed",
+        description: error.message || "There was a problem with authentication.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
   
   return (
