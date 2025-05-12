@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -8,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { 
   Code, Cpu, Database, FileCode2, Radio, 
-  Terminal, Bug, Tool, Download, RefreshCcw, Monitor
+  Terminal, Bug, Wrench, Download, RefreshCcw, Monitor
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
@@ -499,7 +498,7 @@ export function DeveloperOptions() {
               className="w-full"
               onClick={handleImportDeveloperTools}
             >
-              <Tool className="h-4 w-4 mr-2" />
+              <Wrench className="h-4 w-4 mr-2" />
               Import Developer Tools
             </Button>
           )}

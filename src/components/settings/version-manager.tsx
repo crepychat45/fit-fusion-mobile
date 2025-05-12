@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -234,7 +233,7 @@ export function VersionManager({ initialVersion }: VersionManagerProps) {
             }));
           }, 3000);
           
-          return 0;
+          return newProgress;
         }
         
         // Show progress toasts at specific intervals
