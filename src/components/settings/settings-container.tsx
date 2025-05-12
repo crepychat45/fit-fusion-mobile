@@ -6,6 +6,7 @@ import { DisplaySettings } from "./display-settings";
 import { PrivacySettings } from "./privacy-settings";
 import { DeveloperOptions } from "./developer-options";
 import { ChatSettingsPanel } from "./chat-settings";
+import { AboutPage } from "./about-page";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -91,6 +92,7 @@ export function SettingsContainer() {
               <TabsTrigger value="chat" className="flex-shrink-0">Chat</TabsTrigger>
               <TabsTrigger value="developer" className="flex-shrink-0">Developer</TabsTrigger>
               <TabsTrigger value="data" className="flex-shrink-0">Data Management</TabsTrigger>
+              <TabsTrigger value="about" className="flex-shrink-0">About</TabsTrigger>
             </TabsList>
           </div>
         </div>
@@ -145,6 +147,10 @@ export function SettingsContainer() {
                 </div>
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="about" className="mt-0">
+            <AboutPage />
           </TabsContent>
         </div>
       </Tabs>

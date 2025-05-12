@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -84,7 +85,6 @@ export function VersionManager({ initialVersion }: VersionManagerProps) {
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [changelogDialogOpen, setChangelogDialogOpen] = useState(false);
   const [selectedVersion, setSelectedVersion] = useState<VersionChange | null>(null);
-  // Add a separate state for local update progress tracking
   const [localUpdateProgress, setLocalUpdateProgress] = useState(0);
 
   // Load version info from localStorage
@@ -179,6 +179,7 @@ export function VersionManager({ initialVersion }: VersionManagerProps) {
 
   const installUpdate = () => {
     setIsUpdating(true);
+    // Reset progress to 0
     setLocalUpdateProgress(0);
     setVersionInfo(prev => ({
       ...prev, 
@@ -191,18 +192,40 @@ export function VersionManager({ initialVersion }: VersionManagerProps) {
       description: `Starting download of version ${versionInfo.latest}...`,
     });
     
-    // Simulate update progress
+    // Simulate update progress - FIX: Ensure the progress updates properly
+    let progress = 0;
     const interval = setInterval(() => {
-      const newProgress = localUpdateProgress + 10;
-      setLocalUpdateProgress(newProgress);
+      // Increment progress by 10 each time
+      progress += 10;
       
+      // Update both local progress state and version info
+      setLocalUpdateProgress(progress);
       setVersionInfo(currentInfo => ({
         ...currentInfo, 
-        updateProgress: newProgress,
-        updateStatus: newProgress < 50 ? 'downloading' : 'installing'
+        updateProgress: progress,
+        updateStatus: progress < 50 ? 'downloading' : 'installing'
       }));
       
-      if (newProgress >= 100) {
+      // Show progress toasts at specific intervals
+      if (progress === 30) {
+        toast({
+          title: "Download progress: 30%",
+          description: "Downloading update files...",
+        });
+      } else if (progress === 60) {
+        toast({
+          title: "Installing: 60%",
+          description: "Preparing to install...",
+        });
+      } else if (progress === 90) {
+        toast({
+          title: "Installing: 90%",
+          description: "Almost done...",
+        });
+      }
+      
+      // When completed
+      if (progress >= 100) {
         clearInterval(interval);
         setIsUpdating(false);
         setUpdateSuccess(true);
@@ -236,24 +259,6 @@ export function VersionManager({ initialVersion }: VersionManagerProps) {
           }));
         }, 3000);
       }
-      
-      // Show progress toasts at specific intervals
-      if (newProgress === 30) {
-        toast({
-          title: "Download progress: 30%",
-          description: "Downloading update files...",
-        });
-      } else if (newProgress === 60) {
-        toast({
-          title: "Installing: 60%",
-          description: "Preparing to install...",
-        });
-      } else if (newProgress === 90) {
-        toast({
-          title: "Installing: 90%",
-          description: "Almost done...",
-        });
-      }
     }, 500);
   };
 
@@ -268,10 +273,6 @@ export function VersionManager({ initialVersion }: VersionManagerProps) {
   const openChangelogDetails = (version: VersionChange) => {
     setSelectedVersion(version);
     setChangelogDialogOpen(true);
-  };
-  
-  const setUpdateProgress = (value: number) => {
-    setVersionInfo(prev => ({...prev, updateProgress: value}));
   };
 
   return (
