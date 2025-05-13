@@ -8,6 +8,7 @@ import { RefreshCcw } from "lucide-react";
 
 export function VersionManager() {
   const { toast } = useToast();
+  // Define versions as regular strings, not literal types
   const currentVersion = "4.5.0";
   const latestVersion = "4.6.0";
   const [latestVersionAvailable, setLatestVersion] = useState(currentVersion);
@@ -19,6 +20,7 @@ export function VersionManager() {
     // Simulate checking for updates
     setTimeout(() => {
       setLatestVersion(latestVersion);
+      // Compare the string values explicitly
       setUpdateAvailable(latestVersion !== currentVersion);
     }, 2000);
   }, []);
@@ -39,7 +41,8 @@ export function VersionManager() {
         clearInterval(timer);
         setTimeout(() => {
           setIsUpdating(false);
-          setLatestVersion(currentVersion);
+          // Update to latest version after successful update
+          setLatestVersion(latestVersion);
           setUpdateAvailable(false);
           toast({
             title: "Update Complete",
