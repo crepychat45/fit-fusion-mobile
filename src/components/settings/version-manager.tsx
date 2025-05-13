@@ -8,10 +8,13 @@ import { RefreshCcw } from "lucide-react";
 
 export function VersionManager() {
   const { toast } = useToast();
-  // Define versions as regular strings, not literal types
+  
+  // Define versions as string variables instead of literal types
   const currentVersion = "4.5.0";
   const latestVersion = "4.6.0";
-  const [latestVersionAvailable, setLatestVersion] = useState(currentVersion);
+  
+  // Use string type annotation to ensure TypeScript treats them as regular strings
+  const [latestVersionAvailable, setLatestVersion] = useState<string>(currentVersion);
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [updateProgress, setUpdateProgress] = useState<number>(0);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -20,10 +23,10 @@ export function VersionManager() {
     // Simulate checking for updates
     setTimeout(() => {
       setLatestVersion(latestVersion);
-      // Compare the string values explicitly
-      setUpdateAvailable(latestVersion !== currentVersion);
+      // Compare as strings, not as literal types
+      setUpdateAvailable(latestVersionAvailable !== currentVersion);
     }, 2000);
-  }, []);
+  }, [latestVersionAvailable]);
   
   const updateVersion = () => {
     setIsUpdating(true);
