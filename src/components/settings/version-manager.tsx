@@ -1,20 +1,20 @@
 
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { RefreshCcw } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/use-toast";
 
 export function VersionManager() {
   const { toast } = useToast();
   
-  // Define versions as string variables instead of literal types
+  // Define versions as string variables
   const currentVersion = "4.5.0";
   const latestVersion = "4.6.0";
   
   // Use string type annotation to ensure TypeScript treats them as regular strings
-  const [latestVersionAvailable, setLatestVersion] = useState<string>(currentVersion);
+  const [latestVersionAvailable, setLatestVersionAvailable] = useState<string>(currentVersion);
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [updateProgress, setUpdateProgress] = useState<number>(0);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -22,88 +22,86 @@ export function VersionManager() {
   useEffect(() => {
     // Simulate checking for updates
     setTimeout(() => {
-      setLatestVersion(latestVersion);
-      // Compare as strings, not as literal types
-      setUpdateAvailable(latestVersionAvailable !== currentVersion);
+      setLatestVersionAvailable(latestVersion);
+      // Compare strings correctly
+      setUpdateAvailable(latestVersion !== currentVersion);
     }, 2000);
-  }, [latestVersionAvailable]);
+  }, [latestVersion, currentVersion]);
   
   const updateVersion = () => {
     setIsUpdating(true);
-    setUpdateProgress(0);
     
-    // Using a variable for progress tracking to avoid type issues
-    let progress = 0;
-    const timer = setInterval(() => {
-      progress += 10;
-      
-      // Update state with the new progress value
-      setUpdateProgress(progress);
-      
-      if (progress >= 100) {
-        clearInterval(timer);
-        setTimeout(() => {
+    // Simulate update progress
+    const interval = setInterval(() => {
+      setUpdateProgress(prev => {
+        const newProgress = prev + 10;
+        
+        if (newProgress >= 100) {
+          clearInterval(interval);
           setIsUpdating(false);
-          // Update to latest version after successful update
-          setLatestVersion(latestVersion);
+          setLatestVersionAvailable(latestVersion);
           setUpdateAvailable(false);
+          
           toast({
             title: "Update Complete",
             description: `Successfully updated to version ${latestVersion}`,
           });
-        }, 500);
-      }
+          return 100;
+        }
+        
+        return newProgress;
+      });
     }, 500);
   };
   
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Version Information</CardTitle>
-        <CardDescription>Stay up-to-date with the latest features and improvements</CardDescription>
+        <CardTitle className="flex justify-between items-center">
+          <span>App Version</span>
+          <Badge variant="outline">{currentVersion}</Badge>
+        </CardTitle>
+        <CardDescription>Manage application version and updates</CardDescription>
       </CardHeader>
+      
       <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">Current Version</p>
-            <p className="text-sm text-muted-foreground">{currentVersion}</p>
-          </div>
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">Latest Version</p>
-            <p className="text-sm text-muted-foreground">{latestVersionAvailable}</p>
-          </div>
-        </div>
-        
-        {updateAvailable ? (
+        {isUpdating ? (
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium">Update Available</p>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={updateVersion} 
-                disabled={isUpdating}
-              >
-                {isUpdating ? (
-                  <>
-                    Updating...
-                    <RefreshCcw className="ml-2 h-4 w-4 animate-spin" />
-                  </>
-                ) : (
-                  "Update Now"
-                )}
-              </Button>
+            <div className="flex justify-between text-sm">
+              <span>Updating to {latestVersionAvailable}</span>
+              <span>{updateProgress}%</span>
             </div>
-            {isUpdating && (
-              <Progress value={updateProgress} />
-            )}
+            <Progress value={updateProgress} />
+          </div>
+        ) : updateAvailable ? (
+          <div className="bg-muted rounded-lg p-4">
+            <div className="flex justify-between items-center mb-2">
+              <span className="font-medium">New Version Available</span>
+              <Badge>{latestVersionAvailable}</Badge>
+            </div>
+            <p className="text-sm text-muted-foreground mb-3">
+              A new version is available with bug fixes and new features.
+            </p>
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">
-            You are up to date!
-          </p>
+          <div className="bg-muted/50 rounded-lg p-4">
+            <p className="text-sm text-muted-foreground">
+              Your application is up to date.
+            </p>
+          </div>
         )}
       </CardContent>
+      
+      {updateAvailable && !isUpdating && (
+        <CardFooter>
+          <Button 
+            className="w-full" 
+            onClick={updateVersion}
+          >
+            Update Now
+          </Button>
+        </CardFooter>
+      )}
     </Card>
   );
 }
