@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,9 +8,9 @@ import { useToast } from "@/hooks/use-toast";
 export function VersionManager() {
   const { toast } = useToast();
   
-  // Define versions with proper typing to avoid comparison issues
-  const currentVersionValue = "4.5.0";
-  const latestVersionValue = "4.6.0";
+  // Use const assertions to maintain string types instead of literal types
+  const currentVersionValue = "4.5.0" as string;
+  const latestVersionValue = "4.6.0" as string;
   
   const [currentVersion] = useState<string>(currentVersionValue);
   const [latestVersionAvailable, setLatestVersionAvailable] = useState<string>(currentVersionValue);
@@ -23,10 +22,10 @@ export function VersionManager() {
     // Simulate checking for updates
     setTimeout(() => {
       setLatestVersionAvailable(latestVersionValue);
-      // Compare versions properly
+      // Compare versions properly with string comparison
       setUpdateAvailable(latestVersionValue !== currentVersionValue);
     }, 2000);
-  }, []);
+  }, [currentVersionValue, latestVersionValue]);
   
   const updateVersion = () => {
     setIsUpdating(true);
