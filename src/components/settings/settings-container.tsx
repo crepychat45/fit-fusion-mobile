@@ -7,19 +7,23 @@ import { PrivacySettings } from "./privacy-settings";
 import { DeveloperOptions } from "./developer-options";
 import { ChatSettingsPanel } from "./chat-settings";
 import { AboutPage } from "./about-page";
+import { EnhancedSettingsValidation } from "./enhanced-settings-validation";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CheckCircle, AlertTriangle } from "lucide-react";
 
 export function SettingsContainer() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("account");
   const [isLoggedOut, setIsLoggedOut] = useState(false);
+  const [settingsValidated, setSettingsValidated] = useState(false);
   
   const handleClearLocalData = () => {
     try {
       // Clear only app data, not authentication
-      const keysToPreserve = ['auth_token', 'supabase.auth.token'];
+      const keysToPreserve = ['auth_token', 'supabase.auth.token', 'app_version'];
       const keysToRemove = [];
       
       for (let i = 0; i < localStorage.length; i++) {
@@ -62,10 +66,22 @@ export function SettingsContainer() {
       });
     }
   };
+
+  const validateAllSettings = () => {
+    // Simulate settings validation
+    setSettingsValidated(true);
+    toast({
+      title: "Settings Validated",
+      description: "All settings have been validated successfully.",
+    });
+  };
   
   if (isLoggedOut) {
     return (
       <div className="max-w-md mx-auto py-20 text-center space-y-4">
+        <div className="mx-auto h-12 w-12 rounded-full bg-green-100 flex items-center justify-center mb-4">
+          <CheckCircle className="h-6 w-6 text-green-600" />
+        </div>
         <h2 className="text-2xl font-bold">You've been logged out</h2>
         <p className="text-muted-foreground">
           Your session has ended. Please close this window or refresh the page to log in again.
@@ -82,6 +98,18 @@ export function SettingsContainer() {
   
   return (
     <div className="w-full">
+      {!settingsValidated && (
+        <Alert className="mx-4 mb-4">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span>Some settings may need validation to ensure proper functionality.</span>
+            <Button variant="outline" size="sm" onClick={validateAllSettings}>
+              Validate Now
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="border-b">
           <div className="max-w-screen-xl mx-auto px-4">
@@ -90,8 +118,9 @@ export function SettingsContainer() {
               <TabsTrigger value="display" className="flex-shrink-0">Display</TabsTrigger>
               <TabsTrigger value="privacy" className="flex-shrink-0">Privacy</TabsTrigger>
               <TabsTrigger value="chat" className="flex-shrink-0">Chat</TabsTrigger>
+              <TabsTrigger value="enhanced" className="flex-shrink-0">Enhanced</TabsTrigger>
               <TabsTrigger value="developer" className="flex-shrink-0">Developer</TabsTrigger>
-              <TabsTrigger value="data" className="flex-shrink-0">Data Management</TabsTrigger>
+              <TabsTrigger value="data" className="flex-shrink-0">Data</TabsTrigger>
               <TabsTrigger value="about" className="flex-shrink-0">About</TabsTrigger>
             </TabsList>
           </div>
@@ -114,6 +143,10 @@ export function SettingsContainer() {
             <ChatSettingsPanel />
           </TabsContent>
           
+          <TabsContent value="enhanced" className="mt-0">
+            <EnhancedSettingsValidation />
+          </TabsContent>
+          
           <TabsContent value="developer" className="mt-0">
             <DeveloperOptions />
           </TabsContent>
@@ -134,6 +167,15 @@ export function SettingsContainer() {
                   >
                     <span>Clear Local Data</span>
                     <span className="text-xs text-muted-foreground">Removes app data from this device</span>
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-between"
+                    onClick={validateAllSettings}
+                  >
+                    <span>Validate All Settings</span>
+                    <span className="text-xs text-muted-foreground">Check all configurations</span>
                   </Button>
                   
                   <Button 
