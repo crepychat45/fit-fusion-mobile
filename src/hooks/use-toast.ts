@@ -1,3 +1,4 @@
+
 import * as React from "react"
 
 type ToastProps = {
@@ -17,6 +18,13 @@ type ToasterToast = ToastProps & {
   description?: React.ReactNode
   action?: React.ReactElement
 }
+
+const actionTypes = {
+  ADD_TOAST: "ADD_TOAST",
+  UPDATE_TOAST: "UPDATE_TOAST", 
+  DISMISS_TOAST: "DISMISS_TOAST",
+  REMOVE_TOAST: "REMOVE_TOAST",
+} as const
 
 type ActionType = typeof actionTypes
 
@@ -124,6 +132,13 @@ function dispatch(action: Action) {
   })
 }
 
+let count = 0
+
+function genId() {
+  count = (count + 1) % Number.MAX_VALUE
+  return count.toString()
+}
+
 type Toast = Omit<ToasterToast, "id">
 
 function toast({ ...props }: Toast) {
@@ -141,9 +156,6 @@ function toast({ ...props }: Toast) {
     toast: {
       ...props,
       id,
-      onOpenChange: (open) => {
-        if (!open) dismiss()
-      },
     },
   })
 
