@@ -4,17 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export function VersionManager() {
   const { toast } = useToast();
   
-  // Define versions as string variables
-  const currentVersion = "4.5.0";
-  const latestVersion = "4.6.0";
+  // Define versions with proper typing to avoid comparison issues
+  const currentVersionValue = "4.5.0";
+  const latestVersionValue = "4.6.0";
   
-  // Use string type annotation to ensure TypeScript treats them as regular strings
-  const [latestVersionAvailable, setLatestVersionAvailable] = useState<string>(currentVersion);
+  const [currentVersion] = useState<string>(currentVersionValue);
+  const [latestVersionAvailable, setLatestVersionAvailable] = useState<string>(currentVersionValue);
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [updateProgress, setUpdateProgress] = useState<number>(0);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -22,11 +22,11 @@ export function VersionManager() {
   useEffect(() => {
     // Simulate checking for updates
     setTimeout(() => {
-      setLatestVersionAvailable(latestVersion);
-      // Compare strings correctly
-      setUpdateAvailable(latestVersion !== currentVersion);
+      setLatestVersionAvailable(latestVersionValue);
+      // Compare versions properly
+      setUpdateAvailable(latestVersionValue !== currentVersionValue);
     }, 2000);
-  }, [latestVersion, currentVersion]);
+  }, []);
   
   const updateVersion = () => {
     setIsUpdating(true);
@@ -39,12 +39,12 @@ export function VersionManager() {
         if (newProgress >= 100) {
           clearInterval(interval);
           setIsUpdating(false);
-          setLatestVersionAvailable(latestVersion);
+          setLatestVersionAvailable(latestVersionValue);
           setUpdateAvailable(false);
           
           toast({
             title: "Update Complete",
-            description: `Successfully updated to version ${latestVersion}`,
+            description: `Successfully updated to version ${latestVersionValue}`,
           });
           return 100;
         }
