@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
@@ -27,7 +28,7 @@ export function FitfusionChatSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="h-[500px]"
+          className="h-[600px] w-full"
         >
           <AdvancedChatInterface />
         </motion.div>

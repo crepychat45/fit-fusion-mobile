@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -378,9 +377,9 @@ export function AdvancedChatInterface({ onLogout }: AdvancedChatInterfaceProps) 
   const activeConv = conversations.find(c => c.id === activeConversation);
 
   return (
-    <div className="flex h-full max-h-[600px] bg-background border rounded-lg overflow-hidden">
+    <div className="flex h-full w-full bg-background border rounded-lg overflow-hidden">
       {/* Conversations Sidebar */}
-      <div className="w-80 border-r bg-muted/30 flex flex-col">
+      <div className="w-80 min-w-80 border-r bg-muted/30 flex flex-col">
         <div className="p-4 border-b">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-semibold">Conversations</h2>
@@ -509,10 +508,10 @@ export function AdvancedChatInterface({ onLogout }: AdvancedChatInterfaceProps) 
       </div>
 
       {/* Chat Area */}
-      <div className={`flex-1 flex flex-col ${chatBackground}`}>
+      <div className={`flex-1 flex flex-col min-w-0 ${chatBackground}`}>
         {/* Chat Header */}
         {activeConv && (
-          <CardHeader className="pb-3 border-b bg-background/80 backdrop-blur">
+          <CardHeader className="pb-3 border-b bg-background/80 backdrop-blur shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Avatar className="h-8 w-8">
@@ -589,9 +588,9 @@ export function AdvancedChatInterface({ onLogout }: AdvancedChatInterfaceProps) 
         )}
 
         {/* Messages Area */}
-        <CardContent className="flex-1 p-0 bg-transparent">
-          <ScrollArea className="h-[400px] p-4" ref={scrollAreaRef}>
-            <div className="space-y-4">
+        <CardContent className="flex-1 p-0 bg-transparent overflow-hidden">
+          <ScrollArea className="h-full p-4" ref={scrollAreaRef}>
+            <div className="space-y-4 min-h-full">
               {activeMessages.map((message) => (
                 <div
                   key={message.id}
@@ -613,7 +612,7 @@ export function AdvancedChatInterface({ onLogout }: AdvancedChatInterfaceProps) 
                           : 'bg-background/80 backdrop-blur border'
                       }`}
                     >
-                      <p className="text-sm">{message.content}</p>
+                      <p className="text-sm break-words">{message.content}</p>
                       
                       {message.attachments && message.attachments.map((attachment) => (
                         <div key={attachment.id} className="mt-2">
@@ -671,7 +670,7 @@ export function AdvancedChatInterface({ onLogout }: AdvancedChatInterfaceProps) 
 
         {/* Message Input */}
         {activeConversation && (
-          <div className="border-t p-4 bg-background/80 backdrop-blur">
+          <div className="border-t p-4 bg-background/80 backdrop-blur shrink-0">
             <div className="flex items-center gap-2">
               <Popover open={showMediaUpload} onOpenChange={setShowMediaUpload}>
                 <PopoverTrigger asChild>

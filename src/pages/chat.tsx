@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { EnhancedChatInterface } from "@/components/chat/enhanced-chat-interface";
@@ -105,7 +106,7 @@ const ChatPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <div className="fitness-gradient pt-8 pb-6 px-4">
+      <div className="fitness-gradient pt-8 pb-6 px-4 shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <Button 
@@ -135,10 +136,12 @@ const ChatPage = () => {
         </div>
       </div>
       
-      <div className={`flex-1 flex flex-col ${isMobile ? 'pb-20' : ''}`}>
+      <div className={`flex-1 flex flex-col overflow-hidden ${isMobile ? 'pb-20' : ''}`}>
         {isAuthenticated ? (
-          <div className="w-full h-full flex-1 overflow-hidden p-4">
-            <AdvancedChatInterface onLogout={handleLogout} />
+          <div className="flex-1 p-4 overflow-hidden">
+            <div className="h-full">
+              <AdvancedChatInterface onLogout={handleLogout} />
+            </div>
           </div>
         ) : (
           <div className="max-w-md mx-auto p-4 flex-1 flex items-center justify-center">
