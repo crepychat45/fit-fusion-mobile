@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { EnhancedChatInterface } from "@/components/chat/enhanced-chat-interface";
@@ -11,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { LoadingSpinner } from "@/components/common/loading-spinner";
+import { AdvancedChatInterface } from "@/components/chat/advanced-chat-interface";
 
 const ChatPage = () => {
   const navigate = useNavigate();
@@ -138,7 +138,7 @@ const ChatPage = () => {
       <div className={`flex-1 flex flex-col ${isMobile ? 'pb-20' : ''}`}>
         {isAuthenticated ? (
           <div className="w-full h-full flex-1 overflow-hidden p-4">
-            <EnhancedChatInterface onLogout={handleLogout} />
+            <AdvancedChatInterface onLogout={handleLogout} />
           </div>
         ) : (
           <div className="max-w-md mx-auto p-4 flex-1 flex items-center justify-center">

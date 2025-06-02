@@ -1,8 +1,8 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 import { FitfusionChat } from "@/components/chat/fitfusion-chat";
+import { AdvancedChatInterface } from "@/components/chat/advanced-chat-interface";
 import { motion } from "framer-motion";
 
 export function FitfusionChatSection() {
@@ -27,8 +27,9 @@ export function FitfusionChatSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
+          className="h-[500px]"
         >
-          <FitfusionChat />
+          <AdvancedChatInterface />
         </motion.div>
       )}
     </div>
