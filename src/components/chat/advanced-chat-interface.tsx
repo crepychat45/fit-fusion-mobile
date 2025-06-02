@@ -26,7 +26,8 @@ import {
   Palette,
   MessageSquarePlus,
   Archive,
-  Trash2
+  Trash2,
+  UserPlus
 } from "lucide-react";
 import { MediaUpload } from "./media-upload";
 import { EmojiPicker } from "./emoji-picker";
@@ -51,6 +52,8 @@ export function AdvancedChatInterface({ onLogout }: AdvancedChatInterfaceProps) 
   const [showMediaUpload, setShowMediaUpload] = useState(false);
   const [showBackgroundSelector, setShowBackgroundSelector] = useState(false);
   const [showGroupCreator, setShowGroupCreator] = useState(false);
+  const [showNewChatDialog, setShowNewChatDialog] = useState(false);
+  const [newChatUsername, setNewChatUsername] = useState("");
   const [chatBackground, setChatBackground] = useState("bg-background");
   const [isTyping, setIsTyping] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -133,6 +136,59 @@ export function AdvancedChatInterface({ onLogout }: AdvancedChatInterfaceProps) 
     }));
   };
 
+  const createNewUserChat = () => {
+    if (!newChatUsername.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a username to start a chat.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newConversation: ChatConversation = {
+      id: `user-${Date.now()}`,
+      participants: [
+        { id: "user", name: "You", status: "online" },
+        { id: newChatUsername.toLowerCase(), name: newChatUsername, status: "online" }
+      ],
+      unreadCount: 0,
+      updatedAt: new Date(),
+      createdAt: new Date(),
+      name: newChatUsername,
+      isGroupChat: false,
+      metadata: { isSecure: true, encryptionEnabled: true }
+    };
+
+    const welcomeMessage: ChatMessage = {
+      id: `welcome-${Date.now()}`,
+      senderId: "system",
+      receiverId: newConversation.id,
+      content: `Chat started with ${newChatUsername}. Say hello! 👋`,
+      timestamp: new Date(),
+      isRead: true
+    };
+
+    const updatedConversations = [newConversation, ...conversations];
+    setConversations(updatedConversations);
+    setMessages(prev => ({
+      ...prev,
+      [newConversation.id]: [welcomeMessage]
+    }));
+
+    chatStorage.saveConversations(updatedConversations);
+    chatStorage.saveMessages(newConversation.id, [welcomeMessage]);
+
+    setActiveConversation(newConversation.id);
+    setShowNewChatDialog(false);
+    setNewChatUsername("");
+
+    toast({
+      title: "New chat created",
+      description: `Started a conversation with ${newChatUsername}`
+    });
+  };
+
   const sendMessage = () => {
     if (!newMessage.trim() || !activeConversation) return;
 
@@ -160,12 +216,59 @@ export function AdvancedChatInterface({ onLogout }: AdvancedChatInterfaceProps) 
     // Simulate bot response for FitBot conversation
     if (activeConversation === "default-fitbot") {
       simulateBotResponse(newMessage, activeConversation);
+    } else {
+      // Simulate user response for user-to-user chats
+      simulateUserResponse(newMessage, activeConversation);
     }
 
     toast({
       title: "Message sent",
       description: "Your message has been delivered securely.",
     });
+  };
+
+  const simulateUserResponse = (userMessage: string, conversationId: string) => {
+    const conv = conversations.find(c => c.id === conversationId);
+    if (!conv || conv.isGroupChat) return;
+
+    const otherUser = conv.participants.find(p => p.id !== "user");
+    if (!otherUser) return;
+
+    setIsTyping(true);
+    
+    setTimeout(() => {
+      const responses = [
+        "Thanks for the message! 😊",
+        "That sounds great! Let's do it together 💪",
+        "I'm excited about our fitness journey!",
+        "Great idea! When should we start?",
+        "That's awesome! Count me in! 🔥",
+        "Perfect! I'm ready for the challenge 💪"
+      ];
+
+      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+
+      const userResponse: ChatMessage = {
+        id: `response-${Date.now()}`,
+        senderId: otherUser.id,
+        receiverId: "user",
+        content: randomResponse,
+        timestamp: new Date(),
+        isRead: true
+      };
+
+      const currentMessages = messages[conversationId] || [];
+      const updatedMessages = [...currentMessages, userResponse];
+      
+      setMessages(prev => ({
+        ...prev,
+        [conversationId]: updatedMessages
+      }));
+
+      chatStorage.saveMessages(conversationId, updatedMessages);
+      setIsTyping(false);
+      updateConversationTimestamp(conversationId);
+    }, 1500);
   };
 
   const simulateBotResponse = (userMessage: string, conversationId: string) => {
@@ -387,6 +490,15 @@ export function AdvancedChatInterface({ onLogout }: AdvancedChatInterfaceProps) 
               <Button
                 variant="ghost"
                 size="icon"
+                onClick={() => setShowNewChatDialog(true)}
+                className="h-8 w-8"
+                title="New Chat"
+              >
+                <UserPlus className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => setShowGroupCreator(true)}
                 className="h-8 w-8"
                 title="Create Group"
@@ -459,6 +571,8 @@ export function AdvancedChatInterface({ onLogout }: AdvancedChatInterfaceProps) 
                     <AvatarFallback>
                       {conversation.isGroupChat ? (
                         <Users className="h-5 w-5" />
+                      ) : conversation.id === "default-fitbot" ? (
+                        "🤖"
                       ) : (
                         conversation.name?.charAt(0) || 'C'
                       )}
@@ -482,7 +596,9 @@ export function AdvancedChatInterface({ onLogout }: AdvancedChatInterfaceProps) 
                       <p className="text-xs text-muted-foreground truncate">
                         {conversation.isGroupChat 
                           ? `${conversation.participants.length} members`
-                          : 'Private chat'
+                          : conversation.id === "default-fitbot"
+                          ? "AI Assistant"
+                          : "Private chat"
                         }
                       </p>
                       {conversation.unreadCount > 0 && (
@@ -518,6 +634,8 @@ export function AdvancedChatInterface({ onLogout }: AdvancedChatInterfaceProps) 
                   <AvatarFallback>
                     {activeConv.isGroupChat ? (
                       <Users className="h-4 w-4" />
+                    ) : activeConv.id === "default-fitbot" ? (
+                      "🤖"
                     ) : (
                       activeConv.name?.charAt(0) || 'C'
                     )}
@@ -599,7 +717,7 @@ export function AdvancedChatInterface({ onLogout }: AdvancedChatInterfaceProps) 
                   {message.senderId !== 'user' && (
                     <Avatar className="h-6 w-6 mt-1">
                       <AvatarFallback className="text-xs">
-                        {message.senderId === 'fitbot' ? '🤖' : message.senderId.charAt(0)}
+                        {message.senderId === 'fitbot' ? '🤖' : message.senderId.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                   )}
@@ -651,7 +769,9 @@ export function AdvancedChatInterface({ onLogout }: AdvancedChatInterfaceProps) 
               {isTyping && (
                 <div className="flex gap-3 justify-start">
                   <Avatar className="h-6 w-6 mt-1">
-                    <AvatarFallback className="text-xs">🤖</AvatarFallback>
+                    <AvatarFallback className="text-xs">
+                      {activeConv?.id === "default-fitbot" ? "🤖" : activeConv?.name?.charAt(0)}
+                    </AvatarFallback>
                   </Avatar>
                   <div className="bg-background/80 backdrop-blur border p-3 rounded-lg">
                     <div className="flex gap-1">
@@ -725,6 +845,36 @@ export function AdvancedChatInterface({ onLogout }: AdvancedChatInterfaceProps) 
       </div>
 
       {/* Dialogs */}
+      <Dialog open={showNewChatDialog} onOpenChange={setShowNewChatDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Start New Chat</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="username" className="block text-sm font-medium mb-2">
+                Enter username to chat with:
+              </label>
+              <Input
+                id="username"
+                placeholder="e.g. john_doe"
+                value={newChatUsername}
+                onChange={(e) => setNewChatUsername(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && createNewUserChat()}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowNewChatDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={createNewUserChat} disabled={!newChatUsername.trim()}>
+                Start Chat
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={showGroupCreator} onOpenChange={setShowGroupCreator}>
         <DialogContent className="p-0">
           <GroupChatCreator
