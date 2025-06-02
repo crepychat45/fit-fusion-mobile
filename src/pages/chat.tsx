@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from "react";
 import { MobileNav } from "@/components/mobile-nav";
-import { FitfusionChat } from "@/components/chat/fitfusion-chat";
+import { EnhancedChatInterface } from "@/components/chat/enhanced-chat-interface";
 import { EnhancedChatAuth } from "@/components/chat/enhanced-chat-auth";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, KeyRound, ShieldCheck } from "lucide-react";
@@ -17,12 +17,10 @@ const ChatPage = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   
-  // Authentication state
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [authError, setAuthError] = useState<string | null>(null);
   
-  // Check authentication status on mount
   useEffect(() => {
     const checkAuth = async () => {
       setIsLoading(true);
@@ -43,7 +41,6 @@ const ChatPage = () => {
     
     checkAuth();
     
-    // Add auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("Auth state changed:", event, session?.user?.email);
       setIsAuthenticated(!!session);
@@ -126,7 +123,7 @@ const ChatPage = () => {
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="text-white border-white/30">
-              v4.7.0
+              v4.8.0
             </Badge>
             {isAuthenticated && (
               <Badge variant="default" className="bg-green-600 text-white">
@@ -140,8 +137,8 @@ const ChatPage = () => {
       
       <div className={`flex-1 flex flex-col ${isMobile ? 'pb-20' : ''}`}>
         {isAuthenticated ? (
-          <div className="w-full h-full flex-1 overflow-hidden">
-            <FitfusionChat onLogout={handleLogout} />
+          <div className="w-full h-full flex-1 overflow-hidden p-4">
+            <EnhancedChatInterface onLogout={handleLogout} />
           </div>
         ) : (
           <div className="max-w-md mx-auto p-4 flex-1 flex items-center justify-center">

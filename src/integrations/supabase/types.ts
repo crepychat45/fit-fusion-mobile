@@ -13,14 +13,17 @@ export type Database = {
         Row: {
           created_at: string
           id: number
+          user_id: string
         }
         Insert: {
           created_at?: string
           id?: number
+          user_id: string
         }
         Update: {
           created_at?: string
           id?: number
+          user_id?: string
         }
         Relationships: []
       }
@@ -30,12 +33,14 @@ export type Database = {
     }
     Functions: {
       manage_user_profiles: {
-        Args: {
-          action: string
-          user_id?: number
-          new_username?: string
-          new_email?: string
-        }
+        Args:
+          | Record<PropertyKey, never>
+          | {
+              action: string
+              user_id?: number
+              new_username?: string
+              new_email?: string
+            }
         Returns: {
           id: number
           username: string

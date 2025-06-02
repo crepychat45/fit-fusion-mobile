@@ -8,6 +8,8 @@ import { DeveloperOptions } from "./developer-options";
 import { ChatSettingsPanel } from "./chat-settings";
 import { AboutPage } from "./about-page";
 import { EnhancedSettingsValidation } from "./enhanced-settings-validation";
+import { AppUpdateManager } from "./app-update-manager";
+import { SecurityCenter } from "./security-center";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,7 +24,6 @@ export function SettingsContainer() {
   
   const handleClearLocalData = () => {
     try {
-      // Clear only app data, not authentication
       const keysToPreserve = ['auth_token', 'supabase.auth.token', 'app_version'];
       const keysToRemove = [];
       
@@ -68,7 +69,6 @@ export function SettingsContainer() {
   };
 
   const validateAllSettings = () => {
-    // Simulate settings validation
     setSettingsValidated(true);
     toast({
       title: "Settings Validated",
@@ -115,9 +115,11 @@ export function SettingsContainer() {
           <div className="max-w-screen-xl mx-auto px-4">
             <TabsList className="flex flex-nowrap overflow-x-auto py-2 scrollbar-none -mb-px">
               <TabsTrigger value="account" className="flex-shrink-0">Account</TabsTrigger>
+              <TabsTrigger value="security" className="flex-shrink-0">Security</TabsTrigger>
               <TabsTrigger value="display" className="flex-shrink-0">Display</TabsTrigger>
               <TabsTrigger value="privacy" className="flex-shrink-0">Privacy</TabsTrigger>
               <TabsTrigger value="chat" className="flex-shrink-0">Chat</TabsTrigger>
+              <TabsTrigger value="updates" className="flex-shrink-0">Updates</TabsTrigger>
               <TabsTrigger value="enhanced" className="flex-shrink-0">Enhanced</TabsTrigger>
               <TabsTrigger value="developer" className="flex-shrink-0">Developer</TabsTrigger>
               <TabsTrigger value="data" className="flex-shrink-0">Data</TabsTrigger>
@@ -131,6 +133,10 @@ export function SettingsContainer() {
             <AccountSettings />
           </TabsContent>
           
+          <TabsContent value="security" className="mt-0">
+            <SecurityCenter />
+          </TabsContent>
+          
           <TabsContent value="display" className="mt-0">
             <DisplaySettings />
           </TabsContent>
@@ -141,6 +147,10 @@ export function SettingsContainer() {
           
           <TabsContent value="chat" className="mt-0">
             <ChatSettingsPanel />
+          </TabsContent>
+          
+          <TabsContent value="updates" className="mt-0">
+            <AppUpdateManager />
           </TabsContent>
           
           <TabsContent value="enhanced" className="mt-0">
