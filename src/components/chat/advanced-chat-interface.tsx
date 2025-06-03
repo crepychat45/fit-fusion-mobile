@@ -38,9 +38,15 @@ import { ChatConversation, ChatMessage, ChatUser } from "@/types/chat";
 
 interface AdvancedChatInterfaceProps {
   onLogout?: () => void;
+  securityLevel?: string;
+  notificationsEnabled?: boolean;
 }
 
-export function AdvancedChatInterface({ onLogout }: AdvancedChatInterfaceProps) {
+export function AdvancedChatInterface({ 
+  onLogout, 
+  securityLevel = "high", 
+  notificationsEnabled = true 
+}: AdvancedChatInterfaceProps) {
   const { toast } = useToast();
   const [conversations, setConversations] = useState<ChatConversation[]>([]);
   const [activeConversation, setActiveConversation] = useState<string | null>(null);
@@ -653,7 +659,7 @@ export function AdvancedChatInterface({ onLogout }: AdvancedChatInterfaceProps) 
                     </span>
                     <Badge variant="outline" className="text-xs">
                       <Shield className="h-3 w-3 mr-1" />
-                      Encrypted
+                      {securityLevel.toUpperCase()}
                     </Badge>
                   </div>
                 </div>
