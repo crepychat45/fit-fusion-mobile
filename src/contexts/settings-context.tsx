@@ -39,6 +39,7 @@ interface SettingsContextType {
   codeEditorEnabled: boolean;
   setCCodeEditorEnabled: (enabled: boolean) => void;
   appVersion: string;
+  setAppVersion: (version: string) => void;
   subscriptionPlan: SubscriptionPlan;
   setSubscriptionPlan: (plan: SubscriptionPlan) => void;
   paymentMethod: PaymentMethod;
@@ -203,9 +204,31 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     return saved !== null ? saved === "true" : false;
   });
   
-  // Version info
-  const [appVersion] = useState("3.5.2");
-  
+  // Version info - sync with localStorage and listen for updates
+  const [appVersion, setAppVersionState] = useState(() => {
+    return localStorage.getItem('fitfusion-app-version') || "4.7.0";
+  });
+
+  // Listen for version updates from other components
+  useEffect(() => {
+    const handleVersionUpdate = (event: CustomEvent) => {
+      setAppVersionState(event.detail);
+    };
+
+    window.addEventListener('versionUpdated', handleVersionUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('versionUpdated', handleVersionUpdate as EventListener);
+    };
+  }, []);
+
+  const setAppVersion = (version: string) => {
+    setAppVersionState(version);
+    localStorage.setItem('fitfusion-app-version', version);
+    // Trigger version update event for other components
+    window.dispatchEvent(new CustomEvent('versionUpdated', { detail: version }));
+  };
+
   // Subscription settings
   const [subscriptionPlan, setSubscriptionPlan] = useState<SubscriptionPlan>(() => {
     const saved = localStorage.getItem("fitfusion-subscription-plan");
@@ -441,6 +464,7 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
       codeEditorEnabled,
       setCCodeEditorEnabled,
       appVersion,
+      setAppVersion,
       subscriptionPlan,
       setSubscriptionPlan,
       paymentMethod,
