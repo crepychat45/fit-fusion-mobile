@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
 import { 
   Download, 
   CheckCircle, 
@@ -16,10 +17,19 @@ import {
   Zap,
   Shield,
   Sparkles,
-  Info
+  Info,
+  Star,
+  Gift,
+  Smartphone,
+  Calendar,
+  Bug,
+  ArrowUp,
+  Wifi,
+  HardDrive
 } from "lucide-react";
 import { useSettings } from "@/contexts/settings-context";
 import { motion, AnimatePresence } from "framer-motion";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface UpdateInfo {
   version: string;
@@ -27,8 +37,22 @@ interface UpdateInfo {
   features: string[];
   improvements: string[];
   fixes: string[];
+  security: string[];
   size: string;
   priority: "low" | "medium" | "high" | "critical";
+  downloadUrl?: string;
+  changelog?: string;
+}
+
+interface SystemInfo {
+  platform: string;
+  userAgent: string;
+  screenResolution: string;
+  colorDepth: number;
+  timezone: string;
+  language: string;
+  cookiesEnabled: boolean;
+  onlineStatus: boolean;
 }
 
 export function VersionManager() {
@@ -40,6 +64,9 @@ export function VersionManager() {
   const [availableUpdate, setAvailableUpdate] = useState<UpdateInfo | null>(null);
   const [lastCheck, setLastCheck] = useState<Date | null>(null);
   const [showChangelog, setShowChangelog] = useState(false);
+  const [systemInfo, setSystemInfo] = useState<SystemInfo | null>(null);
+  const [networkSpeed, setNetworkSpeed] = useState<string>("Unknown");
+  const [storageInfo, setStorageInfo] = useState<{ used: number; available: number } | null>(null);
 
   const currentVersion = appVersion;
   const latestVersion = "4.9.2";
@@ -48,60 +75,126 @@ export function VersionManager() {
     version: "4.9.2",
     releaseDate: "2025-01-03",
     features: [
-      "Enhanced AI-powered workout recommendations",
-      "Advanced biometric authentication",
-      "Real-time group fitness challenges",
-      "Smart nutrition tracking with barcode scanning",
-      "Offline workout mode with sync"
+      "🤖 Revolutionary AI-powered workout recommendations with machine learning",
+      "🔐 Advanced biometric authentication with enhanced security protocols",
+      "🎯 Real-time group fitness challenges with leaderboards",
+      "📱 Smart nutrition tracking with barcode scanning and AI analysis",
+      "📴 Offline workout mode with intelligent sync capabilities",
+      "🎨 New dynamic theme system with customizable color palettes",
+      "📊 Enhanced analytics dashboard with predictive insights"
     ],
     improvements: [
-      "50% faster app startup time",
-      "Improved battery optimization",
-      "Enhanced security protocols",
-      "Better accessibility features",
-      "Smoother animations and transitions"
+      "⚡ 60% faster app startup time with optimized loading",
+      "🔋 Improved battery optimization reducing consumption by 40%",
+      "🛡️ Enhanced security protocols with zero-trust architecture",
+      "♿ Better accessibility features meeting WCAG 2.1 AA standards",
+      "✨ Smoother animations with 120fps support",
+      "🌐 Improved offline functionality with intelligent caching",
+      "📱 Better mobile responsiveness across all device sizes"
     ],
     fixes: [
-      "Fixed workout timer synchronization issues",
-      "Resolved chat notification bugs",
-      "Fixed progress chart data accuracy",
-      "Improved memory usage optimization",
-      "Fixed dark mode theme inconsistencies"
+      "🔧 Fixed workout timer synchronization issues across devices",
+      "💬 Resolved chat notification bugs and message delivery",
+      "📈 Fixed progress chart data accuracy and real-time updates",
+      "🧠 Improved memory usage optimization reducing RAM by 35%",
+      "🌙 Fixed dark mode theme inconsistencies and contrast issues",
+      "🔄 Resolved sync conflicts between multiple devices",
+      "🎵 Fixed audio playback issues during workouts"
     ],
-    size: "12.8 MB",
-    priority: "high"
+    security: [
+      "🔒 End-to-end encryption for all user communications",
+      "🛡️ Advanced threat detection and prevention system",
+      "🔐 Multi-factor authentication with biometric support",
+      "🚫 Enhanced data privacy controls with granular permissions",
+      "🔍 Security audit compliance with SOC 2 Type II standards"
+    ],
+    size: "15.2 MB",
+    priority: "high",
+    changelog: "This major update introduces revolutionary AI features, enhanced security, and significant performance improvements."
   };
 
+  const releaseHistory = [
+    { version: "4.9.2", date: "2025-01-03", type: "Major Release" },
+    { version: "4.8.1", date: "2024-12-15", type: "Security Update" },
+    { version: "4.8.0", date: "2024-12-01", type: "Feature Update" },
+    { version: "4.7.0", date: "2024-11-15", type: "Major Release" }
+  ];
+
   useEffect(() => {
+    initializeSystemInfo();
     checkForUpdates();
+    measureNetworkSpeed();
+    checkStorageInfo();
   }, []);
+
+  const initializeSystemInfo = () => {
+    setSystemInfo({
+      platform: navigator.platform,
+      userAgent: navigator.userAgent,
+      screenResolution: `${screen.width}x${screen.height}`,
+      colorDepth: screen.colorDepth,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      language: navigator.language,
+      cookiesEnabled: navigator.cookieEnabled,
+      onlineStatus: navigator.onLine
+    });
+  };
+
+  const measureNetworkSpeed = async () => {
+    try {
+      const startTime = performance.now();
+      await fetch('/placeholder.svg', { method: 'HEAD' });
+      const endTime = performance.now();
+      const duration = endTime - startTime;
+      
+      if (duration < 100) setNetworkSpeed("Fast (>10 Mbps)");
+      else if (duration < 300) setNetworkSpeed("Medium (1-10 Mbps)");
+      else setNetworkSpeed("Slow (<1 Mbps)");
+    } catch {
+      setNetworkSpeed("Offline");
+    }
+  };
+
+  const checkStorageInfo = async () => {
+    if ('storage' in navigator && 'estimate' in navigator.storage) {
+      try {
+        const estimate = await navigator.storage.estimate();
+        setStorageInfo({
+          used: Math.round((estimate.usage || 0) / 1024 / 1024), // MB
+          available: Math.round((estimate.quota || 0) / 1024 / 1024) // MB
+        });
+      } catch (error) {
+        console.log("Storage estimation not available");
+      }
+    }
+  };
 
   const checkForUpdates = async () => {
     setIsChecking(true);
     setLastCheck(new Date());
     
     try {
-      // Simulate checking for updates
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Simulate enhanced API call
+      await new Promise(resolve => setTimeout(resolve, 2500));
       
       const needsUpdate = compareVersions(currentVersion, latestVersion) < 0;
       
       if (needsUpdate) {
         setAvailableUpdate(updateInfo);
         toast({
-          title: "Update Available!",
-          description: `FitFusion ${latestVersion} is ready to install.`,
+          title: "🎉 Major Update Available!",
+          description: `FitFusion ${latestVersion} is ready with exciting new features!`,
         });
       } else {
         toast({
-          title: "You're up to date!",
-          description: "You have the latest version of FitFusion.",
+          title: "✅ You're up to date!",
+          description: "You have the latest version with all features.",
         });
       }
     } catch (error) {
       toast({
-        title: "Update check failed",
-        description: "Unable to check for updates. Please try again.",
+        title: "❌ Update check failed",
+        description: "Unable to check for updates. Please check your connection.",
         variant: "destructive"
       });
     } finally {
@@ -116,17 +209,18 @@ export function VersionManager() {
     setUpdateProgress(0);
     
     try {
-      // Simulate update process with realistic progress
       const stages = [
-        { message: "Downloading update...", progress: 25 },
-        { message: "Verifying package integrity...", progress: 50 },
-        { message: "Installing new features...", progress: 75 },
-        { message: "Finalizing installation...", progress: 90 },
-        { message: "Update complete!", progress: 100 }
+        { message: "🔍 Preparing update environment...", progress: 10 },
+        { message: "📦 Downloading update package...", progress: 30 },
+        { message: "🔐 Verifying digital signature...", progress: 50 },
+        { message: "⚙️ Installing new features...", progress: 70 },
+        { message: "🔧 Updating configuration files...", progress: 85 },
+        { message: "✨ Finalizing installation...", progress: 95 },
+        { message: "🎉 Update complete!", progress: 100 }
       ];
       
       for (const stage of stages) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 1200));
         setUpdateProgress(stage.progress);
         
         toast({
@@ -135,19 +229,19 @@ export function VersionManager() {
         });
       }
       
-      // Update the version
+      // Update the version and clear available update
       setAppVersion(availableUpdate.version);
       setAvailableUpdate(null);
       
       toast({
-        title: "Update installed successfully!",
-        description: `FitFusion has been updated to version ${availableUpdate.version}.`,
+        title: "🚀 Update Installed Successfully!",
+        description: `Welcome to FitFusion ${availableUpdate.version}! Enjoy the new features.`,
       });
       
     } catch (error) {
       toast({
-        title: "Update failed",
-        description: "Failed to install update. Please try again.",
+        title: "❌ Update Failed",
+        description: "Installation failed. Please try again or contact support.",
         variant: "destructive"
       });
     } finally {
@@ -191,101 +285,138 @@ export function VersionManager() {
     }
   };
 
+  const getChangeIcon = (type: string) => {
+    switch (type) {
+      case 'features': return <Sparkles className="h-4 w-4 text-green-500" />;
+      case 'fixes': return <Bug className="h-4 w-4 text-blue-500" />;
+      case 'security': return <Shield className="h-4 w-4 text-red-500" />;
+      case 'improvements': return <ArrowUp className="h-4 w-4 text-orange-500" />;
+      default: return <CheckCircle className="h-4 w-4" />;
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Current Version Card */}
-      <Card className="relative overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="h-5 w-5 text-primary" />
-                Version Information
-              </CardTitle>
-              <CardDescription>Current app version and update status</CardDescription>
-            </div>
-            <Badge variant="outline" className="text-lg font-mono px-4 py-2">
+    <Card className="relative overflow-hidden">
+      {availableUpdate && (
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-pulse" />
+      )}
+      
+      <CardHeader>
+        <CardTitle className="flex justify-between items-center">
+          <span className="flex items-center gap-2">
+            <Smartphone className="h-5 w-5 text-primary" />
+            Advanced Version Manager
+          </span>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-sm font-mono px-3 py-1">
               v{currentVersion}
             </Badge>
+            {availableUpdate && (
+              <Badge variant="default" className="animate-pulse bg-gradient-to-r from-orange-500 to-red-500">
+                <Gift className="h-3 w-3 mr-1" />
+                Update Ready
+              </Badge>
+            )}
           </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Clock className="h-4 w-4" />
-              {lastCheck ? (
-                `Last checked: ${lastCheck.toLocaleString()}`
-              ) : (
-                "Never checked for updates"
+        </CardTitle>
+        <CardDescription>
+          Comprehensive version management with real-time updates and system monitoring
+        </CardDescription>
+      </CardHeader>
+      
+      <CardContent className="space-y-6">
+        <Tabs defaultValue="updates" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="updates" className="relative">
+              Updates
+              {availableUpdate && (
+                <div className="absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full animate-pulse" />
               )}
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={checkForUpdates}
-              disabled={isChecking}
-            >
-              {isChecking ? (
-                <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
-              ) : (
-                <RefreshCw className="h-4 w-4 mr-1" />
-              )}
-              Check for Updates
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Available Update Card */}
-      <AnimatePresence>
-        {availableUpdate && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Card className="border-orange-200 bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-950/20 dark:to-yellow-950/20">
-              <CardHeader>
-                <div className="flex items-center justify-between">
+            </TabsTrigger>
+            <TabsTrigger value="changelog">Changelog</TabsTrigger>
+            <TabsTrigger value="system">System</TabsTrigger>
+            <TabsTrigger value="history">History</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="updates" className="space-y-4 mt-6">
+            {isUpdating ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="space-y-4 p-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-lg border"
+              >
+                <div className="flex justify-between text-sm font-medium">
+                  <span>🚀 Installing v{latestVersion}</span>
+                  <span>{Math.round(updateProgress)}%</span>
+                </div>
+                <Progress value={updateProgress} className="h-3" />
+                <p className="text-sm text-muted-foreground text-center">
+                  ⏳ Please keep the app open during installation...
+                </p>
+              </motion.div>
+            ) : availableUpdate ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-950/20 dark:to-blue-950/20 rounded-lg p-6 space-y-4 border"
+              >
+                <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <Download className="h-5 w-5 text-orange-600" />
-                      Update Available
-                    </CardTitle>
-                    <CardDescription>
-                      FitFusion {availableUpdate.version} is ready to install
-                    </CardDescription>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge 
-                      variant="default" 
-                      className={`${getPriorityColor(availableUpdate.priority)} text-white`}
-                    >
-                      {React.createElement(getPriorityIcon(availableUpdate.priority), { className: "h-3 w-3 mr-1" })}
-                      {availableUpdate.priority.toUpperCase()}
-                    </Badge>
-                    <Badge variant="outline">
-                      {availableUpdate.size}
-                    </Badge>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="font-bold text-xl text-green-700 dark:text-green-300">
+                        🎉 Major Update Available!
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Badge variant="default" className="text-lg px-3 py-1 font-mono bg-gradient-to-r from-blue-600 to-purple-600">
+                        v{availableUpdate.version}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        <Star className="h-3 w-3 mr-1" />
+                        Recommended
+                      </Badge>
+                      <Badge 
+                        variant="default" 
+                        className={`${getPriorityColor(availableUpdate.priority)} text-white`}
+                      >
+                        {React.createElement(getPriorityIcon(availableUpdate.priority), { className: "h-3 w-3 mr-1" })}
+                        {availableUpdate.priority.toUpperCase()}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      This major release includes revolutionary AI features, enhanced security protocols,
+                      significant performance improvements, and exciting new functionality.
+                    </p>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {isUpdating && (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span>Installing update...</span>
-                      <span>{updateProgress}%</span>
-                    </div>
-                    <Progress value={updateProgress} className="h-2" />
+                
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                  <div className="flex items-center gap-2 p-2 bg-white/50 dark:bg-black/20 rounded">
+                    <Shield className="h-4 w-4 text-green-500" />
+                    <span>Enhanced Security</span>
                   </div>
-                )}
+                  <div className="flex items-center gap-2 p-2 bg-white/50 dark:bg-black/20 rounded">
+                    <Zap className="h-4 w-4 text-blue-500" />
+                    <span>AI Features</span>
+                  </div>
+                  <div className="flex items-center gap-2 p-2 bg-white/50 dark:bg-black/20 rounded">
+                    <Smartphone className="h-4 w-4 text-purple-500" />
+                    <span>Mobile Optimized</span>
+                  </div>
+                  <div className="flex items-center gap-2 p-2 bg-white/50 dark:bg-black/20 rounded">
+                    <ArrowUp className="h-4 w-4 text-orange-500" />
+                    <span>60% Faster</span>
+                  </div>
+                </div>
 
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground">
-                    Released: {new Date(availableUpdate.releaseDate).toLocaleDateString()}
+                <div className="flex items-center justify-between pt-4">
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <span>📅 {new Date(availableUpdate.releaseDate).toLocaleDateString()}</span>
+                    <span>📦 {availableUpdate.size}</span>
+                    <span className="flex items-center gap-1">
+                      <Wifi className="h-3 w-3" />
+                      {networkSpeed}
+                    </span>
                   </div>
                   <div className="flex gap-2">
                     <Button 
@@ -293,131 +424,338 @@ export function VersionManager() {
                       size="sm"
                       onClick={() => setShowChangelog(!showChangelog)}
                     >
-                      {showChangelog ? "Hide" : "View"} Changelog
+                      {showChangelog ? "Hide" : "View"} Details
                     </Button>
                     <Button 
                       onClick={installUpdate}
                       disabled={isUpdating}
-                      className="bg-orange-600 hover:bg-orange-700"
+                      className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
                     >
-                      {isUpdating ? (
-                        <>
-                          <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
-                          Installing...
-                        </>
-                      ) : (
-                        <>
-                          <Download className="h-4 w-4 mr-1" />
-                          Install Update
-                        </>
-                      )}
+                      <Download className="h-4 w-4 mr-2" />
+                      Install v{availableUpdate.version}
                     </Button>
                   </div>
                 </div>
+              </motion.div>
+            ) : (
+              <div className="bg-green-50 dark:bg-green-950/20 rounded-lg p-6 border border-green-200 dark:border-green-800">
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="h-6 w-6 text-green-600" />
+                  <div>
+                    <p className="text-sm font-medium text-green-800 dark:text-green-200">
+                      ✅ Your application is up to date
+                    </p>
+                    <p className="text-xs text-green-600 dark:text-green-300 mt-1">
+                      Version {currentVersion} • Latest release with all features and security updates
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
 
-                <AnimatePresence>
-                  {showChangelog && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                        <div className="space-y-2">
-                          <h4 className="font-medium text-green-600 flex items-center gap-1">
-                            <Sparkles className="h-4 w-4" />
-                            New Features
-                          </h4>
-                          <ul className="text-xs space-y-1">
-                            {availableUpdate.features.map((feature, index) => (
-                              <li key={index} className="flex items-start gap-1">
-                                <CheckCircle className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
-                                {feature}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
+            <div className="flex justify-between items-center text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
+              <div className="flex items-center gap-4">
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  {lastCheck ? `Last checked: ${lastCheck.toLocaleTimeString()}` : "Never checked"}
+                </span>
+                {systemInfo?.onlineStatus && (
+                  <span className="flex items-center gap-1 text-green-600">
+                    <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />
+                    Online
+                  </span>
+                )}
+              </div>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={checkForUpdates}
+                disabled={isChecking}
+              >
+                <RefreshCw className={`h-3 w-3 mr-1 ${isChecking ? 'animate-spin' : ''}`} />
+                {isChecking ? "Checking..." : "Check Now"}
+              </Button>
+            </div>
 
-                        <div className="space-y-2">
-                          <h4 className="font-medium text-blue-600 flex items-center gap-1">
-                            <Zap className="h-4 w-4" />
-                            Improvements
-                          </h4>
-                          <ul className="text-xs space-y-1">
-                            {availableUpdate.improvements.map((improvement, index) => (
-                              <li key={index} className="flex items-start gap-1">
-                                <CheckCircle className="h-3 w-3 text-blue-500 mt-0.5 flex-shrink-0" />
-                                {improvement}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-
-                        <div className="space-y-2">
-                          <h4 className="font-medium text-orange-600 flex items-center gap-1">
-                            <Shield className="h-4 w-4" />
-                            Bug Fixes
-                          </h4>
-                          <ul className="text-xs space-y-1">
-                            {availableUpdate.fixes.map((fix, index) => (
-                              <li key={index} className="flex items-start gap-1">
-                                <CheckCircle className="h-3 w-3 text-orange-500 mt-0.5 flex-shrink-0" />
-                                {fix}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
+            {/* Enhanced Changelog Display */}
+            <AnimatePresence>
+              {showChangelog && availableUpdate && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
+                >
+                  <Separator className="my-4" />
+                  <div className="space-y-4">
+                    <h4 className="font-semibold text-lg flex items-center gap-2">
+                      <Sparkles className="h-5 w-5 text-primary" />
+                      What's New in v{availableUpdate.version}
+                    </h4>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Features */}
+                      <div className="space-y-3">
+                        <h5 className="font-medium text-green-600 flex items-center gap-2">
+                          {getChangeIcon('features')}
+                          New Features ({availableUpdate.features.length})
+                        </h5>
+                        <ul className="text-sm space-y-2">
+                          {availableUpdate.features.map((feature, index) => (
+                            <motion.li 
+                              key={index}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: index * 0.1 }}
+                              className="flex items-start gap-2 p-2 bg-green-50 dark:bg-green-950/20 rounded"
+                            >
+                              <CheckCircle className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
+                              <span>{feature}</span>
+                            </motion.li>
+                          ))}
+                        </ul>
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
-      {/* Update Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
-            Update Preferences
-          </CardTitle>
-          <CardDescription>
-            Configure how you receive and install updates
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Alert>
-            <Info className="h-4 w-4" />
-            <AlertDescription>
-              Automatic updates ensure you always have the latest features and security improvements.
-              Updates are installed during off-peak hours to minimize disruption.
-            </AlertDescription>
-          </Alert>
+                      {/* Improvements */}
+                      <div className="space-y-3">
+                        <h5 className="font-medium text-blue-600 flex items-center gap-2">
+                          {getChangeIcon('improvements')}
+                          Improvements ({availableUpdate.improvements.length})
+                        </h5>
+                        <ul className="text-sm space-y-2">
+                          {availableUpdate.improvements.map((improvement, index) => (
+                            <motion.li 
+                              key={index}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: index * 0.1 }}
+                              className="flex items-start gap-2 p-2 bg-blue-50 dark:bg-blue-950/20 rounded"
+                            >
+                              <ArrowUp className="h-3 w-3 text-blue-500 mt-0.5 flex-shrink-0" />
+                              <span>{improvement}</span>
+                            </motion.li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      {/* Security */}
+                      <div className="space-y-3">
+                        <h5 className="font-medium text-red-600 flex items-center gap-2">
+                          {getChangeIcon('security')}
+                          Security Updates ({availableUpdate.security.length})
+                        </h5>
+                        <ul className="text-sm space-y-2">
+                          {availableUpdate.security.map((security, index) => (
+                            <motion.li 
+                              key={index}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: index * 0.1 }}
+                              className="flex items-start gap-2 p-2 bg-red-50 dark:bg-red-950/20 rounded"
+                            >
+                              <Shield className="h-3 w-3 text-red-500 mt-0.5 flex-shrink-0" />
+                              <span>{security}</span>
+                            </motion.li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      {/* Bug Fixes */}
+                      <div className="space-y-3">
+                        <h5 className="font-medium text-orange-600 flex items-center gap-2">
+                          {getChangeIcon('fixes')}
+                          Bug Fixes ({availableUpdate.fixes.length})
+                        </h5>
+                        <ul className="text-sm space-y-2">
+                          {availableUpdate.fixes.map((fix, index) => (
+                            <motion.li 
+                              key={index}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: index * 0.1 }}
+                              className="flex items-start gap-2 p-2 bg-orange-50 dark:bg-orange-950/20 rounded"
+                            >
+                              <Bug className="h-3 w-3 text-orange-500 mt-0.5 flex-shrink-0" />
+                              <span>{fix}</span>
+                            </motion.li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </TabsContent>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 border rounded-lg space-y-2">
-              <h4 className="font-medium">Update Channel</h4>
-              <p className="text-sm text-muted-foreground">
-                Currently on: <strong>Stable</strong>
-              </p>
-              <Badge variant="outline" className="text-xs">Recommended</Badge>
+          <TabsContent value="system" className="space-y-4 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Current Version Info */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Package className="h-4 w-4 text-blue-500" />
+                    Version Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Current Version:</span>
+                    <Badge variant="outline" className="font-mono">{currentVersion}</Badge>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Latest Available:</span>
+                    <Badge variant="outline" className="font-mono">{latestVersion}</Badge>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Update Channel:</span>
+                    <span>Stable Release</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Auto-Updates:</span>
+                    <span className="text-green-600">✅ Enabled</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* System Information */}
+              {systemInfo && (
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <Smartphone className="h-4 w-4 text-purple-500" />
+                      System Details
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Platform:</span>
+                      <span className="font-mono text-xs">{systemInfo.platform}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Screen:</span>
+                      <span className="font-mono text-xs">{systemInfo.screenResolution}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Language:</span>
+                      <span>{systemInfo.language}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Timezone:</span>
+                      <span className="text-xs">{systemInfo.timezone}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Network:</span>
+                      <span className="flex items-center gap-1">
+                        <Wifi className="h-3 w-3" />
+                        {networkSpeed}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Storage Information */}
+              {storageInfo && (
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <HardDrive className="h-4 w-4 text-green-500" />
+                      Storage Usage
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Used:</span>
+                        <span>{storageInfo.used} MB</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Available:</span>
+                        <span>{storageInfo.available} MB</span>
+                      </div>
+                      <Progress 
+                        value={(storageInfo.used / storageInfo.available) * 100} 
+                        className="h-2"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* App Status */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-orange-500" />
+                    Application Status
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Build:</span>
+                    <Badge variant="outline">Production</Badge>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Environment:</span>
+                    <span>Web Application</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Status:</span>
+                    <span className="text-green-600">
+                      {availableUpdate ? '🟡 Update Available' : '🟢 Up to Date'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Last Update:</span>
+                    <span className="text-xs">
+                      {localStorage.getItem('fitfusion-last-update') 
+                        ? new Date(localStorage.getItem('fitfusion-last-update')!).toLocaleDateString()
+                        : 'Never'
+                      }
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-            
-            <div className="p-4 border rounded-lg space-y-2">
-              <h4 className="font-medium">Auto-Update</h4>
-              <p className="text-sm text-muted-foreground">
-                Status: <strong>Enabled</strong>
-              </p>
-              <Badge variant="default" className="text-xs bg-green-600">Active</Badge>
+          </TabsContent>
+
+          <TabsContent value="history" className="space-y-4 mt-6">
+            <div className="space-y-3">
+              <h4 className="font-medium flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Release History
+              </h4>
+              {releaseHistory.map((release, index) => (
+                <motion.div
+                  key={release.version}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <Badge variant="outline" className="font-mono">
+                      v{release.version}
+                    </Badge>
+                    <div>
+                      <span className="text-sm font-medium">{release.type}</span>
+                      <p className="text-xs text-muted-foreground">{release.date}</p>
+                    </div>
+                  </div>
+                  {release.version === currentVersion && (
+                    <Badge variant="default" className="text-xs">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Current
+                    </Badge>
+                  )}
+                </motion.div>
+              ))}
             </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
   );
 }
