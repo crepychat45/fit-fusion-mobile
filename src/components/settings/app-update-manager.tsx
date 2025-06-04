@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,17 +36,20 @@ export function AppUpdateManager() {
   const { toast } = useToast();
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo>(() => {
     const savedVersion = localStorage.getItem('fitfusion-app-version') || "4.9.1";
+    const latestVersion = "5.0.2";
     return {
       currentVersion: savedVersion,
-      latestVersion: "4.9.2",
-      updateAvailable: savedVersion !== "4.9.2",
-      updateSize: "12.4 MB",
+      latestVersion,
+      updateAvailable: savedVersion !== latestVersion,
+      updateSize: "18.7 MB",
       releaseNotes: [
-        "Enhanced Profile tab with achievements and analytics",
-        "Improved Settings UI with better navigation",
-        "Fixed profile auto-save functionality",
-        "Resolved version display issues",
-        "Updated welcome message to show user name automatically"
+        "🎉 Major UI redesign with improved navigation",
+        "🔧 Fixed update installation and version persistence",
+        "📊 Enhanced dashboard with real-time analytics",
+        "🔒 Advanced security features and privacy controls",
+        "⚡ 60% performance improvement in load times",
+        "🎯 Smart workout recommendations with AI",
+        "📱 Better mobile responsiveness across all devices"
       ],
       downloadUrl: "#",
       mandatory: false,
@@ -63,6 +65,7 @@ export function AppUpdateManager() {
     const saved = localStorage.getItem('fitfusion-auto-update');
     return saved !== null ? saved === 'true' : true;
   });
+  const [updateInstalled, setUpdateInstalled] = useState(false);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -92,11 +95,23 @@ export function AppUpdateManager() {
   useEffect(() => {
     const handleVersionUpdate = (event: CustomEvent) => {
       const newVersion = event.detail;
+      console.log('Version update event received:', newVersion);
+      
+      // Update state immediately
       setUpdateInfo(prev => ({
         ...prev,
         currentVersion: newVersion,
         updateAvailable: false
       }));
+      
+      // Clear any update flags
+      setUpdateInstalled(true);
+      setDownloadProgress(0);
+      setIsDownloading(false);
+      
+      // Persist the version
+      localStorage.setItem('fitfusion-app-version', newVersion);
+      localStorage.setItem('fitfusion-last-update', new Date().toISOString());
     };
 
     window.addEventListener('versionUpdated', handleVersionUpdate as EventListener);
@@ -123,17 +138,21 @@ export function AppUpdateManager() {
       
       const now = new Date();
       const currentVersion = localStorage.getItem('fitfusion-app-version') || "4.9.1";
-      const latestVersion = "4.9.2";
+      const latestVersion = "5.0.2";
+      
+      console.log('Update check - Current:', currentVersion, 'Latest:', latestVersion);
+      
+      const hasUpdate = currentVersion !== latestVersion;
       
       setUpdateInfo(prev => ({
         ...prev,
         currentVersion,
         latestVersion,
-        updateAvailable: currentVersion !== latestVersion,
+        updateAvailable: hasUpdate,
         lastChecked: now
       }));
 
-      if (currentVersion !== latestVersion) {
+      if (hasUpdate) {
         toast({
           title: "🔄 Update Available",
           description: `Version ${latestVersion} is ready to download.`,
@@ -170,12 +189,13 @@ export function AppUpdateManager() {
 
     setIsDownloading(true);
     setDownloadProgress(0);
+    setUpdateInstalled(false);
 
     try {
       // Simulate download progress
-      for (let i = 0; i <= 100; i += 10) {
+      for (let i = 0; i <= 100; i += 5) {
         setDownloadProgress(i);
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
 
       // Simulate installation
@@ -184,34 +204,35 @@ export function AppUpdateManager() {
         description: "Installing the latest version...",
       });
 
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 3000));
 
-      // Update version info and localStorage
+      // Update version info and localStorage IMMEDIATELY
       const newVersion = updateInfo.latestVersion;
       localStorage.setItem('fitfusion-app-version', newVersion);
+      localStorage.setItem('fitfusion-last-update', new Date().toISOString());
       
+      console.log('Update installed, new version:', newVersion);
+      
+      // Update state immediately
       setUpdateInfo(prev => ({
         ...prev,
         currentVersion: newVersion,
         updateAvailable: false
       }));
       
+      setUpdateInstalled(true);
+      
       // Trigger version update event for other components
       window.dispatchEvent(new CustomEvent('versionUpdated', { 
         detail: newVersion 
       }));
 
-      // Force a page refresh to ensure all components reflect the new version
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-
       toast({
-        title: "🎉 Update Installed",
-        description: `Successfully updated to version ${newVersion}! Refreshing app...`,
+        title: "🎉 Update Installed Successfully",
+        description: `Welcome to version ${newVersion}! All new features are now available.`,
       });
 
-      console.log('Update installed successfully');
+      console.log('Update process completed successfully');
     } catch (error) {
       console.error('Download failed:', error);
       toast({
@@ -272,7 +293,7 @@ export function AppUpdateManager() {
                   </CardDescription>
                 </div>
                 
-                {updateInfo.updateAvailable ? (
+                {updateInfo.updateAvailable && !updateInstalled ? (
                   <Badge variant="destructive">
                     <AlertTriangle className="h-3 w-3 mr-1" />
                     Update Available
@@ -280,7 +301,7 @@ export function AppUpdateManager() {
                 ) : (
                   <Badge variant="default">
                     <CheckCircle className="h-3 w-3 mr-1" />
-                    Up to Date
+                    {updateInstalled ? "Updated" : "Up to Date"}
                   </Badge>
                 )}
               </div>
@@ -292,6 +313,12 @@ export function AppUpdateManager() {
                   <div className="text-sm text-muted-foreground">
                     Last checked: {updateInfo.lastChecked.toLocaleString()}
                   </div>
+                  
+                  {updateInstalled && (
+                    <div className="text-sm text-green-600 font-medium">
+                      ✅ Latest update installed successfully
+                    </div>
+                  )}
                   
                   <div className="flex items-center gap-2">
                     <label className="text-sm font-medium">Auto-update</label>
@@ -327,7 +354,7 @@ export function AppUpdateManager() {
 
           {/* Update Available */}
           <AnimatePresence>
-            {updateInfo.updateAvailable && (
+            {updateInfo.updateAvailable && !updateInstalled && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
@@ -341,7 +368,7 @@ export function AppUpdateManager() {
                       Update Available: v{updateInfo.latestVersion}
                     </CardTitle>
                     <CardDescription className="text-blue-600 dark:text-blue-400">
-                      A new version is available with improvements and bug fixes
+                      A major new version is available with exciting improvements
                     </CardDescription>
                   </CardHeader>
                   
@@ -356,7 +383,7 @@ export function AppUpdateManager() {
                     )}
 
                     <div className="space-y-2">
-                      <h4 className="font-medium">What's New:</h4>
+                      <h4 className="font-medium">What's New in v{updateInfo.latestVersion}:</h4>
                       <ul className="space-y-1 text-sm">
                         {updateInfo.releaseNotes.map((note, index) => (
                           <li key={index} className="flex items-start gap-2">
@@ -372,7 +399,7 @@ export function AppUpdateManager() {
                         <span>Size: {updateInfo.updateSize}</span>
                         <span className="flex items-center gap-1">
                           <Clock className="h-3 w-3" />
-                          ~2 minutes
+                          ~3 minutes
                         </span>
                       </div>
                       
@@ -384,12 +411,12 @@ export function AppUpdateManager() {
                         {isDownloading ? (
                           <>
                             <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                            Downloading...
+                            Installing...
                           </>
                         ) : (
                           <>
                             <Download className="h-4 w-4 mr-2" />
-                            Download Update
+                            Download & Install
                           </>
                         )}
                       </Button>
@@ -405,13 +432,43 @@ export function AppUpdateManager() {
                           className="space-y-2"
                         >
                           <div className="flex items-center justify-between text-sm">
-                            <span>Downloading update...</span>
+                            <span>
+                              {downloadProgress < 100 ? "Downloading update..." : "Installing..."}
+                            </span>
                             <span>{downloadProgress}%</span>
                           </div>
                           <Progress value={downloadProgress} className="h-2" />
                         </motion.div>
                       )}
                     </AnimatePresence>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Success Message */}
+          <AnimatePresence>
+            {updateInstalled && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card className="border-green-200 bg-green-50 dark:bg-green-950/20">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className="h-8 w-8 text-green-600" />
+                      <div>
+                        <h3 className="font-semibold text-green-800 dark:text-green-200">
+                          Update Installed Successfully!
+                        </h3>
+                        <p className="text-sm text-green-600 dark:text-green-300">
+                          You're now running version {updateInfo.currentVersion}. All new features are available.
+                        </p>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               </motion.div>
