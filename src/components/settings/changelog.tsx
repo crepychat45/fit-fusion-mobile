@@ -18,7 +18,8 @@ import {
   GitBranch,
   Sparkles,
   Users,
-  Heart
+  Heart,
+  AlertTriangle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
