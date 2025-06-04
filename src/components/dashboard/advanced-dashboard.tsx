@@ -44,6 +44,13 @@ export function AdvancedDashboard() {
     { name: "Consistency King", description: "5 days streak", icon: Target, earned: false }
   ];
 
+  const getProgressValue = (key: string, data: any) => {
+    if (key === 'calories') {
+      return `${data.burned}/${data.target}`;
+    }
+    return `${data.completed}/${data.target}`;
+  };
+
   return (
     <div className="px-4 space-y-4">
       <div className="flex items-center justify-between">
@@ -151,7 +158,7 @@ export function AdvancedDashboard() {
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium capitalize">{key}</span>
                     <span className="text-sm text-muted-foreground">
-                      {data.completed}/{data.target}
+                      {getProgressValue(key, data)}
                     </span>
                   </div>
                   <Progress value={data.percentage} className="h-2" />
