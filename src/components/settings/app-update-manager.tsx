@@ -35,21 +35,24 @@ interface UpdateInfo {
 
 export function AppUpdateManager() {
   const { toast } = useToast();
-  const [updateInfo, setUpdateInfo] = useState<UpdateInfo>({
-    currentVersion: "4.9.1",
-    latestVersion: "4.9.2",
-    updateAvailable: true,
-    updateSize: "12.4 MB",
-    releaseNotes: [
-      "Enhanced Profile tab with achievements and analytics",
-      "Improved Settings UI with better navigation",
-      "Fixed profile auto-save functionality",
-      "Resolved version display issues",
-      "Updated welcome message to show user name automatically"
-    ],
-    downloadUrl: "#",
-    mandatory: false,
-    lastChecked: new Date()
+  const [updateInfo, setUpdateInfo] = useState<UpdateInfo>(() => {
+    const savedVersion = localStorage.getItem('fitfusion-app-version') || "4.9.1";
+    return {
+      currentVersion: savedVersion,
+      latestVersion: "4.9.2",
+      updateAvailable: savedVersion !== "4.9.2",
+      updateSize: "12.4 MB",
+      releaseNotes: [
+        "Enhanced Profile tab with achievements and analytics",
+        "Improved Settings UI with better navigation",
+        "Fixed profile auto-save functionality",
+        "Resolved version display issues",
+        "Updated welcome message to show user name automatically"
+      ],
+      downloadUrl: "#",
+      mandatory: false,
+      lastChecked: new Date()
+    };
   });
   
   const [isDownloading, setIsDownloading] = useState(false);
@@ -85,6 +88,23 @@ export function AppUpdateManager() {
     }
   }, [autoUpdate, isOnline]);
 
+  // Listen for version update events
+  useEffect(() => {
+    const handleVersionUpdate = (event: CustomEvent) => {
+      const newVersion = event.detail;
+      setUpdateInfo(prev => ({
+        ...prev,
+        currentVersion: newVersion,
+        updateAvailable: false
+      }));
+    };
+
+    window.addEventListener('versionUpdated', handleVersionUpdate as EventListener);
+    return () => {
+      window.removeEventListener('versionUpdated', handleVersionUpdate as EventListener);
+    };
+  }, []);
+
   const checkForUpdates = async () => {
     if (!isOnline) {
       toast({
@@ -102,15 +122,21 @@ export function AppUpdateManager() {
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       const now = new Date();
+      const currentVersion = localStorage.getItem('fitfusion-app-version') || "4.9.1";
+      const latestVersion = "4.9.2";
+      
       setUpdateInfo(prev => ({
         ...prev,
+        currentVersion,
+        latestVersion,
+        updateAvailable: currentVersion !== latestVersion,
         lastChecked: now
       }));
 
-      if (updateInfo.updateAvailable) {
+      if (currentVersion !== latestVersion) {
         toast({
           title: "🔄 Update Available",
-          description: `Version ${updateInfo.latestVersion} is ready to download.`,
+          description: `Version ${latestVersion} is ready to download.`,
         });
       } else {
         toast({
@@ -160,24 +186,29 @@ export function AppUpdateManager() {
 
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // Update version info
+      // Update version info and localStorage
+      const newVersion = updateInfo.latestVersion;
+      localStorage.setItem('fitfusion-app-version', newVersion);
+      
       setUpdateInfo(prev => ({
         ...prev,
-        currentVersion: prev.latestVersion,
+        currentVersion: newVersion,
         updateAvailable: false
       }));
-
-      // Update localStorage version
-      localStorage.setItem('fitfusion-app-version', updateInfo.latestVersion);
       
-      // Trigger version update event
+      // Trigger version update event for other components
       window.dispatchEvent(new CustomEvent('versionUpdated', { 
-        detail: updateInfo.latestVersion 
+        detail: newVersion 
       }));
+
+      // Force a page refresh to ensure all components reflect the new version
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
 
       toast({
         title: "🎉 Update Installed",
-        description: `Successfully updated to version ${updateInfo.latestVersion}!`,
+        description: `Successfully updated to version ${newVersion}! Refreshing app...`,
       });
 
       console.log('Update installed successfully');
