@@ -1,492 +1,438 @@
 
 import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Download, 
-  RefreshCw, 
   CheckCircle, 
   AlertTriangle, 
-  Smartphone,
+  RefreshCw, 
+  Wifi, 
+  WifiOff,
   Clock,
-  FileText,
-  Zap,
-  Star,
-  Shield,
-  Gift
+  Info,
+  Smartphone,
+  Globe
 } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { motion, AnimatePresence } from "framer-motion";
+import { Changelog } from "./changelog";
 
 interface UpdateInfo {
-  version: string;
-  releaseDate: string;
-  changelog: string[];
-  size: string;
+  currentVersion: string;
+  latestVersion: string;
+  updateAvailable: boolean;
+  updateSize: string;
+  releaseNotes: string[];
+  downloadUrl: string;
   mandatory: boolean;
-  securityUpdate: boolean;
+  lastChecked: Date;
 }
 
 export function AppUpdateManager() {
   const { toast } = useToast();
-  
-  // Get current version from localStorage to sync with other components
-  const [currentVersion, setCurrentVersion] = useState(() => {
-    return localStorage.getItem('fitfusion-app-version') || "4.7.0";
+  const [updateInfo, setUpdateInfo] = useState<UpdateInfo>({
+    currentVersion: "4.9.1",
+    latestVersion: "4.9.2",
+    updateAvailable: true,
+    updateSize: "12.4 MB",
+    releaseNotes: [
+      "Enhanced Profile tab with achievements and analytics",
+      "Improved Settings UI with better navigation",
+      "Fixed profile auto-save functionality",
+      "Resolved version display issues",
+      "Updated welcome message to show user name automatically"
+    ],
+    downloadUrl: "#",
+    mandatory: false,
+    lastChecked: new Date()
   });
   
-  const [availableUpdate, setAvailableUpdate] = useState<UpdateInfo | null>(null);
-  const [isChecking, setIsChecking] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
-  const [isInstalling, setIsInstalling] = useState(false);
-  const [showChangelog, setShowChangelog] = useState(false);
-  const [lastCheckTime, setLastCheckTime] = useState<Date | null>(() => {
-    const stored = localStorage.getItem('fitfusion-last-update-check');
-    return stored ? new Date(stored) : null;
-  });
-  const [autoUpdateEnabled, setAutoUpdateEnabled] = useState(() => {
+  const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [autoUpdate, setAutoUpdate] = useState(() => {
     const saved = localStorage.getItem('fitfusion-auto-update');
-    return saved !== 'false';
+    return saved !== null ? saved === 'true' : true;
   });
 
-  // Mock update data with enhanced features
-  const mockUpdate: UpdateInfo = {
-    version: "4.9.2",
-    releaseDate: "2024-06-03",
-    changelog: [
-      "🤖 Revolutionary AI-powered workout generation with machine learning",
-      "🔒 Enhanced security features with end-to-end encryption and biometric auth",
-      "💬 Advanced chat functionality with real-time messaging and file sharing",
-      "🛡️ Comprehensive privacy controls and data management system",
-      "⚡ Performance optimizations reducing load times by 40%",
-      "🎨 Modern UI/UX redesign with accessibility improvements",
-      "📱 Better mobile responsiveness and offline functionality",
-      "🔧 Advanced developer tools and debugging options",
-      "📊 Enhanced analytics and progress tracking features",
-      "🌐 Multi-language support and localization improvements"
-    ],
-    size: "18.7 MB",
-    mandatory: false,
-    securityUpdate: true
-  };
-
-  // Listen for version updates from other components
   useEffect(() => {
-    const handleVersionUpdate = (event: CustomEvent) => {
-      setCurrentVersion(event.detail);
-      // Check if we still have an update available
-      if (event.detail === mockUpdate.version) {
-        setAvailableUpdate(null);
-      }
-    };
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
 
-    window.addEventListener('versionUpdated', handleVersionUpdate as EventListener);
-    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
     return () => {
-      window.removeEventListener('versionUpdated', handleVersionUpdate as EventListener);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
     };
-  }, [mockUpdate.version]);
+  }, []);
 
   useEffect(() => {
-    // Auto-check for updates on component mount
-    if (autoUpdateEnabled) {
+    localStorage.setItem('fitfusion-auto-update', autoUpdate.toString());
+  }, [autoUpdate]);
+
+  useEffect(() => {
+    // Check for updates on mount if auto-update is enabled
+    if (autoUpdate && isOnline) {
       checkForUpdates();
     }
-    
-    // Set up periodic checks every hour
-    const interval = setInterval(() => {
-      if (autoUpdateEnabled) {
-        checkForUpdates(true); // Silent check
-      }
-    }, 3600000); // 1 hour
+  }, [autoUpdate, isOnline]);
 
-    return () => clearInterval(interval);
-  }, [autoUpdateEnabled]);
-
-  const checkForUpdates = async (silent = false) => {
-    setIsChecking(true);
-    const now = new Date();
-    setLastCheckTime(now);
-    localStorage.setItem('fitfusion-last-update-check', now.toISOString());
-    
-    if (!silent) {
+  const checkForUpdates = async () => {
+    if (!isOnline) {
       toast({
-        title: "🔍 Checking for updates",
-        description: "Scanning for the latest version..."
+        title: "⚠️ No Internet Connection",
+        description: "Please check your internet connection and try again.",
+        variant: "destructive",
       });
+      return;
     }
 
+    setIsCheckingUpdates(true);
+    
     try {
-      // Simulate API call with more realistic delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Simulate API call to check for updates
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Compare versions (simple string comparison for demo)
-      const updateAvailable = currentVersion !== mockUpdate.version;
-      
-      if (updateAvailable) {
-        setAvailableUpdate(mockUpdate);
-        
-        if (!silent) {
-          toast({
-            title: "🎉 Major Update Available!",
-            description: `Version ${mockUpdate.version} includes exciting new features and security improvements.`,
-          });
-        }
+      const now = new Date();
+      setUpdateInfo(prev => ({
+        ...prev,
+        lastChecked: now
+      }));
+
+      if (updateInfo.updateAvailable) {
+        toast({
+          title: "🔄 Update Available",
+          description: `Version ${updateInfo.latestVersion} is ready to download.`,
+        });
       } else {
-        setAvailableUpdate(null);
-        
-        if (!silent) {
-          toast({
-            title: "✅ You're up to date",
-            description: "You have the latest version with all features.",
-          });
-        }
+        toast({
+          title: "✅ Up to Date",
+          description: "You're running the latest version of the app.",
+        });
       }
+      
+      console.log('Update check completed at:', now);
     } catch (error) {
+      console.error('Update check failed:', error);
       toast({
-        title: "❌ Update check failed",
-        description: "Unable to check for updates. Please try again later.",
-        variant: "destructive"
+        title: "❌ Update Check Failed",
+        description: "Could not check for updates. Please try again later.",
+        variant: "destructive",
       });
     } finally {
-      setIsChecking(false);
+      setIsCheckingUpdates(false);
     }
   };
 
   const downloadUpdate = async () => {
-    if (!availableUpdate) return;
-    
+    if (!isOnline) {
+      toast({
+        title: "⚠️ No Internet Connection",
+        description: "Internet connection required to download updates.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsDownloading(true);
     setDownloadProgress(0);
-    
-    toast({
-      title: "📦 Downloading update",
-      description: `Downloading version ${availableUpdate.version} (${availableUpdate.size})...`
-    });
 
     try {
-      // Simulate download with realistic progress steps
-      const steps = [5, 15, 30, 45, 60, 75, 85, 95, 100];
-      
-      for (let step of steps) {
-        await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 200));
-        setDownloadProgress(step);
-        
-        if (step === 50) {
-          toast({
-            title: "📥 Download progress",
-            description: "Halfway there! Downloading security updates...",
-          });
-        }
+      // Simulate download progress
+      for (let i = 0; i <= 100; i += 10) {
+        setDownloadProgress(i);
+        await new Promise(resolve => setTimeout(resolve, 200));
       }
-      
+
+      // Simulate installation
       toast({
-        title: "✅ Download complete",
-        description: "Update package verified and ready to install.",
+        title: "📦 Installing Update",
+        description: "Installing the latest version...",
       });
+
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Update version info
+      setUpdateInfo(prev => ({
+        ...prev,
+        currentVersion: prev.latestVersion,
+        updateAvailable: false
+      }));
+
+      // Update localStorage version
+      localStorage.setItem('fitfusion-app-version', updateInfo.latestVersion);
       
-      // Auto-install after download
-      setTimeout(() => installUpdate(), 1000);
-    } catch (error) {
+      // Trigger version update event
+      window.dispatchEvent(new CustomEvent('versionUpdated', { 
+        detail: updateInfo.latestVersion 
+      }));
+
       toast({
-        title: "❌ Download failed",
-        description: "Unable to download update. Please check your connection.",
-        variant: "destructive"
+        title: "🎉 Update Installed",
+        description: `Successfully updated to version ${updateInfo.latestVersion}!`,
+      });
+
+      console.log('Update installed successfully');
+    } catch (error) {
+      console.error('Download failed:', error);
+      toast({
+        title: "❌ Download Failed",
+        description: "Failed to download the update. Please try again.",
+        variant: "destructive",
       });
     } finally {
       setIsDownloading(false);
-    }
-  };
-
-  const installUpdate = async () => {
-    if (!availableUpdate) return;
-    
-    setIsInstalling(true);
-    
-    toast({
-      title: "⚙️ Installing update",
-      description: "Installing new features and security improvements..."
-    });
-
-    try {
-      // Simulate installation with status updates
-      const installSteps = [
-        "Preparing installation environment...",
-        "Installing core updates...",
-        "Updating security features...",
-        "Configuring new features...",
-        "Optimizing performance...",
-        "Finalizing installation..."
-      ];
-
-      for (let i = 0; i < installSteps.length; i++) {
-        await new Promise(resolve => setTimeout(resolve, 800));
-        toast({
-          title: installSteps[i],
-          description: `Step ${i + 1} of ${installSteps.length}`,
-        });
-      }
-      
-      // Update version in localStorage and component state
-      const newVersion = availableUpdate.version;
-      setCurrentVersion(newVersion);
-      localStorage.setItem('fitfusion-app-version', newVersion);
-      localStorage.setItem('fitfusion-last-update', new Date().toISOString());
-      
-      // Clear the available update
-      setAvailableUpdate(null);
-      
-      // Trigger version update event for other components
-      window.dispatchEvent(new CustomEvent('versionUpdated', { detail: newVersion }));
-      
-      toast({
-        title: "🎉 Update installed successfully!",
-        description: `FitFusion has been updated to version ${newVersion} with all new features!`,
-      });
-      
-      // Show success message with features
-      setTimeout(() => {
-        toast({
-          title: "✨ Welcome to the new FitFusion!",
-          description: "Explore the enhanced AI features, improved security, and better performance.",
-        });
-      }, 2000);
-      
-    } catch (error) {
-      toast({
-        title: "❌ Installation failed",
-        description: "Unable to install update. Please try again or contact support.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsInstalling(false);
+      setDownloadProgress(0);
     }
   };
 
   const toggleAutoUpdate = () => {
-    const newValue = !autoUpdateEnabled;
-    setAutoUpdateEnabled(newValue);
-    localStorage.setItem('fitfusion-auto-update', newValue.toString());
-    
+    setAutoUpdate(!autoUpdate);
     toast({
-      title: newValue ? "🔄 Auto-update enabled" : "⏸️ Auto-update disabled",
-      description: newValue 
-        ? "The app will check for updates automatically every hour." 
-        : "You'll need to check for updates manually."
+      title: `Auto-Update ${!autoUpdate ? 'Enabled' : 'Disabled'}`,
+      description: `Automatic updates have been ${!autoUpdate ? 'enabled' : 'disabled'}.`,
     });
   };
 
   return (
     <div className="space-y-6">
-      <Card className="relative overflow-hidden">
-        {availableUpdate && (
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 via-blue-500 to-purple-500 animate-pulse" />
-        )}
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-semibold">App Updates</h3>
+          <p className="text-sm text-muted-foreground">
+            Manage app updates and view version history
+          </p>
+        </div>
         
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Smartphone className="h-5 w-5" />
-            App Update Center
-          </CardTitle>
-          <CardDescription>
-            Keep FitFusion updated with the latest features, security improvements, and performance enhancements
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between p-4 border rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
-            <div>
-              <p className="font-medium flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-500" />
-                Current Version
-              </p>
-              <p className="text-sm text-muted-foreground font-mono">v{currentVersion}</p>
-            </div>
-            <Badge variant="outline" className="px-3 py-1">
-              <Shield className="h-3 w-3 mr-1" />
-              Active
-            </Badge>
-          </div>
+        <div className="flex items-center gap-2">
+          <Badge variant={isOnline ? "default" : "destructive"}>
+            {isOnline ? <Wifi className="h-3 w-3 mr-1" /> : <WifiOff className="h-3 w-3 mr-1" />}
+            {isOnline ? "Online" : "Offline"}
+          </Badge>
+        </div>
+      </div>
 
-          {availableUpdate && (
-            <Alert className="border-green-200 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950/20 dark:to-blue-950/20">
-              <Gift className="h-4 w-4 text-green-600" />
-              <AlertDescription className="flex items-center justify-between w-full">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <strong className="text-green-800 dark:text-green-200">
-                      🎉 Major Update Available: v{availableUpdate.version}
-                    </strong>
-                    {availableUpdate.securityUpdate && (
-                      <Badge variant="destructive" className="text-xs animate-pulse">
-                        <Shield className="h-3 w-3 mr-1" />
-                        Security
-                      </Badge>
-                    )}
+      <Tabs defaultValue="updates" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="updates">Updates</TabsTrigger>
+          <TabsTrigger value="changelog">Changelog</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="updates" className="space-y-4">
+          {/* Current Version Info */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Smartphone className="h-5 w-5" />
+                    Current Version
+                  </CardTitle>
+                  <CardDescription>
+                    You are running version {updateInfo.currentVersion}
+                  </CardDescription>
+                </div>
+                
+                {updateInfo.updateAvailable ? (
+                  <Badge variant="destructive">
+                    <AlertTriangle className="h-3 w-3 mr-1" />
+                    Update Available
+                  </Badge>
+                ) : (
+                  <Badge variant="default">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Up to Date
+                  </Badge>
+                )}
+              </div>
+            </CardHeader>
+            
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <div className="text-sm text-muted-foreground">
+                    Last checked: {updateInfo.lastChecked.toLocaleString()}
                   </div>
-                  <p className="text-sm mt-1 text-green-700 dark:text-green-300">
-                    Released {new Date(availableUpdate.releaseDate).toLocaleDateString()} • {availableUpdate.size} • 
-                    {availableUpdate.securityUpdate ? " Critical Security Update" : " Feature Update"}
-                  </p>
+                  
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm font-medium">Auto-update</label>
+                    <input
+                      type="checkbox"
+                      checked={autoUpdate}
+                      onChange={toggleAutoUpdate}
+                      className="rounded border-gray-300"
+                    />
+                  </div>
                 </div>
-                <div className="flex gap-2 ml-4">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setShowChangelog(true)}
-                  >
-                    <FileText className="h-4 w-4 mr-1" />
-                    What's New
-                  </Button>
-                  <Button 
-                    size="sm"
-                    onClick={downloadUpdate}
-                    disabled={isDownloading || isInstalling}
-                    className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
-                  >
-                    {isDownloading ? (
-                      <>
-                        <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
-                        Downloading {downloadProgress}%
-                      </>
-                    ) : isInstalling ? (
-                      <>
-                        <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
-                        Installing...
-                      </>
-                    ) : (
-                      <>
-                        <Download className="h-4 w-4 mr-1" />
-                        Update Now
-                      </>
+                
+                <Button 
+                  variant="outline" 
+                  onClick={checkForUpdates}
+                  disabled={isCheckingUpdates || !isOnline}
+                >
+                  {isCheckingUpdates ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      Checking...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Check for Updates
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Update Available */}
+          <AnimatePresence>
+            {updateInfo.updateAvailable && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950/20">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                      <Download className="h-5 w-5" />
+                      Update Available: v{updateInfo.latestVersion}
+                    </CardTitle>
+                    <CardDescription className="text-blue-600 dark:text-blue-400">
+                      A new version is available with improvements and bug fixes
+                    </CardDescription>
+                  </CardHeader>
+                  
+                  <CardContent className="space-y-4">
+                    {updateInfo.mandatory && (
+                      <Alert className="border-red-200 bg-red-50 dark:bg-red-950/20">
+                        <AlertTriangle className="h-4 w-4 text-red-600" />
+                        <AlertDescription className="text-red-800 dark:text-red-200">
+                          This is a mandatory security update and must be installed.
+                        </AlertDescription>
+                      </Alert>
                     )}
-                  </Button>
+
+                    <div className="space-y-2">
+                      <h4 className="font-medium">What's New:</h4>
+                      <ul className="space-y-1 text-sm">
+                        {updateInfo.releaseNotes.map((note, index) => (
+                          <li key={index} className="flex items-start gap-2">
+                            <span className="text-blue-500 mt-1">•</span>
+                            <span>{note}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-4">
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <span>Size: {updateInfo.updateSize}</span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          ~2 minutes
+                        </span>
+                      </div>
+                      
+                      <Button 
+                        onClick={downloadUpdate}
+                        disabled={isDownloading || !isOnline}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
+                        {isDownloading ? (
+                          <>
+                            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                            Downloading...
+                          </>
+                        ) : (
+                          <>
+                            <Download className="h-4 w-4 mr-2" />
+                            Download Update
+                          </>
+                        )}
+                      </Button>
+                    </div>
+
+                    {/* Download Progress */}
+                    <AnimatePresence>
+                      {isDownloading && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="space-y-2"
+                        >
+                          <div className="flex items-center justify-between text-sm">
+                            <span>Downloading update...</span>
+                            <span>{downloadProgress}%</span>
+                          </div>
+                          <Progress value={downloadProgress} className="h-2" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Additional Info */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Info className="h-5 w-5" />
+                Update Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="font-medium">Update Channel:</span>
+                  <span className="ml-2 text-muted-foreground">Stable</span>
                 </div>
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {isDownloading && (
-            <div className="space-y-3 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border">
-              <div className="flex justify-between text-sm font-medium">
-                <span>📦 Downloading v{availableUpdate?.version}</span>
-                <span>{downloadProgress}%</span>
+                <div>
+                  <span className="font-medium">Auto-update:</span>
+                  <span className="ml-2 text-muted-foreground">
+                    {autoUpdate ? "Enabled" : "Disabled"}
+                  </span>
+                </div>
+                <div>
+                  <span className="font-medium">Update Size:</span>
+                  <span className="ml-2 text-muted-foreground">{updateInfo.updateSize}</span>
+                </div>
+                <div>
+                  <span className="font-medium">Network:</span>
+                  <span className="ml-2 text-muted-foreground">
+                    {isOnline ? "Connected" : "Disconnected"}
+                  </span>
+                </div>
               </div>
-              <Progress value={downloadProgress} className="h-3" />
-              <p className="text-xs text-muted-foreground text-center">
-                {downloadProgress < 50 ? "Downloading core files..." : 
-                 downloadProgress < 90 ? "Downloading security updates..." : "Verifying download..."}
-              </p>
-            </div>
-          )}
-
-          <div className="flex items-center justify-between p-4 border rounded-lg">
-            <div>
-              <p className="font-medium flex items-center gap-2">
-                <Zap className="h-4 w-4 text-blue-500" />
-                Automatic Updates
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Automatically check and notify about new updates
-              </p>
-            </div>
-            <Button
-              variant={autoUpdateEnabled ? "default" : "outline"}
-              size="sm"
-              onClick={toggleAutoUpdate}
-              className={autoUpdateEnabled ? "bg-green-600 hover:bg-green-700" : ""}
-            >
-              {autoUpdateEnabled ? (
-                <>
-                  <CheckCircle className="h-4 w-4 mr-1" />
-                  Enabled
-                </>
-              ) : (
-                "Enable"
-              )}
-            </Button>
-          </div>
-
-          <div className="flex items-center justify-between bg-muted/50 p-3 rounded-lg">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              {lastCheckTime ? (
-                <>
-                  <Clock className="h-4 w-4" />
-                  Last checked: {lastCheckTime.toLocaleTimeString()}
-                </>
-              ) : (
-                <>
-                  <AlertTriangle className="h-4 w-4" />
-                  Never checked for updates
-                </>
-              )}
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => checkForUpdates()}
-              disabled={isChecking}
-            >
-              {isChecking ? (
-                <>
-                  <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
-                  Checking...
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="h-4 w-4 mr-1" />
-                  Check Now
-                </>
-              )}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Enhanced Changelog Dialog */}
-      <Dialog open={showChangelog} onOpenChange={setShowChangelog}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Star className="h-5 w-5 text-yellow-500" />
-              What's New in v{availableUpdate?.version}
-            </DialogTitle>
-            <DialogDescription>
-              Released on {availableUpdate && new Date(availableUpdate.releaseDate).toLocaleDateString()} • 
-              Major update with {availableUpdate?.changelog.length} improvements
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
-            {availableUpdate?.changelog.map((item, index) => (
-              <div key={index} className="flex items-start gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
-                <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                <span className="text-sm leading-relaxed">{item}</span>
-              </div>
-            ))}
-          </div>
-          
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setShowChangelog(false)}>
-              Close
-            </Button>
-            <Button 
-              onClick={() => {
-                setShowChangelog(false);
-                downloadUpdate();
-              }}
-              className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
-            >
-              <Download className="h-4 w-4 mr-1" />
-              Update to v{availableUpdate?.version}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              
+              <Alert>
+                <Globe className="h-4 w-4" />
+                <AlertDescription>
+                  Updates are downloaded over WiFi to save data. Large updates may require a stable connection.
+                </AlertDescription>
+              </Alert>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="changelog">
+          <Changelog />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

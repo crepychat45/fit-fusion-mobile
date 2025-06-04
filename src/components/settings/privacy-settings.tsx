@@ -1,436 +1,574 @@
 
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { 
-  Fingerprint, Eye, Lock, Shield, 
-  Smartphone, AlertTriangle, RefreshCcw, 
-  Key, Database, Trash2
+  Shield, 
+  Eye, 
+  EyeOff, 
+  Lock, 
+  Unlock, 
+  Globe, 
+  UserCheck, 
+  AlertTriangle,
+  CheckCircle,
+  Info,
+  Settings
 } from "lucide-react";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogDescription,
-  DialogFooter,
-  DialogClose
-} from "@/components/ui/dialog";
-import { supabase } from "@/integrations/supabase/client";
+
+interface PrivacySettings {
+  dataCollection: boolean;
+  analytics: boolean;
+  crashReporting: boolean;
+  locationTracking: boolean;
+  biometricAuth: boolean;
+  twoFactorAuth: boolean;
+  sessionTimeout: number;
+  dataRetention: number;
+  shareUsageData: boolean;
+  personalizedAds: boolean;
+  cookieConsent: boolean;
+  thirdPartyIntegrations: boolean;
+}
 
 export function PrivacySettings() {
   const { toast } = useToast();
-  const [biometricEnabled, setBiometricEnabled] = useState(false);
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-  const [screenBlockingEnabled, setScreenBlockingEnabled] = useState(false);
-  const [secureStorageEnabled, setSecureStorageEnabled] = useState(true);
-  const [dataEncryption, setDataEncryption] = useState(true);
-  const [confirmDialog, setConfirmDialog] = useState<{
-    title: string;
-    description: string;
-    action: () => void;
-    actionText: string;
-    variant?: 'default' | 'destructive';
-  } | null>(null);
-  const [clearCacheDialog, setClearCacheDialog] = useState(false);
-  const [clearingCache, setClearingCache] = useState(false);
-  const [clearProgress, setClearProgress] = useState(0);
-
-  // Load settings from localStorage
-  useEffect(() => {
-    const loadSettings = () => {
-      const bioAuth = localStorage.getItem('fitfusion-biometric-auth');
-      setBiometricEnabled(bioAuth === 'true');
-      
-      const twoFactor = localStorage.getItem('fitfusion-2fa-enabled');
-      setTwoFactorEnabled(twoFactor === 'true');
-      
-      const screenBlocking = localStorage.getItem('fitfusion-screenshot-blocking');
-      setScreenBlockingEnabled(screenBlocking === 'true');
-      
-      const secureStorage = localStorage.getItem('fitfusion-secure-storage');
-      setSecureStorageEnabled(secureStorage !== 'false'); // Default true
-      
-      const encryption = localStorage.getItem('fitfusion-data-encryption');
-      setDataEncryption(encryption !== 'false'); // Default true
-    };
-    
-    loadSettings();
-  }, []);
+  const [settings, setSettings] = useState<PrivacySettings>({
+    dataCollection: true,
+    analytics: false,
+    crashReporting: true,
+    locationTracking: false,
+    biometricAuth: false,
+    twoFactorAuth: false,
+    sessionTimeout: 30,
+    dataRetention: 90,
+    shareUsageData: false,
+    personalizedAds: false,
+    cookieConsent: true,
+    thirdPartyIntegrations: false,
+  });
   
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [validationStatus, setValidationStatus] = useState<'idle' | 'validating' | 'valid' | 'invalid'>('idle');
+
+  // Load settings from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('fitfusion-privacy-settings');
+      if (saved) {
+        const parsedSettings = JSON.parse(saved);
+        setSettings(parsedSettings);
+        console.log('Privacy settings loaded:', parsedSettings);
+      }
+    } catch (error) {
+      console.error('Error loading privacy settings:', error);
+      toast({
+        title: "⚠️ Loading Error",
+        description: "Could not load saved privacy settings.",
+        variant: "destructive",
+      });
+    }
+  }, []);
+
   // Save settings when they change
   useEffect(() => {
-    localStorage.setItem('fitfusion-biometric-auth', biometricEnabled.toString());
-  }, [biometricEnabled]);
-  
-  useEffect(() => {
-    localStorage.setItem('fitfusion-2fa-enabled', twoFactorEnabled.toString());
-  }, [twoFactorEnabled]);
-  
-  useEffect(() => {
-    localStorage.setItem('fitfusion-screenshot-blocking', screenBlockingEnabled.toString());
-  }, [screenBlockingEnabled]);
-  
-  useEffect(() => {
-    localStorage.setItem('fitfusion-secure-storage', secureStorageEnabled.toString());
-  }, [secureStorageEnabled]);
-  
-  useEffect(() => {
-    localStorage.setItem('fitfusion-data-encryption', dataEncryption.toString());
-  }, [dataEncryption]);
-  
-  const handleToggle = (setting: string, value: boolean, settingFunction: React.Dispatch<React.SetStateAction<boolean>>) => {
-    settingFunction(value);
-    
-    toast({
-      title: `${setting} ${value ? 'Enabled' : 'Disabled'}`,
-      description: `Your security setting has been updated.`,
-    });
-  };
-  
-  const handleClearCache = () => {
-    setClearingCache(true);
-    setClearProgress(0);
-    
-    // Simulate clearing cache with progress
-    const interval = setInterval(() => {
-      setClearProgress(prev => {
-        const newProgress = prev + 10;
-        
-        if (newProgress >= 100) {
-          clearInterval(interval);
-          setClearingCache(false);
-          setClearCacheDialog(false);
-          
-          // Clear selected localStorage items (not all, to preserve app functionality)
-          const preserveKeys = [
-            'fitfusion-theme',
-            'fitfusion-language',
-            'auth_token',
-            'fitfusion-unit-system'
-          ];
-          
-          const keysToRemove = [];
-          for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && !preserveKeys.includes(key)) {
-              keysToRemove.push(key);
-            }
-          }
-          
-          keysToRemove.forEach(key => localStorage.removeItem(key));
-          
-          toast({
-            title: "Cache Cleared",
-            description: "All temporary data has been purged from your device.",
-            variant: "default",
-          });
-          
-          return 0;
-        }
-        
-        return newProgress;
-      });
-    }, 100);
-  };
-  
-  const handleEncryptionToggle = (value: boolean) => {
-    setDataEncryption(value);
-    
-    toast({
-      title: value ? "Encryption Enabled" : "Encryption Disabled",
-      description: value 
-        ? "Your data is now encrypted using industry-standard protocols." 
-        : "Your data is no longer encrypted. This is less secure.",
-      variant: value ? "default" : "destructive",
-    });
-  };
-  
-  const handleDeviceAccessLog = () => {
-    toast({
-      title: "Device Access Log",
-      description: "Loading your recent device access history...",
-    });
-    
-    // Simulate API call
-    setTimeout(() => {
+    if (hasChanges) {
+      const timeout = setTimeout(() => {
+        saveSettings();
+      }, 1000); // Auto-save after 1 second of inactivity
+
+      return () => clearTimeout(timeout);
+    }
+  }, [settings, hasChanges]);
+
+  const saveSettings = async () => {
+    try {
+      setIsLoading(true);
+      localStorage.setItem('fitfusion-privacy-settings', JSON.stringify(settings));
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      setHasChanges(false);
+      
       toast({
-        title: "Device History",
-        description: "Current device: Your phone (last accessed just now)",
+        title: "✅ Settings Saved",
+        description: "Your privacy preferences have been saved.",
       });
-    }, 1000);
+      
+      console.log('Privacy settings saved:', settings);
+    } catch (error) {
+      console.error('Error saving privacy settings:', error);
+      toast({
+        title: "❌ Save Error",
+        description: "Failed to save privacy settings. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const showConfirmDialog = (title: string, description: string, action: () => void, actionText: string, variant?: 'default' | 'destructive') => {
-    setConfirmDialog({
-      title,
-      description,
-      action,
-      actionText,
-      variant,
+  const handleToggle = (key: keyof PrivacySettings, value: boolean) => {
+    console.log(`Toggling ${key} to ${value}`);
+    
+    setSettings(prev => ({
+      ...prev,
+      [key]: value,
+    }));
+    
+    setHasChanges(true);
+    
+    // Show immediate feedback
+    toast({
+      title: `${formatSettingName(key)} ${value ? 'Enabled' : 'Disabled'}`,
+      description: `Privacy setting updated successfully.`,
+    });
+
+    // Validate critical settings
+    if (key === 'twoFactorAuth' || key === 'biometricAuth') {
+      validateSecuritySettings();
+    }
+  };
+
+  const handleNumberChange = (key: keyof PrivacySettings, value: number) => {
+    console.log(`Changing ${key} to ${value}`);
+    
+    setSettings(prev => ({
+      ...prev,
+      [key]: value,
+    }));
+    
+    setHasChanges(true);
+    
+    toast({
+      title: `${formatSettingName(key)} Updated`,
+      description: `Set to ${value} ${key === 'sessionTimeout' ? 'minutes' : 'days'}.`,
+    });
+  };
+
+  const formatSettingName = (key: string) => {
+    return key
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, (str) => str.toUpperCase());
+  };
+
+  const validateSecuritySettings = async () => {
+    setValidationStatus('validating');
+    
+    try {
+      // Simulate validation
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      const hasSecurityEnabled = settings.twoFactorAuth || settings.biometricAuth;
+      setValidationStatus(hasSecurityEnabled ? 'valid' : 'invalid');
+      
+      if (!hasSecurityEnabled) {
+        toast({
+          title: "⚠️ Security Recommendation",
+          description: "Consider enabling two-factor or biometric authentication for better security.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      setValidationStatus('invalid');
+      console.error('Validation error:', error);
+    }
+  };
+
+  const exportPrivacyReport = async () => {
+    try {
+      setIsLoading(true);
+      
+      const report = {
+        timestamp: new Date().toISOString(),
+        settings: settings,
+        recommendations: generateRecommendations(),
+      };
+      
+      const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `privacy-report-${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast({
+        title: "📊 Report Generated",
+        description: "Privacy report has been downloaded successfully.",
+      });
+    } catch (error) {
+      console.error('Export error:', error);
+      toast({
+        title: "❌ Export Failed",
+        description: "Could not generate privacy report.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const generateRecommendations = () => {
+    const recommendations = [];
+    
+    if (!settings.twoFactorAuth && !settings.biometricAuth) {
+      recommendations.push("Enable two-factor or biometric authentication");
+    }
+    
+    if (settings.locationTracking) {
+      recommendations.push("Consider disabling location tracking if not needed");
+    }
+    
+    if (settings.shareUsageData) {
+      recommendations.push("Review usage data sharing preferences");
+    }
+    
+    return recommendations;
+  };
+
+  const resetToDefaults = () => {
+    const confirmed = window.confirm("Reset all privacy settings to defaults? This action cannot be undone.");
+    if (!confirmed) return;
+
+    const defaultSettings: PrivacySettings = {
+      dataCollection: true,
+      analytics: false,
+      crashReporting: true,
+      locationTracking: false,
+      biometricAuth: false,
+      twoFactorAuth: false,
+      sessionTimeout: 30,
+      dataRetention: 90,
+      shareUsageData: false,
+      personalizedAds: false,
+      cookieConsent: true,
+      thirdPartyIntegrations: false,
+    };
+
+    setSettings(defaultSettings);
+    setHasChanges(true);
+
+    toast({
+      title: "🔄 Settings Reset",
+      description: "All privacy settings have been reset to defaults.",
     });
   };
 
   return (
     <div className="space-y-6">
+      {/* Header with Status */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">Privacy Settings</h2>
+          <p className="text-muted-foreground">Control how your data is collected and used</p>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          {validationStatus === 'validating' && (
+            <Badge variant="outline" className="animate-pulse">
+              <Settings className="h-3 w-3 mr-1 animate-spin" />
+              Validating
+            </Badge>
+          )}
+          {validationStatus === 'valid' && (
+            <Badge variant="default" className="bg-green-500">
+              <CheckCircle className="h-3 w-3 mr-1" />
+              Secure
+            </Badge>
+          )}
+          {validationStatus === 'invalid' && (
+            <Badge variant="destructive">
+              <AlertTriangle className="h-3 w-3 mr-1" />
+              Needs Attention
+            </Badge>
+          )}
+        </div>
+      </div>
+
+      {/* Security Recommendations */}
+      {validationStatus === 'invalid' && (
+        <Alert className="border-orange-200 bg-orange-50 dark:bg-orange-950/20">
+          <AlertTriangle className="h-4 w-4 text-orange-600" />
+          <AlertDescription className="text-orange-800 dark:text-orange-200">
+            Your current privacy settings may need attention. Consider enabling additional security features.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Data Collection Settings */}
       <Card>
         <CardHeader>
-          <CardTitle>Privacy Settings</CardTitle>
-          <CardDescription>Control how your personal data is used and stored</CardDescription>
+          <CardTitle className="flex items-center gap-2">
+            <Globe className="h-5 w-5" />
+            Data Collection
+          </CardTitle>
+          <CardDescription>
+            Control what data is collected and how it's used
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
-            <div className="flex flex-col space-y-1">
-              <div className="flex items-center">
-                <Fingerprint className="h-4 w-4 mr-2 text-primary" />
-                <span className="font-medium">Biometric Authentication</span>
-              </div>
-              <span className="text-xs text-muted-foreground pl-6">
-                Use fingerprint or face recognition to unlock the app
-              </span>
+            <div className="space-y-1">
+              <Label htmlFor="dataCollection">Basic Data Collection</Label>
+              <p className="text-xs text-muted-foreground">
+                Collect essential app usage data for functionality
+              </p>
             </div>
             <Switch 
-              checked={biometricEnabled} 
-              onCheckedChange={(checked) => handleToggle('Biometric Authentication', checked, setBiometricEnabled)} 
+              id="dataCollection"
+              checked={settings.dataCollection} 
+              onCheckedChange={(checked) => handleToggle('dataCollection', checked)} 
             />
           </div>
           
           <Separator />
           
           <div className="flex items-center justify-between">
-            <div className="flex flex-col space-y-1">
-              <div className="flex items-center">
-                <Shield className="h-4 w-4 mr-2 text-primary" />
-                <span className="font-medium">Two-Factor Authentication</span>
-              </div>
-              <span className="text-xs text-muted-foreground pl-6">
-                Add an extra layer of security to your account
-              </span>
+            <div className="space-y-1">
+              <Label htmlFor="analytics">Analytics</Label>
+              <p className="text-xs text-muted-foreground">
+                Help improve the app with anonymous usage analytics
+              </p>
             </div>
             <Switch 
-              checked={twoFactorEnabled} 
-              onCheckedChange={(checked) => handleToggle('Two-Factor Authentication', checked, setTwoFactorEnabled)} 
+              id="analytics"
+              checked={settings.analytics} 
+              onCheckedChange={(checked) => handleToggle('analytics', checked)} 
             />
           </div>
           
           <Separator />
           
           <div className="flex items-center justify-between">
-            <div className="flex flex-col space-y-1">
-              <div className="flex items-center">
-                <Eye className="h-4 w-4 mr-2 text-primary" />
-                <span className="font-medium">Screenshot Blocking</span>
-              </div>
-              <span className="text-xs text-muted-foreground pl-6">
-                Prevent screenshots of sensitive data
-              </span>
+            <div className="space-y-1">
+              <Label htmlFor="crashReporting">Crash Reporting</Label>
+              <p className="text-xs text-muted-foreground">
+                Automatically send crash reports to help fix bugs
+              </p>
             </div>
             <Switch 
-              checked={screenBlockingEnabled} 
-              onCheckedChange={(checked) => handleToggle('Screenshot Blocking', checked, setScreenBlockingEnabled)} 
+              id="crashReporting"
+              checked={settings.crashReporting} 
+              onCheckedChange={(checked) => handleToggle('crashReporting', checked)} 
             />
           </div>
           
           <Separator />
           
           <div className="flex items-center justify-between">
-            <div className="flex flex-col space-y-1">
-              <div className="flex items-center">
-                <Database className="h-4 w-4 mr-2 text-primary" />
-                <span className="font-medium">Secure Storage</span>
-              </div>
-              <span className="text-xs text-muted-foreground pl-6">
-                Store data in encrypted form on your device
-              </span>
+            <div className="space-y-1">
+              <Label htmlFor="locationTracking">Location Tracking</Label>
+              <p className="text-xs text-muted-foreground">
+                Track your location for location-based features
+              </p>
             </div>
             <Switch 
-              checked={secureStorageEnabled} 
-              onCheckedChange={(checked) => handleToggle('Secure Storage', checked, setSecureStorageEnabled)} 
-            />
-          </div>
-          
-          <Separator />
-          
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col space-y-1">
-              <div className="flex items-center">
-                <Lock className="h-4 w-4 mr-2 text-primary" />
-                <span className="font-medium">End-to-End Encryption</span>
-              </div>
-              <span className="text-xs text-muted-foreground pl-6">
-                Encrypt all your messages and data
-              </span>
-            </div>
-            <Switch 
-              checked={dataEncryption} 
-              onCheckedChange={(checked) => handleEncryptionToggle(checked)} 
+              id="locationTracking"
+              checked={settings.locationTracking} 
+              onCheckedChange={(checked) => handleToggle('locationTracking', checked)} 
             />
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between border-t pt-4">
-          <div className="flex items-center text-sm text-muted-foreground">
-            <Shield className="h-4 w-4 mr-1" />
-            <span>Your privacy matters to us</span>
+      </Card>
+
+      {/* Security Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            Security & Authentication
+          </CardTitle>
+          <CardDescription>
+            Enhance your account security with additional protection
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <Label htmlFor="biometricAuth">Biometric Authentication</Label>
+              <p className="text-xs text-muted-foreground">
+                Use fingerprint or face unlock for app access
+              </p>
+            </div>
+            <Switch 
+              id="biometricAuth"
+              checked={settings.biometricAuth} 
+              onCheckedChange={(checked) => handleToggle('biometricAuth', checked)} 
+            />
           </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setClearCacheDialog(true)}
-          >
-            Clear Cached Data
-          </Button>
+          
+          <Separator />
+          
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <Label htmlFor="twoFactorAuth">Two-Factor Authentication</Label>
+              <p className="text-xs text-muted-foreground">
+                Add an extra layer of security to your account
+              </p>
+            </div>
+            <Switch 
+              id="twoFactorAuth"
+              checked={settings.twoFactorAuth} 
+              onCheckedChange={(checked) => handleToggle('twoFactorAuth', checked)} 
+            />
+          </div>
+          
+          <Separator />
+          
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <Label htmlFor="sessionTimeout">Session Timeout</Label>
+              <p className="text-xs text-muted-foreground">
+                Automatically log out after inactivity (minutes)
+              </p>
+            </div>
+            <select 
+              className="w-24 rounded-md border border-input bg-background px-3 py-1 text-sm"
+              value={settings.sessionTimeout}
+              onChange={(e) => handleNumberChange('sessionTimeout', parseInt(e.target.value))}
+            >
+              <option value={15}>15</option>
+              <option value={30}>30</option>
+              <option value={60}>60</option>
+              <option value={120}>120</option>
+              <option value={0}>Never</option>
+            </select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Data Management */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Lock className="h-5 w-5" />
+            Data Management
+          </CardTitle>
+          <CardDescription>
+            Control how long your data is stored and shared
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <Label htmlFor="dataRetention">Data Retention Period</Label>
+              <p className="text-xs text-muted-foreground">
+                How long to keep your data (days)
+              </p>
+            </div>
+            <select 
+              className="w-24 rounded-md border border-input bg-background px-3 py-1 text-sm"
+              value={settings.dataRetention}
+              onChange={(e) => handleNumberChange('dataRetention', parseInt(e.target.value))}
+            >
+              <option value={30}>30</option>
+              <option value={90}>90</option>
+              <option value={180}>180</option>
+              <option value={365}>365</option>
+              <option value={0}>Forever</option>
+            </select>
+          </div>
+          
+          <Separator />
+          
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <Label htmlFor="shareUsageData">Share Usage Data</Label>
+              <p className="text-xs text-muted-foreground">
+                Share anonymized usage data with third parties
+              </p>
+            </div>
+            <Switch 
+              id="shareUsageData"
+              checked={settings.shareUsageData} 
+              onCheckedChange={(checked) => handleToggle('shareUsageData', checked)} 
+            />
+          </div>
+          
+          <Separator />
+          
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <Label htmlFor="personalizedAds">Personalized Ads</Label>
+              <p className="text-xs text-muted-foreground">
+                Show ads based on your interests and activity
+              </p>
+            </div>
+            <Switch 
+              id="personalizedAds"
+              checked={settings.personalizedAds} 
+              onCheckedChange={(checked) => handleToggle('personalizedAds', checked)} 
+            />
+          </div>
+          
+          <Separator />
+          
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <Label htmlFor="thirdPartyIntegrations">Third-Party Integrations</Label>
+              <p className="text-xs text-muted-foreground">
+                Allow integrations with external services
+              </p>
+            </div>
+            <Switch 
+              id="thirdPartyIntegrations"
+              checked={settings.thirdPartyIntegrations} 
+              onCheckedChange={(checked) => handleToggle('thirdPartyIntegrations', checked)} 
+            />
+          </div>
+        </CardContent>
+        
+        <CardFooter className="flex justify-between">
+          <div className="flex items-center text-sm text-muted-foreground">
+            <Info className="h-4 w-4 mr-2" />
+            <span>Changes are automatically saved</span>
+          </div>
+          
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={exportPrivacyReport}
+              disabled={isLoading}
+            >
+              Export Report
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={resetToDefaults}
+              disabled={isLoading}
+            >
+              Reset to Defaults
+            </Button>
+          </div>
         </CardFooter>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Account Security</CardTitle>
-          <CardDescription>Manage your account security settings</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Button 
-            variant="outline" 
-            className="w-full justify-start"
-            onClick={() => showConfirmDialog(
-              "Change Password", 
-              "You'll be redirected to the password change form.",
-              () => {
-                // Navigate to password change page or open modal
-                toast({
-                  title: "Password Change",
-                  description: "Please enter your current and new password.",
-                });
-              },
-              "Continue"
-            )}
-          >
-            <Key className="h-4 w-4 mr-2" />
-            Change Password
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            className="w-full justify-start"
-            onClick={handleDeviceAccessLog}
-          >
-            <Smartphone className="h-4 w-4 mr-2" />
-            Device Access Log
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            className="w-full justify-start"
-            onClick={() => showConfirmDialog(
-              "Disconnect All Devices", 
-              "This will sign you out from all devices except this one.",
-              () => {
-                // Log out all sessions
-                toast({
-                  title: "Devices Disconnected",
-                  description: "You have been signed out from all other devices.",
-                });
-              },
-              "Disconnect All",
-              "destructive"
-            )}
-          >
-            <AlertTriangle className="h-4 w-4 mr-2" />
-            Disconnect All Devices
-          </Button>
-          
-          <Button 
-            variant="destructive" 
-            className="w-full justify-start"
-            onClick={() => showConfirmDialog(
-              "Delete Account", 
-              "This action cannot be undone. This will permanently delete your account and all associated data.",
-              () => {
-                // Delete account
-                toast({
-                  title: "Account Deletion Requested",
-                  description: "Please check your email to confirm account deletion.",
-                  variant: "destructive",
-                });
-              },
-              "Delete Account",
-              "destructive"
-            )}
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete Account
-          </Button>
-        </CardContent>
-      </Card>
-      
-      {/* Confirm Dialog */}
-      <Dialog open={confirmDialog !== null} onOpenChange={(open) => !open && setConfirmDialog(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{confirmDialog?.title}</DialogTitle>
-            <DialogDescription>
-              {confirmDialog?.description}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-0">
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            <Button 
-              variant={confirmDialog?.variant || "default"} 
-              onClick={() => {
-                confirmDialog?.action();
-                setConfirmDialog(null);
-              }}
-            >
-              {confirmDialog?.actionText}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Clear Cache Dialog */}
-      <Dialog open={clearCacheDialog} onOpenChange={setClearCacheDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Clear Cached Data</DialogTitle>
-            <DialogDescription>
-              This will remove all temporary data stored on your device, including cached images and offline data.
-            </DialogDescription>
-          </DialogHeader>
-          
-          {clearingCache && (
-            <div className="py-4">
-              <p className="text-sm text-center mb-2">Clearing cache: {clearProgress}%</p>
-              <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-primary transition-all duration-150"
-                  style={{ width: `${clearProgress}%` }}
-                ></div>
-              </div>
-              <p className="text-xs text-center text-muted-foreground mt-2">Please don't close the app</p>
+      {/* Loading indicator */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-background p-6 rounded-lg shadow-lg">
+            <div className="flex items-center gap-3">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+              <span>Processing...</span>
             </div>
-          )}
-          
-          {!clearingCache && (
-            <DialogFooter className="gap-2 sm:gap-0">
-              <DialogClose asChild>
-                <Button variant="outline">Cancel</Button>
-              </DialogClose>
-              <Button 
-                variant="default"
-                onClick={handleClearCache}
-              >
-                <RefreshCcw className="h-4 w-4 mr-2" />
-                Clear Cache
-              </Button>
-            </DialogFooter>
-          )}
-        </DialogContent>
-      </Dialog>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
