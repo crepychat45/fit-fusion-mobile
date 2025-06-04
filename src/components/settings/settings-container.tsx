@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { AccountSettings } from "./account-settings";
 import { DisplaySettings } from "./display-settings";
 import { PrivacySettings } from "./privacy-settings";
@@ -443,30 +444,33 @@ export function SettingsContainer() {
               className="bg-background w-80 h-full shadow-lg p-4"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="space-y-2">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => handleTabChange(tab.id)}
-                    className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
-                      activeTab === tab.id 
-                        ? 'bg-primary text-primary-foreground' 
-                        : 'hover:bg-muted'
-                    }`}
-                  >
-                    <tab.icon className={`h-5 w-5 ${activeTab === tab.id ? 'text-primary-foreground' : tab.color}`} />
-                    <div className="flex-1">
-                      <div className="font-medium">{tab.label}</div>
-                      <div className="text-xs text-muted-foreground">{tab.description}</div>
-                    </div>
-                    {tab.badge && (
-                      <Badge variant={activeTab === tab.id ? "secondary" : "outline"} className="text-xs">
-                        {tab.badge}
-                      </Badge>
-                    )}
-                  </button>
-                ))}
-              </div>
+              <ScrollArea className="h-full">
+                <div className="space-y-2 pr-4">
+                  {tabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => handleTabChange(tab.id)}
+                      className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
+                        activeTab === tab.id 
+                          ? 'bg-primary text-primary-foreground' 
+                          : 'hover:bg-muted'
+                      }`}
+                    >
+                      <tab.icon className={`h-5 w-5 ${activeTab === tab.id ? 'text-primary-foreground' : tab.color}`} />
+                      <div className="flex-1">
+                        <div className="font-medium">{tab.label}</div>
+                        <div className="text-xs text-muted-foreground">{tab.description}</div>
+                      </div>
+                      {tab.badge && (
+                        <Badge variant={activeTab === tab.id ? "secondary" : "outline"} className="text-xs">
+                          {tab.badge}
+                        </Badge>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                <ScrollBar orientation="vertical" />
+              </ScrollArea>
             </motion.div>
           </motion.div>
         )}
@@ -495,33 +499,36 @@ export function SettingsContainer() {
       </AnimatePresence>
       
       <Tabs value={activeTab} onValueChange={handleTabChange}>
-        {/* Enhanced Tab Navigation */}
+        {/* Enhanced Tab Navigation with Proper Scrolling */}
         <div className="border-b bg-muted/30 hidden md:block">
           <div className="max-w-screen-xl mx-auto px-4">
-            <TabsList className="flex flex-nowrap overflow-x-auto py-2 scrollbar-none -mb-px bg-transparent w-full justify-start">
-              {tabs.map((tab) => (
-                <TabsTrigger 
-                  key={tab.id}
-                  value={tab.id} 
-                  className="flex-shrink-0 relative group data-[state=active]:bg-background data-[state=active]:shadow-sm min-w-fit"
-                >
-                  <div className="flex items-center gap-2">
-                    <tab.icon className={`h-4 w-4 ${tab.color}`} />
-                    <span className="font-medium whitespace-nowrap">{tab.label}</span>
-                    {tab.badge && (
-                      <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
-                        {tab.badge}
-                      </Badge>
-                    )}
-                  </div>
-                  
-                  {/* Hover tooltip */}
-                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                    {tab.description}
-                  </div>
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            <ScrollArea className="w-full">
+              <TabsList className="flex flex-nowrap py-2 bg-transparent w-max min-w-full justify-start">
+                {tabs.map((tab) => (
+                  <TabsTrigger 
+                    key={tab.id}
+                    value={tab.id} 
+                    className="flex-shrink-0 relative group data-[state=active]:bg-background data-[state=active]:shadow-sm min-w-fit whitespace-nowrap"
+                  >
+                    <div className="flex items-center gap-2">
+                      <tab.icon className={`h-4 w-4 ${tab.color}`} />
+                      <span className="font-medium">{tab.label}</span>
+                      {tab.badge && (
+                        <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
+                          {tab.badge}
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    {/* Hover tooltip */}
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                      {tab.description}
+                    </div>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
           </div>
         </div>
         
