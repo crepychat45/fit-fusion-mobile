@@ -5,7 +5,7 @@ import { MobileNav } from "@/components/mobile-nav";
 import { ProfileEditor } from "@/components/profile-editor";
 import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, CheckCircle, BarChart2, ListChecks, Shield, CreditCard, Settings, User, Bell, RefreshCw, Award, Medal, Trophy, BookOpen, Clock, Zap, Target, Flame, TrendingUp, Star } from "lucide-react";
+import { Calendar, CheckCircle, BarChart2, ListChecks, Shield, CreditCard, Settings, User, Bell, RefreshCw, Award, Medal, Trophy, BookOpen, Clock, Zap, Target, Flame, TrendingUp, Star, Activity } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { userProfile } from "@/data/user";
 import { Badge } from "@/components/ui/badge";

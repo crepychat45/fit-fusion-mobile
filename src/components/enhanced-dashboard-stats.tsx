@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -27,7 +28,7 @@ import {
   Info
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Cell } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Cell, Pie } from 'recharts';
 import { useToast } from '@/components/ui/use-toast';
 
 interface ActivityData {
@@ -258,13 +259,20 @@ export function EnhancedDashboardStats() {
               <CardContent>
                 <ResponsiveContainer width="100%" height={350}>
                   <RechartsPieChart>
-                    <RechartsPieChart dataKey="value" data={fitnessGoals} cx="50%" cy="50%" outerRadius={120} fill="#8884d8" label>
+                    <Pie 
+                      dataKey="value" 
+                      data={fitnessGoals} 
+                      cx="50%" 
+                      cy="50%" 
+                      outerRadius={120} 
+                      label
+                    >
                       {
                         fitnessGoals.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))
                       }
-                    </RechartsPieChart>
+                    </Pie>
                     <Tooltip />
                   </RechartsPieChart>
                 </ResponsiveContainer>
