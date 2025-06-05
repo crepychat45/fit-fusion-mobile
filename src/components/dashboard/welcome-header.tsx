@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Settings, Bell } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
 
 interface WelcomeHeaderProps {
   userName?: string;
@@ -12,6 +13,7 @@ interface WelcomeHeaderProps {
 export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState<string>("Friend");
+  const { user } = useEnhancedAuth();
   
   useEffect(() => {
     // Enhanced user name detection from multiple sources
@@ -22,6 +24,28 @@ export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
       if (userName && userName.trim()) {
         console.log("Found userName prop:", userName);
         return userName.trim();
+      }
+
+      // Check if we have auth user data
+      if (user) {
+        if (user.user_metadata?.name) {
+          console.log("Found name in user metadata:", user.user_metadata.name);
+          return user.user_metadata.name;
+        }
+        if (user.user_metadata?.full_name) {
+          console.log("Found full_name in user metadata:", user.user_metadata.full_name);
+          return user.user_metadata.full_name;
+        }
+        if (user.email) {
+          // Extract name from email (before @)
+          const emailName = user.email.split('@')[0];
+          const formattedName = emailName
+            .split(/[._-]/)
+            .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+            .join(' ');
+          console.log("Using email-based name:", formattedName);
+          return formattedName;
+        }
       }
       
       // Check localStorage for saved user data with multiple possible keys
@@ -87,17 +111,38 @@ export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
         }
       }
       
-      // Check browser sessionStorage as fallback
+      // Fallback: Create a name if we have info in localStorage
       try {
-        const sessionUser = sessionStorage.getItem('currentUser') || sessionStorage.getItem('user');
-        if (sessionUser) {
-          const userData = JSON.parse(sessionUser);
-          if (userData.name) return userData.name;
-          if (userData.firstName) return userData.firstName;
+        // Look for any name or profile info in localStorage
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (!key || !key.toLowerCase().includes('user') && !key.toLowerCase().includes('profile')) continue;
+          
+          try {
+            const data = JSON.parse(localStorage.getItem(key) || '{}');
+            if (typeof data === 'object' && data !== null) {
+              // Try to extract a name from any object property
+              for (const prop in data) {
+                if (typeof data[prop] === 'string' && 
+                    (prop.toLowerCase().includes('name') || prop.toLowerCase().includes('user')) && 
+                    data[prop].length > 1 && 
+                    data[prop].length < 30) {
+                  console.log(`Found potential name in ${key}.${prop}:`, data[prop]);
+                  return data[prop].trim();
+                }
+              }
+            }
+          } catch (e) {
+            // Ignore parsing errors
+          }
         }
       } catch (error) {
-        console.error('Error checking sessionStorage:', error);
+        console.error('Error checking localStorage:', error);
       }
+      
+      // Last resort: Try to create a random nickname
+      const savedName = localStorage.getItem('fitfusion-nickname');
+      if (savedName) return savedName;
       
       console.log("No user name found, using default");
       return "Friend";
@@ -110,6 +155,7 @@ export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
     // Save the name for future use if it's not the default
     if (name !== "Friend") {
       try {
+        // Always ensure we have a user profile entry
         const currentProfile = localStorage.getItem('fitfusion-user-profile');
         const profile = currentProfile ? JSON.parse(currentProfile) : {};
         profile.name = name;
@@ -120,7 +166,7 @@ export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
         console.error('Error saving profile:', error);
       }
     }
-  }, [userName]);
+  }, [userName, user]);
   
   // Listen for storage changes to update name dynamically
   useEffect(() => {

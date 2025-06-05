@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -33,7 +32,8 @@ import {
   Zap,
   Save,
   RefreshCw,
-  Menu
+  Menu,
+  X
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -101,7 +101,7 @@ export function SettingsContainer() {
       label: "Updates",
       icon: Download,
       description: "Version management",
-      badge: localStorage.getItem('fitfusion-app-version') || "4.9.2",
+      badge: "5.0.2",
       color: "text-indigo-600"
     },
     {
@@ -184,7 +184,6 @@ export function SettingsContainer() {
         description: `Successfully cleared ${keysToRemove.length} items from local storage.`,
       });
 
-      // Trigger settings change to update UI
       setHasUnsavedChanges(false);
       setLastSaved(new Date());
     } catch (error) {
@@ -353,36 +352,43 @@ export function SettingsContainer() {
         </Alert>
       )}
 
-      {/* Enhanced Header */}
-      <div className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b">
+      {/* Enhanced Header with modern design */}
+      <div className="sticky top-0 z-50 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 backdrop-blur-xl border-b border-white/20 shadow-lg">
         <div className="max-w-screen-xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Settings className="h-6 w-6 text-primary" />
-                <h1 className="text-2xl font-bold">Settings</h1>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
+                  <Settings className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Settings
+                  </h1>
+                  <p className="text-sm text-muted-foreground">Customize your experience</p>
+                </div>
               </div>
               {lastSaved && (
-                <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground bg-green-50 dark:bg-green-950/20 px-3 py-1 rounded-full">
                   <CheckCircle className="h-3 w-3 text-green-500" />
-                  Last saved: {lastSaved.toLocaleTimeString()}
+                  Saved at {lastSaved.toLocaleTimeString()}
                 </div>
               )}
             </div>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               {/* Mobile Menu Toggle */}
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="md:hidden"
+                className="md:hidden bg-white/50 backdrop-blur-sm"
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
               >
-                <Menu className="h-4 w-4" />
+                {showMobileMenu ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
               </Button>
 
               {hasUnsavedChanges && (
-                <Button variant="outline" size="sm" onClick={handleManualSave}>
+                <Button variant="outline" size="sm" className="bg-orange-50 border-orange-200 text-orange-700">
                   <Save className="h-4 w-4 mr-1" />
                   Save Changes
                 </Button>
@@ -391,7 +397,7 @@ export function SettingsContainer() {
               <Button 
                 variant={settingsValidated ? "default" : "outline"}
                 size="sm" 
-                onClick={validateAllSettings}
+                className={settingsValidated ? "bg-green-600 hover:bg-green-700" : ""}
                 disabled={isValidating}
               >
                 {isValidating ? (
@@ -407,66 +413,81 @@ export function SettingsContainer() {
                 ) : (
                   <>
                     <Zap className="h-4 w-4 mr-1" />
-                    Validate Settings
+                    Validate
                   </>
                 )}
               </Button>
             </div>
           </div>
-
-          {/* Validation Progress */}
-          {isValidating && (
-            <div className="mt-4 space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span>Validating settings...</span>
-                <span>{Math.round(validationProgress)}%</span>
-              </div>
-              <Progress value={validationProgress} className="h-2" />
-            </div>
-          )}
         </div>
       </div>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu Overlay with improved design */}
       <AnimatePresence>
         {showMobileMenu && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-40 md:hidden"
+            className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
             onClick={() => setShowMobileMenu(false)}
           >
             <motion.div
-              initial={{ x: -300 }}
-              animate={{ x: 0 }}
-              exit={{ x: -300 }}
-              className="bg-background w-80 h-full shadow-lg p-4"
+              initial={{ x: -300, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -300, opacity: 0 }}
+              className="bg-white dark:bg-gray-900 w-80 h-full shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <ScrollArea className="h-full">
-                <div className="space-y-2 pr-4">
+              <div className="p-4 border-b bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30">
+                <div className="flex items-center justify-between">
+                  <h2 className="font-semibold text-lg">Navigation</h2>
+                  <Button variant="ghost" size="sm" onClick={() => setShowMobileMenu(false)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              
+              <ScrollArea className="h-[calc(100vh-80px)]">
+                <div className="p-4 space-y-1">
                   {tabs.map((tab) => (
-                    <button
+                    <motion.button
                       key={tab.id}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={() => handleTabChange(tab.id)}
-                      className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
+                      className={`w-full flex items-center gap-3 p-4 rounded-xl text-left transition-all duration-200 ${
                         activeTab === tab.id 
-                          ? 'bg-primary text-primary-foreground' 
-                          : 'hover:bg-muted'
+                          ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg' 
+                          : 'hover:bg-gray-50 dark:hover:bg-gray-800'
                       }`}
                     >
-                      <tab.icon className={`h-5 w-5 ${activeTab === tab.id ? 'text-primary-foreground' : tab.color}`} />
+                      <div className={`p-2 rounded-lg ${
+                        activeTab === tab.id 
+                          ? 'bg-white/20' 
+                          : 'bg-gray-100 dark:bg-gray-800'
+                      }`}>
+                        <tab.icon className={`h-5 w-5 ${
+                          activeTab === tab.id ? 'text-white' : tab.color
+                        }`} />
+                      </div>
                       <div className="flex-1">
                         <div className="font-medium">{tab.label}</div>
-                        <div className="text-xs text-muted-foreground">{tab.description}</div>
+                        <div className={`text-xs ${
+                          activeTab === tab.id ? 'text-white/80' : 'text-muted-foreground'
+                        }`}>
+                          {tab.description}
+                        </div>
                       </div>
                       {tab.badge && (
-                        <Badge variant={activeTab === tab.id ? "secondary" : "outline"} className="text-xs">
+                        <Badge 
+                          variant={activeTab === tab.id ? "secondary" : "outline"} 
+                          className="text-xs"
+                        >
                           {tab.badge}
                         </Badge>
                       )}
-                    </button>
+                    </motion.button>
                   ))}
                 </div>
                 <ScrollBar orientation="vertical" />
@@ -499,34 +520,52 @@ export function SettingsContainer() {
       </AnimatePresence>
       
       <Tabs value={activeTab} onValueChange={handleTabChange}>
-        {/* Enhanced Tab Navigation with Proper Scrolling */}
-        <div className="border-b bg-muted/30 hidden md:block">
+        {/* Enhanced Desktop Tab Navigation */}
+        <div className="border-b bg-gradient-to-r from-gray-50/50 to-gray-100/50 dark:from-gray-900/50 dark:to-gray-800/50 hidden md:block">
           <div className="max-w-screen-xl mx-auto px-4">
             <ScrollArea className="w-full">
-              <TabsList className="flex flex-nowrap py-2 bg-transparent w-max min-w-full justify-start">
-                {tabs.map((tab) => (
-                  <TabsTrigger 
-                    key={tab.id}
-                    value={tab.id} 
-                    className="flex-shrink-0 relative group data-[state=active]:bg-background data-[state=active]:shadow-sm min-w-fit whitespace-nowrap"
-                  >
-                    <div className="flex items-center gap-2">
-                      <tab.icon className={`h-4 w-4 ${tab.color}`} />
-                      <span className="font-medium">{tab.label}</span>
+              <div className="flex items-center py-2">
+                <TabsList className="flex-shrink-0 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-white/20 shadow-sm">
+                  {tabs.slice(0, 6).map((tab) => (
+                    <TabsTrigger 
+                      key={tab.id}
+                      value={tab.id} 
+                      className="relative group data-[state=active]:bg-white data-[state=active]:shadow-md transition-all duration-200"
+                    >
+                      <div className="flex items-center gap-2">
+                        <tab.icon className={`h-4 w-4 ${tab.color}`} />
+                        <span className="font-medium">{tab.label}</span>
+                        {tab.badge && (
+                          <Badge variant="secondary" className="text-xs px-1.5 py-0.5 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700">
+                            {tab.badge}
+                          </Badge>
+                        )}
+                      </div>
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+                
+                {/* Overflow tabs */}
+                <div className="ml-4 flex gap-1">
+                  {tabs.slice(6).map((tab) => (
+                    <Button
+                      key={tab.id}
+                      variant={activeTab === tab.id ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => handleTabChange(tab.id)}
+                      className="flex items-center gap-2"
+                    >
+                      <tab.icon className={`h-4 w-4 ${activeTab === tab.id ? 'text-white' : tab.color}`} />
+                      <span>{tab.label}</span>
                       {tab.badge && (
-                        <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
+                        <Badge variant="secondary" className="text-xs">
                           {tab.badge}
                         </Badge>
                       )}
-                    </div>
-                    
-                    {/* Hover tooltip */}
-                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-popover text-popover-foreground text-xs rounded-md shadow-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                      {tab.description}
-                    </div>
-                  </TabsTrigger>
-                ))}
-              </TabsList>
+                    </Button>
+                  ))}
+                </div>
+              </div>
               <ScrollBar orientation="horizontal" />
             </ScrollArea>
           </div>
@@ -537,7 +576,7 @@ export function SettingsContainer() {
             key={activeTab}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.3 }}
           >
             <TabsContent value="account" className="mt-0">
               <AccountSettings />
@@ -596,19 +635,6 @@ export function SettingsContainer() {
                         <div className="text-xs text-muted-foreground">Removes app data from this device</div>
                       </div>
                       <Database className="h-4 w-4" />
-                    </Button>
-                    
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-between h-auto p-4"
-                      onClick={validateAllSettings}
-                      disabled={isValidating}
-                    >
-                      <div className="text-left">
-                        <div className="font-medium">Validate All Settings</div>
-                        <div className="text-xs text-muted-foreground">Check all configurations</div>
-                      </div>
-                      <Zap className={`h-4 w-4 ${isValidating ? 'animate-spin' : ''}`} />
                     </Button>
                     
                     <Button 

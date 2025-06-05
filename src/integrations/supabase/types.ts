@@ -9,7 +9,7 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      "Money Manger Pro": {
+      "Crepy Enterprise": {
         Row: {
           created_at: string
           id: number
@@ -32,6 +32,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_user_profile: {
+        Args: { user_id: number }
+        Returns: {
+          id: number
+          username: string
+          email: string
+        }[]
+      }
       manage_user_profiles: {
         Args:
           | Record<PropertyKey, never>
@@ -49,6 +57,10 @@ export type Database = {
       }
       "Money Manager pro": {
         Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      recover_password: {
+        Args: { user_email: string }
         Returns: undefined
       }
     }

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,12 +36,13 @@ interface UpdateInfo {
 export function AppUpdateManager() {
   const { toast } = useToast();
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo>(() => {
-    const savedVersion = localStorage.getItem('fitfusion-app-version') || "4.9.1";
+    // Always use the fixed latest version
+    const currentVersion = localStorage.getItem('fitfusion-app-version') || "4.9.1";
     const latestVersion = "5.0.2";
     return {
-      currentVersion: savedVersion,
+      currentVersion,
       latestVersion,
-      updateAvailable: savedVersion !== latestVersion,
+      updateAvailable: currentVersion !== latestVersion,
       updateSize: "18.7 MB",
       releaseNotes: [
         "🎉 Major UI redesign with improved navigation",
@@ -89,7 +91,26 @@ export function AppUpdateManager() {
     if (autoUpdate && isOnline) {
       checkForUpdates();
     }
+
+    // Ensure version consistency
+    syncVersions();
   }, [autoUpdate, isOnline]);
+
+  // Sync versions across the app
+  const syncVersions = () => {
+    const storedVersion = localStorage.getItem('fitfusion-app-version') || "4.9.1";
+    
+    // Always make sure localStorage has the correct version
+    if (updateInfo.currentVersion !== storedVersion) {
+      localStorage.setItem('fitfusion-app-version', updateInfo.currentVersion);
+      console.log('Version synced to:', updateInfo.currentVersion);
+    }
+
+    // Dispatch version update event for all components to sync
+    window.dispatchEvent(
+      new CustomEvent('versionUpdated', { detail: updateInfo.currentVersion })
+    );
+  };
 
   // Listen for version update events
   useEffect(() => {
@@ -101,13 +122,8 @@ export function AppUpdateManager() {
       setUpdateInfo(prev => ({
         ...prev,
         currentVersion: newVersion,
-        updateAvailable: false
+        updateAvailable: newVersion !== prev.latestVersion
       }));
-      
-      // Clear any update flags
-      setUpdateInstalled(true);
-      setDownloadProgress(0);
-      setIsDownloading(false);
       
       // Persist the version
       localStorage.setItem('fitfusion-app-version', newVersion);
