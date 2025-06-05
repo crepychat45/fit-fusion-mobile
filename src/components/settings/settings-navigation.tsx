@@ -13,7 +13,8 @@ import {
   Code, 
   Database,
   Info,
-  Sparkles
+  Sparkles,
+  X
 } from "lucide-react";
 
 interface TabInfo {
@@ -147,52 +148,69 @@ export function SettingsNavigation({ activeTab, onTabChange, showMobileMenu, onM
         </div>
       </div>
 
-      {/* Mobile Navigation Menu */}
+      {/* Mobile Navigation Overlay */}
       {showMobileMenu && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
-          onClick={onMobileMenuToggle}
-        >
+        <div className="fixed inset-0 bg-black/60 z-50 md:hidden backdrop-blur-sm">
           <motion.div
-            initial={{ x: -300, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: -300, opacity: 0 }}
-            className="bg-white dark:bg-gray-900 w-80 h-full shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ type: "spring", damping: 20 }}
+            className="bg-white dark:bg-gray-900 w-full max-w-sm h-full shadow-2xl overflow-hidden"
           >
-            <div className="p-4 border-b bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30">
-              <h2 className="font-semibold text-lg">Navigation</h2>
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
+                  <Settings className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-lg">Settings</h2>
+                  <p className="text-xs text-muted-foreground">Navigation</p>
+                </div>
+              </div>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={onMobileMenuToggle}
+                className="rounded-full"
+              >
+                <X className="h-5 w-5" />
+              </Button>
             </div>
             
+            {/* Navigation Items */}
             <ScrollArea className="h-[calc(100vh-80px)]">
-              <div className="p-4 space-y-1">
-                {tabs.map((tab) => (
+              <div className="p-2">
+                {tabs.map((tab, index) => (
                   <motion.button
                     key={tab.id}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
                     onClick={() => onTabChange(tab.id)}
-                    className={`w-full flex items-center gap-3 p-4 rounded-xl text-left transition-all duration-200 ${
+                    className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-200 mb-1 ${
                       activeTab === tab.id 
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg' 
-                        : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg scale-105' 
+                        : 'hover:bg-gray-50 dark:hover:bg-gray-800/50 active:scale-95'
                     }`}
                   >
-                    <div className={`p-2 rounded-lg ${
+                    <div className={`p-2.5 rounded-lg transition-all ${
                       activeTab === tab.id 
-                        ? 'bg-white/20' 
-                        : 'bg-gray-100 dark:bg-gray-800'
+                        ? 'bg-white/20 shadow-inner' 
+                        : 'bg-gray-100 dark:bg-gray-800 group-hover:bg-gray-200'
                     }`}>
                       <tab.icon className={`h-5 w-5 ${
                         activeTab === tab.id ? 'text-white' : tab.color
                       }`} />
                     </div>
-                    <div className="flex-1">
-                      <div className="font-medium">{tab.label}</div>
-                      <div className={`text-xs ${
+                    <div className="flex-1 min-w-0">
+                      <div className={`font-medium truncate ${
+                        activeTab === tab.id ? 'text-white' : 'text-gray-900 dark:text-gray-100'
+                      }`}>
+                        {tab.label}
+                      </div>
+                      <div className={`text-xs truncate ${
                         activeTab === tab.id ? 'text-white/80' : 'text-muted-foreground'
                       }`}>
                         {tab.description}
@@ -201,7 +219,11 @@ export function SettingsNavigation({ activeTab, onTabChange, showMobileMenu, onM
                     {tab.badge && (
                       <Badge 
                         variant={activeTab === tab.id ? "secondary" : "outline"} 
-                        className="text-xs"
+                        className={`text-xs flex-shrink-0 ${
+                          activeTab === tab.id 
+                            ? 'bg-white/20 text-white border-white/30' 
+                            : ''
+                        }`}
                       >
                         {tab.badge}
                       </Badge>
@@ -209,10 +231,9 @@ export function SettingsNavigation({ activeTab, onTabChange, showMobileMenu, onM
                   </motion.button>
                 ))}
               </div>
-              <ScrollBar orientation="vertical" />
             </ScrollArea>
           </motion.div>
-        </motion.div>
+        </div>
       )}
     </>
   );

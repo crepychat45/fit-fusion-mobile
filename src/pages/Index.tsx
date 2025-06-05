@@ -10,7 +10,6 @@ import { UpcomingWorkouts } from "@/components/dashboard/upcoming-workouts";
 import { RecentActivitySection } from "@/components/dashboard/recent-activity-section";
 import { FitfusionChatSection } from "@/components/dashboard/fitfusion-chat-section";
 import { RescheduleDialog } from "@/components/dashboard/reschedule-dialog";
-import { AdvancedDashboard } from "@/components/dashboard/advanced-dashboard";
 import { QuickActionsPanel } from "@/components/dashboard/quick-actions-panel";
 import { HealthMetricsPanel } from "@/components/dashboard/health-metrics-panel";
 import { AchievementNotifications } from "@/components/dashboard/achievement-notifications";
@@ -19,10 +18,10 @@ import { MotivationalQuotes } from "@/components/dashboard/motivational-quotes";
 import { WatchPanel } from "@/components/dashboard/watch-panel";
 import { EnhancedNotifications } from "@/components/dashboard/enhanced-notifications";
 import { motion, AnimatePresence } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Sparkles, TrendingUp, Shield, Zap, Target } from "lucide-react";
+import { Sparkles, TrendingUp, Shield, Zap, Target, Brain, Heart, Activity } from "lucide-react";
 
 const scheduledWorkouts = [
   {
@@ -54,7 +53,6 @@ const Index = () => {
   const [showAdvancedFeatures, setShowAdvancedFeatures] = useState(false);
   
   useEffect(() => {
-    // Simulate loading advanced features
     const timer = setTimeout(() => {
       setIsLoading(false);
       setShowAdvancedFeatures(true);
@@ -98,7 +96,7 @@ const Index = () => {
         animate="visible"
         className="space-y-6"
       >
-        {/* Enhanced Activity Summary with Advanced Metrics */}
+        {/* Enhanced Activity Summary */}
         <motion.div variants={itemVariants} className="px-4 -mt-6 relative z-10">
           <ActivitySummary
             workoutsCompleted={userProfile.stats.workoutsCompleted}
@@ -108,7 +106,7 @@ const Index = () => {
           />
         </motion.div>
 
-        {/* New Advanced Features Banner */}
+        {/* AI-Powered Features Banner */}
         <AnimatePresence>
           {showAdvancedFeatures && (
             <motion.div
@@ -122,27 +120,31 @@ const Index = () => {
                   <div className="absolute inset-0 bg-black/10" />
                   <div className="relative z-10">
                     <div className="flex items-center gap-2 mb-2">
-                      <Sparkles className="h-5 w-5" />
+                      <Brain className="h-5 w-5" />
                       <Badge className="bg-white/20 text-white border-white/30">
-                        NEW
+                        AI POWERED
                       </Badge>
                     </div>
-                    <h3 className="text-lg font-bold mb-1">AI-Powered Fitness Experience</h3>
+                    <h3 className="text-lg font-bold mb-1">Next-Gen Fitness Experience</h3>
                     <p className="text-white/90 text-sm mb-3">
-                      Advanced analytics, personalized recommendations, and real-time coaching
+                      Advanced AI coaching, real-time biometrics, and personalized nutrition
                     </p>
-                    <div className="flex items-center gap-4 text-xs">
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="flex items-center gap-1">
+                        <Brain className="h-3 w-3" />
+                        <span>AI Coach</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Heart className="h-3 w-3" />
+                        <span>Biometric Sync</span>
+                      </div>
                       <div className="flex items-center gap-1">
                         <TrendingUp className="h-3 w-3" />
-                        <span>Smart Analytics</span>
+                        <span>Predictive Analytics</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Shield className="h-3 w-3" />
-                        <span>Secure & Private</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Zap className="h-3 w-3" />
-                        <span>Lightning Fast</span>
+                        <span>Privacy First</span>
                       </div>
                     </div>
                   </div>
@@ -152,24 +154,14 @@ const Index = () => {
           )}
         </AnimatePresence>
 
-        {/* Quick Actions Panel */}
-        <motion.div variants={itemVariants}>
-          <QuickActionsPanel />
-        </motion.div>
-
-        {/* Watch Panel - New Component */}
+        {/* Watch Panel - Enhanced */}
         <motion.div variants={itemVariants} className="px-4">
           <WatchPanel />
         </motion.div>
 
-        {/* Enhanced Notifications */}
-        <motion.div variants={itemVariants} className="px-4">
-          <EnhancedNotifications />
-        </motion.div>
-
-        {/* Health Metrics Panel */}
+        {/* Quick Actions Panel */}
         <motion.div variants={itemVariants}>
-          <HealthMetricsPanel />
+          <QuickActionsPanel />
         </motion.div>
 
         {/* Enhanced Today's Workout */}
@@ -180,25 +172,28 @@ const Index = () => {
           />
         </motion.div>
 
-        {/* Weather & Motivation Widget */}
+        {/* Health Metrics & Weather Side by Side */}
         <motion.div variants={itemVariants} className="px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <HealthMetricsPanel />
             <WeatherWidget />
+          </div>
+        </motion.div>
+
+        {/* Enhanced Notifications */}
+        <motion.div variants={itemVariants} className="px-4">
+          <EnhancedNotifications />
+        </motion.div>
+
+        {/* Achievement & Motivation Combined */}
+        <motion.div variants={itemVariants} className="px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <AchievementNotifications />
             <MotivationalQuotes />
           </div>
         </motion.div>
 
-        {/* Achievement Notifications */}
-        <motion.div variants={itemVariants}>
-          <AchievementNotifications />
-        </motion.div>
-
-        {/* Advanced Dashboard Analytics */}
-        <motion.div variants={itemVariants}>
-          <AdvancedDashboard />
-        </motion.div>
-
-        {/* Enhanced Upcoming Workouts */}
+        {/* Upcoming Workouts */}
         <motion.div variants={itemVariants}>
           <UpcomingWorkouts workouts={scheduledWorkouts} />
         </motion.div>
@@ -208,12 +203,12 @@ const Index = () => {
           <FitfusionChatSection />
         </motion.div>
 
-        {/* Enhanced Recent Activity */}
+        {/* Recent Activity */}
         <motion.div variants={itemVariants}>
           <RecentActivitySection />
         </motion.div>
 
-        {/* Enhanced Daily Tip */}
+        {/* Daily Tip */}
         <motion.div variants={itemVariants} className="px-4 mt-6 mb-20">
           <DailyTip />
         </motion.div>
