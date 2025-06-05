@@ -16,6 +16,8 @@ import { HealthMetricsPanel } from "@/components/dashboard/health-metrics-panel"
 import { AchievementNotifications } from "@/components/dashboard/achievement-notifications";
 import { WeatherWidget } from "@/components/dashboard/weather-widget";
 import { MotivationalQuotes } from "@/components/dashboard/motivational-quotes";
+import { WatchPanel } from "@/components/dashboard/watch-panel";
+import { EnhancedNotifications } from "@/components/dashboard/enhanced-notifications";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -153,6 +155,16 @@ const Index = () => {
         {/* Quick Actions Panel */}
         <motion.div variants={itemVariants}>
           <QuickActionsPanel />
+        </motion.div>
+
+        {/* Watch Panel - New Component */}
+        <motion.div variants={itemVariants} className="px-4">
+          <WatchPanel />
+        </motion.div>
+
+        {/* Enhanced Notifications */}
+        <motion.div variants={itemVariants} className="px-4">
+          <EnhancedNotifications />
         </motion.div>
 
         {/* Health Metrics Panel */}

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { AccountSettings } from "./account-settings";
 import { DisplaySettings } from "./display-settings";
 import { PrivacySettings } from "./privacy-settings";
@@ -11,6 +10,7 @@ import { EnhancedSettingsValidation } from "./enhanced-settings-validation";
 import { AppUpdateManager } from "./app-update-manager";
 import { SecurityCenter } from "./security-center";
 import { VersionManager } from "./version-manager";
+import { SettingsNavigation } from "./settings-navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,30 +21,12 @@ import {
   CheckCircle, 
   AlertTriangle, 
   Settings, 
-  Shield, 
-  Palette, 
-  MessageSquare, 
-  Download, 
-  Code, 
-  Database,
-  Info,
-  Sparkles,
-  Zap,
   Save,
   RefreshCw,
   Menu,
   X
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-
-interface TabInfo {
-  id: string;
-  label: string;
-  icon: React.ComponentType<any>;
-  description: string;
-  badge?: string;
-  color: string;
-}
 
 export function SettingsContainer() {
   const { toast } = useToast();
@@ -58,83 +40,6 @@ export function SettingsContainer() {
   const [isConnected, setIsConnected] = useState(true);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   
-  const tabs: TabInfo[] = [
-    {
-      id: "account",
-      label: "Account",
-      icon: Settings,
-      description: "Personal info & preferences",
-      color: "text-blue-600"
-    },
-    {
-      id: "security",
-      label: "Security",
-      icon: Shield,
-      description: "Authentication & privacy",
-      badge: "Enhanced",
-      color: "text-green-600"
-    },
-    {
-      id: "display",
-      label: "Display",
-      icon: Palette,
-      description: "Theme & appearance",
-      color: "text-purple-600"
-    },
-    {
-      id: "privacy",
-      label: "Privacy",
-      icon: Shield,
-      description: "Data & permissions",
-      color: "text-orange-600"
-    },
-    {
-      id: "chat",
-      label: "Chat",
-      icon: MessageSquare,
-      description: "Messaging preferences",
-      badge: "AI",
-      color: "text-pink-600"
-    },
-    {
-      id: "updates",
-      label: "Updates",
-      icon: Download,
-      description: "Version management",
-      badge: "5.0.2",
-      color: "text-indigo-600"
-    },
-    {
-      id: "enhanced",
-      label: "Enhanced",
-      icon: Sparkles,
-      description: "Advanced features",
-      badge: "Pro",
-      color: "text-yellow-600"
-    },
-    {
-      id: "developer",
-      label: "Developer",
-      icon: Code,
-      description: "Debug & testing",
-      color: "text-red-600"
-    },
-    {
-      id: "data",
-      label: "Data",
-      icon: Database,
-      description: "Export & management",
-      color: "text-cyan-600"
-    },
-    {
-      id: "about",
-      label: "About",
-      icon: Info,
-      description: "App information",
-      color: "text-gray-600"
-    }
-  ];
-
   useEffect(() => {
     // Check connection status
     const checkConnection = () => {
@@ -393,191 +298,26 @@ export function SettingsContainer() {
                   Save Changes
                 </Button>
               )}
-              
-              <Button 
-                variant={settingsValidated ? "default" : "outline"}
-                size="sm" 
-                className={settingsValidated ? "bg-green-600 hover:bg-green-700" : ""}
-                disabled={isValidating}
-              >
-                {isValidating ? (
-                  <>
-                    <Zap className="h-4 w-4 mr-1 animate-spin" />
-                    Validating...
-                  </>
-                ) : settingsValidated ? (
-                  <>
-                    <CheckCircle className="h-4 w-4 mr-1" />
-                    Validated
-                  </>
-                ) : (
-                  <>
-                    <Zap className="h-4 w-4 mr-1" />
-                    Validate
-                  </>
-                )}
-              </Button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu Overlay with improved design */}
-      <AnimatePresence>
-        {showMobileMenu && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
-            onClick={() => setShowMobileMenu(false)}
-          >
-            <motion.div
-              initial={{ x: -300, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -300, opacity: 0 }}
-              className="bg-white dark:bg-gray-900 w-80 h-full shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="p-4 border-b bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30">
-                <div className="flex items-center justify-between">
-                  <h2 className="font-semibold text-lg">Navigation</h2>
-                  <Button variant="ghost" size="sm" onClick={() => setShowMobileMenu(false)}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              
-              <ScrollArea className="h-[calc(100vh-80px)]">
-                <div className="p-4 space-y-1">
-                  {tabs.map((tab) => (
-                    <motion.button
-                      key={tab.id}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => handleTabChange(tab.id)}
-                      className={`w-full flex items-center gap-3 p-4 rounded-xl text-left transition-all duration-200 ${
-                        activeTab === tab.id 
-                          ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg' 
-                          : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-                      }`}
-                    >
-                      <div className={`p-2 rounded-lg ${
-                        activeTab === tab.id 
-                          ? 'bg-white/20' 
-                          : 'bg-gray-100 dark:bg-gray-800'
-                      }`}>
-                        <tab.icon className={`h-5 w-5 ${
-                          activeTab === tab.id ? 'text-white' : tab.color
-                        }`} />
-                      </div>
-                      <div className="flex-1">
-                        <div className="font-medium">{tab.label}</div>
-                        <div className={`text-xs ${
-                          activeTab === tab.id ? 'text-white/80' : 'text-muted-foreground'
-                        }`}>
-                          {tab.description}
-                        </div>
-                      </div>
-                      {tab.badge && (
-                        <Badge 
-                          variant={activeTab === tab.id ? "secondary" : "outline"} 
-                          className="text-xs"
-                        >
-                          {tab.badge}
-                        </Badge>
-                      )}
-                    </motion.button>
-                  ))}
-                </div>
-                <ScrollBar orientation="vertical" />
-              </ScrollArea>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Validation Status Alert */}
-      <AnimatePresence>
-        {!settingsValidated && !isValidating && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-          >
-            <Alert className="mx-4 mt-4 border-orange-200 bg-orange-50 dark:bg-orange-950/20">
-              <AlertTriangle className="h-4 w-4 text-orange-600" />
-              <AlertDescription className="flex items-center justify-between">
-                <span>Settings validation recommended for optimal performance.</span>
-                <Button variant="outline" size="sm" onClick={validateAllSettings}>
-                  <Zap className="h-4 w-4 mr-1" />
-                  Validate Now
-                </Button>
-              </AlertDescription>
-            </Alert>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      
-      <Tabs value={activeTab} onValueChange={handleTabChange}>
-        {/* Enhanced Desktop Tab Navigation */}
-        <div className="border-b bg-gradient-to-r from-gray-50/50 to-gray-100/50 dark:from-gray-900/50 dark:to-gray-800/50 hidden md:block">
-          <div className="max-w-screen-xl mx-auto px-4">
-            <ScrollArea className="w-full">
-              <div className="flex items-center py-2">
-                <TabsList className="flex-shrink-0 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-white/20 shadow-sm">
-                  {tabs.slice(0, 6).map((tab) => (
-                    <TabsTrigger 
-                      key={tab.id}
-                      value={tab.id} 
-                      className="relative group data-[state=active]:bg-white data-[state=active]:shadow-md transition-all duration-200"
-                    >
-                      <div className="flex items-center gap-2">
-                        <tab.icon className={`h-4 w-4 ${tab.color}`} />
-                        <span className="font-medium">{tab.label}</span>
-                        {tab.badge && (
-                          <Badge variant="secondary" className="text-xs px-1.5 py-0.5 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700">
-                            {tab.badge}
-                          </Badge>
-                        )}
-                      </div>
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-                
-                {/* Overflow tabs */}
-                <div className="ml-4 flex gap-1">
-                  {tabs.slice(6).map((tab) => (
-                    <Button
-                      key={tab.id}
-                      variant={activeTab === tab.id ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => handleTabChange(tab.id)}
-                      className="flex items-center gap-2"
-                    >
-                      <tab.icon className={`h-4 w-4 ${activeTab === tab.id ? 'text-white' : tab.color}`} />
-                      <span>{tab.label}</span>
-                      {tab.badge && (
-                        <Badge variant="secondary" className="text-xs">
-                          {tab.badge}
-                        </Badge>
-                      )}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-              <ScrollBar orientation="horizontal" />
-            </ScrollArea>
-          </div>
-        </div>
+      <SettingsNavigation 
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        showMobileMenu={showMobileMenu}
+        onMobileMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+      />
         
-        <div className="max-w-screen-xl mx-auto py-6 px-4">
-          <motion.div
-            key={activeTab}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3 }}
-          >
+      <div className="max-w-screen-xl mx-auto py-6 px-4">
+        <motion.div
+          key={activeTab}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsContent value="account" className="mt-0">
               <AccountSettings />
             </TabsContent>
@@ -617,7 +357,6 @@ export function SettingsContainer() {
               <div className="space-y-6">
                 <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 p-6 rounded-lg border">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    <Database className="h-5 w-5 text-blue-600" />
                     Data Management Center
                   </h3>
                   <p className="text-sm text-muted-foreground mb-6">
@@ -656,9 +395,9 @@ export function SettingsContainer() {
             <TabsContent value="about" className="mt-0">
               <AboutPage />
             </TabsContent>
-          </motion.div>
-        </div>
-      </Tabs>
+          </Tabs>
+        </motion.div>
+      </div>
     </div>
   );
 }
