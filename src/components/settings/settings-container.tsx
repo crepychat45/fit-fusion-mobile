@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { AccountSettings } from "./account-settings";
@@ -24,7 +25,9 @@ import {
   Save,
   RefreshCw,
   Menu,
-  X
+  X,
+  Database,
+  Shield
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
