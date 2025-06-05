@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { EnhancedChatAuth } from "@/components/chat/enhanced-chat-auth";
@@ -11,6 +10,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { LoadingSpinner } from "@/components/common/loading-spinner";
 import { AdvancedChatInterface } from "@/components/chat/advanced-chat-interface";
+import { MobileChatInterface } from "@/components/chat/mobile-chat-interface";
 import { ChatSettings } from "@/components/chat/chat-settings";
 import { ChatSecurity } from "@/components/chat/chat-security";
 import { ChatNotifications } from "@/components/chat/chat-notifications";
@@ -159,14 +159,14 @@ const ChatPage = () => {
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="fitness-gradient pt-8 pb-6 px-4 shrink-0 shadow-xl relative overflow-hidden"
+        className="fitness-gradient pt-8 pb-4 px-4 shrink-0 shadow-xl relative overflow-hidden"
       >
         {/* Background Effects */}
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20" />
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-3xl" />
         
         <div className="relative z-10">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
               <Button 
                 variant="ghost" 
@@ -183,14 +183,16 @@ const ChatPage = () => {
             </div>
             
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-white border-white/30 bg-white/10 text-xs hidden md:inline-flex">
-                v5.2.0
-              </Badge>
+              {!isMobile && (
+                <Badge variant="outline" className="text-white border-white/30 bg-white/10 text-xs">
+                  v5.2.0
+                </Badge>
+              )}
               {isAuthenticated && (
                 <>
                   <Badge variant="default" className={`${getSecurityBadgeColor()} text-white border-0 text-xs`}>
                     <ShieldCheck className="h-3 w-3 mr-1" />
-                    {securityLevel.toUpperCase()}
+                    {isMobile ? "HIGH" : securityLevel.toUpperCase()}
                   </Badge>
                   
                   {/* Mobile Menu for Settings */}
@@ -257,7 +259,7 @@ const ChatPage = () => {
             </div>
           </div>
 
-          {/* Enhanced Status Indicators */}
+          {/* Enhanced Status Indicators - Optimized for Mobile */}
           {isAuthenticated && (
             <motion.div 
               initial={{ opacity: 0, scale: 0.9 }}
@@ -265,15 +267,15 @@ const ChatPage = () => {
               transition={{ delay: 0.2 }}
               className="flex flex-wrap items-center gap-2"
             >
-              <div className="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1">
+              <div className="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-full px-2 py-1">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
                 <span className="text-white text-xs font-medium">Online</span>
               </div>
-              <div className="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1">
+              <div className="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-full px-2 py-1">
                 <Users className="w-3 h-3 text-white" />
                 <span className="text-white text-xs">3 Active</span>
               </div>
-              <div className="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1">
+              <div className="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-full px-2 py-1">
                 <ShieldCheck className="w-3 h-3 text-green-400" />
                 <span className="text-white text-xs">Encrypted</span>
               </div>
@@ -285,21 +287,25 @@ const ChatPage = () => {
       {/* Main Content */}
       <div className={`flex-1 flex flex-col overflow-hidden ${isMobile ? 'pb-20' : ''}`}>
         {isAuthenticated ? (
-          <div className="flex-1 p-4 md:p-6 overflow-hidden">
-            <div className="h-full max-w-7xl mx-auto">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="h-full"
-              >
-                <AdvancedChatInterface 
-                  onLogout={handleLogout}
-                  securityLevel={securityLevel}
-                  notificationsEnabled={notificationsEnabled}
-                />
-              </motion.div>
-            </div>
+          <div className="flex-1 overflow-hidden">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="h-full"
+            >
+              {isMobile ? (
+                <MobileChatInterface />
+              ) : (
+                <div className="p-4 md:p-6 h-full max-w-7xl mx-auto">
+                  <AdvancedChatInterface 
+                    onLogout={handleLogout}
+                    securityLevel={securityLevel}
+                    notificationsEnabled={notificationsEnabled}
+                  />
+                </div>
+              )}
+            </motion.div>
           </div>
         ) : (
           <div className="max-w-md mx-auto p-6 flex-1 flex items-center justify-center">

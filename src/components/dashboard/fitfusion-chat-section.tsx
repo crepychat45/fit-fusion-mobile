@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChevronRight, MessageCircle, Users, Shield, Zap, Settings, Smartphone, Monitor } from "lucide-react";
 import { AdvancedChatInterface } from "@/components/chat/advanced-chat-interface";
+import { MobileChatInterface } from "@/components/chat/mobile-chat-interface";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
@@ -83,17 +84,21 @@ export function FitfusionChatSection() {
         {showChat && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: isMobile ? 400 : 600 }}
+            animate={{ opacity: 1, height: isMobile ? 500 : 600 }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
             className="overflow-hidden"
           >
             <CardContent className="p-0">
-              <div className={`${isMobile ? 'h-[400px]' : 'h-[600px]'} w-full border-t`}>
-                <AdvancedChatInterface 
-                  securityLevel="high" 
-                  notificationsEnabled={true}
-                />
+              <div className={`${isMobile ? 'h-[500px]' : 'h-[600px]'} w-full border-t`}>
+                {isMobile ? (
+                  <MobileChatInterface />
+                ) : (
+                  <AdvancedChatInterface 
+                    securityLevel="high" 
+                    notificationsEnabled={true}
+                  />
+                )}
               </div>
               
               {/* Enhanced Quick Action Bar */}

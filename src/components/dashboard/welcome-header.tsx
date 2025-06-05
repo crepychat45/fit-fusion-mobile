@@ -15,28 +15,28 @@ interface WelcomeHeaderProps {
 
 export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
   const navigate = useNavigate();
-  const [displayName, setDisplayName] = useState<string>("John Smith");
-  const [userEmail, setUserEmail] = useState<string>("jkenterprise.email@gmail.com");
+  const [displayName, setDisplayName] = useState<string>("User");
+  const [userEmail, setUserEmail] = useState<string>("user@example.com");
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
   const { user } = useEnhancedAuth();
   
   useEffect(() => {
-    // Enhanced user profile detection
+    // Enhanced user profile detection with better fallbacks
     const getUserProfile = () => {
       console.log("Getting user profile - checking all sources...");
       
       let profile = {
-        name: "John Smith",
-        firstName: "John",
-        lastName: "Smith",
-        fullName: "John Smith",
-        email: "jkenterprise.email@gmail.com",
+        name: "User",
+        firstName: "",
+        lastName: "",
+        fullName: "User",
+        email: "user@example.com",
         avatar: null
       };
 
       // Check userName prop first
-      if (userName && userName.trim()) {
+      if (userName && userName.trim() && userName !== "John Smith") {
         console.log("Found userName prop:", userName);
         profile.name = userName.trim();
         profile.fullName = userName.trim();
@@ -45,22 +45,45 @@ export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
       // Check auth user data
       if (user) {
         console.log("Found auth user:", user);
+        
+        // Check for full name in metadata
         if (user.user_metadata?.full_name) {
           profile.fullName = user.user_metadata.full_name;
           profile.name = user.user_metadata.full_name;
         }
+        
+        // Check for display name
+        if (user.user_metadata?.display_name) {
+          profile.name = user.user_metadata.display_name;
+          profile.fullName = user.user_metadata.display_name;
+        }
+        
+        // Check for first and last name
         if (user.user_metadata?.first_name) {
           profile.firstName = user.user_metadata.first_name;
         }
         if (user.user_metadata?.last_name) {
           profile.lastName = user.user_metadata.last_name;
         }
+        
+        // Check for name field
         if (user.user_metadata?.name) {
           profile.name = user.user_metadata.name;
         }
+        
+        // Use email if available
         if (user.email) {
           profile.email = user.email;
+          
+          // If no name found, use email prefix as fallback
+          if (!profile.name || profile.name === "User") {
+            const emailPrefix = user.email.split('@')[0];
+            profile.name = emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
+            profile.fullName = profile.name;
+          }
         }
+        
+        // Check for avatar
         if (user.user_metadata?.avatar_url) {
           profile.avatar = user.user_metadata.avatar_url;
         }
@@ -70,6 +93,26 @@ export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
       if (profile.firstName && profile.lastName) {
         profile.fullName = `${profile.firstName} ${profile.lastName}`;
         profile.name = profile.fullName;
+      }
+
+      // Check localStorage for saved profile
+      try {
+        const savedProfile = localStorage.getItem('fitfusion-user-profile');
+        if (savedProfile) {
+          const parsed = JSON.parse(savedProfile);
+          if (parsed.name && parsed.name !== "John Smith") {
+            profile.name = parsed.name;
+            profile.fullName = parsed.fullName || parsed.name;
+          }
+          if (parsed.email && parsed.email !== "jkenterprise.email@gmail.com") {
+            profile.email = parsed.email;
+          }
+          if (parsed.avatar) {
+            profile.avatar = parsed.avatar;
+          }
+        }
+      } catch (error) {
+        console.error('Error loading saved profile:', error);
       }
 
       console.log("Final user profile:", profile);
@@ -103,18 +146,25 @@ export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
   };
 
   const getInitials = () => {
-    if (!userProfile) return "JS";
+    if (!userProfile) return "U";
+    
     if (userProfile.firstName && userProfile.lastName) {
       return `${userProfile.firstName[0]}${userProfile.lastName[0]}`.toUpperCase();
     }
-    if (userProfile.name) {
+    
+    if (userProfile.name && userProfile.name !== "User") {
       const names = userProfile.name.split(' ');
       if (names.length >= 2) {
         return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
       }
       return userProfile.name[0].toUpperCase();
     }
-    return "JS";
+    
+    if (userProfile.email) {
+      return userProfile.email[0].toUpperCase();
+    }
+    
+    return "U";
   };
   
   return (
