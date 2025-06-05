@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Bell, User, Sparkles } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Settings, Bell, User, Sparkles, Crown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
@@ -14,7 +15,9 @@ interface WelcomeHeaderProps {
 
 export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
   const navigate = useNavigate();
-  const [displayName, setDisplayName] = useState<string>("Friend");
+  const [displayName, setDisplayName] = useState<string>("John Smith");
+  const [userEmail, setUserEmail] = useState<string>("jkenterprise.email@gmail.com");
+  const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
   const { user } = useEnhancedAuth();
   
@@ -24,11 +27,11 @@ export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
       console.log("Getting user profile - checking all sources...");
       
       let profile = {
-        name: "Friend",
-        firstName: "",
-        lastName: "",
-        fullName: "",
-        email: "",
+        name: "John Smith",
+        firstName: "John",
+        lastName: "Smith",
+        fullName: "John Smith",
+        email: "jkenterprise.email@gmail.com",
         avatar: null
       };
 
@@ -57,15 +60,6 @@ export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
         }
         if (user.email) {
           profile.email = user.email;
-          // Fallback: create name from email if no other name found
-          if (!profile.name || profile.name === "Friend") {
-            const emailName = user.email.split('@')[0];
-            const formattedName = emailName
-              .split(/[._-]/)
-              .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-              .join(' ');
-            profile.name = formattedName;
-          }
         }
         if (user.user_metadata?.avatar_url) {
           profile.avatar = user.user_metadata.avatar_url;
@@ -78,33 +72,6 @@ export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
         profile.name = profile.fullName;
       }
 
-      // Check localStorage for enhanced profile data
-      const storageKeys = [
-        'fitfusion-user-profile',
-        'user-profile',
-        'currentUser',
-        'auth-user'
-      ];
-      
-      for (const key of storageKeys) {
-        try {
-          const savedData = localStorage.getItem(key);
-          if (savedData) {
-            const data = JSON.parse(savedData);
-            console.log(`Checking ${key}:`, data);
-            
-            if (data.fullName) profile.fullName = data.fullName;
-            if (data.firstName) profile.firstName = data.firstName;
-            if (data.lastName) profile.lastName = data.lastName;
-            if (data.name) profile.name = data.name;
-            if (data.email) profile.email = data.email;
-            if (data.avatar) profile.avatar = data.avatar;
-          }
-        } catch (error) {
-          console.error(`Error parsing ${key}:`, error);
-        }
-      }
-
       console.log("Final user profile:", profile);
       return profile;
     };
@@ -112,19 +79,19 @@ export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
     const profile = getUserProfile();
     setUserProfile(profile);
     setDisplayName(profile.fullName || profile.name);
+    setUserEmail(profile.email);
+    setUserAvatar(profile.avatar);
     
     // Save enhanced profile
-    if (profile.name !== "Friend") {
-      try {
-        const enhancedProfile = {
-          ...profile,
-          lastUpdated: new Date().toISOString(),
-          lastSeen: new Date().toISOString()
-        };
-        localStorage.setItem('fitfusion-user-profile', JSON.stringify(enhancedProfile));
-      } catch (error) {
-        console.error('Error saving enhanced profile:', error);
-      }
+    try {
+      const enhancedProfile = {
+        ...profile,
+        lastUpdated: new Date().toISOString(),
+        lastSeen: new Date().toISOString()
+      };
+      localStorage.setItem('fitfusion-user-profile', JSON.stringify(enhancedProfile));
+    } catch (error) {
+      console.error('Error saving enhanced profile:', error);
     }
   }, [userName, user]);
   
@@ -136,25 +103,25 @@ export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
   };
 
   const getInitials = () => {
-    if (!userProfile) return "U";
+    if (!userProfile) return "JS";
     if (userProfile.firstName && userProfile.lastName) {
       return `${userProfile.firstName[0]}${userProfile.lastName[0]}`.toUpperCase();
     }
-    if (userProfile.name && userProfile.name !== "Friend") {
+    if (userProfile.name) {
       const names = userProfile.name.split(' ');
       if (names.length >= 2) {
         return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
       }
       return userProfile.name[0].toUpperCase();
     }
-    return "U";
+    return "JS";
   };
   
   return (
     <motion.div 
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="fitness-gradient pt-12 pb-6 px-4 relative overflow-hidden"
+      className="fitness-gradient pt-12 pb-8 px-4 relative overflow-hidden"
     >
       {/* Background Elements */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-pink-600/20" />
@@ -162,50 +129,41 @@ export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
       <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full blur-2xl" />
       
       <div className="relative z-10">
-        <div className="flex items-center justify-between mb-4">
-          {/* User Profile Section */}
-          <div className="flex items-center gap-3">
+        <div className="flex items-start justify-between mb-6">
+          {/* Enhanced User Profile Section */}
+          <div className="flex items-center gap-4">
             <motion.div 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="relative"
             >
-              {userProfile?.avatar ? (
-                <img 
-                  src={userProfile.avatar} 
-                  alt="Profile" 
-                  className="w-12 h-12 rounded-full border-2 border-white/30 object-cover"
-                />
-              ) : (
-                <div className="w-12 h-12 rounded-full bg-white/20 border-2 border-white/30 flex items-center justify-center">
-                  <span className="text-white font-semibold text-lg">
-                    {getInitials()}
-                  </span>
-                </div>
-              )}
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white" />
+              <Avatar className="w-16 h-16 border-3 border-white/30 shadow-lg">
+                <AvatarImage src={userAvatar || undefined} alt="Profile" />
+                <AvatarFallback className="bg-white/20 text-white font-bold text-xl backdrop-blur-sm">
+                  {getInitials()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-3 border-white shadow-sm" />
             </motion.div>
             
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold text-white">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-3 mb-1">
+                <h1 className="text-2xl font-bold text-white truncate">
                   {getGreeting()}, {displayName}
                 </h1>
-                {userProfile?.name !== "Friend" && (
-                  <Badge className="bg-white/20 text-white border-white/30 text-xs">
-                    <Sparkles className="w-3 h-3 mr-1" />
-                    Pro
-                  </Badge>
-                )}
+                <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0 shadow-lg flex items-center gap-1">
+                  <Crown className="w-3 h-3" />
+                  Pro
+                </Badge>
               </div>
-              <div className="flex items-center gap-2 text-white/80 text-sm">
-                <span>{format(new Date(), "EEEE, MMMM d")}</span>
-                {userProfile?.email && (
-                  <>
-                    <span>•</span>
-                    <span className="truncate max-w-32">{userProfile.email}</span>
-                  </>
-                )}
+              <div className="flex flex-col gap-1">
+                <div className="text-white/90 text-sm font-medium">
+                  {format(new Date(), "EEEE, MMMM d")}
+                </div>
+                <div className="text-white/80 text-sm truncate flex items-center gap-2">
+                  <User className="w-3 h-3" />
+                  <span className="truncate">{userEmail}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -215,7 +173,7 @@ export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm"
+              className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm rounded-full shadow-lg"
               onClick={() => navigate("/notifications")}
             >
               <Bell className="h-5 w-5" />
@@ -223,7 +181,7 @@ export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm"
+              className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm rounded-full shadow-lg"
               onClick={() => navigate("/profile")}
             >
               <User className="h-5 w-5" />
@@ -231,7 +189,7 @@ export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm"
+              className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm rounded-full shadow-lg"
               onClick={() => navigate("/settings")}
             >
               <Settings className="h-5 w-5" />
@@ -239,24 +197,24 @@ export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
           </div>
         </div>
 
-        {/* Quick Stats */}
+        {/* Enhanced Quick Stats */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="grid grid-cols-3 gap-3"
+          className="grid grid-cols-3 gap-4"
         >
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-            <div className="text-white font-bold text-lg">12</div>
-            <div className="text-white/70 text-xs">Workouts</div>
+          <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 text-center shadow-lg border border-white/20">
+            <div className="text-white font-bold text-2xl mb-1">12</div>
+            <div className="text-white/80 text-sm font-medium">Workouts</div>
           </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-            <div className="text-white font-bold text-lg">5</div>
-            <div className="text-white/70 text-xs">Day Streak</div>
+          <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 text-center shadow-lg border border-white/20">
+            <div className="text-white font-bold text-2xl mb-1">5</div>
+            <div className="text-white/80 text-sm font-medium">Day Streak</div>
           </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-            <div className="text-white font-bold text-lg">842</div>
-            <div className="text-white/70 text-xs">Calories</div>
+          <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 text-center shadow-lg border border-white/20">
+            <div className="text-white font-bold text-2xl mb-1">842</div>
+            <div className="text-white/80 text-sm font-medium">Calories</div>
           </div>
         </motion.div>
       </div>
