@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,7 +18,7 @@ import {
   X,
   CheckCircle,
   Clock,
-  Fire
+  Flame
 } from "lucide-react";
 
 interface Notification {
@@ -281,13 +280,13 @@ export function EnhancedNotifications() {
                                 )}
                                 {notification.type === 'achievement' && (
                                   <Badge variant="secondary" className="text-xs">
-                                    <Fire className="h-3 w-3 mr-1" />
+                                    <Flame className="h-3 w-3 mr-1" />
                                     +{notification.data.rewards} XP
                                   </Badge>
                                 )}
                                 {notification.type === 'workout' && notification.data.caloriesBurned && (
                                   <Badge variant="outline" className="text-xs">
-                                    <Fire className="h-3 w-3 mr-1" />
+                                    <Flame className="h-3 w-3 mr-1" />
                                     {notification.data.caloriesBurned} cal
                                   </Badge>
                                 )}
