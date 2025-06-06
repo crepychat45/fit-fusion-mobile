@@ -33,7 +33,7 @@ export type Database = {
     }
     Functions: {
       get_user_profile: {
-        Args: { user_id: number }
+        Args: Record<PropertyKey, never> | { user_id: number }
         Returns: {
           id: number
           username: string

@@ -1,240 +1,266 @@
 
-import React from "react";
-import { motion } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import React, { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Settings, 
+  User, 
   Shield, 
+  Bell, 
   Palette, 
   MessageSquare, 
-  Download, 
-  Code, 
-  Database,
+  Smartphone,
+  CreditCard,
+  HelpCircle,
   Info,
-  Sparkles,
-  X
+  Download,
+  Settings as SettingsIcon,
+  ChevronRight,
+  Crown,
+  Lock,
+  Eye,
+  Volume2,
+  Globe,
+  Zap
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
-interface TabInfo {
-  id: string;
-  label: string;
-  icon: React.ComponentType<any>;
-  description: string;
-  badge?: string;
-  color: string;
-}
-
-interface SettingsNavigationProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
-  showMobileMenu: boolean;
-  onMobileMenuToggle: () => void;
-}
-
-const tabs: TabInfo[] = [
+const settingsCategories = [
   {
-    id: "account",
-    label: "Account",
-    icon: Settings,
-    description: "Personal info & preferences",
-    color: "text-blue-600"
+    title: "Account",
+    icon: User,
+    color: "text-blue-500",
+    bgColor: "bg-blue-50",
+    items: [
+      { href: "/profile", icon: User, label: "Profile Settings", description: "Edit your personal information" },
+      { href: "/subscription", icon: Crown, label: "Subscription", description: "Manage your premium plan", badge: "Pro" },
+    ]
   },
   {
-    id: "security",
-    label: "Security",
+    title: "Privacy & Security",
     icon: Shield,
-    description: "Authentication & privacy",
-    badge: "Enhanced",
-    color: "text-green-600"
+    color: "text-green-500",
+    bgColor: "bg-green-50",
+    items: [
+      { href: "/privacy", icon: Lock, label: "Privacy Settings", description: "Control your privacy preferences" },
+      { href: "/settings", icon: Shield, label: "Security Center", description: "Two-factor auth and security" },
+    ]
   },
   {
-    id: "display",
-    label: "Display",
+    title: "App Experience",
     icon: Palette,
-    description: "Theme & appearance",
-    color: "text-purple-600"
+    color: "text-purple-500",
+    bgColor: "bg-purple-50",
+    items: [
+      { href: "/settings", icon: Palette, label: "Display Settings", description: "Theme, colors, and layout" },
+      { href: "/notifications", icon: Bell, label: "Notifications", description: "Manage your alerts" },
+      { href: "/settings", icon: Volume2, label: "Sound Settings", description: "Audio preferences" },
+      { href: "/settings", icon: Globe, label: "Language", description: "Choose your language" },
+    ]
   },
   {
-    id: "privacy",
-    label: "Privacy",
-    icon: Shield,
-    description: "Data & permissions",
-    color: "text-orange-600"
+    title: "Devices & Integrations",
+    icon: Smartphone,
+    color: "text-orange-500", 
+    bgColor: "bg-orange-50",
+    items: [
+      { href: "/wearables", icon: Smartphone, label: "Wearable Devices", description: "Connect your smartwatch" },
+      { href: "/settings", icon: Zap, label: "Third-party Apps", description: "Connected services" },
+    ]
   },
   {
-    id: "chat",
-    label: "Chat",
-    icon: MessageSquare,
-    description: "Messaging preferences",
-    badge: "AI",
-    color: "text-pink-600"
-  },
-  {
-    id: "updates",
-    label: "Updates",
-    icon: Download,
-    description: "Version management",
-    badge: "5.0.2",
-    color: "text-indigo-600"
-  },
-  {
-    id: "enhanced",
-    label: "Enhanced",
-    icon: Sparkles,
-    description: "Advanced features",
-    badge: "Pro",
-    color: "text-yellow-600"
-  },
-  {
-    id: "developer",
-    label: "Developer",
-    icon: Code,
-    description: "Debug & testing",
-    color: "text-red-600"
-  },
-  {
-    id: "data",
-    label: "Data",
-    icon: Database,
-    description: "Export & management",
-    color: "text-cyan-600"
-  },
-  {
-    id: "about",
-    label: "About",
-    icon: Info,
-    description: "App information",
-    color: "text-gray-600"
+    title: "Support & Info",
+    icon: HelpCircle,
+    color: "text-gray-500",
+    bgColor: "bg-gray-50",
+    items: [
+      { href: "/help", icon: HelpCircle, label: "Help Center", description: "Get help and support" },
+      { href: "/export-data", icon: Download, label: "Export Data", description: "Download your information" },
+      { href: "/settings", icon: Info, label: "About FitFusion", description: "App info and version" },
+    ]
   }
 ];
 
-export function SettingsNavigation({ activeTab, onTabChange, showMobileMenu, onMobileMenuToggle }: SettingsNavigationProps) {
-  return (
-    <>
-      {/* Desktop Navigation */}
-      <div className="border-b bg-gradient-to-r from-gray-50/50 to-gray-100/50 dark:from-gray-900/50 dark:to-gray-800/50 hidden md:block">
-        <div className="max-w-screen-xl mx-auto px-4">
-          <ScrollArea className="w-full">
-            <div className="flex items-center py-2 space-x-2">
-              {tabs.map((tab) => (
-                <Button
-                  key={tab.id}
-                  variant={activeTab === tab.id ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => onTabChange(tab.id)}
-                  className={`flex items-center gap-2 whitespace-nowrap ${
-                    activeTab === tab.id 
-                      ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg" 
-                      : "hover:bg-gray-100 dark:hover:bg-gray-800"
-                  }`}
-                >
-                  <tab.icon className={`h-4 w-4 ${activeTab === tab.id ? 'text-white' : tab.color}`} />
-                  <span className="font-medium">{tab.label}</span>
-                  {tab.badge && (
-                    <Badge 
-                      variant={activeTab === tab.id ? "secondary" : "outline"} 
-                      className="text-xs px-1.5 py-0.5"
-                    >
-                      {tab.badge}
-                    </Badge>
-                  )}
-                </Button>
-              ))}
-            </div>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
-        </div>
-      </div>
+export function SettingsNavigation() {
+  const location = useLocation();
+  const [expandedCategory, setExpandedCategory] = useState<string | null>("Account");
 
-      {/* Mobile Navigation Overlay */}
-      {showMobileMenu && (
-        <div className="fixed inset-0 bg-black/60 z-50 md:hidden backdrop-blur-sm">
-          <motion.div
-            initial={{ x: "-100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "-100%" }}
-            transition={{ type: "spring", damping: 20 }}
-            className="bg-white dark:bg-gray-900 w-full max-w-sm h-full shadow-2xl overflow-hidden"
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30">
-              <div className="flex items-center gap-2">
-                <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
-                  <Settings className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <h2 className="font-semibold text-lg">Settings</h2>
-                  <p className="text-xs text-muted-foreground">Navigation</p>
-                </div>
-              </div>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={onMobileMenuToggle}
-                className="rounded-full"
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const categoryVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.3 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { x: -20, opacity: 0 },
+    visible: {
+      x: 0,
+      opacity: 1,
+      transition: { duration: 0.2 }
+    }
+  };
+
+  return (
+    <motion.div 
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-4 p-4"
+    >
+      {settingsCategories.map((category, categoryIndex) => {
+        const isExpanded = expandedCategory === category.title;
+        const CategoryIcon = category.icon;
+        
+        return (
+          <motion.div key={category.title} variants={categoryVariants}>
+            <Card className="overflow-hidden hover-lift">
+              <motion.div
+                whileHover={{ scale: 1.01 }}
+                className="cursor-pointer"
+                onClick={() => setExpandedCategory(isExpanded ? null : category.title)}
               >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-            
-            {/* Navigation Items */}
-            <ScrollArea className="h-[calc(100vh-80px)]">
-              <div className="p-2">
-                {tabs.map((tab, index) => (
-                  <motion.button
-                    key={tab.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    onClick={() => onTabChange(tab.id)}
-                    className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-200 mb-1 ${
-                      activeTab === tab.id 
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg scale-105' 
-                        : 'hover:bg-gray-50 dark:hover:bg-gray-800/50 active:scale-95'
-                    }`}
-                  >
-                    <div className={`p-2.5 rounded-lg transition-all ${
-                      activeTab === tab.id 
-                        ? 'bg-white/20 shadow-inner' 
-                        : 'bg-gray-100 dark:bg-gray-800 group-hover:bg-gray-200'
-                    }`}>
-                      <tab.icon className={`h-5 w-5 ${
-                        activeTab === tab.id ? 'text-white' : tab.color
-                      }`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className={`font-medium truncate ${
-                        activeTab === tab.id ? 'text-white' : 'text-gray-900 dark:text-gray-100'
-                      }`}>
-                        {tab.label}
-                      </div>
-                      <div className={`text-xs truncate ${
-                        activeTab === tab.id ? 'text-white/80' : 'text-muted-foreground'
-                      }`}>
-                        {tab.description}
-                      </div>
-                    </div>
-                    {tab.badge && (
-                      <Badge 
-                        variant={activeTab === tab.id ? "secondary" : "outline"} 
-                        className={`text-xs flex-shrink-0 ${
-                          activeTab === tab.id 
-                            ? 'bg-white/20 text-white border-white/30' 
-                            : ''
-                        }`}
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <motion.div 
+                        className={cn("p-2 rounded-lg", category.bgColor)}
+                        whileHover={{ rotate: 5 }}
+                        transition={{ duration: 0.2 }}
                       >
-                        {tab.badge}
-                      </Badge>
-                    )}
-                  </motion.button>
-                ))}
-              </div>
-            </ScrollArea>
+                        <CategoryIcon className={cn("h-5 w-5", category.color)} />
+                      </motion.div>
+                      <div>
+                        <h3 className="font-semibold text-sm">{category.title}</h3>
+                        <p className="text-xs text-muted-foreground">
+                          {category.items.length} setting{category.items.length !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <motion.div
+                      animate={{ rotate: isExpanded ? 90 : 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    </motion.div>
+                  </div>
+                </CardContent>
+              </motion.div>
+
+              <AnimatePresence>
+                {isExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="overflow-hidden"
+                  >
+                    <div className="border-t border-border/50 bg-muted/20">
+                      <motion.div 
+                        variants={containerVariants}
+                        initial="hidden"
+                        animate="visible"
+                        className="p-2 space-y-1"
+                      >
+                        {category.items.map((item, itemIndex) => {
+                          const isActive = location.pathname === item.href;
+                          const ItemIcon = item.icon;
+                          
+                          return (
+                            <motion.div key={item.href} variants={itemVariants}>
+                              <Link to={item.href}>
+                                <motion.div
+                                  whileHover={{ x: 4, backgroundColor: "rgba(139, 92, 246, 0.05)" }}
+                                  whileTap={{ scale: 0.98 }}
+                                  className={cn(
+                                    "flex items-center justify-between p-3 rounded-lg transition-all duration-200",
+                                    isActive 
+                                      ? "bg-primary/10 text-primary border border-primary/20" 
+                                      : "hover:bg-muted/50"
+                                  )}
+                                >
+                                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                                    <ItemIcon className={cn(
+                                      "h-4 w-4 flex-shrink-0",
+                                      isActive ? "text-primary" : "text-muted-foreground"
+                                    )} />
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-sm font-medium truncate">
+                                          {item.label}
+                                        </span>
+                                        {item.badge && (
+                                          <Badge variant="outline" className="text-xs">
+                                            {item.badge}
+                                          </Badge>
+                                        )}
+                                      </div>
+                                      <p className="text-xs text-muted-foreground truncate">
+                                        {item.description}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  
+                                  <ChevronRight className="h-3 w-3 text-muted-foreground flex-shrink-0 ml-2" />
+                                </motion.div>
+                              </Link>
+                            </motion.div>
+                          );
+                        })}
+                      </motion.div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </Card>
           </motion.div>
-        </div>
-      )}
-    </>
+        );
+      })}
+
+      {/* Quick Actions */}
+      <motion.div variants={categoryVariants}>
+        <Card className="bg-gradient-to-br from-primary/5 to-purple-50 border-primary/20">
+          <CardContent className="p-4">
+            <div className="text-center">
+              <motion.div
+                animate={{ rotate: [0, 5, -5, 0] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                className="inline-flex p-3 bg-primary/10 rounded-full mb-3"
+              >
+                <SettingsIcon className="h-6 w-6 text-primary" />
+              </motion.div>
+              <h3 className="font-semibold text-sm mb-1">Need Help?</h3>
+              <p className="text-xs text-muted-foreground mb-3">
+                Our support team is here to help you get the most out of FitFusion
+              </p>
+              <Link to="/help">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="text-xs bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium"
+                >
+                  Contact Support
+                </motion.button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </motion.div>
   );
 }

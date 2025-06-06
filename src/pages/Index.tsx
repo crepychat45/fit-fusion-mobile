@@ -87,130 +87,282 @@ const Index = () => {
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 pb-16">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 pb-16 relative overflow-hidden">
+      {/* Background animations */}
+      <div className="fixed inset-0 pointer-events-none">
+        <motion.div
+          animate={{
+            scale: [1, 1.1, 1],
+            rotate: [0, 180, 360],
+            opacity: [0.1, 0.2, 0.1]
+          }}
+          transition={{ duration: 20, repeat: Infinity }}
+          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{
+            scale: [1.1, 1, 1.1],
+            rotate: [360, 180, 0],
+            opacity: [0.15, 0.05, 0.15]
+          }}
+          transition={{ duration: 25, repeat: Infinity }}
+          className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-pink-400/20 to-orange-600/20 rounded-full blur-3xl"
+        />
+      </div>
+
       <WelcomeHeader userName={userProfile.name} />
       
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="space-y-6"
+        className="space-y-6 relative z-10"
       >
-        {/* Enhanced Activity Summary */}
-        <motion.div variants={itemVariants} className="px-4 -mt-6 relative z-10">
-          <ActivitySummary
-            workoutsCompleted={userProfile.stats.workoutsCompleted}
-            streakDays={userProfile.stats.streakDays}
-            caloriesBurned={userProfile.stats.caloriesBurned}
-            avgHeartRate={userProfile.stats.avgHeartRate}
-          />
+        {/* Enhanced Activity Summary with better animations */}
+        <motion.div 
+          variants={itemVariants} 
+          className="px-4 -mt-6 relative z-10"
+          whileHover={{ scale: 1.01 }}
+        >
+          <motion.div
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ type: "spring", duration: 0.8 }}
+            className="hover-lift"
+          >
+            <ActivitySummary
+              workoutsCompleted={userProfile.stats.workoutsCompleted}
+              streakDays={userProfile.stats.streakDays}
+              caloriesBurned={userProfile.stats.caloriesBurned}
+              avgHeartRate={userProfile.stats.avgHeartRate}
+            />
+          </motion.div>
         </motion.div>
 
-        {/* AI-Powered Features Banner */}
+        {/* Enhanced AI-Powered Features Banner */}
         <AnimatePresence>
           {showAdvancedFeatures && (
             <motion.div
               variants={itemVariants}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, scale: 0.8, y: 50 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ type: "spring", duration: 0.8, bounce: 0.4 }}
               className="px-4"
             >
-              <Card className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 border-0 overflow-hidden">
-                <CardContent className="p-4 text-white relative">
-                  <div className="absolute inset-0 bg-black/10" />
-                  <div className="relative z-10">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Brain className="h-5 w-5" />
-                      <Badge className="bg-white/20 text-white border-white/30">
-                        AI POWERED
-                      </Badge>
+              <motion.div
+                whileHover={{ scale: 1.02, rotate: [0, 1, 0] }}
+                className="hover-glow"
+              >
+                <Card className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 border-0 overflow-hidden relative">
+                  <motion.div
+                    animate={{ 
+                      background: [
+                        "linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1))",
+                        "linear-gradient(45deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1))",
+                        "linear-gradient(45deg, rgba(236, 72, 153, 0.1), rgba(59, 130, 246, 0.1))"
+                      ]
+                    }}
+                    transition={{ duration: 5, repeat: Infinity }}
+                    className="absolute inset-0"
+                  />
+                  <CardContent className="p-4 text-white relative z-10">
+                    <div className="relative">
+                      <div className="flex items-center gap-2 mb-2">
+                        <motion.div
+                          animate={{ rotate: [0, 360] }}
+                          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                        >
+                          <Brain className="h-5 w-5" />
+                        </motion.div>
+                        <Badge className="bg-white/20 text-white border-white/30 animate-pulse">
+                          AI POWERED
+                        </Badge>
+                      </div>
+                      <h3 className="text-lg font-bold mb-1">Next-Gen Fitness Experience</h3>
+                      <p className="text-white/90 text-sm mb-3">
+                        Advanced AI coaching, real-time biometrics, and personalized nutrition
+                      </p>
+                      <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.5, staggerChildren: 0.1 }}
+                        className="grid grid-cols-2 gap-2 text-xs"
+                      >
+                        {[
+                          { icon: Brain, label: "AI Coach" },
+                          { icon: Heart, label: "Biometric Sync" },
+                          { icon: TrendingUp, label: "Predictive Analytics" },
+                          { icon: Shield, label: "Privacy First" }
+                        ].map((item, index) => (
+                          <motion.div 
+                            key={item.label}
+                            initial={{ x: -20, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            transition={{ delay: 0.7 + index * 0.1 }}
+                            className="flex items-center gap-1"
+                          >
+                            <item.icon className="h-3 w-3" />
+                            <span>{item.label}</span>
+                          </motion.div>
+                        ))}
+                      </motion.div>
                     </div>
-                    <h3 className="text-lg font-bold mb-1">Next-Gen Fitness Experience</h3>
-                    <p className="text-white/90 text-sm mb-3">
-                      Advanced AI coaching, real-time biometrics, and personalized nutrition
-                    </p>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="flex items-center gap-1">
-                        <Brain className="h-3 w-3" />
-                        <span>AI Coach</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Heart className="h-3 w-3" />
-                        <span>Biometric Sync</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <TrendingUp className="h-3 w-3" />
-                        <span>Predictive Analytics</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Shield className="h-3 w-3" />
-                        <span>Privacy First</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Watch Panel - Enhanced */}
-        <motion.div variants={itemVariants} className="px-4">
-          <WatchPanel />
+        {/* Enhanced Watch Panel with floating animation */}
+        <motion.div 
+          variants={itemVariants} 
+          className="px-4"
+          whileHover={{ y: -2 }}
+        >
+          <motion.div
+            animate={{ y: [0, -5, 0] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            className="hover-lift"
+          >
+            <WatchPanel />
+          </motion.div>
         </motion.div>
 
-        {/* Quick Actions Panel */}
-        <motion.div variants={itemVariants}>
+        {/* Enhanced Quick Actions Panel */}
+        <motion.div 
+          variants={itemVariants}
+          whileHover={{ scale: 1.01 }}
+        >
           <QuickActionsPanel />
         </motion.div>
 
         {/* Enhanced Today's Workout */}
-        <motion.div variants={itemVariants}>
+        <motion.div 
+          variants={itemVariants}
+          className="hover-lift"
+        >
           <TodaysWorkout 
             workouts={scheduledWorkouts}
             onReschedule={openRescheduleDialog}
           />
         </motion.div>
 
-        {/* Health Metrics & Weather Side by Side */}
+        {/* Health Metrics & Weather Side by Side with staggered animation */}
         <motion.div variants={itemVariants} className="px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <HealthMetricsPanel />
-            <WeatherWidget />
-          </div>
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ staggerChildren: 0.2 }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          >
+            <motion.div
+              initial={{ x: -50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              className="hover-lift"
+            >
+              <HealthMetricsPanel />
+            </motion.div>
+            <motion.div
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="hover-lift"
+            >
+              <WeatherWidget />
+            </motion.div>
+          </motion.div>
         </motion.div>
 
-        {/* Enhanced Notifications */}
-        <motion.div variants={itemVariants} className="px-4">
-          <EnhancedNotifications />
+        {/* Enhanced Notifications with glow effect */}
+        <motion.div 
+          variants={itemVariants} 
+          className="px-4"
+        >
+          <motion.div
+            whileHover={{ scale: 1.01 }}
+            className="hover-glow"
+          >
+            <EnhancedNotifications />
+          </motion.div>
         </motion.div>
 
-        {/* Achievement & Motivation Combined */}
+        {/* Achievement & Motivation Combined with bounce animation */}
         <motion.div variants={itemVariants} className="px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <AchievementNotifications />
-            <MotivationalQuotes />
-          </div>
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ staggerChildren: 0.15 }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", bounce: 0.4 }}
+              className="hover-scale"
+            >
+              <AchievementNotifications />
+            </motion.div>
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", bounce: 0.4, delay: 0.1 }}
+              className="hover-scale"
+            >
+              <MotivationalQuotes />
+            </motion.div>
+          </motion.div>
         </motion.div>
 
-        {/* Upcoming Workouts */}
-        <motion.div variants={itemVariants}>
+        {/* Enhanced Upcoming Workouts */}
+        <motion.div 
+          variants={itemVariants}
+          className="hover-lift"
+        >
           <UpcomingWorkouts workouts={scheduledWorkouts} />
         </motion.div>
 
-        {/* Enhanced Chat Section */}
-        <motion.div variants={itemVariants}>
-          <FitfusionChatSection />
+        {/* Enhanced Chat Section with special effects */}
+        <motion.div 
+          variants={itemVariants}
+          whileHover={{ scale: 1.005 }}
+        >
+          <motion.div
+            animate={{ 
+              boxShadow: [
+                "0 0 20px rgba(139, 92, 246, 0.1)",
+                "0 0 30px rgba(139, 92, 246, 0.2)",
+                "0 0 20px rgba(139, 92, 246, 0.1)"
+              ]
+            }}
+            transition={{ duration: 3, repeat: Infinity }}
+          >
+            <FitfusionChatSection />
+          </motion.div>
         </motion.div>
 
-        {/* Recent Activity */}
-        <motion.div variants={itemVariants}>
+        {/* Enhanced Recent Activity */}
+        <motion.div 
+          variants={itemVariants}
+          className="hover-lift"
+        >
           <RecentActivitySection />
         </motion.div>
 
-        {/* Daily Tip */}
-        <motion.div variants={itemVariants} className="px-4 mt-6 mb-20">
-          <DailyTip />
+        {/* Enhanced Daily Tip with floating animation */}
+        <motion.div 
+          variants={itemVariants} 
+          className="px-4 mt-6 mb-20"
+        >
+          <motion.div
+            animate={{ y: [0, -3, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            whileHover={{ scale: 1.02 }}
+            className="hover-glow"
+          >
+            <DailyTip />
+          </motion.div>
         </motion.div>
       </motion.div>
       
