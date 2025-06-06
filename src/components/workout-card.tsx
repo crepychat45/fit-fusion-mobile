@@ -1,59 +1,70 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dumbbell, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dumbbell, Clock, PlayCircle, Heart } from "lucide-react";
+import { Workout } from "@/data/workouts";
 
 interface WorkoutCardProps {
-  id: string;
-  title: string;
-  category: string;
-  duration: number;
-  exercises: number;
-  image?: string;
+  workout: Workout;
+  onFavorite: () => void;
+  isFavorite: boolean;
 }
 
-export function WorkoutCard({ id, title, category, duration, exercises, image }: WorkoutCardProps) {
+export function WorkoutCard({ workout, onFavorite, isFavorite }: WorkoutCardProps) {
   const navigate = useNavigate();
   
   return (
-    <Card 
-      className="overflow-hidden transition-all hover:shadow-md cursor-pointer"
-      onClick={() => navigate(`/workout/${id}`)}
-    >
-      <div className="relative h-36 w-full">
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
-        
-        {image ? (
-          <img 
-            src={image} 
-            alt={title} 
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="h-full w-full fitness-gradient flex items-center justify-center">
-            <Dumbbell className="h-12 w-12 text-white" />
+    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 border-0 shadow-md">
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <CardTitle className="text-lg mb-1">{workout.title}</CardTitle>
+            <CardDescription className="text-sm">{workout.description}</CardDescription>
           </div>
-        )}
-        
-        <Badge className="absolute top-2 right-2 z-20 bg-black/40 text-white border-none">
-          {category}
-        </Badge>
-      </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onFavorite}
+              className="p-2"
+            >
+              <Heart 
+                className={`h-4 w-4 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} 
+              />
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4 mt-3">
+          <div className="flex items-center gap-1">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{workout.duration} mins</span>
+          </div>
+          <Badge variant="outline">{workout.level}</Badge>
+          <Badge variant="secondary">{workout.category}</Badge>
+        </div>
+      </CardHeader>
       
-      <CardContent className="p-3">
-        <h3 className="font-semibold text-base">{title}</h3>
-        
-        <div className="flex items-center gap-4 mt-2 text-muted-foreground text-xs">
-          <div className="flex items-center gap-1">
-            <Clock className="h-3.5 w-3.5" />
-            <span>{duration} min</span>
+      <CardContent className="pt-0">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <Dumbbell className="h-4 w-4" />
+              {workout.exercises?.length || 8} exercises
+            </span>
           </div>
-          <div className="flex items-center gap-1">
-            <Dumbbell className="h-3.5 w-3.5" />
-            <span>{exercises} exercises</span>
-          </div>
+          
+          <Button 
+            size="sm" 
+            onClick={() => navigate(`/workout-detail/${workout.id}`)}
+            className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+          >
+            <PlayCircle className="h-4 w-4 mr-1" />
+            Start
+          </Button>
         </div>
       </CardContent>
     </Card>

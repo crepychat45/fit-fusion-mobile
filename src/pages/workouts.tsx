@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { WorkoutCard } from "@/components/workout-card";
 import { MobileNav } from "@/components/mobile-nav";
 import { useToast } from "@/components/ui/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -23,7 +21,6 @@ import {
   Users,
   PlayCircle,
   Heart,
-  Bookmark,
   Share2,
   BarChart3,
   Award,
@@ -110,8 +107,8 @@ const Workouts = () => {
   const filteredWorkouts = workouts.filter(workout => {
     const matchesSearch = workout.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          workout.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType = filterType === "all" || workout.type === filterType;
-    const matchesDifficulty = filterDifficulty === "all" || workout.difficulty === filterDifficulty;
+    const matchesType = filterType === "all" || workout.category === filterType;
+    const matchesDifficulty = filterDifficulty === "all" || workout.level === filterDifficulty;
     
     return matchesSearch && matchesType && matchesDifficulty;
   });
@@ -246,11 +243,10 @@ const Workouts = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="Strength">Strength</SelectItem>
-                <SelectItem value="Cardio">Cardio</SelectItem>
-                <SelectItem value="HIIT">HIIT</SelectItem>
-                <SelectItem value="Yoga">Yoga</SelectItem>
-                <SelectItem value="Flexibility">Flexibility</SelectItem>
+                <SelectItem value="strength">Strength</SelectItem>
+                <SelectItem value="cardio">Cardio</SelectItem>
+                <SelectItem value="hiit">HIIT</SelectItem>
+                <SelectItem value="flexibility">Flexibility</SelectItem>
               </SelectContent>
             </Select>
 
@@ -260,9 +256,9 @@ const Workouts = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Levels</SelectItem>
-                <SelectItem value="Beginner">Beginner</SelectItem>
-                <SelectItem value="Intermediate">Intermediate</SelectItem>
-                <SelectItem value="Advanced">Advanced</SelectItem>
+                <SelectItem value="beginner">Beginner</SelectItem>
+                <SelectItem value="intermediate">Intermediate</SelectItem>
+                <SelectItem value="advanced">Advanced</SelectItem>
               </SelectContent>
             </Select>
 
@@ -340,8 +336,8 @@ const Workouts = () => {
                               <Clock className="h-4 w-4 text-muted-foreground" />
                               <span className="text-sm">{workout.duration}</span>
                             </div>
-                            <Badge variant="outline">{workout.difficulty}</Badge>
-                            <Badge variant="secondary">{workout.type}</Badge>
+                            <Badge variant="outline">{workout.level}</Badge>
+                            <Badge variant="secondary">{workout.category}</Badge>
                           </div>
                         </CardHeader>
                         
@@ -510,11 +506,55 @@ const Workouts = () => {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: index * 0.1 }}
                         >
-                          <WorkoutCard 
-                            workout={workout} 
-                            onFavorite={() => toggleFavorite(workout.id)}
-                            isFavorite={true}
-                          />
+                          <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 border-0 shadow-md">
+                            <CardHeader className="pb-3">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <CardTitle className="text-lg mb-1">{workout.title}</CardTitle>
+                                  <CardDescription className="text-sm">{workout.description}</CardDescription>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => toggleFavorite(workout.id)}
+                                    className="p-2"
+                                  >
+                                    <Heart className="h-4 w-4 fill-red-500 text-red-500" />
+                                  </Button>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-4 mt-3">
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-sm">{workout.duration}</span>
+                                </div>
+                                <Badge variant="outline">{workout.level}</Badge>
+                                <Badge variant="secondary">{workout.category}</Badge>
+                              </div>
+                            </CardHeader>
+                            
+                            <CardContent className="pt-0">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                  <span className="flex items-center gap-1">
+                                    <Flame className="h-4 w-4" />
+                                    {workout.exercises?.length || 8} exercises
+                                  </span>
+                                </div>
+                                
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => navigate(`/workout-detail/${workout.id}`)}
+                                  className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+                                >
+                                  <PlayCircle className="h-4 w-4 mr-1" />
+                                  Start
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
                         </motion.div>
                       ))}
                   </div>

@@ -32,7 +32,9 @@ import {
   ChevronDown,
   AlertCircle,
   Clock,
-  Gift
+  Gift,
+  RefreshCw,
+  Settings
 } from "lucide-react";
 import { 
   Tabs, 
