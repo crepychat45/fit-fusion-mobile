@@ -21,16 +21,23 @@ import {
   Award,
   TrendingUp,
   CheckCircle,
-  Sparkles
+  Sparkles,
+  Brain,
+  Book,
+  UserCheck,
+  Gift,
+  MessageCircle,
+  Network
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function AboutPage() {
   const { toast } = useToast();
-  const [appVersion] = useState("5.0.3");
-  const [buildNumber] = useState("20241206.001");
-  const [releaseDate] = useState("December 6, 2024");
+  const [appVersion] = useState("5.0.4");
+  const [buildNumber] = useState("20241206.002");
+  const [releaseDate] = useState("June 6, 2025");
   const [userStats, setUserStats] = useState({
     totalUsers: 125000,
     activeToday: 8500,
@@ -40,7 +47,7 @@ export function AboutPage() {
 
   const features = [
     {
-      icon: Zap,
+      icon: Brain,
       title: "AI-Powered Workouts",
       description: "Personalized fitness routines using machine learning",
       version: "5.0.0"
@@ -64,20 +71,37 @@ export function AboutPage() {
       version: "5.0.3"
     },
     {
-      icon: Globe,
-      title: "Multi-language Support",
-      description: "Available in 25+ languages",
-      version: "4.9.0"
+      icon: MessageCircle,
+      title: "Enhanced Chat",
+      description: "Secure communication with fitness community",
+      version: "5.0.4"
     },
     {
-      icon: Heart,
-      title: "Health Integration",
-      description: "Sync with popular health and fitness apps",
-      version: "5.0.2"
+      icon: Network,
+      title: "AI Integration",
+      description: "Integrated AI throughout the platform",
+      version: "5.0.4"
     }
   ];
 
   const changelog = [
+    {
+      version: "5.0.4",
+      date: "June 6, 2025",
+      type: "major",
+      changes: [
+        "🧠 Enhanced AI integration throughout the entire platform",
+        "💬 Redesigned chat interface with voice message support",
+        "🔒 Improved security with biometric authentication",
+        "💪 New smart workout recommendation system",
+        "📊 Enhanced analytics dashboard with goal tracking",
+        "💳 Secure payment gateway for subscriptions",
+        "🎨 UI/UX improvements across all pages",
+        "📱 Better mobile experience with responsive design",
+        "🏆 Expanded achievements and goals system",
+        "🔄 Sync optimizations for faster data transfer"
+      ]
+    },
     {
       version: "5.0.3",
       date: "December 6, 2024",
@@ -136,7 +160,9 @@ export function AboutPage() {
     { name: "Sarah Chen", role: "UI/UX Designer", avatar: "SC" },
     { name: "Mike Rodriguez", role: "Backend Engineer", avatar: "MR" },
     { name: "Emily Davis", role: "Product Manager", avatar: "ED" },
-    { name: "David Kim", role: "AI Specialist", avatar: "DK" }
+    { name: "David Kim", role: "AI Specialist", avatar: "DK" },
+    { name: "Lisa Wang", role: "Mobile Developer", avatar: "LW" },
+    { name: "James Smith", role: "QA Engineer", avatar: "JS" }
   ];
 
   const handleFeedback = () => {
@@ -265,6 +291,9 @@ export function AboutPage() {
                       <Badge variant="outline" className="text-xs">
                         {feature.version}
                       </Badge>
+                      {feature.version === appVersion && (
+                        <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">New</Badge>
+                      )}
                     </div>
                     <p className="text-sm text-muted-foreground">{feature.description}</p>
                   </div>
@@ -292,37 +321,43 @@ export function AboutPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            {changelog.map((release, releaseIndex) => (
-              <motion.div
-                key={release.version}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: releaseIndex * 0.1 }}
-                className="border-l-4 border-primary pl-4"
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <h4 className="font-semibold">Version {release.version}</h4>
-                  <Badge variant={release.type === "major" ? "default" : release.type === "minor" ? "secondary" : "outline"}>
-                    {release.type}
-                  </Badge>
-                  <span className="text-sm text-muted-foreground">{release.date}</span>
-                </div>
-                <ul className="space-y-1">
-                  {release.changes.map((change, changeIndex) => (
-                    <motion.li
-                      key={changeIndex}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.2, delay: (releaseIndex * 0.1) + (changeIndex * 0.05) }}
-                      className="text-sm text-muted-foreground flex items-start gap-2"
-                    >
-                      <CheckCircle className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
-                      {change}
-                    </motion.li>
-                  ))}
-                </ul>
-              </motion.div>
-            ))}
+            <ScrollArea className="h-96 pr-4">
+              {changelog.map((release, releaseIndex) => (
+                <motion.div
+                  key={release.version}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: releaseIndex * 0.1 }}
+                  className={`border-l-4 pl-4 mb-6 ${
+                    release.version === appVersion 
+                      ? 'border-primary' 
+                      : 'border-muted'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <h4 className="font-semibold">Version {release.version}</h4>
+                    <Badge variant={release.type === "major" ? "default" : release.type === "minor" ? "secondary" : "outline"}>
+                      {release.type}
+                    </Badge>
+                    <span className="text-sm text-muted-foreground">{release.date}</span>
+                  </div>
+                  <ul className="space-y-1">
+                    {release.changes.map((change, changeIndex) => (
+                      <motion.li
+                        key={changeIndex}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.2, delay: (releaseIndex * 0.1) + (changeIndex * 0.05) }}
+                        className="text-sm text-muted-foreground flex items-start gap-2"
+                      >
+                        <CheckCircle className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
+                        {change}
+                      </motion.li>
+                    ))}
+                  </ul>
+                </motion.div>
+              ))}
+            </ScrollArea>
           </CardContent>
         </Card>
       </motion.div>
@@ -435,7 +470,7 @@ export function AboutPage() {
             </div>
 
             <div className="pt-4 border-t text-center text-sm text-muted-foreground">
-              <p>© 2024 FitFusion. Made with ❤️ for fitness enthusiasts worldwide.</p>
+              <p>© 2025 FitFusion. Made with ❤️ for fitness enthusiasts worldwide.</p>
               <p className="mt-1">
                 Built with React, TypeScript, and Supabase • Lovable AI-assisted development
               </p>
