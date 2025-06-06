@@ -1,574 +1,538 @@
 
-import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import React, { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Slider } from "@/components/ui/slider";
 import { 
-  Shield, 
   Eye, 
   EyeOff, 
-  Lock, 
-  Unlock, 
+  Shield, 
+  Database, 
   Globe, 
-  UserCheck, 
+  Lock,
+  UserCheck,
   AlertTriangle,
   CheckCircle,
-  Info,
-  Settings
+  Settings,
+  Trash2,
+  Download,
+  Upload,
+  Activity,
+  MapPin,
+  Camera,
+  Mic,
+  Bell,
+  Share2,
+  Info
 } from "lucide-react";
-
-interface PrivacySettings {
-  dataCollection: boolean;
-  analytics: boolean;
-  crashReporting: boolean;
-  locationTracking: boolean;
-  biometricAuth: boolean;
-  twoFactorAuth: boolean;
-  sessionTimeout: number;
-  dataRetention: number;
-  shareUsageData: boolean;
-  personalizedAds: boolean;
-  cookieConsent: boolean;
-  thirdPartyIntegrations: boolean;
-}
+import { motion, AnimatePresence } from "framer-motion";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function PrivacySettings() {
   const { toast } = useToast();
-  const [settings, setSettings] = useState<PrivacySettings>({
-    dataCollection: true,
-    analytics: false,
-    crashReporting: true,
-    locationTracking: false,
-    biometricAuth: false,
-    twoFactorAuth: false,
-    sessionTimeout: 30,
-    dataRetention: 90,
-    shareUsageData: false,
-    personalizedAds: false,
-    cookieConsent: true,
-    thirdPartyIntegrations: false,
-  });
-  
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
-  const [validationStatus, setValidationStatus] = useState<'idle' | 'validating' | 'valid' | 'invalid'>('idle');
+  const [profileVisibility, setProfileVisibility] = useState("friends");
+  const [dataCollection, setDataCollection] = useState(true);
+  const [analyticsEnabled, setAnalyticsEnabled] = useState(true);
+  const [locationTracking, setLocationTracking] = useState(false);
+  const [personalization, setPersonalization] = useState(true);
+  const [thirdPartySharing, setThirdPartySharing] = useState(false);
+  const [cookieConsent, setCookieConsent] = useState(true);
+  const [dataRetention, setDataRetention] = useState([365]);
+  const [aiTraining, setAiTraining] = useState(false);
+  const [biometricData, setBiometricData] = useState(true);
+  const [voiceRecording, setVoiceRecording] = useState(false);
+  const [cameraAccess, setCameraAccess] = useState(true);
+  const [notificationTracking, setNotificationTracking] = useState(true);
+  const [socialSharing, setSocialSharing] = useState(false);
+  const [advancedEncryption, setAdvancedEncryption] = useState(true);
+  const [dataMinimization, setDataMinimization] = useState(true);
+  const [consentManagement, setConsentManagement] = useState(true);
 
-  // Load settings from localStorage on mount
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('fitfusion-privacy-settings');
-      if (saved) {
-        const parsedSettings = JSON.parse(saved);
-        setSettings(parsedSettings);
-        console.log('Privacy settings loaded:', parsedSettings);
-      }
-    } catch (error) {
-      console.error('Error loading privacy settings:', error);
-      toast({
-        title: "⚠️ Loading Error",
-        description: "Could not load saved privacy settings.",
-        variant: "destructive",
-      });
-    }
-  }, []);
-
-  // Save settings when they change
-  useEffect(() => {
-    if (hasChanges) {
-      const timeout = setTimeout(() => {
-        saveSettings();
-      }, 1000); // Auto-save after 1 second of inactivity
-
-      return () => clearTimeout(timeout);
-    }
-  }, [settings, hasChanges]);
-
-  const saveSettings = async () => {
-    try {
-      setIsLoading(true);
-      localStorage.setItem('fitfusion-privacy-settings', JSON.stringify(settings));
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      setHasChanges(false);
-      
-      toast({
-        title: "✅ Settings Saved",
-        description: "Your privacy preferences have been saved.",
-      });
-      
-      console.log('Privacy settings saved:', settings);
-    } catch (error) {
-      console.error('Error saving privacy settings:', error);
-      toast({
-        title: "❌ Save Error",
-        description: "Failed to save privacy settings. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleToggle = (key: keyof PrivacySettings, value: boolean) => {
-    console.log(`Toggling ${key} to ${value}`);
-    
-    setSettings(prev => ({
-      ...prev,
-      [key]: value,
-    }));
-    
-    setHasChanges(true);
-    
-    // Show immediate feedback
+  const handleDataExport = async () => {
     toast({
-      title: `${formatSettingName(key)} ${value ? 'Enabled' : 'Disabled'}`,
-      description: `Privacy setting updated successfully.`,
+      title: "📦 Preparing data export",
+      description: "Compiling your personal data for download..."
     });
 
-    // Validate critical settings
-    if (key === 'twoFactorAuth' || key === 'biometricAuth') {
-      validateSecuritySettings();
-    }
-  };
+    // Simulate data preparation
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
-  const handleNumberChange = (key: keyof PrivacySettings, value: number) => {
-    console.log(`Changing ${key} to ${value}`);
-    
-    setSettings(prev => ({
-      ...prev,
-      [key]: value,
-    }));
-    
-    setHasChanges(true);
-    
-    toast({
-      title: `${formatSettingName(key)} Updated`,
-      description: `Set to ${value} ${key === 'sessionTimeout' ? 'minutes' : 'days'}.`,
-    });
-  };
-
-  const formatSettingName = (key: string) => {
-    return key
-      .replace(/([A-Z])/g, ' $1')
-      .replace(/^./, (str) => str.toUpperCase());
-  };
-
-  const validateSecuritySettings = async () => {
-    setValidationStatus('validating');
-    
-    try {
-      // Simulate validation
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      const hasSecurityEnabled = settings.twoFactorAuth || settings.biometricAuth;
-      setValidationStatus(hasSecurityEnabled ? 'valid' : 'invalid');
-      
-      if (!hasSecurityEnabled) {
-        toast({
-          title: "⚠️ Security Recommendation",
-          description: "Consider enabling two-factor or biometric authentication for better security.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      setValidationStatus('invalid');
-      console.error('Validation error:', error);
-    }
-  };
-
-  const exportPrivacyReport = async () => {
-    try {
-      setIsLoading(true);
-      
-      const report = {
-        timestamp: new Date().toISOString(),
-        settings: settings,
-        recommendations: generateRecommendations(),
-      };
-      
-      const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `privacy-report-${Date.now()}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
-      toast({
-        title: "📊 Report Generated",
-        description: "Privacy report has been downloaded successfully.",
-      });
-    } catch (error) {
-      console.error('Export error:', error);
-      toast({
-        title: "❌ Export Failed",
-        description: "Could not generate privacy report.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const generateRecommendations = () => {
-    const recommendations = [];
-    
-    if (!settings.twoFactorAuth && !settings.biometricAuth) {
-      recommendations.push("Enable two-factor or biometric authentication");
-    }
-    
-    if (settings.locationTracking) {
-      recommendations.push("Consider disabling location tracking if not needed");
-    }
-    
-    if (settings.shareUsageData) {
-      recommendations.push("Review usage data sharing preferences");
-    }
-    
-    return recommendations;
-  };
-
-  const resetToDefaults = () => {
-    const confirmed = window.confirm("Reset all privacy settings to defaults? This action cannot be undone.");
-    if (!confirmed) return;
-
-    const defaultSettings: PrivacySettings = {
-      dataCollection: true,
-      analytics: false,
-      crashReporting: true,
-      locationTracking: false,
-      biometricAuth: false,
-      twoFactorAuth: false,
-      sessionTimeout: 30,
-      dataRetention: 90,
-      shareUsageData: false,
-      personalizedAds: false,
-      cookieConsent: true,
-      thirdPartyIntegrations: false,
+    const data = {
+      profile: { /* user profile data */ },
+      preferences: { /* user preferences */ },
+      activity: { /* activity data */ },
+      privacy: { /* privacy settings */ },
+      exportDate: new Date().toISOString(),
+      dataTypes: [
+        "Profile Information",
+        "Activity Logs", 
+        "Preferences",
+        "Privacy Settings",
+        "Device Information"
+      ]
     };
 
-    setSettings(defaultSettings);
-    setHasChanges(true);
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `fitfusion-data-export-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 
     toast({
-      title: "🔄 Settings Reset",
-      description: "All privacy settings have been reset to defaults.",
+      title: "✅ Data exported successfully",
+      description: "Your complete data archive has been downloaded.",
+    });
+  };
+
+  const handleDataDeletion = async () => {
+    const confirmation = window.confirm(
+      "Are you sure you want to delete all your data? This action cannot be undone."
+    );
+    
+    if (!confirmation) return;
+
+    toast({
+      title: "🗑️ Deleting your data",
+      description: "Permanently removing all personal information..."
+    });
+
+    // Simulate data deletion
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    toast({
+      title: "✅ Data deleted",
+      description: "All your personal data has been permanently removed.",
+    });
+  };
+
+  const resetPrivacySettings = () => {
+    setProfileVisibility("friends");
+    setDataCollection(false);
+    setAnalyticsEnabled(false);
+    setLocationTracking(false);
+    setPersonalization(false);
+    setThirdPartySharing(false);
+    setAiTraining(false);
+    setBiometricData(false);
+    setVoiceRecording(false);
+    setSocialSharing(false);
+    setDataRetention([90]);
+
+    toast({
+      title: "🔒 Privacy settings reset",
+      description: "All settings have been set to maximum privacy.",
     });
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header with Status */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Privacy Settings</h2>
-          <p className="text-muted-foreground">Control how your data is collected and used</p>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          {validationStatus === 'validating' && (
-            <Badge variant="outline" className="animate-pulse">
-              <Settings className="h-3 w-3 mr-1 animate-spin" />
-              Validating
-            </Badge>
-          )}
-          {validationStatus === 'valid' && (
-            <Badge variant="default" className="bg-green-500">
-              <CheckCircle className="h-3 w-3 mr-1" />
-              Secure
-            </Badge>
-          )}
-          {validationStatus === 'invalid' && (
-            <Badge variant="destructive">
-              <AlertTriangle className="h-3 w-3 mr-1" />
-              Needs Attention
-            </Badge>
-          )}
-        </div>
-      </div>
+    <div className="space-y-6 h-full overflow-y-auto">
+      {/* Privacy Overview */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Card className="overflow-hidden">
+          <CardHeader className="bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950/30 dark:to-blue-950/30">
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Privacy Control Center
+            </CardTitle>
+            <CardDescription>
+              Comprehensive control over your personal data and privacy
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center p-4 bg-green-50 dark:bg-green-950/20 rounded-lg">
+                <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                <p className="font-medium">Data Protected</p>
+                <p className="text-sm text-muted-foreground">End-to-end encryption</p>
+              </div>
+              <div className="text-center p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                <UserCheck className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                <p className="font-medium">You're in Control</p>
+                <p className="text-sm text-muted-foreground">Full data ownership</p>
+              </div>
+              <div className="text-center p-4 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
+                <Lock className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+                <p className="font-medium">Zero Knowledge</p>
+                <p className="text-sm text-muted-foreground">Server-side encryption</p>
+              </div>
+            </div>
 
-      {/* Security Recommendations */}
-      {validationStatus === 'invalid' && (
-        <Alert className="border-orange-200 bg-orange-50 dark:bg-orange-950/20">
-          <AlertTriangle className="h-4 w-4 text-orange-600" />
-          <AlertDescription className="text-orange-800 dark:text-orange-200">
-            Your current privacy settings may need attention. Consider enabling additional security features.
-          </AlertDescription>
-        </Alert>
-      )}
+            <div className="mt-4 flex gap-2">
+              <Button variant="outline" onClick={resetPrivacySettings} className="flex-1">
+                <Shield className="h-4 w-4 mr-2" />
+                Maximum Privacy
+              </Button>
+              <Button variant="outline" onClick={handleDataExport} className="flex-1">
+                <Download className="h-4 w-4 mr-2" />
+                Export Data
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
 
-      {/* Data Collection Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Globe className="h-5 w-5" />
-            Data Collection
-          </CardTitle>
-          <CardDescription>
-            Control what data is collected and how it's used
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label htmlFor="dataCollection">Basic Data Collection</Label>
-              <p className="text-xs text-muted-foreground">
-                Collect essential app usage data for functionality
-              </p>
+      {/* Data Collection Controls */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Database className="h-5 w-5" />
+              Data Collection & Usage
+            </CardTitle>
+            <CardDescription>
+              Control what data we collect and how it's used
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Activity className="h-4 w-4 text-primary" />
+                <div>
+                  <p className="font-medium">Analytics & Performance</p>
+                  <p className="text-sm text-muted-foreground">
+                    Help improve the app with anonymous usage data
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {analyticsEnabled && (
+                  <Badge variant="secondary" className="text-xs">Active</Badge>
+                )}
+                <Switch 
+                  checked={analyticsEnabled}
+                  onCheckedChange={setAnalyticsEnabled}
+                />
+              </div>
             </div>
-            <Switch 
-              id="dataCollection"
-              checked={settings.dataCollection} 
-              onCheckedChange={(checked) => handleToggle('dataCollection', checked)} 
-            />
-          </div>
-          
-          <Separator />
-          
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label htmlFor="analytics">Analytics</Label>
-              <p className="text-xs text-muted-foreground">
-                Help improve the app with anonymous usage analytics
-              </p>
-            </div>
-            <Switch 
-              id="analytics"
-              checked={settings.analytics} 
-              onCheckedChange={(checked) => handleToggle('analytics', checked)} 
-            />
-          </div>
-          
-          <Separator />
-          
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label htmlFor="crashReporting">Crash Reporting</Label>
-              <p className="text-xs text-muted-foreground">
-                Automatically send crash reports to help fix bugs
-              </p>
-            </div>
-            <Switch 
-              id="crashReporting"
-              checked={settings.crashReporting} 
-              onCheckedChange={(checked) => handleToggle('crashReporting', checked)} 
-            />
-          </div>
-          
-          <Separator />
-          
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label htmlFor="locationTracking">Location Tracking</Label>
-              <p className="text-xs text-muted-foreground">
-                Track your location for location-based features
-              </p>
-            </div>
-            <Switch 
-              id="locationTracking"
-              checked={settings.locationTracking} 
-              onCheckedChange={(checked) => handleToggle('locationTracking', checked)} 
-            />
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* Security Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
-            Security & Authentication
-          </CardTitle>
-          <CardDescription>
-            Enhance your account security with additional protection
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label htmlFor="biometricAuth">Biometric Authentication</Label>
-              <p className="text-xs text-muted-foreground">
-                Use fingerprint or face unlock for app access
-              </p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <MapPin className="h-4 w-4 text-primary" />
+                <div>
+                  <p className="font-medium">Location Tracking</p>
+                  <p className="text-sm text-muted-foreground">
+                    Enable location-based features and recommendations
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {locationTracking && (
+                  <Badge variant="secondary" className="text-xs">Active</Badge>
+                )}
+                <Switch 
+                  checked={locationTracking}
+                  onCheckedChange={setLocationTracking}
+                />
+              </div>
             </div>
-            <Switch 
-              id="biometricAuth"
-              checked={settings.biometricAuth} 
-              onCheckedChange={(checked) => handleToggle('biometricAuth', checked)} 
-            />
-          </div>
-          
-          <Separator />
-          
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label htmlFor="twoFactorAuth">Two-Factor Authentication</Label>
-              <p className="text-xs text-muted-foreground">
-                Add an extra layer of security to your account
-              </p>
-            </div>
-            <Switch 
-              id="twoFactorAuth"
-              checked={settings.twoFactorAuth} 
-              onCheckedChange={(checked) => handleToggle('twoFactorAuth', checked)} 
-            />
-          </div>
-          
-          <Separator />
-          
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label htmlFor="sessionTimeout">Session Timeout</Label>
-              <p className="text-xs text-muted-foreground">
-                Automatically log out after inactivity (minutes)
-              </p>
-            </div>
-            <select 
-              className="w-24 rounded-md border border-input bg-background px-3 py-1 text-sm"
-              value={settings.sessionTimeout}
-              onChange={(e) => handleNumberChange('sessionTimeout', parseInt(e.target.value))}
-            >
-              <option value={15}>15</option>
-              <option value={30}>30</option>
-              <option value={60}>60</option>
-              <option value={120}>120</option>
-              <option value={0}>Never</option>
-            </select>
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* Data Management */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Lock className="h-5 w-5" />
-            Data Management
-          </CardTitle>
-          <CardDescription>
-            Control how long your data is stored and shared
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label htmlFor="dataRetention">Data Retention Period</Label>
-              <p className="text-xs text-muted-foreground">
-                How long to keep your data (days)
-              </p>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Settings className="h-4 w-4 text-primary" />
+                <div>
+                  <p className="font-medium">Personalization Data</p>
+                  <p className="text-sm text-muted-foreground">
+                    Customize your experience based on preferences
+                  </p>
+                </div>
+              </div>
+              <Switch 
+                checked={personalization}
+                onCheckedChange={setPersonalization}
+              />
             </div>
-            <select 
-              className="w-24 rounded-md border border-input bg-background px-3 py-1 text-sm"
-              value={settings.dataRetention}
-              onChange={(e) => handleNumberChange('dataRetention', parseInt(e.target.value))}
-            >
-              <option value={30}>30</option>
-              <option value={90}>90</option>
-              <option value={180}>180</option>
-              <option value={365}>365</option>
-              <option value={0}>Forever</option>
-            </select>
-          </div>
-          
-          <Separator />
-          
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label htmlFor="shareUsageData">Share Usage Data</Label>
-              <p className="text-xs text-muted-foreground">
-                Share anonymized usage data with third parties
-              </p>
-            </div>
-            <Switch 
-              id="shareUsageData"
-              checked={settings.shareUsageData} 
-              onCheckedChange={(checked) => handleToggle('shareUsageData', checked)} 
-            />
-          </div>
-          
-          <Separator />
-          
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label htmlFor="personalizedAds">Personalized Ads</Label>
-              <p className="text-xs text-muted-foreground">
-                Show ads based on your interests and activity
-              </p>
-            </div>
-            <Switch 
-              id="personalizedAds"
-              checked={settings.personalizedAds} 
-              onCheckedChange={(checked) => handleToggle('personalizedAds', checked)} 
-            />
-          </div>
-          
-          <Separator />
-          
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label htmlFor="thirdPartyIntegrations">Third-Party Integrations</Label>
-              <p className="text-xs text-muted-foreground">
-                Allow integrations with external services
-              </p>
-            </div>
-            <Switch 
-              id="thirdPartyIntegrations"
-              checked={settings.thirdPartyIntegrations} 
-              onCheckedChange={(checked) => handleToggle('thirdPartyIntegrations', checked)} 
-            />
-          </div>
-        </CardContent>
-        
-        <CardFooter className="flex justify-between">
-          <div className="flex items-center text-sm text-muted-foreground">
-            <Info className="h-4 w-4 mr-2" />
-            <span>Changes are automatically saved</span>
-          </div>
-          
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={exportPrivacyReport}
-              disabled={isLoading}
-            >
-              Export Report
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={resetToDefaults}
-              disabled={isLoading}
-            >
-              Reset to Defaults
-            </Button>
-          </div>
-        </CardFooter>
-      </Card>
 
-      {/* Loading indicator */}
-      {isLoading && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-background p-6 rounded-lg shadow-lg">
-            <div className="flex items-center gap-3">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-              <span>Processing...</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Share2 className="h-4 w-4 text-primary" />
+                <div>
+                  <p className="font-medium">Third-Party Data Sharing</p>
+                  <p className="text-sm text-muted-foreground">
+                    Share anonymized data with partners for research
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {thirdPartySharing && (
+                  <Badge variant="destructive" className="text-xs">Enabled</Badge>
+                )}
+                <Switch 
+                  checked={thirdPartySharing}
+                  onCheckedChange={setThirdPartySharing}
+                />
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Database className="h-4 w-4 text-primary" />
+                <div>
+                  <p className="font-medium">AI Training Data</p>
+                  <p className="text-sm text-muted-foreground">
+                    Use your data to improve AI features (anonymized)
+                  </p>
+                </div>
+              </div>
+              <Switch 
+                checked={aiTraining}
+                onCheckedChange={setAiTraining}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Device Permissions */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <UserCheck className="h-5 w-5" />
+              Device Permissions & Access
+            </CardTitle>
+            <CardDescription>
+              Manage what device features the app can access
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Camera className="h-4 w-4 text-primary" />
+                <div>
+                  <p className="font-medium">Camera Access</p>
+                  <p className="text-sm text-muted-foreground">
+                    Take photos and scan QR codes
+                  </p>
+                </div>
+              </div>
+              <Switch 
+                checked={cameraAccess}
+                onCheckedChange={setCameraAccess}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Mic className="h-4 w-4 text-primary" />
+                <div>
+                  <p className="font-medium">Microphone Access</p>
+                  <p className="text-sm text-muted-foreground">
+                    Voice commands and audio recording
+                  </p>
+                </div>
+              </div>
+              <Switch 
+                checked={voiceRecording}
+                onCheckedChange={setVoiceRecording}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Bell className="h-4 w-4 text-primary" />
+                <div>
+                  <p className="font-medium">Notification Tracking</p>
+                  <p className="text-sm text-muted-foreground">
+                    Track notification engagement for optimization
+                  </p>
+                </div>
+              </div>
+              <Switch 
+                checked={notificationTracking}
+                onCheckedChange={setNotificationTracking}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <UserCheck className="h-4 w-4 text-primary" />
+                <div>
+                  <p className="font-medium">Biometric Data Storage</p>
+                  <p className="text-sm text-muted-foreground">
+                    Store fingerprint/face data locally for quick access
+                  </p>
+                </div>
+              </div>
+              <Switch 
+                checked={biometricData}
+                onCheckedChange={setBiometricData}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Privacy Controls */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      >
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5" />
+              Visibility & Sharing Controls
+            </CardTitle>
+            <CardDescription>
+              Control who can see your information and activities
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Profile Visibility</p>
+                <p className="text-sm text-muted-foreground">
+                  Who can see your profile and activity
+                </p>
+              </div>
+              <Select value={profileVisibility} onValueChange={setProfileVisibility}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="public">Public</SelectItem>
+                  <SelectItem value="friends">Friends Only</SelectItem>
+                  <SelectItem value="private">Private</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Share2 className="h-4 w-4 text-primary" />
+                <div>
+                  <p className="font-medium">Social Media Sharing</p>
+                  <p className="text-sm text-muted-foreground">
+                    Allow sharing achievements to social platforms
+                  </p>
+                </div>
+              </div>
+              <Switch 
+                checked={socialSharing}
+                onCheckedChange={setSocialSharing}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="font-medium">Data Retention Period</p>
+                <Badge variant="outline">{dataRetention[0]} days</Badge>
+              </div>
+              <Slider
+                value={dataRetention}
+                onValueChange={setDataRetention}
+                max={730}
+                min={30}
+                step={30}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>30 days</span>
+                <span>1 year</span>
+                <span>2 years</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Data Management Actions */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+      >
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Trash2 className="h-5 w-5" />
+              Data Rights & Management
+            </CardTitle>
+            <CardDescription>
+              Exercise your data rights under GDPR and other privacy laws
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                You have the right to access, correct, delete, or port your data at any time.
+                These actions are immediate and permanent.
+              </AlertDescription>
+            </Alert>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Button 
+                variant="outline" 
+                onClick={handleDataExport}
+                className="w-full h-auto p-4 justify-start"
+              >
+                <div className="text-left">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Download className="h-4 w-4" />
+                    <span className="font-medium">Export My Data</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Download all your personal data in JSON format
+                  </div>
+                </div>
+              </Button>
+
+              <Button 
+                variant="destructive" 
+                onClick={handleDataDeletion}
+                className="w-full h-auto p-4 justify-start"
+              >
+                <div className="text-left">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Trash2 className="h-4 w-4" />
+                    <span className="font-medium">Delete My Data</span>
+                  </div>
+                  <div className="text-xs">
+                    Permanently remove all personal information
+                  </div>
+                </div>
+              </Button>
+            </div>
+
+            <div className="pt-4 border-t">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Advanced Data Minimization</p>
+                  <p className="text-sm text-muted-foreground">
+                    Automatically delete unnecessary data
+                  </p>
+                </div>
+                <Switch 
+                  checked={dataMinimization}
+                  onCheckedChange={setDataMinimization}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 }

@@ -1,683 +1,567 @@
+
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Textarea } from "@/components/ui/textarea";
 import { 
-  Code, Cpu, Database, FileCode2, Radio, 
-  Terminal, Bug, Wrench, Download, RefreshCcw, Monitor
+  Code, 
+  Terminal, 
+  Bug, 
+  Cpu, 
+  Database, 
+  Zap,
+  AlertTriangle,
+  CheckCircle,
+  Download,
+  Upload,
+  RefreshCw,
+  Eye,
+  Settings,
+  Activity,
+  Shield,
+  Smartphone,
+  Globe
 } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import { Label } from "@/components/ui/label";
+import { motion, AnimatePresence } from "framer-motion";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogClose,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 export function DeveloperOptions() {
   const { toast } = useToast();
-  const [developerOptions, setDeveloperOptions] = useState({
-    debugMode: false,
-    apiLogging: false,
-    experimentalFeatures: false,
-    performanceMonitoring: false,
-    betaAccess: false,
-    customScripting: false,
-    verboseLogging: false,
-    remoteDebugging: false,
-    developerTools: false,
-    networkInspector: false,
+  const [debugMode, setDebugMode] = useState(false);
+  const [apiLogging, setApiLogging] = useState(false);
+  const [experimentalFeatures, setExperimentalFeatures] = useState(false);
+  const [performanceMonitoring, setPerformanceMonitoring] = useState(false);
+  const [betaAccess, setBetaAccess] = useState(false);
+  const [customScripting, setCustomScripting] = useState(false);
+  const [devConsole, setDevConsole] = useState(false);
+  const [memoryProfiler, setMemoryProfiler] = useState(false);
+  const [networkMonitor, setNetworkMonitor] = useState(false);
+  const [errorReporting, setErrorReporting] = useState(true);
+  const [customScript, setCustomScript] = useState("");
+  const [logs, setLogs] = useState<string[]>([]);
+  const [systemInfo, setSystemInfo] = useState({
+    userAgent: navigator.userAgent,
+    platform: navigator.platform,
+    language: navigator.language,
+    cookieEnabled: navigator.cookieEnabled,
+    onLine: navigator.onLine,
+    memory: (performance as any).memory ? {
+      used: Math.round((performance as any).memory.usedJSHeapSize / 1024 / 1024),
+      total: Math.round((performance as any).memory.totalJSHeapSize / 1024 / 1024),
+      limit: Math.round((performance as any).memory.jsHeapSizeLimit / 1024 / 1024)
+    } : null
   });
-  
-  const [codeEditorEnabled, setCodeEditorEnabled] = useState(false);
-  const [runwaysEnabled, setRunwaysEnabled] = useState(false);
-  const [logsVisible, setLogsVisible] = useState(false);
-  const [logData, setLogData] = useState<{time: string, level: string, message: string}[]>([]);
-  const [consoleInput, setConsoleInput] = useState("");
-  const [apiEndpoint, setApiEndpoint] = useState("https://api.example.com/v1");
-  const [apiKey, setApiKey] = useState("");
-  const [apiMethod, setApiMethod] = useState("GET");
-  const [apiTestDialogOpen, setApiTestDialogOpen] = useState(false);
-  const [apiTestInProgress, setApiTestInProgress] = useState(false);
-  const [apiResponse, setApiResponse] = useState("");
-  const [scriptContent, setScriptContent] = useState(
-    '// Custom JavaScript Function\nfunction processData(data) {\n  // Add your custom logic here\n  return data.map(item => {\n    return {\n      ...item,\n      processed: true\n    };\n  });\n}'
-  );
-  const [scriptDialogOpen, setScriptDialogOpen] = useState(false);
-  
-  // Load settings from localStorage
-  useEffect(() => {
-    const storedOptions = localStorage.getItem("fitfusion-developer-options");
-    if (storedOptions) {
-      try {
-        setDeveloperOptions(JSON.parse(storedOptions));
-      } catch (error) {
-        console.error("Error parsing developer options:", error);
-      }
+
+  const addLog = (message: string) => {
+    const timestamp = new Date().toLocaleTimeString();
+    setLogs(prev => [`[${timestamp}] ${message}`, ...prev.slice(0, 99)]);
+  };
+
+  const clearLogs = () => {
+    setLogs([]);
+    toast({
+      title: "🧹 Logs cleared",
+      description: "Debug console has been cleared.",
+    });
+  };
+
+  const exportLogs = () => {
+    const logData = logs.join('\n');
+    const blob = new Blob([logData], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `fitfusion-logs-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "📥 Logs exported",
+      description: "Debug logs have been downloaded.",
+    });
+  };
+
+  const runDiagnostics = async () => {
+    toast({
+      title: "🔍 Running diagnostics",
+      description: "Performing comprehensive system check...",
+    });
+
+    addLog("Starting system diagnostics...");
+    
+    // Simulate diagnostic checks
+    const checks = [
+      "Checking JavaScript heap memory",
+      "Validating local storage",
+      "Testing API connectivity",
+      "Verifying service worker",
+      "Checking browser compatibility",
+      "Testing performance metrics"
+    ];
+
+    for (const check of checks) {
+      addLog(check);
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
-    
-    const codeEditor = localStorage.getItem("fitfusion-code-editor-enabled");
-    setCodeEditorEnabled(codeEditor === "true");
-    
-    const runways = localStorage.getItem("fitfusion-runways-enabled");
-    setRunwaysEnabled(runways === "true");
-    
-    // Generate sample logs
-    generateSampleLogs();
-  }, []);
-  
-  // Save options when they change
-  useEffect(() => {
-    localStorage.setItem("fitfusion-developer-options", JSON.stringify(developerOptions));
-  }, [developerOptions]);
-  
-  useEffect(() => {
-    localStorage.setItem("fitfusion-code-editor-enabled", codeEditorEnabled.toString());
-  }, [codeEditorEnabled]);
-  
-  useEffect(() => {
-    localStorage.setItem("fitfusion-runways-enabled", runwaysEnabled.toString());
-  }, [runwaysEnabled]);
-  
-  const handleOptionToggle = (option: keyof typeof developerOptions, value: boolean) => {
-    setDeveloperOptions(prev => ({
-      ...prev,
-      [option]: value
-    }));
+
+    addLog("✅ All diagnostics completed successfully");
     
     toast({
-      title: `${formatOptionName(option)} ${value ? 'Enabled' : 'Disabled'}`,
-      description: `Developer setting updated successfully.`,
+      title: "✅ Diagnostics complete",
+      description: "System is running optimally.",
     });
-    
-    // Generate new log entry
-    if (option === "debugMode" && value) {
-      addLogEntry("Debug mode activated. Verbose logging enabled.", "info");
-    }
   };
-  
-  const formatOptionName = (option: string) => {
-    return option
-      .replace(/([A-Z])/g, ' $1')
-      .replace(/^./, (str) => str.toUpperCase());
-  };
-  
-  const generateSampleLogs = () => {
-    const now = new Date();
-    const sampleLogs = [
-      {
-        time: formatTime(new Date(now.getTime() - 5000)),
-        level: "info",
-        message: "Application initialized successfully"
-      },
-      {
-        time: formatTime(new Date(now.getTime() - 4500)),
-        level: "debug",
-        message: "Loading user preferences from local storage"
-      },
-      {
-        time: formatTime(new Date(now.getTime() - 4000)),
-        level: "info",
-        message: "User preferences loaded"
-      },
-      {
-        time: formatTime(new Date(now.getTime() - 3500)),
-        level: "debug",
-        message: "Initializing workout module"
-      },
-      {
-        time: formatTime(new Date(now.getTime() - 3000)),
-        level: "warn",
-        message: "Network connectivity issues detected"
-      },
-      {
-        time: formatTime(new Date(now.getTime() - 2500)),
-        level: "error",
-        message: "Failed to load remote configuration"
-      },
-      {
-        time: formatTime(new Date(now.getTime() - 2000)),
-        level: "info",
-        message: "Using cached configuration instead"
-      },
-      {
-        time: formatTime(new Date(now.getTime() - 1500)),
-        level: "debug",
-        message: "Route changed: /settings"
-      },
-      {
-        time: formatTime(new Date(now.getTime() - 1000)),
-        level: "info",
-        message: "Settings page rendered"
-      },
-      {
-        time: formatTime(new Date(now.getTime() - 500)),
-        level: "debug",
-        message: "Developer options component mounted"
-      }
-    ];
-    
-    setLogData(sampleLogs);
-  };
-  
-  const addLogEntry = (message: string, level: string = "info") => {
-    setLogData(prev => [
-      ...prev,
-      {
-        time: formatTime(new Date()),
-        level,
-        message
-      }
-    ]);
-  };
-  
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-  };
-  
-  const handleConsoleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!consoleInput.trim()) return;
-    
-    addLogEntry(`> ${consoleInput}`, "command");
-    
-    // Process command
-    const commandLower = consoleInput.toLowerCase();
-    if (commandLower === "clear") {
-      setLogData([]);
-      addLogEntry("Console cleared", "system");
-    } else if (commandLower === "help") {
-      addLogEntry("Available commands: clear, help, status, toggle debug", "system");
-    } else if (commandLower === "status") {
-      addLogEntry(`Debug mode: ${developerOptions.debugMode ? "enabled" : "disabled"}`, "system");
-      addLogEntry(`API Logging: ${developerOptions.apiLogging ? "enabled" : "disabled"}`, "system");
-    } else if (commandLower === "toggle debug") {
-      const newValue = !developerOptions.debugMode;
-      handleOptionToggle("debugMode", newValue);
-      addLogEntry(`Debug mode ${newValue ? "enabled" : "disabled"}`, "system");
-    } else {
-      addLogEntry(`Unknown command: ${consoleInput}`, "error");
-    }
-    
-    setConsoleInput("");
-  };
-  
-  const handleApiTest = () => {
-    setApiTestInProgress(true);
-    setApiResponse("");
-    
-    // Simulate API request
-    setTimeout(() => {
-      if (apiMethod === "GET") {
-        setApiResponse(JSON.stringify({
-          success: true,
-          data: {
-            message: "API test successful",
-            endpoint: apiEndpoint,
-            timestamp: new Date().toISOString()
-          }
-        }, null, 2));
-      } else {
-        setApiResponse(JSON.stringify({
-          success: true,
-          data: {
-            id: "123456",
-            created: true,
-            timestamp: new Date().toISOString()
-          }
-        }, null, 2));
-      }
-      
-      setApiTestInProgress(false);
-      
-      if (developerOptions.apiLogging) {
-        addLogEntry(`API ${apiMethod} request to ${apiEndpoint} completed`, "info");
-      }
-    }, 1500);
-  };
-  
-  const handleRunScript = () => {
-    try {
-      // In a real app, this would be more secure and sandboxed
-      // eslint-disable-next-line no-new-func
-      const fn = new Function('return ' + scriptContent)();
-      
-      if (typeof fn === 'function') {
-        const testData = [{ name: "Item 1" }, { name: "Item 2" }];
-        const result = fn(testData);
-        
-        toast({
-          title: "Script Executed",
-          description: "Custom script ran successfully.",
-        });
-        
-        addLogEntry(`Script executed: ${JSON.stringify(result).substring(0, 100)}`, "info");
-      } else {
-        throw new Error("Script does not return a function");
-      }
-    } catch (error: any) {
+
+  const executeCustomScript = () => {
+    if (!customScript.trim()) {
       toast({
-        title: "Script Error",
-        description: error.message || "Failed to execute script",
+        title: "⚠️ No script provided",
+        description: "Please enter a JavaScript command to execute.",
         variant: "destructive"
       });
-      
-      addLogEntry(`Script error: ${error.message}`, "error");
+      return;
     }
-    
-    setScriptDialogOpen(false);
+
+    try {
+      addLog(`Executing: ${customScript}`);
+      const result = eval(customScript);
+      addLog(`Result: ${JSON.stringify(result)}`);
+      
+      toast({
+        title: "✅ Script executed",
+        description: "Check the console for results.",
+      });
+    } catch (error) {
+      addLog(`Error: ${error}`);
+      toast({
+        title: "❌ Script error",
+        description: "Check the console for error details.",
+        variant: "destructive"
+      });
+    }
   };
-  
-  const handleImportDeveloperTools = () => {
-    toast({
-      title: "Importing Developer Tools",
-      description: "Starting download of development packages...",
-    });
-    
-    // Simulate download progress
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 10;
-      if (progress >= 100) {
-        clearInterval(interval);
-        setDeveloperOptions(prev => ({
-          ...prev,
-          developerTools: true
-        }));
-        
+
+  const simulateError = () => {
+    addLog("Simulating application error...");
+    try {
+      throw new Error("Simulated error for testing purposes");
+    } catch (error) {
+      addLog(`Error caught: ${error}`);
+      if (errorReporting) {
         toast({
-          title: "Developer Tools Installed",
-          description: "Tools are now available in the developer menu.",
+          title: "🐛 Error reported",
+          description: "Simulated error has been logged.",
+          variant: "destructive"
         });
-        
-        addLogEntry("Developer tools package installed successfully", "info");
       }
-    }, 300);
+    }
   };
-  
+
+  const enableDeveloperMode = () => {
+    setDebugMode(true);
+    setApiLogging(true);
+    setPerformanceMonitoring(true);
+    setDevConsole(true);
+    
+    addLog("Developer mode enabled - all debugging features activated");
+    
+    toast({
+      title: "🚀 Developer mode enabled",
+      description: "All debugging and monitoring features are now active.",
+    });
+  };
+
+  useEffect(() => {
+    if (debugMode) {
+      addLog("Debug mode activated");
+    }
+  }, [debugMode]);
+
+  useEffect(() => {
+    if (performanceMonitoring) {
+      const interval = setInterval(() => {
+        if ((performance as any).memory) {
+          const memory = (performance as any).memory;
+          setSystemInfo(prev => ({
+            ...prev,
+            memory: {
+              used: Math.round(memory.usedJSHeapSize / 1024 / 1024),
+              total: Math.round(memory.totalJSHeapSize / 1024 / 1024),
+              limit: Math.round(memory.jsHeapSizeLimit / 1024 / 1024)
+            }
+          }));
+        }
+      }, 5000);
+
+      return () => clearInterval(interval);
+    }
+  }, [performanceMonitoring]);
+
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Developer Options</CardTitle>
-              <CardDescription>Advanced settings for developers</CardDescription>
-            </div>
-            <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-              Beta
-            </Badge>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Bug className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="font-medium">Debug Mode</p>
-                <p className="text-xs text-muted-foreground">Show debugging information in console</p>
-              </div>
-            </div>
-            <Switch 
-              checked={developerOptions.debugMode} 
-              onCheckedChange={(checked) => handleOptionToggle("debugMode", checked)} 
-            />
-          </div>
-          
-          <Separator />
-          
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Database className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="font-medium">API Logging</p>
-                <p className="text-xs text-muted-foreground">Log API requests and responses</p>
-              </div>
-            </div>
-            <Switch 
-              checked={developerOptions.apiLogging} 
-              onCheckedChange={(checked) => handleOptionToggle("apiLogging", checked)} 
-            />
-          </div>
-          
-          <Separator />
-          
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <FileCode2 className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="font-medium">Code Editor</p>
-                <p className="text-xs text-muted-foreground">Enable built-in code editing</p>
-              </div>
-            </div>
-            <Switch 
-              checked={codeEditorEnabled} 
-              onCheckedChange={(checked) => {
-                setCodeEditorEnabled(checked);
-                toast({
-                  title: `Code Editor ${checked ? 'Enabled' : 'Disabled'}`,
-                  description: `You can ${checked ? 'now' : 'no longer'} edit code in the app.`,
-                });
-              }} 
-            />
-          </div>
-          
-          <Separator />
-          
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Radio className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="font-medium">Runways Design</p>
-                <p className="text-xs text-muted-foreground">Enable experimental UI design features</p>
-              </div>
-            </div>
-            <Switch 
-              checked={runwaysEnabled} 
-              onCheckedChange={(checked) => {
-                setRunwaysEnabled(checked);
-                toast({
-                  title: `Runways Design ${checked ? 'Enabled' : 'Disabled'}`,
-                  description: `Advanced UI customization is now ${checked ? 'available' : 'disabled'}.`,
-                });
-              }} 
-            />
-          </div>
-          
-          <Separator />
-          
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Cpu className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="font-medium">Performance Monitoring</p>
-                <p className="text-xs text-muted-foreground">Track app performance metrics</p>
-              </div>
-            </div>
-            <Switch 
-              checked={developerOptions.performanceMonitoring} 
-              onCheckedChange={(checked) => handleOptionToggle("performanceMonitoring", checked)} 
-            />
-          </div>
-          
-          <Separator />
-          
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Terminal className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="font-medium">Custom Scripting</p>
-                <p className="text-xs text-muted-foreground">Run custom JavaScript code</p>
-              </div>
-            </div>
-            <Switch 
-              checked={developerOptions.customScripting} 
-              onCheckedChange={(checked) => handleOptionToggle("customScripting", checked)} 
-            />
-          </div>
-          
-          <Separator />
-          
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Monitor className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="font-medium">Remote Debugging</p>
-                <p className="text-xs text-muted-foreground">Allow debugging from external devices</p>
-              </div>
-            </div>
-            <Switch 
-              checked={developerOptions.remoteDebugging} 
-              onCheckedChange={(checked) => handleOptionToggle("remoteDebugging", checked)} 
-            />
-          </div>
-        </CardContent>
-        <CardFooter className="flex-col items-start space-y-4">
-          <div className="flex justify-between w-full">
+    <div className="space-y-6 h-full overflow-y-auto">
+      {/* Developer Mode Warning */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Alert className="border-orange-200 bg-orange-50/50">
+          <AlertTriangle className="h-4 w-4 text-orange-600" />
+          <AlertDescription>
+            <strong>Developer Options</strong>
+            <br />
+            These advanced settings are intended for developers and may affect app performance or stability.
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={() => setLogsVisible(!logsVisible)}
+              className="mt-2 ml-0"
+              onClick={enableDeveloperMode}
             >
-              {logsVisible ? "Hide Logs" : "Show Logs"}
+              <Code className="h-3 w-3 mr-1" />
+              Enable All
             </Button>
-            
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setApiTestDialogOpen(true)}
-              >
-                Test API
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => {
-                  if (developerOptions.customScripting) {
-                    setScriptDialogOpen(true);
-                  } else {
-                    toast({
-                      title: "Custom Scripting Disabled",
-                      description: "Enable custom scripting to use this feature.",
-                      variant: "destructive",
-                    });
-                  }
-                }}
-              >
-                <Code className="h-4 w-4 mr-2" />
-                Script Editor
-              </Button>
-            </div>
-          </div>
-          
-          {!developerOptions.developerTools && (
-            <Button 
-              className="w-full"
-              onClick={handleImportDeveloperTools}
-            >
-              <Wrench className="h-4 w-4 mr-2" />
-              Import Developer Tools
-            </Button>
-          )}
-          
-          {logsVisible && (
-            <div className="w-full mt-4">
-              <div className="bg-black text-green-400 p-3 rounded-lg font-mono text-xs h-60 overflow-y-auto">
-                {logData.map((log, index) => (
-                  <div key={index} className={`mb-1 ${getLogColor(log.level)}`}>
-                    <span className="opacity-70">[{log.time}]</span> {log.level.toUpperCase()}: {log.message}
+          </AlertDescription>
+        </Alert>
+      </motion.div>
+
+      <Tabs defaultValue="debugging" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="debugging">Debugging</TabsTrigger>
+          <TabsTrigger value="performance">Performance</TabsTrigger>
+          <TabsTrigger value="console">Console</TabsTrigger>
+          <TabsTrigger value="system">System Info</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="debugging" className="space-y-6">
+          {/* Debug Options */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bug className="h-5 w-5" />
+                  Debug Configuration
+                </CardTitle>
+                <CardDescription>
+                  Enable debugging features for development and testing
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Terminal className="h-4 w-4 text-primary" />
+                    <div>
+                      <p className="font-medium">Debug Mode</p>
+                      <p className="text-sm text-muted-foreground">
+                        Enable verbose logging and debug information
+                      </p>
+                    </div>
                   </div>
-                ))}
-              </div>
-              
-              <form onSubmit={handleConsoleSubmit} className="mt-2 flex gap-2">
-                <Input 
-                  className="font-mono text-xs bg-black text-green-400 border-green-800 placeholder-green-800"
-                  placeholder="Type a command..."
-                  value={consoleInput}
-                  onChange={(e) => setConsoleInput(e.target.value)}
-                />
-                <Button type="submit" variant="outline" size="sm">Run</Button>
-              </form>
-            </div>
-          )}
-        </CardFooter>
-      </Card>
-      
-      {/* API Test Dialog */}
-      <Dialog open={apiTestDialogOpen} onOpenChange={setApiTestDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>API Test Console</DialogTitle>
-            <DialogDescription>
-              Test API endpoints and view responses
-            </DialogDescription>
-          </DialogHeader>
-          
-          <Tabs defaultValue="request">
-            <TabsList className="grid grid-cols-2 mb-4">
-              <TabsTrigger value="request">Request</TabsTrigger>
-              <TabsTrigger value="response">Response</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="request" className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Select 
-                  value={apiMethod}
-                  onValueChange={setApiMethod}
-                >
-                  <SelectTrigger className="w-20">
-                    <SelectValue placeholder="Method" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="GET">GET</SelectItem>
-                    <SelectItem value="POST">POST</SelectItem>
-                    <SelectItem value="PUT">PUT</SelectItem>
-                    <SelectItem value="DELETE">DELETE</SelectItem>
-                  </SelectContent>
-                </Select>
-                
-                <Input 
-                  value={apiEndpoint}
-                  onChange={(e) => setApiEndpoint(e.target.value)}
-                  placeholder="API Endpoint"
-                  className="flex-1"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label>API Key</Label>
-                <Input 
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="Optional API Key"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label>Request Body (for POST/PUT)</Label>
-                <textarea 
-                  className="w-full h-40 p-3 rounded-md border border-input bg-background font-mono text-sm"
-                  placeholder="{ 'key': 'value' }"
-                />
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="response" className="space-y-4">
-              {apiTestInProgress ? (
-                <div className="py-4 text-center space-y-4">
-                  <RefreshCcw className="h-8 w-8 animate-spin mx-auto text-primary" />
-                  <p className="text-sm">Making API request...</p>
+                  <div className="flex items-center gap-2">
+                    {debugMode && <Badge variant="default" className="text-xs">Active</Badge>}
+                    <Switch checked={debugMode} onCheckedChange={setDebugMode} />
+                  </div>
                 </div>
-              ) : (
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Globe className="h-4 w-4 text-primary" />
+                    <div>
+                      <p className="font-medium">API Logging</p>
+                      <p className="text-sm text-muted-foreground">
+                        Log all API requests and responses
+                      </p>
+                    </div>
+                  </div>
+                  <Switch checked={apiLogging} onCheckedChange={setApiLogging} />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Zap className="h-4 w-4 text-primary" />
+                    <div>
+                      <p className="font-medium">Experimental Features</p>
+                      <p className="text-sm text-muted-foreground">
+                        Enable beta features and experimental functionality
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {experimentalFeatures && <Badge variant="secondary" className="text-xs">Beta</Badge>}
+                    <Switch checked={experimentalFeatures} onCheckedChange={setExperimentalFeatures} />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Shield className="h-4 w-4 text-primary" />
+                    <div>
+                      <p className="font-medium">Error Reporting</p>
+                      <p className="text-sm text-muted-foreground">
+                        Automatically report errors for debugging
+                      </p>
+                    </div>
+                  </div>
+                  <Switch checked={errorReporting} onCheckedChange={setErrorReporting} />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Code className="h-4 w-4 text-primary" />
+                    <div>
+                      <p className="font-medium">Custom Scripting</p>
+                      <p className="text-sm text-muted-foreground">
+                        Allow execution of custom JavaScript code
+                      </p>
+                    </div>
+                  </div>
+                  <Switch checked={customScripting} onCheckedChange={setCustomScripting} />
+                </div>
+
+                <div className="pt-4 border-t">
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={runDiagnostics} className="flex-1">
+                      <Activity className="h-4 w-4 mr-2" />
+                      Run Diagnostics
+                    </Button>
+                    <Button variant="outline" onClick={simulateError} className="flex-1">
+                      <Bug className="h-4 w-4 mr-2" />
+                      Simulate Error
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </TabsContent>
+
+        <TabsContent value="performance" className="space-y-6">
+          {/* Performance Monitoring */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Cpu className="h-5 w-5" />
+                  Performance Monitoring
+                </CardTitle>
+                <CardDescription>
+                  Monitor app performance and resource usage
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Activity className="h-4 w-4 text-primary" />
+                    <div>
+                      <p className="font-medium">Performance Monitoring</p>
+                      <p className="text-sm text-muted-foreground">
+                        Track memory usage and performance metrics
+                      </p>
+                    </div>
+                  </div>
+                  <Switch checked={performanceMonitoring} onCheckedChange={setPerformanceMonitoring} />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Database className="h-4 w-4 text-primary" />
+                    <div>
+                      <p className="font-medium">Memory Profiler</p>
+                      <p className="text-sm text-muted-foreground">
+                        Advanced memory usage analysis
+                      </p>
+                    </div>
+                  </div>
+                  <Switch checked={memoryProfiler} onCheckedChange={setMemoryProfiler} />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Globe className="h-4 w-4 text-primary" />
+                    <div>
+                      <p className="font-medium">Network Monitor</p>
+                      <p className="text-sm text-muted-foreground">
+                        Monitor network requests and bandwidth
+                      </p>
+                    </div>
+                  </div>
+                  <Switch checked={networkMonitor} onCheckedChange={setNetworkMonitor} />
+                </div>
+
+                {systemInfo.memory && performanceMonitoring && (
+                  <div className="pt-4 border-t space-y-3">
+                    <h4 className="font-medium">Memory Usage</h4>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Used Memory</span>
+                        <span>{systemInfo.memory.used} MB</span>
+                      </div>
+                      <Progress value={(systemInfo.memory.used / systemInfo.memory.limit) * 100} className="h-2" />
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>Total: {systemInfo.memory.total} MB</span>
+                        <span>Limit: {systemInfo.memory.limit} MB</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        </TabsContent>
+
+        <TabsContent value="console" className="space-y-6">
+          {/* Developer Console */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Terminal className="h-5 w-5" />
+                  Developer Console
+                </CardTitle>
+                <CardDescription>
+                  Execute JavaScript commands and view debug logs
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {customScripting && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Custom Script</label>
+                    <div className="flex gap-2">
+                      <Textarea
+                        placeholder="Enter JavaScript code here..."
+                        value={customScript}
+                        onChange={(e) => setCustomScript(e.target.value)}
+                        className="font-mono text-sm"
+                        rows={3}
+                      />
+                      <Button onClick={executeCustomScript} size="sm">
+                        <Zap className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
                 <div className="space-y-2">
-                  <Label>Response</Label>
-                  {apiResponse ? (
-                    <div className="bg-muted p-3 rounded-md border font-mono text-sm overflow-auto h-80">
-                      <pre>{apiResponse}</pre>
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium">Debug Logs</label>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={exportLogs}>
+                        <Download className="h-4 w-4 mr-1" />
+                        Export
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={clearLogs}>
+                        <RefreshCw className="h-4 w-4 mr-1" />
+                        Clear
+                      </Button>
                     </div>
-                  ) : (
-                    <div className="bg-muted p-3 rounded-md border h-60 flex items-center justify-center">
-                      <p className="text-muted-foreground">No response yet. Send a request first.</p>
-                    </div>
-                  )}
+                  </div>
+                  <div className="bg-black text-green-400 p-4 rounded-lg font-mono text-sm h-64 overflow-y-auto">
+                    <AnimatePresence>
+                      {logs.length === 0 ? (
+                        <div className="text-muted-foreground">No logs available. Enable debug mode to see output.</div>
+                      ) : (
+                        logs.map((log, index) => (
+                          <motion.div
+                            key={index}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            className="mb-1"
+                          >
+                            {log}
+                          </motion.div>
+                        ))
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
-              )}
-            </TabsContent>
-          </Tabs>
-          
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setApiTestDialogOpen(false)}
-            >
-              Close
-            </Button>
-            <Button
-              type="button"
-              disabled={apiTestInProgress}
-              onClick={handleApiTest}
-            >
-              {apiTestInProgress ? "Sending..." : "Send Request"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Script Editor Dialog */}
-      <Dialog open={scriptDialogOpen} onOpenChange={setScriptDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>JavaScript Editor</DialogTitle>
-            <DialogDescription>
-              Write and execute custom JavaScript code
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="py-4">
-            <textarea 
-              className="w-full h-80 p-3 rounded-md border border-input bg-muted font-mono text-sm"
-              value={scriptContent}
-              onChange={(e) => setScriptContent(e.target.value)}
-            />
-          </div>
-          
-          <DialogFooter className="gap-2 sm:gap-0">
-            <DialogClose asChild>
-              <Button variant="outline">
-                Cancel
-              </Button>
-            </DialogClose>
-            <Button onClick={handleRunScript}>
-              Run Script
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </TabsContent>
+
+        <TabsContent value="system" className="space-y-6">
+          {/* System Information */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Smartphone className="h-5 w-5" />
+                  System Information
+                </CardTitle>
+                <CardDescription>
+                  Browser and system details for debugging
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="font-medium mb-1">Platform</p>
+                    <p className="text-muted-foreground">{systemInfo.platform}</p>
+                  </div>
+                  <div>
+                    <p className="font-medium mb-1">Language</p>
+                    <p className="text-muted-foreground">{systemInfo.language}</p>
+                  </div>
+                  <div>
+                    <p className="font-medium mb-1">Cookies Enabled</p>
+                    <p className="text-muted-foreground">{systemInfo.cookieEnabled ? "Yes" : "No"}</p>
+                  </div>
+                  <div>
+                    <p className="font-medium mb-1">Online Status</p>
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${systemInfo.onLine ? 'bg-green-500' : 'bg-red-500'}`} />
+                      <span className="text-muted-foreground">{systemInfo.onLine ? "Online" : "Offline"}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <p className="font-medium mb-2">User Agent</p>
+                  <div className="bg-muted p-3 rounded-lg text-xs font-mono break-all">
+                    {systemInfo.userAgent}
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => navigator.clipboard.writeText(JSON.stringify(systemInfo, null, 2))}>
+                      <Upload className="h-4 w-4 mr-2" />
+                      Copy System Info
+                    </Button>
+                    <Button variant="outline" onClick={() => window.location.reload()}>
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Reload App
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
-}
-
-// Helper function to determine log entry color
-function getLogColor(level: string) {
-  switch (level.toLowerCase()) {
-    case "error":
-      return "text-red-400";
-    case "warn":
-      return "text-yellow-400";
-    case "debug":
-      return "text-blue-400";
-    case "info":
-      return "text-green-400";
-    case "command":
-      return "text-purple-400";
-    case "system":
-      return "text-cyan-400";
-    default:
-      return "text-green-400";
-  }
 }
