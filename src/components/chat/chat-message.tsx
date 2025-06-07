@@ -1,163 +1,281 @@
 
-import React from "react";
-import { ChatMessage as ChatMessageType, ChatAttachment } from "@/types/chat";
+import React, { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { format } from "date-fns";
-import { Check, CheckCheck, Download, File, FileAudio, FileText, FileVideo, Image } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { ChatMessage, ChatAttachment } from "@/types/chat";
+import { formatDistanceToNow } from "date-fns";
+import { Download, Eye, Play, Pause, Volume2, FileText, Image as ImageIcon, Video, Music } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/use-toast";
 
 interface ChatMessageProps {
-  message: ChatMessageType;
+  message: ChatMessage;
   isCurrentUser: boolean;
   senderAvatar?: string;
   senderName: string;
 }
 
-export function ChatMessage({
-  message,
-  isCurrentUser,
-  senderAvatar,
-  senderName
-}: ChatMessageProps) {
-  const handleDownload = (attachment: ChatAttachment) => {
-    const link = document.createElement("a");
-    link.href = attachment.url;
-    link.download = attachment.name;
-    link.target = "_blank";
-    link.click();
+export function ChatMessage({ message, isCurrentUser, senderAvatar, senderName }: ChatMessageProps) {
+  const [isMediaPreviewOpen, setIsMediaPreviewOpen] = useState(false);
+  const [selectedMedia, setSelectedMedia] = useState<ChatAttachment | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const { toast } = useToast();
+
+  const formatFileSize = (size: number) => {
+    if (size < 1024) return `${size} B`;
+    if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
+    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
   };
-  
-  const renderAttachmentPreview = (attachment: ChatAttachment) => {
-    switch (attachment.type) {
-      case 'image':
-        return (
-          <div className="relative group overflow-hidden rounded-md">
-            <img 
-              src={attachment.url} 
-              alt={attachment.name} 
-              className="max-h-48 object-cover rounded-md"
+
+  const handleDownload = async (attachment: ChatAttachment) => {
+    try {
+      if (attachment.url.startsWith('blob:') || attachment.url.startsWith('data:')) {
+        // Handle blob URLs or data URLs
+        const link = document.createElement('a');
+        link.href = attachment.url;
+        link.download = attachment.name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        // Handle regular URLs
+        const response = await fetch(attachment.url);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = attachment.name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }
+      
+      toast({
+        title: "Download started",
+        description: `${attachment.name} is being downloaded`
+      });
+    } catch (error) {
+      toast({
+        title: "Download failed",
+        description: "Unable to download file",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleMediaPreview = (attachment: ChatAttachment) => {
+    setSelectedMedia(attachment);
+    setIsMediaPreviewOpen(true);
+  };
+
+  const handlePlayPause = () => {
+    setIsPlaying(!isPlaying);
+    // In a real app, you would control actual audio/video playback here
+  };
+
+  const getAttachmentIcon = (type: string) => {
+    switch (type) {
+      case 'image': return <ImageIcon className="h-4 w-4" />;
+      case 'video': return <Video className="h-4 w-4" />;
+      case 'audio': return <Music className="h-4 w-4" />;
+      default: return <FileText className="h-4 w-4" />;
+    }
+  };
+
+  const renderAttachment = (attachment: ChatAttachment) => {
+    const isImage = attachment.type === 'image';
+    const isVideo = attachment.type === 'video';
+    const isAudio = attachment.type === 'audio';
+
+    return (
+      <div key={attachment.id} className="mt-2">
+        {isImage && (
+          <div className="relative max-w-sm">
+            <img
+              src={attachment.url}
+              alt={attachment.name}
+              className="rounded-lg max-h-48 w-auto cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={() => handleMediaPreview(attachment)}
+              onError={(e) => {
+                console.error('Image failed to load:', attachment.url);
+                e.currentTarget.style.display = 'none';
+              }}
             />
-            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <Button 
-                variant="ghost" 
+            <Button
+              variant="secondary"
+              size="icon"
+              className="absolute top-2 right-2 h-8 w-8 opacity-80 hover:opacity-100"
+              onClick={() => handleMediaPreview(attachment)}
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+
+        {isVideo && (
+          <div className="relative max-w-sm bg-black rounded-lg overflow-hidden">
+            <video
+              src={attachment.url}
+              className="max-h-48 w-auto cursor-pointer"
+              onClick={() => handleMediaPreview(attachment)}
+              controls={false}
+              onError={(e) => {
+                console.error('Video failed to load:', attachment.url);
+              }}
+            />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Button
+                variant="secondary"
                 size="icon"
-                className="text-white"
-                onClick={() => handleDownload(attachment)}
+                className="h-12 w-12 rounded-full bg-black/50 hover:bg-black/70"
+                onClick={() => handleMediaPreview(attachment)}
               >
-                <Download className="h-4 w-4" />
+                <Play className="h-6 w-6 text-white" />
               </Button>
             </div>
           </div>
-        );
-      case 'video':
-        return (
-          <div className="relative group overflow-hidden rounded-md">
-            <video 
-              src={attachment.url}
-              className="max-h-48 max-w-full object-cover rounded-md"
-              controls
-            />
-          </div>
-        );
-      case 'audio':
-        return (
-          <div className="bg-accent/30 rounded-md p-2 flex items-center space-x-2">
-            <FileAudio className="h-8 w-8 text-primary" />
+        )}
+
+        {isAudio && (
+          <div className="flex items-center gap-3 bg-muted p-3 rounded-lg max-w-sm">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handlePlayPause}
+              className="h-10 w-10 rounded-full"
+            >
+              {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+            </Button>
             <div className="flex-1">
-              <p className="text-xs font-medium truncate">{attachment.name}</p>
-              <audio controls className="max-w-full h-8 mt-1">
-                <source src={attachment.url} />
-              </audio>
-            </div>
-          </div>
-        );
-      case 'document':
-        return (
-          <div className="bg-accent/30 rounded-md p-3 flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <FileText className="h-8 w-8 text-primary" />
-              <div>
-                <p className="text-sm font-medium truncate max-w-[160px]">{attachment.name}</p>
-                {attachment.size && (
-                  <p className="text-xs text-muted-foreground">
-                    {Math.round(attachment.size / 1024)} KB
-                  </p>
-                )}
+              <p className="text-sm font-medium">{attachment.name}</p>
+              <div className="h-1 bg-muted-foreground/20 rounded-full mt-1">
+                <div className="h-full w-1/3 bg-primary rounded-full"></div>
               </div>
             </div>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="icon"
               onClick={() => handleDownload(attachment)}
             >
               <Download className="h-4 w-4" />
             </Button>
           </div>
-        );
-    }
+        )}
+
+        {!isImage && !isVideo && !isAudio && (
+          <div className="flex items-center gap-3 bg-muted p-3 rounded-lg max-w-sm hover:bg-muted/80 transition-colors">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              {getAttachmentIcon(attachment.type)}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{attachment.name}</p>
+              <p className="text-xs text-muted-foreground">{formatFileSize(attachment.size)}</p>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleDownload(attachment)}
+              className="hover:bg-primary/10"
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
-    <div className={cn(
-      "flex mb-4 max-w-[85%]",
-      isCurrentUser ? "ml-auto" : "mr-auto"
-    )}>
-      {!isCurrentUser && (
-        <Avatar className="h-8 w-8 mr-2 mt-1">
-          <AvatarImage src={senderAvatar} alt={senderName} />
-          <AvatarFallback>
-            {senderName.substring(0, 2).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-      )}
-      
+    <>
       <div className={cn(
-        "flex flex-col",
-        isCurrentUser ? "items-end" : "items-start"
+        "flex gap-3 mb-4 animate-fade-in",
+        isCurrentUser ? "flex-row-reverse" : "flex-row"
       )}>
+        {!isCurrentUser && (
+          <Avatar className="h-8 w-8 flex-shrink-0">
+            <AvatarImage src={senderAvatar} alt={senderName} />
+            <AvatarFallback>{senderName.substring(0, 2).toUpperCase()}</AvatarFallback>
+          </Avatar>
+        )}
+        
         <div className={cn(
-          "rounded-lg p-3 max-w-prose break-words",
-          isCurrentUser 
-            ? "bg-primary text-primary-foreground rounded-tr-none" 
-            : "bg-muted rounded-tl-none"
+          "flex flex-col gap-1 max-w-[70%]",
+          isCurrentUser ? "items-end" : "items-start"
         )}>
-          {message.content && (
-            <p className="text-sm mb-1">{message.content}</p>
-          )}
-          
-          {message.attachments && message.attachments.length > 0 && (
-            <div className={cn(
-              "grid gap-2 mt-2",
-              message.attachments.length > 1 ? "grid-cols-2" : "grid-cols-1"
-            )}>
-              {message.attachments.map((attachment) => (
-                <div key={attachment.id}>
-                  {renderAttachmentPreview(attachment)}
-                </div>
-              ))}
-            </div>
+          {!isCurrentUser && (
+            <span className="text-xs text-muted-foreground font-medium px-1">
+              {senderName}
+            </span>
           )}
           
           <div className={cn(
-            "flex items-center mt-1",
-            isCurrentUser ? "justify-end" : "justify-start"
+            "rounded-2xl px-4 py-2 break-words",
+            isCurrentUser 
+              ? "bg-primary text-primary-foreground" 
+              : "bg-muted"
           )}>
-            <span className="text-xs opacity-70">
-              {format(message.timestamp, "h:mm a")}
-            </span>
-            {isCurrentUser && (
-              <span className="ml-1">
-                {message.isRead ? (
-                  <CheckCheck className="h-3 w-3" />
-                ) : (
-                  <Check className="h-3 w-3" />
-                )}
-              </span>
+            {message.content && (
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                {message.content}
+              </p>
             )}
+            
+            {message.attachments && message.attachments.map(renderAttachment)}
           </div>
+          
+          <span className="text-xs text-muted-foreground px-1">
+            {formatDistanceToNow(message.timestamp, { addSuffix: true })}
+          </span>
         </div>
       </div>
-    </div>
+
+      {/* Media preview dialog */}
+      <Dialog open={isMediaPreviewOpen} onOpenChange={setIsMediaPreviewOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>{selectedMedia?.name}</DialogTitle>
+          </DialogHeader>
+          
+          <div className="flex items-center justify-center p-4">
+            {selectedMedia?.type === 'image' && (
+              <img
+                src={selectedMedia.url}
+                alt={selectedMedia.name}
+                className="max-w-full max-h-[70vh] object-contain rounded-lg"
+                onError={(e) => {
+                  console.error('Preview image failed to load:', selectedMedia.url);
+                }}
+              />
+            )}
+            
+            {selectedMedia?.type === 'video' && (
+              <video
+                src={selectedMedia.url}
+                controls
+                className="max-w-full max-h-[70vh] rounded-lg"
+                onError={(e) => {
+                  console.error('Preview video failed to load:', selectedMedia.url);
+                }}
+              />
+            )}
+          </div>
+          
+          <div className="flex justify-between items-center p-4 border-t">
+            <div className="text-sm text-muted-foreground">
+              {selectedMedia && formatFileSize(selectedMedia.size)}
+            </div>
+            <Button
+              onClick={() => selectedMedia && handleDownload(selectedMedia)}
+              className="flex items-center gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Download
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

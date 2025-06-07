@@ -1,8 +1,9 @@
+
 import React, { useEffect, useState } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { EnhancedChatAuth } from "@/components/chat/enhanced-chat-auth";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, KeyRound, ShieldCheck, Settings, Bell, Users, Menu, X } from "lucide-react";
+import { ArrowLeft, KeyRound, ShieldCheck, Settings, Bell, Users, Menu, X, Camera, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -32,10 +33,14 @@ const ChatPage = () => {
   const [activeTab, setActiveTab] = useState("chat");
   const [securityLevel, setSecurityLevel] = useState("high");
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [connectionStatus, setConnectionStatus] = useState<"connecting" | "connected" | "disconnected">("connecting");
+  const [onlineUsers, setOnlineUsers] = useState(3);
   
   useEffect(() => {
     const checkAuth = async () => {
       setIsLoading(true);
+      setConnectionStatus("connecting");
+      
       try {
         const { data: { session } } = await supabase.auth.getSession();
         setIsAuthenticated(!!session);
@@ -43,10 +48,19 @@ const ChatPage = () => {
         if (session) {
           console.log("User authenticated:", session.user?.email);
           loadUserPreferences(session.user?.id);
+          setConnectionStatus("connected");
+          
+          // Simulate real-time connection
+          setTimeout(() => {
+            setOnlineUsers(Math.floor(Math.random() * 10) + 1);
+          }, 1000);
+        } else {
+          setConnectionStatus("disconnected");
         }
       } catch (error) {
         console.error("Auth check error:", error);
         setAuthError("Failed to check authentication status");
+        setConnectionStatus("disconnected");
       } finally {
         setIsLoading(false);
       }
@@ -60,14 +74,16 @@ const ChatPage = () => {
       setAuthError(null);
       
       if (event === 'SIGNED_OUT') {
+        setConnectionStatus("disconnected");
         toast({
           title: "Signed out",
           description: "You've been signed out of FitFusion Chat."
         });
       } else if (event === 'SIGNED_IN') {
+        setConnectionStatus("connected");
         toast({
           title: "Welcome back!",
-          description: "You're now signed in to FitFusion Chat."
+          description: "You're now connected to FitFusion Chat."
         });
       }
     });
@@ -80,29 +96,38 @@ const ChatPage = () => {
   const loadUserPreferences = (userId?: string) => {
     if (!userId) return;
     
-    const preferences = localStorage.getItem(`chat_preferences_${userId}`);
-    if (preferences) {
-      const parsed = JSON.parse(preferences);
-      setSecurityLevel(parsed.securityLevel || "high");
-      setNotificationsEnabled(parsed.notificationsEnabled ?? true);
+    try {
+      const preferences = localStorage.getItem(`chat_preferences_${userId}`);
+      if (preferences) {
+        const parsed = JSON.parse(preferences);
+        setSecurityLevel(parsed.securityLevel || "high");
+        setNotificationsEnabled(parsed.notificationsEnabled ?? true);
+      }
+    } catch (error) {
+      console.error("Failed to load user preferences:", error);
     }
   };
 
   const saveUserPreferences = (userId?: string) => {
     if (!userId) return;
     
-    const preferences = {
-      securityLevel,
-      notificationsEnabled,
-      lastUpdated: new Date().toISOString()
-    };
-    
-    localStorage.setItem(`chat_preferences_${userId}`, JSON.stringify(preferences));
+    try {
+      const preferences = {
+        securityLevel,
+        notificationsEnabled,
+        lastUpdated: new Date().toISOString()
+      };
+      
+      localStorage.setItem(`chat_preferences_${userId}`, JSON.stringify(preferences));
+    } catch (error) {
+      console.error("Failed to save user preferences:", error);
+    }
   };
   
   const handleAuthSuccess = () => {
     setIsAuthenticated(true);
     setAuthError(null);
+    setConnectionStatus("connected");
     toast({
       title: "Authentication successful",
       description: "Welcome to FitFusion Chat!"
@@ -112,6 +137,7 @@ const ChatPage = () => {
   const handleAuthError = (error: string) => {
     setAuthError(error);
     setIsAuthenticated(false);
+    setConnectionStatus("disconnected");
   };
   
   const handleLogout = async () => {
@@ -123,6 +149,7 @@ const ChatPage = () => {
       
       await supabase.auth.signOut();
       setIsAuthenticated(false);
+      setConnectionStatus("disconnected");
       toast({
         title: "Logged out",
         description: "You've been logged out of FitFusion Chat."
@@ -144,11 +171,20 @@ const ChatPage = () => {
       default: return "bg-green-600";
     }
   };
+
+  const getConnectionStatusColor = () => {
+    switch (connectionStatus) {
+      case "connected": return "bg-green-500";
+      case "connecting": return "bg-yellow-500";
+      case "disconnected": return "bg-red-500";
+      default: return "bg-gray-500";
+    }
+  };
   
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <LoadingSpinner size="lg" text="Loading FitFusion Chat..." />
+        <LoadingSpinner size="lg" text="Connecting to FitFusion Chat..." />
       </div>
     );
   }
@@ -177,22 +213,25 @@ const ChatPage = () => {
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>
-                <h1 className="text-xl md:text-2xl font-bold text-white">FitFusion Chat</h1>
-                <p className="text-white/90 text-xs md:text-sm">Secure fitness community</p>
+                <h1 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
+                  <MessageCircle className="h-6 w-6" />
+                  FitFusion Chat
+                </h1>
+                <p className="text-white/90 text-xs md:text-sm">Secure fitness community • v5.0.4</p>
               </div>
             </div>
             
             <div className="flex items-center gap-2">
               {!isMobile && (
                 <Badge variant="outline" className="text-white border-white/30 bg-white/10 text-xs">
-                  v5.2.0
+                  Enhanced
                 </Badge>
               )}
               {isAuthenticated && (
                 <>
                   <Badge variant="default" className={`${getSecurityBadgeColor()} text-white border-0 text-xs`}>
                     <ShieldCheck className="h-3 w-3 mr-1" />
-                    {isMobile ? "HIGH" : securityLevel.toUpperCase()}
+                    {isMobile ? "SECURE" : securityLevel.toUpperCase()}
                   </Badge>
                   
                   {/* Mobile Menu for Settings */}
@@ -209,7 +248,10 @@ const ChatPage = () => {
                       </SheetTrigger>
                       <SheetContent side="right" className="w-80">
                         <SheetHeader>
-                          <SheetTitle>Chat Settings</SheetTitle>
+                          <SheetTitle className="flex items-center gap-2">
+                            <Settings className="h-5 w-5" />
+                            Chat Settings
+                          </SheetTitle>
                         </SheetHeader>
                         <div className="mt-6">
                           <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -267,17 +309,24 @@ const ChatPage = () => {
               transition={{ delay: 0.2 }}
               className="flex flex-wrap items-center gap-2"
             >
-              <div className="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-full px-2 py-1">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                <span className="text-white text-xs font-medium">Online</span>
+              <div className="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1">
+                <div className={`w-2 h-2 rounded-full animate-pulse ${getConnectionStatusColor()}`} />
+                <span className="text-white text-xs font-medium">
+                  {connectionStatus === "connected" ? "Connected" : 
+                   connectionStatus === "connecting" ? "Connecting..." : "Offline"}
+                </span>
               </div>
-              <div className="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-full px-2 py-1">
+              <div className="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1">
                 <Users className="w-3 h-3 text-white" />
-                <span className="text-white text-xs">3 Active</span>
+                <span className="text-white text-xs">{onlineUsers} Online</span>
               </div>
-              <div className="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-full px-2 py-1">
+              <div className="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1">
                 <ShieldCheck className="w-3 h-3 text-green-400" />
-                <span className="text-white text-xs">Encrypted</span>
+                <span className="text-white text-xs">E2E Encrypted</span>
+              </div>
+              <div className="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1">
+                <Camera className="w-3 h-3 text-blue-400" />
+                <span className="text-white text-xs">Media Ready</span>
               </div>
             </motion.div>
           )}
@@ -355,11 +404,11 @@ const ChatPage = () => {
                     </div>
                     <div className="flex items-center">
                       <div className="p-2 bg-primary/10 rounded-full mr-3">
-                        <ShieldCheck className="h-4 w-4 text-primary" />
+                        <Camera className="h-4 w-4 text-primary" />
                       </div>
                       <div>
-                        <div className="font-medium text-sm">Zero-Knowledge Architecture</div>
-                        <div className="text-xs text-muted-foreground">Complete privacy</div>
+                        <div className="font-medium text-sm">Secure Media Sharing</div>
+                        <div className="text-xs text-muted-foreground">Photos, videos & documents</div>
                       </div>
                     </div>
                     <div className="flex items-center">
@@ -367,8 +416,8 @@ const ChatPage = () => {
                         <Users className="h-4 w-4 text-primary" />
                       </div>
                       <div>
-                        <div className="font-medium text-sm">Secure Group Chats</div>
-                        <div className="text-xs text-muted-foreground">Private communities</div>
+                        <div className="font-medium text-sm">Private Communities</div>
+                        <div className="text-xs text-muted-foreground">Secure group fitness chats</div>
                       </div>
                     </div>
                   </div>
@@ -384,7 +433,10 @@ const ChatPage = () => {
         <Dialog open={showSettings} onOpenChange={setShowSettings}>
           <DialogContent className="max-w-4xl h-[80vh]">
             <DialogHeader>
-              <DialogTitle className="text-xl">Advanced Chat Settings</DialogTitle>
+              <DialogTitle className="text-xl flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Advanced Chat Settings
+              </DialogTitle>
             </DialogHeader>
             
             <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
