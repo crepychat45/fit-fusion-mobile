@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ChatMessage, ChatAttachment } from "@/types/chat";
+import type { ChatMessage, ChatAttachment } from "@/types/chat";
 import { formatDistanceToNow } from "date-fns";
 import { Download, Eye, Play, Pause, Volume2, FileText, Image as ImageIcon, Video, Music } from "lucide-react";
 import { cn } from "@/lib/utils";
