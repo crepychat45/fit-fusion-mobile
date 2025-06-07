@@ -2,8 +2,8 @@
 import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ChatAttachment } from "@/types/chat";
-import { Paperclip, Send, X, FileText, FileVideo, FileAudio, Image as ImageIcon, Camera, Mic, Plus } from "lucide-react";
+import type { ChatAttachment } from "@/types/chat";
+import { Paperclip, Send, X, FileText, FileVideo, FileAudio, Image as ImageIcon, Camera, Mic, Plus, Smile, StopCircle } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
+import { EmojiPicker } from "./emoji-picker";
 
 interface ChatInputProps {
   onSendMessage: (content: string, attachments: File[]) => void;
@@ -21,11 +22,15 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
   const [message, setMessage] = useState("");
   const [attachments, setAttachments] = useState<File[]>([]);
   const [isRecording, setIsRecording] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [recordingTime, setRecordingTime] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
+  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -63,25 +68,28 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
   };
 
   const validateFile = (file: File): boolean => {
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    const maxSize = 50 * 1024 * 1024; // 50MB
     const allowedTypes = [
       // Images
-      'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+      'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml', 'image/bmp', 'image/tiff',
       // Videos
-      'video/mp4', 'video/webm', 'video/mov', 'video/avi', 'video/quicktime',
+      'video/mp4', 'video/webm', 'video/mov', 'video/avi', 'video/quicktime', 'video/mkv', 'video/wmv', 'video/flv',
       // Audio
-      'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/m4a', 'audio/mpeg',
+      'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/m4a', 'audio/mpeg', 'audio/aac', 'audio/flac', 'audio/wma',
       // Documents
       'application/pdf', 'text/plain', 'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-powerpoint',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'application/rtf', 'text/csv', 'application/json', 'application/xml'
     ];
 
     if (file.size > maxSize) {
       toast({
         title: "File too large",
-        description: `${file.name} exceeds 10MB limit`,
+        description: `${file.name} exceeds 50MB limit`,
         variant: "destructive"
       });
       return false;
@@ -193,18 +201,61 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
         return;
       }
 
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      setIsRecording(true);
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: { 
+          echoCancellation: true,
+          noiseSuppression: true,
+          sampleRate: 44100
+        } 
+      });
       
-      // Simulate recording for demo
-      setTimeout(() => {
-        setIsRecording(false);
-        stream.getTracks().forEach(track => track.stop());
-        toast({
-          title: "Recording complete",
-          description: "Voice message recorded successfully"
+      const recorder = new MediaRecorder(stream, {
+        mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4'
+      });
+      
+      const chunks: Blob[] = [];
+      
+      recorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunks.push(event.data);
+        }
+      };
+      
+      recorder.onstop = () => {
+        const blob = new Blob(chunks, { type: recorder.mimeType });
+        const file = new File([blob], `voice-recording-${Date.now()}.${recorder.mimeType.includes('webm') ? 'webm' : 'mp4'}`, {
+          type: recorder.mimeType
         });
-      }, 3000);
+        
+        if (validateFile(file)) {
+          setAttachments(prev => [...prev, file]);
+          toast({
+            title: "Voice recording complete",
+            description: "Voice message added to attachments"
+          });
+        }
+        
+        stream.getTracks().forEach(track => track.stop());
+        setRecordingTime(0);
+        if (recordingIntervalRef.current) {
+          clearInterval(recordingIntervalRef.current);
+        }
+      };
+      
+      setMediaRecorder(recorder);
+      setIsRecording(true);
+      setRecordingTime(0);
+      
+      recordingIntervalRef.current = setInterval(() => {
+        setRecordingTime(prev => prev + 1);
+      }, 1000);
+      
+      recorder.start();
+      
+      toast({
+        title: "Recording started",
+        description: "Tap the microphone again to stop recording"
+      });
       
     } catch (error) {
       toast({
@@ -213,6 +264,25 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
         variant: "destructive"
       });
     }
+  };
+
+  const stopVoiceRecording = () => {
+    if (mediaRecorder && isRecording) {
+      mediaRecorder.stop();
+      setIsRecording(false);
+      setMediaRecorder(null);
+    }
+  };
+
+  const handleEmojiSelect = (emoji: string) => {
+    setMessage(prev => prev + emoji);
+    setShowEmojiPicker(false);
+  };
+
+  const formatRecordingTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -239,40 +309,40 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
         ref={videoInputRef}
         className="hidden"
         onChange={handleFileChange}
-        accept="video/*"
+        accept="video/mp4,video/webm,video/mov,video/avi,video/quicktime,video/mkv,video/wmv,video/flv"
       />
       <input
         type="file"
         ref={audioInputRef}
         className="hidden"
         onChange={handleFileChange}
-        accept="audio/*"
+        accept="audio/mp3,audio/wav,audio/ogg,audio/m4a,audio/mpeg,audio/aac,audio/flac,audio/wma"
       />
       <input
         type="file"
         ref={documentInputRef}
         className="hidden"
         onChange={handleFileChange}
-        accept=".pdf,.doc,.docx,.xls,.xlsx,.txt"
+        accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.csv,.json,.xml"
       />
       
       {/* Attachments preview */}
       {attachments.length > 0 && (
-        <div className="mb-3 flex flex-wrap gap-2">
+        <div className="mb-3 flex flex-wrap gap-2 max-h-32 overflow-y-auto">
           {attachments.map((file, index) => (
             <div 
               key={index}
-              className="flex items-center bg-muted rounded-md p-2 pr-8 relative animate-fade-in"
+              className="flex items-center bg-muted rounded-md p-2 pr-8 relative animate-fade-in min-w-0"
             >
               {getFileIcon(file)}
-              <div className="ml-2">
-                <p className="text-xs font-medium truncate max-w-[100px]">{file.name}</p>
+              <div className="ml-2 min-w-0 flex-1">
+                <p className="text-xs font-medium truncate max-w-[120px]" title={file.name}>{file.name}</p>
                 <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>
               </div>
               <Button
                 variant="ghost" 
                 size="icon"
-                className="h-6 w-6 p-0 absolute right-1 top-1"
+                className="h-6 w-6 p-0 absolute right-1 top-1 hover:bg-destructive/10"
                 onClick={() => removeAttachment(index)}
               >
                 <X className="h-3 w-3" />
@@ -295,7 +365,7 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
               <Plus className="h-5 w-5" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[220px] p-2">
+          <PopoverContent className="w-[240px] p-2">
             <div className="grid gap-1">
               <Button
                 variant="ghost"
@@ -313,7 +383,7 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
                 onClick={() => handleAttachmentClick("image")}
               >
                 <ImageIcon className="mr-2 h-4 w-4" />
-                <span>Photo</span>
+                <span>Photo & Images</span>
               </Button>
               <Button
                 variant="ghost"
@@ -322,7 +392,7 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
                 onClick={() => handleAttachmentClick("video")}
               >
                 <FileVideo className="mr-2 h-4 w-4" />
-                <span>Video</span>
+                <span>Videos (MP4, WebM, MOV)</span>
               </Button>
               <Button
                 variant="ghost"
@@ -331,7 +401,7 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
                 onClick={() => handleAttachmentClick("audio")}
               >
                 <FileAudio className="mr-2 h-4 w-4" />
-                <span>Audio</span>
+                <span>Music & Audio</span>
               </Button>
               <Button
                 variant="ghost"
@@ -340,9 +410,29 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
                 onClick={() => handleAttachmentClick("document")}
               >
                 <FileText className="mr-2 h-4 w-4" />
-                <span>Document</span>
+                <span>Documents (PDF, Office)</span>
               </Button>
             </div>
+          </PopoverContent>
+        </Popover>
+
+        {/* Emoji picker */}
+        <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full flex-shrink-0 hover:bg-primary/10"
+              disabled={isLoading}
+            >
+              <Smile className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" side="top">
+            <EmojiPicker 
+              onEmojiSelect={handleEmojiSelect}
+              onClose={() => setShowEmojiPicker(false)}
+            />
           </PopoverContent>
         </Popover>
 
@@ -354,25 +444,25 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
             "rounded-full flex-shrink-0",
             isRecording ? "bg-red-100 text-red-600 animate-pulse" : "hover:bg-primary/10"
           )}
-          onClick={startVoiceRecording}
-          disabled={isLoading || isRecording}
+          onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
+          disabled={isLoading}
         >
-          <Mic className="h-4 w-4" />
+          {isRecording ? <StopCircle className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
         </Button>
         
         {/* Message input */}
         <div className="relative flex-1">
           <Input
-            placeholder={isRecording ? "Recording..." : "Type a message..."}
+            placeholder={isRecording ? `Recording... ${formatRecordingTime(recordingTime)}` : "Type a message..."}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="pr-12 focus:ring-2 focus:ring-primary"
+            className="pr-16 focus:ring-2 focus:ring-primary"
             disabled={isLoading || isRecording}
-            maxLength={1000}
+            maxLength={2000}
           />
           <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground">
-            {message.length}/1000
+            {message.length}/2000
           </div>
         </div>
 
@@ -392,7 +482,8 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
       {isRecording && (
         <div className="mt-2 flex items-center gap-2 text-red-600 animate-fade-in">
           <div className="w-3 h-3 bg-red-600 rounded-full animate-pulse"></div>
-          <span className="text-sm font-medium">Recording voice message...</span>
+          <span className="text-sm font-medium">Recording... {formatRecordingTime(recordingTime)}</span>
+          <span className="text-xs text-muted-foreground ml-2">Tap stop when finished</span>
         </div>
       )}
     </div>

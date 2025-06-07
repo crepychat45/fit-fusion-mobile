@@ -1,9 +1,9 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { EnhancedChatAuth } from "@/components/chat/enhanced-chat-auth";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, KeyRound, ShieldCheck, Settings, Bell, Users, Menu, X, Camera, MessageCircle } from "lucide-react";
+import { ArrowLeft, KeyRound, ShieldCheck, Settings, Bell, Users, Menu, X, Camera, MessageCircle, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -12,13 +12,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { LoadingSpinner } from "@/components/common/loading-spinner";
 import { AdvancedChatInterface } from "@/components/chat/advanced-chat-interface";
 import { MobileChatInterface } from "@/components/chat/mobile-chat-interface";
-import { ChatSettings } from "@/components/chat/chat-settings";
+import { EnhancedChatSettings } from "@/components/chat/enhanced-chat-settings";
 import { ChatSecurity } from "@/components/chat/chat-security";
 import { ChatNotifications } from "@/components/chat/chat-notifications";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { motion, AnimatePresence } from "framer-motion";
+import type { Session, User } from '@supabase/supabase-js';
 
 const ChatPage = () => {
   const navigate = useNavigate();
@@ -30,68 +31,163 @@ const ChatPage = () => {
   const [authError, setAuthError] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [activeTab, setActiveTab] = useState("chat");
+  const [activeTab, setActiveTab] = useState("settings");
   const [securityLevel, setSecurityLevel] = useState("high");
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState<"connecting" | "connected" | "disconnected">("connecting");
   const [onlineUsers, setOnlineUsers] = useState(3);
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [sessionCheckInterval, setSessionCheckInterval] = useState<NodeJS.Timeout | null>(null);
   
+  // Session management to prevent auto-logout
+  const refreshSession = useCallback(async () => {
+    try {
+      const { data: { session }, error } = await supabase.auth.refreshSession();
+      if (error) {
+        console.error('Session refresh error:', error);
+        return;
+      }
+      
+      if (session) {
+        setSession(session);
+        setUser(session.user);
+        setIsAuthenticated(true);
+        setConnectionStatus("connected");
+      }
+    } catch (error) {
+      console.error('Session refresh failed:', error);
+    }
+  }, []);
+
+  // Enhanced session monitoring
   useEffect(() => {
-    const checkAuth = async () => {
+    let mounted = true;
+    
+    const initializeAuth = async () => {
       setIsLoading(true);
       setConnectionStatus("connecting");
       
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setIsAuthenticated(!!session);
+        // Get initial session
+        const { data: { session }, error } = await supabase.auth.getSession();
         
-        if (session) {
-          console.log("User authenticated:", session.user?.email);
-          loadUserPreferences(session.user?.id);
-          setConnectionStatus("connected");
-          
-          // Simulate real-time connection
-          setTimeout(() => {
-            setOnlineUsers(Math.floor(Math.random() * 10) + 1);
-          }, 1000);
-        } else {
+        if (error) {
+          console.error("Auth check error:", error);
+          setAuthError("Failed to check authentication status");
           setConnectionStatus("disconnected");
+          return;
+        }
+        
+        if (mounted) {
+          if (session) {
+            console.log("User authenticated:", session.user?.email);
+            setSession(session);
+            setUser(session.user);
+            setIsAuthenticated(true);
+            setConnectionStatus("connected");
+            loadUserPreferences(session.user?.id);
+            
+            // Set up session refresh interval (every 50 minutes)
+            const interval = setInterval(() => {
+              refreshSession();
+            }, 50 * 60 * 1000);
+            setSessionCheckInterval(interval);
+            
+            // Simulate real-time connection
+            setTimeout(() => {
+              if (mounted) {
+                setOnlineUsers(Math.floor(Math.random() * 10) + 1);
+              }
+            }, 1000);
+          } else {
+            setIsAuthenticated(false);
+            setConnectionStatus("disconnected");
+          }
         }
       } catch (error) {
-        console.error("Auth check error:", error);
-        setAuthError("Failed to check authentication status");
-        setConnectionStatus("disconnected");
+        console.error("Auth initialization error:", error);
+        if (mounted) {
+          setAuthError("Failed to initialize authentication");
+          setConnectionStatus("disconnected");
+        }
       } finally {
-        setIsLoading(false);
+        if (mounted) {
+          setIsLoading(false);
+        }
       }
     };
     
-    checkAuth();
+    initializeAuth();
     
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("Auth state changed:", event, session?.user?.email);
-      setIsAuthenticated(!!session);
-      setAuthError(null);
+      if (!mounted) return;
       
-      if (event === 'SIGNED_OUT') {
-        setConnectionStatus("disconnected");
-        toast({
-          title: "Signed out",
-          description: "You've been signed out of FitFusion Chat."
-        });
-      } else if (event === 'SIGNED_IN') {
-        setConnectionStatus("connected");
-        toast({
-          title: "Welcome back!",
-          description: "You're now connected to FitFusion Chat."
-        });
+      console.log("Auth state changed:", event, session?.user?.email);
+      
+      // Handle different auth events
+      switch (event) {
+        case 'SIGNED_IN':
+          setSession(session);
+          setUser(session?.user || null);
+          setIsAuthenticated(!!session);
+          setAuthError(null);
+          setConnectionStatus("connected");
+          
+          if (session?.user) {
+            loadUserPreferences(session.user.id);
+            toast({
+              title: "Welcome back!",
+              description: "You're now connected to FitFusion Chat."
+            });
+          }
+          break;
+          
+        case 'SIGNED_OUT':
+          setSession(null);
+          setUser(null);
+          setIsAuthenticated(false);
+          setConnectionStatus("disconnected");
+          
+          // Clear session refresh interval
+          if (sessionCheckInterval) {
+            clearInterval(sessionCheckInterval);
+            setSessionCheckInterval(null);
+          }
+          
+          toast({
+            title: "Signed out",
+            description: "You've been signed out of FitFusion Chat."
+          });
+          break;
+          
+        case 'TOKEN_REFRESHED':
+          if (session) {
+            setSession(session);
+            setUser(session.user);
+            setIsAuthenticated(true);
+            setConnectionStatus("connected");
+          }
+          break;
+          
+        case 'USER_UPDATED':
+          if (session) {
+            setSession(session);
+            setUser(session.user);
+          }
+          break;
       }
     });
     
     return () => {
+      mounted = false;
       subscription.unsubscribe();
+      if (sessionCheckInterval) {
+        clearInterval(sessionCheckInterval);
+      }
     };
-  }, [toast]);
+  }, [refreshSession, sessionCheckInterval, toast]);
 
   const loadUserPreferences = (userId?: string) => {
     if (!userId) return;
@@ -142,14 +238,22 @@ const ChatPage = () => {
   
   const handleLogout = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        saveUserPreferences(session.user.id);
+      if (user) {
+        saveUserPreferences(user.id);
+      }
+      
+      // Clear session refresh interval
+      if (sessionCheckInterval) {
+        clearInterval(sessionCheckInterval);
+        setSessionCheckInterval(null);
       }
       
       await supabase.auth.signOut();
       setIsAuthenticated(false);
+      setSession(null);
+      setUser(null);
       setConnectionStatus("disconnected");
+      
       toast({
         title: "Logged out",
         description: "You've been logged out of FitFusion Chat."
@@ -160,6 +264,24 @@ const ChatPage = () => {
         description: "Failed to log out. Please try again.",
         variant: "destructive"
       });
+    }
+  };
+
+  const handleReconnect = async () => {
+    setConnectionStatus("connecting");
+    try {
+      await refreshSession();
+      toast({
+        title: "Reconnected",
+        description: "Successfully reconnected to FitFusion Chat."
+      });
+    } catch (error) {
+      toast({
+        title: "Connection failed",
+        description: "Unable to reconnect. Please try again.",
+        variant: "destructive"
+      });
+      setConnectionStatus("disconnected");
     }
   };
 
@@ -217,14 +339,25 @@ const ChatPage = () => {
                   <MessageCircle className="h-6 w-6" />
                   FitFusion Chat
                 </h1>
-                <p className="text-white/90 text-xs md:text-sm">Secure fitness community • v5.0.4</p>
+                <p className="text-white/90 text-xs md:text-sm">Secure fitness community • v6.2.1</p>
               </div>
             </div>
             
             <div className="flex items-center gap-2">
+              {connectionStatus === "disconnected" && isAuthenticated && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleReconnect}
+                  className="text-white hover:bg-white/20 rounded-full backdrop-blur-sm shadow-lg"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+              )}
+              
               {!isMobile && (
                 <Badge variant="outline" className="text-white border-white/30 bg-white/10 text-xs">
-                  Enhanced
+                  Enhanced Pro
                 </Badge>
               )}
               {isAuthenticated && (
@@ -250,7 +383,7 @@ const ChatPage = () => {
                         <SheetHeader>
                           <SheetTitle className="flex items-center gap-2">
                             <Settings className="h-5 w-5" />
-                            Chat Settings
+                            Enhanced Chat Settings
                           </SheetTitle>
                         </SheetHeader>
                         <div className="mt-6">
@@ -263,7 +396,7 @@ const ChatPage = () => {
                             
                             <div className="mt-4 space-y-4">
                               <TabsContent value="settings">
-                                <ChatSettings onClose={() => setShowMobileMenu(false)} />
+                                <EnhancedChatSettings onClose={() => setShowMobileMenu(false)} />
                               </TabsContent>
                               
                               <TabsContent value="security">
@@ -407,8 +540,8 @@ const ChatPage = () => {
                         <Camera className="h-4 w-4 text-primary" />
                       </div>
                       <div>
-                        <div className="font-medium text-sm">Secure Media Sharing</div>
-                        <div className="text-xs text-muted-foreground">Photos, videos & documents</div>
+                        <div className="font-medium text-sm">Enhanced Media Sharing</div>
+                        <div className="text-xs text-muted-foreground">Photos, videos, audio & documents</div>
                       </div>
                     </div>
                     <div className="flex items-center">
@@ -416,8 +549,8 @@ const ChatPage = () => {
                         <Users className="h-4 w-4 text-primary" />
                       </div>
                       <div>
-                        <div className="font-medium text-sm">Private Communities</div>
-                        <div className="text-xs text-muted-foreground">Secure group fitness chats</div>
+                        <div className="font-medium text-sm">Cloud Backup & Sync</div>
+                        <div className="text-xs text-muted-foreground">Secure cross-device sync</div>
                       </div>
                     </div>
                   </div>
@@ -435,20 +568,20 @@ const ChatPage = () => {
             <DialogHeader>
               <DialogTitle className="text-xl flex items-center gap-2">
                 <Settings className="h-5 w-5" />
-                Advanced Chat Settings
+                Enhanced Chat Settings
               </DialogTitle>
             </DialogHeader>
             
             <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
               <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="settings">General Settings</TabsTrigger>
+                <TabsTrigger value="settings">Enhanced Settings</TabsTrigger>
                 <TabsTrigger value="security">Security & Privacy</TabsTrigger>
                 <TabsTrigger value="notifications">Notifications</TabsTrigger>
               </TabsList>
               
               <div className="flex-1 mt-4 overflow-hidden">
                 <TabsContent value="settings" className="h-full">
-                  <ChatSettings onClose={() => setShowSettings(false)} />
+                  <EnhancedChatSettings onClose={() => setShowSettings(false)} />
                 </TabsContent>
                 
                 <TabsContent value="security" className="h-full">
