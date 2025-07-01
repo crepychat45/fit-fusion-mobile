@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { EnhancedChatAuth } from "@/components/chat/enhanced-chat-auth";
 import { Button } from "@/components/ui/button";
@@ -38,9 +38,13 @@ const ChatPage = () => {
   const [onlineUsers, setOnlineUsers] = useState(3);
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [sessionCheckInterval, setSessionCheckInterval] = useState<NodeJS.Timeout | null>(null);
   
-  // Session management to prevent auto-logout
+  // Use refs to prevent multiple intervals
+  const sessionIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isInitializedRef = useRef(false);
+  const authListenerRef = useRef<any>(null);
+
+  // Session refresh function
   const refreshSession = useCallback(async () => {
     try {
       const { data: { session }, error } = await supabase.auth.refreshSession();
@@ -52,7 +56,6 @@ const ChatPage = () => {
       if (session) {
         setSession(session);
         setUser(session.user);
-        setIsAuthenticated(true);
         setConnectionStatus("connected");
       }
     } catch (error) {
@@ -60,136 +63,8 @@ const ChatPage = () => {
     }
   }, []);
 
-  // Enhanced session monitoring
-  useEffect(() => {
-    let mounted = true;
-    
-    const initializeAuth = async () => {
-      setIsLoading(true);
-      setConnectionStatus("connecting");
-      
-      try {
-        // Get initial session
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error("Auth check error:", error);
-          setAuthError("Failed to check authentication status");
-          setConnectionStatus("disconnected");
-          return;
-        }
-        
-        if (mounted) {
-          if (session) {
-            console.log("User authenticated:", session.user?.email);
-            setSession(session);
-            setUser(session.user);
-            setIsAuthenticated(true);
-            setConnectionStatus("connected");
-            loadUserPreferences(session.user?.id);
-            
-            // Set up session refresh interval (every 50 minutes)
-            const interval = setInterval(() => {
-              refreshSession();
-            }, 50 * 60 * 1000);
-            setSessionCheckInterval(interval);
-            
-            // Simulate real-time connection
-            setTimeout(() => {
-              if (mounted) {
-                setOnlineUsers(Math.floor(Math.random() * 10) + 1);
-              }
-            }, 1000);
-          } else {
-            setIsAuthenticated(false);
-            setConnectionStatus("disconnected");
-          }
-        }
-      } catch (error) {
-        console.error("Auth initialization error:", error);
-        if (mounted) {
-          setAuthError("Failed to initialize authentication");
-          setConnectionStatus("disconnected");
-        }
-      } finally {
-        if (mounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-    
-    initializeAuth();
-    
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!mounted) return;
-      
-      console.log("Auth state changed:", event, session?.user?.email);
-      
-      // Handle different auth events
-      switch (event) {
-        case 'SIGNED_IN':
-          setSession(session);
-          setUser(session?.user || null);
-          setIsAuthenticated(!!session);
-          setAuthError(null);
-          setConnectionStatus("connected");
-          
-          if (session?.user) {
-            loadUserPreferences(session.user.id);
-            toast({
-              title: "Welcome back!",
-              description: "You're now connected to FitFusion Chat."
-            });
-          }
-          break;
-          
-        case 'SIGNED_OUT':
-          setSession(null);
-          setUser(null);
-          setIsAuthenticated(false);
-          setConnectionStatus("disconnected");
-          
-          // Clear session refresh interval
-          if (sessionCheckInterval) {
-            clearInterval(sessionCheckInterval);
-            setSessionCheckInterval(null);
-          }
-          
-          toast({
-            title: "Signed out",
-            description: "You've been signed out of FitFusion Chat."
-          });
-          break;
-          
-        case 'TOKEN_REFRESHED':
-          if (session) {
-            setSession(session);
-            setUser(session.user);
-            setIsAuthenticated(true);
-            setConnectionStatus("connected");
-          }
-          break;
-          
-        case 'USER_UPDATED':
-          if (session) {
-            setSession(session);
-            setUser(session.user);
-          }
-          break;
-      }
-    });
-    
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-      if (sessionCheckInterval) {
-        clearInterval(sessionCheckInterval);
-      }
-    };
-  }, [refreshSession, sessionCheckInterval, toast]);
-
-  const loadUserPreferences = (userId?: string) => {
+  // Load user preferences
+  const loadUserPreferences = useCallback((userId?: string) => {
     if (!userId) return;
     
     try {
@@ -202,9 +77,10 @@ const ChatPage = () => {
     } catch (error) {
       console.error("Failed to load user preferences:", error);
     }
-  };
+  }, []);
 
-  const saveUserPreferences = (userId?: string) => {
+  // Save user preferences
+  const saveUserPreferences = useCallback((userId?: string) => {
     if (!userId) return;
     
     try {
@@ -218,9 +94,128 @@ const ChatPage = () => {
     } catch (error) {
       console.error("Failed to save user preferences:", error);
     }
-  };
-  
-  const handleAuthSuccess = () => {
+  }, [securityLevel, notificationsEnabled]);
+
+  // Enhanced session monitoring - Fixed to prevent infinite loops
+  useEffect(() => {
+    if (isInitializedRef.current) return;
+
+    const initializeAuth = async () => {
+      setIsLoading(true);
+      setConnectionStatus("connecting");
+      
+      try {
+        // Get initial session
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Auth check error:", error);
+          setAuthError("Failed to check authentication status");
+          setConnectionStatus("disconnected");
+          setIsLoading(false);
+          return;
+        }
+        
+        if (session) {
+          console.log("User authenticated:", session.user?.email);
+          setSession(session);
+          setUser(session.user);
+          setIsAuthenticated(true);
+          setConnectionStatus("connected");
+          loadUserPreferences(session.user?.id);
+          
+          // Set up session refresh interval only once
+          if (!sessionIntervalRef.current) {
+            sessionIntervalRef.current = setInterval(() => {
+              refreshSession();
+            }, 50 * 60 * 1000); // 50 minutes
+          }
+          
+          // Simulate real-time connection
+          setTimeout(() => {
+            setOnlineUsers(Math.floor(Math.random() * 10) + 1);
+          }, 1000);
+        } else {
+          setIsAuthenticated(false);
+          setConnectionStatus("disconnected");
+        }
+      } catch (error) {
+        console.error("Auth initialization error:", error);
+        setAuthError("Failed to initialize authentication");
+        setConnectionStatus("disconnected");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    initializeAuth();
+    isInitializedRef.current = true;
+    
+    // Set up auth state listener only once
+    if (!authListenerRef.current) {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        console.log("Auth state changed:", event);
+        
+        // Handle different auth events without causing loops
+        switch (event) {
+          case 'SIGNED_IN':
+            if (session && !isAuthenticated) {
+              setSession(session);
+              setUser(session.user);
+              setIsAuthenticated(true);
+              setAuthError(null);
+              setConnectionStatus("connected");
+              loadUserPreferences(session.user.id);
+              
+              toast({
+                title: "Welcome back!",
+                description: "You're now connected to FitFusion Chat."
+              });
+            }
+            break;
+            
+          case 'SIGNED_OUT':
+            setSession(null);
+            setUser(null);
+            setIsAuthenticated(false);
+            setConnectionStatus("disconnected");
+            
+            // Clear session refresh interval
+            if (sessionIntervalRef.current) {
+              clearInterval(sessionIntervalRef.current);
+              sessionIntervalRef.current = null;
+            }
+            
+            toast({
+              title: "Signed out",
+              description: "You've been signed out of FitFusion Chat."
+            });
+            break;
+            
+          case 'TOKEN_REFRESHED':
+            if (session && isAuthenticated) {
+              setSession(session);
+              setUser(session.user);
+              setConnectionStatus("connected");
+            }
+            break;
+        }
+      });
+      
+      authListenerRef.current = subscription;
+    }
+    
+    return () => {
+      if (sessionIntervalRef.current) {
+        clearInterval(sessionIntervalRef.current);
+      }
+      if (authListenerRef.current) {
+        authListenerRef.current.unsubscribe();
+      }
+    };
+  }, []); // Empty dependency array to run only once
+
+  const handleAuthSuccess = useCallback(() => {
     setIsAuthenticated(true);
     setAuthError(null);
     setConnectionStatus("connected");
@@ -228,24 +223,24 @@ const ChatPage = () => {
       title: "Authentication successful",
       description: "Welcome to FitFusion Chat!"
     });
-  };
+  }, [toast]);
   
-  const handleAuthError = (error: string) => {
+  const handleAuthError = useCallback((error: string) => {
     setAuthError(error);
     setIsAuthenticated(false);
     setConnectionStatus("disconnected");
-  };
+  }, []);
   
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     try {
       if (user) {
         saveUserPreferences(user.id);
       }
       
       // Clear session refresh interval
-      if (sessionCheckInterval) {
-        clearInterval(sessionCheckInterval);
-        setSessionCheckInterval(null);
+      if (sessionIntervalRef.current) {
+        clearInterval(sessionIntervalRef.current);
+        sessionIntervalRef.current = null;
       }
       
       await supabase.auth.signOut();
@@ -265,9 +260,9 @@ const ChatPage = () => {
         variant: "destructive"
       });
     }
-  };
+  }, [user, saveUserPreferences, toast]);
 
-  const handleReconnect = async () => {
+  const handleReconnect = useCallback(async () => {
     setConnectionStatus("connecting");
     try {
       await refreshSession();
@@ -283,7 +278,7 @@ const ChatPage = () => {
       });
       setConnectionStatus("disconnected");
     }
-  };
+  }, [refreshSession, toast]);
 
   const getSecurityBadgeColor = () => {
     switch (securityLevel) {
