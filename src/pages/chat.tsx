@@ -19,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { motion, AnimatePresence } from "framer-motion";
+import { AIEnhancedChat } from "@/components/chat/ai-enhanced-chat";
 import type { Session, User } from '@supabase/supabase-js';
 
 const ChatPage = () => {
@@ -463,28 +464,24 @@ const ChatPage = () => {
       
       {/* Main Content */}
       <div className={`flex-1 flex flex-col overflow-hidden ${isMobile ? 'pb-20' : ''}`}>
-        {isAuthenticated ? (
-          <div className="flex-1 overflow-hidden">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="h-full"
-            >
-              {isMobile ? (
-                <MobileChatInterface />
-              ) : (
-                <div className="p-4 md:p-6 h-full max-w-7xl mx-auto">
+          {isAuthenticated ? (
+            isMobile ? (
+              <MobileChatInterface />
+            ) : (
+              <div className="flex-1 flex gap-4">
+                <div className="flex-1">
+                  <AIEnhancedChat user={user} />
+                </div>
+                <div className="w-80">
                   <AdvancedChatInterface 
                     onLogout={handleLogout}
                     securityLevel={securityLevel}
                     notificationsEnabled={notificationsEnabled}
                   />
                 </div>
-              )}
-            </motion.div>
-          </div>
-        ) : (
+              </div>
+            )
+          ) : (
           <div className="max-w-md mx-auto p-6 flex-1 flex items-center justify-center">
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}

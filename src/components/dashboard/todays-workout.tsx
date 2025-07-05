@@ -25,16 +25,25 @@ export function TodaysWorkout({ workouts, onReschedule }: TodaysWorkoutProps) {
   const { toast } = useToast();
   
   const handleStartWorkout = (workout: Workout) => {
-    const audio = new Audio("/workout-start.mp3");
-    audio.volume = 0.3;
-    audio.play().catch(err => console.log("Audio playback prevented: ", err));
-    
-    toast({
-      title: "Workout Started",
-      description: `Starting ${workout.name} workout. Let's crush it!`,
-    });
-    
-    navigate(`/workout/1`);
+    try {
+      const audio = new Audio("/workout-start.mp3");
+      audio.volume = 0.3;
+      audio.play().catch(err => console.log("Audio playback prevented: ", err));
+      
+      toast({
+        title: "Workout Started",
+        description: `Starting ${workout.name} workout. Let's crush it!`,
+      });
+      
+      navigate(`/workout-detail/${workout.id}`);
+    } catch (error) {
+      console.error("Error starting workout:", error);
+      toast({
+        title: "Error",
+        description: "Failed to start workout. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
   
   const todaysWorkouts = workouts.filter(workout => workout.day === "Today");

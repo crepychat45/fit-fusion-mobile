@@ -360,11 +360,21 @@ const Workouts = () => {
                                   ✓ Completed
                                 </Badge>
                               ) : (
-                                <Button 
-                                  size="sm" 
-                                  onClick={() => navigate(`/workout-detail/${workout.id}`)}
-                                  className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
-                                >
+                                 <Button 
+                                   size="sm" 
+                                   onClick={() => {
+                                     try {
+                                       navigate(`/workout-detail/${workout.id}`);
+                                     } catch (error) {
+                                       toast({
+                                         title: "Navigation Error",
+                                         description: "Failed to open workout. Please try again.",
+                                         variant: "destructive"
+                                       });
+                                     }
+                                   }}
+                                   className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
+                                 >
                                   <PlayCircle className="h-4 w-4 mr-1" />
                                   Start
                                 </Button>
@@ -574,7 +584,7 @@ const Workouts = () => {
           <Button 
             size="lg" 
             className="rounded-full shadow-lg bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
-            onClick={() => navigate("/workout-detail/1")}
+            onClick={() => navigate("/workout-detail/quick-start")}
           >
             <Plus className="h-5 w-5 mr-2" />
             Quick Start
