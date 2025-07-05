@@ -14,8 +14,10 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
  
-    --primary: 261 50% 75%;
+    --primary: 255 91% 67%;
     --primary-foreground: 210 40% 98%;
+    --primary-glow: 255 91% 80%;
+    --primary-dark: 255 91% 55%;
  
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -23,15 +25,36 @@
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
  
-    --accent: 210 40% 96.1%;
+    --accent: 280 100% 80%;
     --accent-foreground: 222.2 47.4% 11.2%;
+    --accent-glow: 280 100% 90%;
  
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 255 91% 67%;
+    
+    /* AI & Security themed colors */
+    --ai-primary: 240 100% 70%;
+    --ai-secondary: 280 100% 75%;
+    --ai-accent: 200 100% 65%;
+    --security-primary: 120 100% 40%;
+    --security-secondary: 120 60% 30%;
+    --premium-gradient: linear-gradient(135deg, hsl(255, 91%, 67%), hsl(280, 100%, 75%));
+    --ai-gradient: linear-gradient(135deg, hsl(240, 100%, 70%), hsl(280, 100%, 80%));
+    --security-gradient: linear-gradient(135deg, hsl(120, 100%, 40%), hsl(170, 100%, 45%));
+    
+    /* Enhanced shadows */
+    --shadow-primary: 0 10px 30px -10px hsl(255 91% 67% / 0.3);
+    --shadow-ai: 0 10px 30px -10px hsl(240 100% 70% / 0.4);
+    --shadow-security: 0 10px 30px -10px hsl(120 100% 40% / 0.3);
+    --shadow-glow: 0 0 40px hsl(255 91% 80% / 0.4);
+    
+    /* Glassmorphism */
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
  
     --radius: 0.5rem;
   }
@@ -46,8 +69,10 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
  
-    --primary: 261 50% 75%;
+    --primary: 255 91% 67%;
     --primary-foreground: 210 40% 98%;
+    --primary-glow: 255 91% 80%;
+    --primary-dark: 255 91% 55%;
  
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -55,15 +80,30 @@
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
  
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 280 100% 75%;
     --accent-foreground: 210 40% 98%;
+    --accent-glow: 280 100% 85%;
  
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
  
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 255 91% 67%;
+    
+    /* Dark mode AI & Security colors */
+    --ai-primary: 240 100% 80%;
+    --ai-secondary: 280 100% 85%;
+    --ai-accent: 200 100% 75%;
+    --security-primary: 120 100% 50%;
+    --security-secondary: 120 60% 40%;
+    --premium-gradient: linear-gradient(135deg, hsl(255, 91%, 67%), hsl(280, 100%, 75%));
+    --ai-gradient: linear-gradient(135deg, hsl(240, 100%, 80%), hsl(280, 100%, 85%));
+    --security-gradient: linear-gradient(135deg, hsl(120, 100%, 50%), hsl(170, 100%, 55%));
+    
+    /* Dark mode glassmorphism */
+    --glass-bg: rgba(0, 0, 0, 0.2);
+    --glass-border: rgba(255, 255, 255, 0.1);
   }
 }
  
@@ -265,9 +305,122 @@
   background: rgba(139, 92, 246, 0.7);
 }
 
-/* Loading states */
+/* Enhanced UI Components */
+.ai-card {
+  background: var(--ai-gradient);
+  border: 1px solid hsl(var(--ai-primary) / 0.3);
+  box-shadow: var(--shadow-ai);
+}
+
+.security-card {
+  background: var(--security-gradient);
+  border: 1px solid hsl(var(--security-primary) / 0.3);
+  box-shadow: var(--shadow-security);
+}
+
+.premium-card {
+  background: var(--premium-gradient);
+  border: 1px solid hsl(var(--primary) / 0.3);
+  box-shadow: var(--shadow-primary);
+}
+
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.interactive-button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.interactive-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.interactive-button:hover::before {
+  left: 100%;
+}
+
+.interactive-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+
+.neural-animation {
+  animation: neural-pulse 2s ease-in-out infinite;
+}
+
+@keyframes neural-pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+.security-indicator {
+  position: relative;
+}
+
+.security-indicator::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  background: hsl(var(--security-primary));
+  border-radius: 50%;
+  animation: security-blink 2s infinite;
+}
+
+@keyframes security-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* Enhanced loading states */
 .loading-pulse {
   background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
+}
+
+.ai-thinking {
+  background: linear-gradient(45deg, hsl(var(--ai-primary) / 0.1), hsl(var(--ai-secondary) / 0.1));
+  animation: ai-thinking 1.5s ease-in-out infinite;
+}
+
+@keyframes ai-thinking {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Performance optimizations */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.smooth-scroll {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }

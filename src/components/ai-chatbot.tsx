@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Loader2, MessageSquare, Search, Brain, Sparkles, Info, BarChart, Dumbbell, Calendar, Lock, Shield, Zap, Mic, Camera, FileText, Heart, Star, Settings, CreditCard } from "lucide-react";
+import { Send, Bot, User, Loader2, Search, Brain, Sparkles, BarChart, Dumbbell, Calendar, Lock, Shield, Zap, Mic, Star, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { AIChatAssistant } from "./chat/ai-chat-assistant";
 import { SecurePaymentGateway } from "./chat/secure-payment-gateway";
 import { AISecuritySystem } from "./chat/ai-security-system";
+import { EnhancedAIFeatures } from "./enhanced-ai-features";
+import { EnhancedSecurityCenter } from "./enhanced-security-center";
 
 interface Message {
   text: string;
@@ -84,6 +86,8 @@ export function AIChatbot() {
   const [showAIAssistant, setShowAIAssistant] = useState(false);
   const [showPaymentGateway, setShowPaymentGateway] = useState(false);
   const [showSecuritySystem, setShowSecuritySystem] = useState(false);
+  const [showAIFeatures, setShowAIFeatures] = useState(false);
+  const [showSecurityCenter, setShowSecurityCenter] = useState(false);
   const [aiModel, setAiModel] = useState("FitFusion-AI-Pro");
   const [isRecording, setIsRecording] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -222,8 +226,10 @@ export function AIChatbot() {
   };
 
   const quickActions = [
-    { text: "AI Features", icon: <Brain className="h-3 w-3" />, action: () => setShowAIAssistant(true) },
-    { text: "Security", icon: <Shield className="h-3 w-3" />, action: () => setShowSecuritySystem(true) },
+    { text: "AI Features", icon: <Brain className="h-3 w-3" />, action: () => setShowAIFeatures(true) },
+    { text: "AI Assistant", icon: <Sparkles className="h-3 w-3" />, action: () => setShowAIAssistant(true) },
+    { text: "Security Center", icon: <Shield className="h-3 w-3" />, action: () => setShowSecurityCenter(true) },
+    { text: "AI Security", icon: <Lock className="h-3 w-3" />, action: () => setShowSecuritySystem(true) },
     { text: "Premium", icon: <CreditCard className="h-3 w-3" />, action: () => setShowPaymentGateway(true) },
     { text: "My stats", icon: <BarChart className="h-3 w-3" /> },
     { text: "Workout tips", icon: <Dumbbell className="h-3 w-3" /> },
@@ -232,7 +238,7 @@ export function AIChatbot() {
 
   return (
     <>
-      <Card className="h-[500px] flex flex-col bg-gradient-to-br from-blue-50/50 to-purple-50/50 dark:from-gray-900 dark:to-purple-900/20">
+      <Card className="h-[500px] flex flex-col glass-card bg-gradient-to-br from-blue-50/50 to-purple-50/50 dark:from-gray-900 dark:to-purple-900/20 hover-lift">
         <CardHeader className="py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
@@ -420,7 +426,7 @@ export function AIChatbot() {
                 <Button 
                   onClick={handleSend} 
                   size="icon" 
-                  className="bg-gradient-to-r from-blue-500 to-purple-500"
+                  className="interactive-button bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
                   disabled={!input.trim() || isTyping}
                 >
                   {isTyping ? (
@@ -437,7 +443,7 @@ export function AIChatbot() {
                     key={index}
                     variant="outline"
                     size="sm"
-                    className="text-xs whitespace-nowrap"
+                    className="text-xs whitespace-nowrap interactive-button hover-scale"
                     onClick={() => {
                       if (action.action) {
                         action.action();
@@ -474,6 +480,26 @@ export function AIChatbot() {
             <DialogTitle>Secure Payment Gateway</DialogTitle>
           </DialogHeader>
           <SecurePaymentGateway onClose={() => setShowPaymentGateway(false)} />
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Features Dialog */}
+      <Dialog open={showAIFeatures} onOpenChange={setShowAIFeatures}>
+        <DialogContent className="max-w-6xl h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Enhanced AI Features</DialogTitle>
+          </DialogHeader>
+          <EnhancedAIFeatures />
+        </DialogContent>
+      </Dialog>
+
+      {/* Security Center Dialog */}
+      <Dialog open={showSecurityCenter} onOpenChange={setShowSecurityCenter}>
+        <DialogContent className="max-w-6xl h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Enhanced Security Center</DialogTitle>
+          </DialogHeader>
+          <EnhancedSecurityCenter />
         </DialogContent>
       </Dialog>
 
