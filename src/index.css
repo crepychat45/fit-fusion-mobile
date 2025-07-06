@@ -279,7 +279,32 @@
   max-height: 80vh;
 }
 
+/* Safe area support for modern mobile devices */
+.safe-area-padding {
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
 /* Mobile optimizations */
+@media (max-width: 640px) {
+  /* Extra small devices */
+  .mobile-xs-text {
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+  
+  .mobile-xs-padding {
+    padding: 0.75rem;
+  }
+  
+  .mobile-xs-button {
+    min-height: 44px;
+    min-width: 44px;
+    font-size: 0.875rem;
+  }
+}
+
 @media (max-width: 768px) {
   .chat-container {
     height: 500px;
@@ -539,7 +564,7 @@
   }
 }
 
-/* Mobile optimized glassmorphism */
+  /* Mobile optimized glassmorphism */
 @media (max-width: 768px) {
   .glass-mobile {
     background: rgba(255, 255, 255, 0.85);
@@ -552,4 +577,61 @@
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.15);
   }
+}
+
+/* Device-specific optimizations */
+@media (max-width: 480px) {
+  /* Small phones */
+  .mobile-compact {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .mobile-compact .mobile-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  /* Tablets */
+  .tablet-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+}
+
+/* Touch-friendly interactive elements */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Better mobile navigation */
+.mobile-nav-safe {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
+}
+
+/* Mobile-first responsive text */
+.responsive-text {
+  font-size: clamp(0.875rem, 2.5vw, 1rem);
+  line-height: 1.5;
+}
+
+/* Enhanced mobile buttons */
+.mobile-enhanced-button {
+  @apply mobile-button touch-target;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-enhanced-button:active {
+  transform: scale(0.96);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }

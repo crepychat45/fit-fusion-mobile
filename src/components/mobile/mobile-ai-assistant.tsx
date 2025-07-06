@@ -237,7 +237,7 @@ export function MobileAIAssistant({ isOpen, onClose }: MobileAIAssistantProps) {
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl shadow-2xl max-h-[90vh] flex flex-col"
+            className="absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl shadow-2xl max-h-[90vh] flex flex-col safe-area-padding"
           >
             {/* Header */}
             <div className="p-4 border-b bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 rounded-t-3xl">
@@ -296,7 +296,7 @@ export function MobileAIAssistant({ isOpen, onClose }: MobileAIAssistantProps) {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[50vh] custom-scrollbar">
+            <div className="flex-1 overflow-y-auto p-3 space-y-3 max-h-[50vh] custom-scrollbar xs:p-4 xs:space-y-4 sm:max-h-[55vh]">
               <AnimatePresence>
                 {messages.map((message) => (
                   <motion.div

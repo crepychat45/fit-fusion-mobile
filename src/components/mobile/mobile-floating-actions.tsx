@@ -120,7 +120,7 @@ export function MobileFloatingActions({
   };
 
   return (
-    <div className="fixed bottom-20 right-4 z-40 flex flex-col items-end space-y-3">
+    <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+5rem)] right-4 z-40 flex flex-col items-end space-y-3 sm:bottom-24 md:bottom-20">
       {/* Action Buttons */}
       <AnimatePresence>
         {isExpanded && actions.map((action, index) => (
@@ -148,7 +148,7 @@ export function MobileFloatingActions({
           >
             <Button
               onClick={action.action}
-              className={`${action.color} text-white shadow-lg hover:shadow-xl transition-all duration-200 rounded-full p-3 min-w-[48px] h-12 mobile-haptic-feedback`}
+              className={`${action.color} text-white shadow-lg hover:shadow-xl transition-all duration-200 rounded-full p-3 min-w-[44px] h-11 mobile-haptic-feedback touch-manipulation active:scale-95 xs:min-w-[48px] xs:h-12`}
             >
               <action.icon className="h-5 w-5" />
             </Button>
@@ -185,7 +185,7 @@ export function MobileFloatingActions({
       >
         <Button
           onClick={handleExpand}
-          className={`bg-primary hover:bg-primary/90 text-primary-foreground shadow-2xl hover:shadow-3xl transition-all duration-300 rounded-full p-4 w-14 h-14 mobile-haptic-feedback ${
+          className={`bg-primary hover:bg-primary/90 text-primary-foreground shadow-2xl hover:shadow-3xl transition-all duration-300 rounded-full p-3 w-12 h-12 mobile-haptic-feedback touch-manipulation active:scale-95 xs:p-4 xs:w-14 xs:h-14 ${
             isExpanded ? 'rotate-45' : ''
           }`}
         >

@@ -186,7 +186,7 @@ export function MobileSecurityCenter({ isOpen, onClose }: MobileSecurityCenterPr
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl shadow-2xl max-h-[95vh] flex flex-col"
+            className="absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl shadow-2xl max-h-[95vh] flex flex-col safe-area-padding"
           >
             {/* Header */}
             <div className="p-4 border-b bg-gradient-to-r from-green-50 via-blue-50 to-purple-50 dark:from-green-950/20 dark:via-blue-950/20 dark:to-purple-950/20 rounded-t-3xl">

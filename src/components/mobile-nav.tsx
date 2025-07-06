@@ -119,7 +119,7 @@ export function MobileNav() {
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-background/95 backdrop-blur-xl border-t border-border/50 px-4 py-2 shadow-2xl"
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-background/95 backdrop-blur-xl border-t border-border/50 px-3 py-2 shadow-2xl mobile-nav-safe xs:px-4"
       >
         <div className="flex items-center justify-around max-w-md mx-auto">
           {navItems.map((item, index) => {
@@ -138,22 +138,22 @@ export function MobileNav() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     className={cn(
-                      "flex flex-col items-center space-y-1 p-2 rounded-xl transition-all duration-200",
+                      "flex flex-col items-center space-y-1 p-1.5 rounded-xl transition-all duration-200 touch-target xs:p-2",
                       isActive 
                         ? "bg-primary/10 text-primary" 
                         : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                     )}
                   >
                     <div className={cn(
-                      "p-2 rounded-lg transition-all duration-200",
+                      "p-1.5 rounded-lg transition-all duration-200 xs:p-2",
                       isActive && "bg-primary/20"
                     )}>
                       <Icon className={cn(
-                        "h-5 w-5 transition-colors duration-200",
+                        "h-4 w-4 transition-colors duration-200 xs:h-5 xs:w-5",
                         isActive ? "text-primary" : item.color
                       )} />
                     </div>
-                    <span className="text-xs font-medium">{item.label}</span>
+                    <span className="text-xs font-medium responsive-text">{item.label}</span>
                     
                     {isActive && (
                       <motion.div

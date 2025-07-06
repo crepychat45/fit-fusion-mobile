@@ -4,6 +4,7 @@ import { MobileNav } from "@/components/mobile-nav";
 import { MobileFloatingActions } from "@/components/mobile/mobile-floating-actions";
 import { MobileAIAssistant } from "@/components/mobile/mobile-ai-assistant";
 import { MobileSecurityCenter } from "@/components/mobile/mobile-security-center";
+import { MobileDeviceDetector } from "@/components/mobile/mobile-device-detector";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ActivitySummary } from "@/components/activity-summary";
 import { userProfile } from "@/data/user";
@@ -393,6 +394,9 @@ const Index = () => {
         scheduledTime={scheduledTime}
         onTimeChange={setScheduledTime}
       />
+      
+      {/* Mobile Device Detector */}
+      <MobileDeviceDetector />
       
       {/* Mobile Features */}
       {isMobile && (
