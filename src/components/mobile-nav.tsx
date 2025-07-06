@@ -11,10 +11,20 @@ import {
   Plus,
   Settings,
   Heart,
-  Trophy
+  Trophy,
+  Shield,
+  Brain,
+  Zap,
+  Bell,
+  Camera,
+  Mic
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { MobileAIAssistant } from "@/components/mobile/mobile-ai-assistant";
+import { MobileSecurityCenter } from "@/components/mobile/mobile-security-center";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const navItems = [
   {
@@ -52,10 +62,54 @@ const navItems = [
 export function MobileNav() {
   const location = useLocation();
   const [showMore, setShowMore] = useState(false);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
+  const [showSecurity, setShowSecurity] = useState(false);
+  const [notifications, setNotifications] = useState(3);
+  const isMobile = useIsMobile();
 
   const additionalItems = [
     { href: "/settings", icon: Settings, label: "Settings", color: "text-gray-500" },
     { href: "/subscription", icon: Trophy, label: "Premium", color: "text-yellow-500" },
+  ];
+
+  const quickActions = [
+    {
+      id: "ai-assistant",
+      icon: Brain,
+      label: "AI Coach",
+      color: "text-blue-500",
+      action: () => setShowAIAssistant(true),
+      badge: "NEW"
+    },
+    {
+      id: "security",
+      icon: Shield,
+      label: "Security",
+      color: "text-green-500",
+      action: () => setShowSecurity(true),
+      badge: null
+    },
+    {
+      id: "voice",
+      icon: Mic,
+      label: "Voice",
+      color: "text-purple-500",
+      action: () => {
+        // Voice command functionality
+        if ('webkitSpeechRecognition' in window) {
+          setShowAIAssistant(true);
+        }
+      },
+      badge: null
+    },
+    {
+      id: "notifications",
+      icon: Bell,
+      label: "Alerts",
+      color: "text-orange-500",
+      action: () => window.location.href = "/notifications",
+      badge: notifications > 0 ? notifications.toString() : null
+    }
   ];
 
   return (
@@ -65,7 +119,7 @@ export function MobileNav() {
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.3 }}
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-lg border-t border-border/50 px-4 py-2 shadow-lg"
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-background/95 backdrop-blur-xl border-t border-border/50 px-4 py-2 shadow-2xl"
       >
         <div className="flex items-center justify-around max-w-md mx-auto">
           {navItems.map((item, index) => {
@@ -159,6 +213,39 @@ export function MobileNav() {
               
               <h3 className="text-lg font-semibold mb-4 text-center">More Options</h3>
               
+              {/* Quick Actions */}
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                {quickActions.map((action, index) => (
+                  <motion.div
+                    key={action.id}
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: index * 0.1, duration: 0.3 }}
+                  >
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={action.action}
+                      className="w-full flex flex-col items-center p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 transition-all duration-200 relative"
+                    >
+                      {action.badge && (
+                        <Badge 
+                          variant="secondary" 
+                          className="absolute -top-1 -right-1 text-xs px-1 py-0 h-5 min-w-[20px] bg-primary text-primary-foreground"
+                        >
+                          {action.badge}
+                        </Badge>
+                      )}
+                      <div className={cn("p-3 rounded-xl bg-white/80 shadow-sm mb-2", action.color)}>
+                        <action.icon className="h-5 w-5" />
+                      </div>
+                      <span className="text-sm font-medium">{action.label}</span>
+                    </motion.button>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Traditional Items */}
               <div className="grid grid-cols-2 gap-4 mb-6">
                 {additionalItems.map((item, index) => {
                   const Icon = item.icon;
@@ -167,7 +254,7 @@ export function MobileNav() {
                       key={item.href}
                       initial={{ scale: 0, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
-                      transition={{ delay: index * 0.1, duration: 0.3 }}
+                      transition={{ delay: (quickActions.length + index) * 0.1, duration: 0.3 }}
                     >
                       <Link 
                         to={item.href}
@@ -199,6 +286,18 @@ export function MobileNav() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Mobile AI Assistant */}
+      <MobileAIAssistant 
+        isOpen={showAIAssistant} 
+        onClose={() => setShowAIAssistant(false)} 
+      />
+
+      {/* Mobile Security Center */}
+      <MobileSecurityCenter 
+        isOpen={showSecurity} 
+        onClose={() => setShowSecurity(false)} 
+      />
     </>
   );
 }

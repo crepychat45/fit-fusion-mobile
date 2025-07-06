@@ -1,6 +1,10 @@
 
 import React, { useState, useEffect } from "react";
 import { MobileNav } from "@/components/mobile-nav";
+import { MobileFloatingActions } from "@/components/mobile/mobile-floating-actions";
+import { MobileAIAssistant } from "@/components/mobile/mobile-ai-assistant";
+import { MobileSecurityCenter } from "@/components/mobile/mobile-security-center";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { ActivitySummary } from "@/components/activity-summary";
 import { userProfile } from "@/data/user";
 import { DailyTip } from "@/components/daily-tip";
@@ -51,6 +55,9 @@ const Index = () => {
   const [scheduledTime, setScheduledTime] = useState("07:00 AM");
   const [isLoading, setIsLoading] = useState(true);
   const [showAdvancedFeatures, setShowAdvancedFeatures] = useState(false);
+  const [showMobileAI, setShowMobileAI] = useState(false);
+  const [showMobileSecurity, setShowMobileSecurity] = useState(false);
+  const isMobile = useIsMobile();
   
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -64,6 +71,17 @@ const Index = () => {
   const openRescheduleDialog = (workout: any) => {
     setSelectedWorkout(workout);
     setShowReschedule(true);
+  };
+
+  const handleQuickWorkout = () => {
+    // Navigate to quick workout selection
+    window.location.href = "/workouts?quick=true";
+  };
+
+  const handleVoiceCommand = () => {
+    if (isMobile) {
+      setShowMobileAI(true);
+    }
   };
 
   const containerVariants = {
@@ -375,6 +393,28 @@ const Index = () => {
         scheduledTime={scheduledTime}
         onTimeChange={setScheduledTime}
       />
+      
+      {/* Mobile Features */}
+      {isMobile && (
+        <>
+          <MobileFloatingActions 
+            onAIAssistant={() => setShowMobileAI(true)}
+            onSecurity={() => setShowMobileSecurity(true)}
+            onVoiceCommand={handleVoiceCommand}
+            onQuickWorkout={handleQuickWorkout}
+          />
+          
+          <MobileAIAssistant 
+            isOpen={showMobileAI}
+            onClose={() => setShowMobileAI(false)}
+          />
+          
+          <MobileSecurityCenter 
+            isOpen={showMobileSecurity}
+            onClose={() => setShowMobileSecurity(false)}
+          />
+        </>
+      )}
       
       <MobileNav />
     </div>
