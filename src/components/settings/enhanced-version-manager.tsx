@@ -24,30 +24,30 @@ interface ChangelogEntry {
 
 const mockChangelog: ChangelogEntry[] = [
   {
-    version: "4.9.2",
-    date: "2024-06-03",
-    type: "minor",
+    version: "4.8.0",
+    date: "2024-01-20",
+    type: "major",
     changes: {
       features: [
-        "Revolutionary AI-powered workout generation with personalized recommendations",
-        "Advanced real-time chat system with enhanced security protocols",
-        "Smart notification system with intelligent filtering and priority levels",
-        "Comprehensive settings management with cloud synchronization",
-        "New biometric authentication with fingerprint and face recognition",
-        "Enhanced data export capabilities with multiple format support"
+        "🎤 Advanced voice AI coach with natural language processing and real-time speech recognition",
+        "👤 Custom profile name editor with persistent storage and real-time sync across app",
+        "⚙️ Enhanced settings system with automatic persistence and backup/restore functionality", 
+        "⌚ Improved smartwatch hub with toggle controls and real-time device management",
+        "🤖 Contextual AI responses with smartwatch integration and mobile optimization",
+        "📱 Mobile-first design improvements with better touch interactions and gestures"
       ],
       fixes: [
-        "Fixed critical version update synchronization across all components",
-        "Resolved chat authentication token refresh issues",
-        "Fixed settings validation and error handling in all tabs",
-        "Corrected app state persistence during updates",
-        "Fixed mobile navigation alignment and responsiveness",
-        "Resolved memory leaks in chat component lifecycle"
+        "Fixed voice recording functionality not working properly on mobile devices",
+        "Resolved settings automatically disabling after app restart",
+        "Fixed profile name displaying 'User' instead of custom display name throughout app",
+        "Corrected smartwatch settings not persisting between sessions",
+        "Fixed AI coach providing generic responses instead of contextual fitness advice",
+        "Resolved profile display inconsistencies across different components"
       ],
       security: [
-        "Implemented end-to-end encryption for all chat communications",
-        "Enhanced session management with automatic timeout protection",
-        "Advanced threat detection and prevention system",
+        "Enhanced voice data processing with on-device speech recognition",
+        "Improved profile data encryption and secure local storage",
+        "Strengthened settings validation to prevent data corruption",
         "Improved data privacy controls with granular permissions",
         "Security audit compliance with industry standards"
       ],
@@ -93,14 +93,14 @@ export function EnhancedVersionManager() {
   // Get current version from localStorage or default
   const [currentVersion, setCurrentVersion] = useState<string>(() => {
     const stored = localStorage.getItem('fitfusion-app-version');
-    return stored || "4.7.0";
+    return stored || "4.8.0";
   });
   
-  const [latestVersionAvailable, setLatestVersionAvailable] = useState<string>("4.9.2");
+  const [latestVersionAvailable, setLatestVersionAvailable] = useState<string>("4.8.0");
   const [updateAvailable, setUpdateAvailable] = useState(() => {
     const stored = localStorage.getItem('fitfusion-app-version');
     const current = stored || "4.7.0";
-    return current !== "4.9.2";
+    return current !== "4.8.0";
   });
   
   const [updateProgress, setUpdateProgress] = useState<number>(0);

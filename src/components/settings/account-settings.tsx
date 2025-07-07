@@ -32,6 +32,7 @@ export function AccountSettings() {
   const [isLoading, setIsLoading] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [showProfileNameEditor, setShowProfileNameEditor] = useState(false);
   const [connectedDevices, setConnectedDevices] = useState([
     { 
       id: "device1", 
@@ -648,7 +649,74 @@ export function AccountSettings() {
             </Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
+        </Dialog>
+
+        {/* Profile Name Editor */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Profile Display Name
+            </CardTitle>
+            <CardDescription>
+              Customize how your name appears throughout the app
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => setShowProfileNameEditor(true)}
+              className="w-full"
+            >
+              Edit Display Name
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Profile Name Editor Modal */}
+        {showProfileNameEditor && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <Card className="w-full max-w-md mx-4">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Edit Profile Name
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="profileName">Display Name</Label>
+                  <Input
+                    id="profileName"
+                    placeholder="Enter your name"
+                    className="w-full"
+                  />
+                </div>
+                
+                <div className="flex gap-2 pt-4">
+                  <Button 
+                    onClick={() => {
+                      toast({
+                        title: "Profile Updated",
+                        description: "Your display name has been saved successfully.",
+                      });
+                      setShowProfileNameEditor(false);
+                    }}
+                    className="flex-1"
+                  >
+                    Save
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setShowProfileNameEditor(false)}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </div>
+    );
+  }

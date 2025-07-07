@@ -66,8 +66,20 @@ const Index = () => {
       setIsLoading(false);
       setShowAdvancedFeatures(true);
     }, 1000);
+
+    // Listen for profile updates
+    const handleProfileUpdate = () => {
+      // Force re-render of profile components
+      setIsLoading(true);
+      setTimeout(() => setIsLoading(false), 500);
+    };
+
+    window.addEventListener('profileUpdated', handleProfileUpdate);
     
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('profileUpdated', handleProfileUpdate);
+    };
   }, []);
   
   const openRescheduleDialog = (workout: any) => {

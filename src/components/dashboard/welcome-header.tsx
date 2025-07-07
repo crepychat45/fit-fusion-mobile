@@ -37,48 +37,68 @@ export function WelcomeHeader({ userName, showCompactProfile = false }: WelcomeH
         avatar: null
       };
 
-      // Check userName prop first
+      // Check for custom profile name first
+      try {
+        const customProfile = localStorage.getItem('fitfusion-custom-profile');
+        if (customProfile) {
+          const parsed = JSON.parse(customProfile);
+          if (parsed.displayName && parsed.displayName.trim()) {
+            profile.name = parsed.displayName.trim();
+            profile.fullName = parsed.displayName.trim();
+            console.log("Found custom profile name:", parsed.displayName);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading custom profile:', error);
+      }
+
+      // Check userName prop next
       if (userName && userName.trim() && userName !== "John Smith") {
         console.log("Found userName prop:", userName);
-        profile.name = userName.trim();
-        profile.fullName = userName.trim();
+        if (profile.name === "User") { // Only use if no custom profile
+          profile.name = userName.trim();
+          profile.fullName = userName.trim();
+        }
       }
 
       // Check auth user data
       if (user) {
         console.log("Found auth user:", user);
         
-        // Check for full name in metadata
-        if (user.user_metadata?.full_name) {
-          profile.fullName = user.user_metadata.full_name;
-          profile.name = user.user_metadata.full_name;
+        // Only use auth data if no custom profile exists
+        if (profile.name === "User") {
+          // Check for full name in metadata
+          if (user.user_metadata?.full_name) {
+            profile.fullName = user.user_metadata.full_name;
+            profile.name = user.user_metadata.full_name;
+          }
+          
+          // Check for display name
+          if (user.user_metadata?.display_name) {
+            profile.name = user.user_metadata.display_name;
+            profile.fullName = user.user_metadata.display_name;
+          }
+          
+          // Check for first and last name
+          if (user.user_metadata?.first_name) {
+            profile.firstName = user.user_metadata.first_name;
+          }
+          if (user.user_metadata?.last_name) {
+            profile.lastName = user.user_metadata.last_name;
+          }
+          
+          // Check for name field
+          if (user.user_metadata?.name) {
+            profile.name = user.user_metadata.name;
+          }
         }
         
-        // Check for display name
-        if (user.user_metadata?.display_name) {
-          profile.name = user.user_metadata.display_name;
-          profile.fullName = user.user_metadata.display_name;
-        }
-        
-        // Check for first and last name
-        if (user.user_metadata?.first_name) {
-          profile.firstName = user.user_metadata.first_name;
-        }
-        if (user.user_metadata?.last_name) {
-          profile.lastName = user.user_metadata.last_name;
-        }
-        
-        // Check for name field
-        if (user.user_metadata?.name) {
-          profile.name = user.user_metadata.name;
-        }
-        
-        // Use email if available
+        // Always use email if available
         if (user.email) {
           profile.email = user.email;
           
-          // If no name found, use email prefix as fallback
-          if (!profile.name || profile.name === "User") {
+          // If no name found anywhere, use email prefix as final fallback
+          if (profile.name === "User") {
             const emailPrefix = user.email.split('@')[0];
             profile.name = emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
             profile.fullName = profile.name;
@@ -92,15 +112,15 @@ export function WelcomeHeader({ userName, showCompactProfile = false }: WelcomeH
       }
 
       // Build full name if we have first and last
-      if (profile.firstName && profile.lastName) {
+      if (profile.firstName && profile.lastName && profile.name === "User") {
         profile.fullName = `${profile.firstName} ${profile.lastName}`;
         profile.name = profile.fullName;
       }
 
-      // Check localStorage for saved profile
+      // Check localStorage for saved profile (legacy support)
       try {
         const savedProfile = localStorage.getItem('fitfusion-user-profile');
-        if (savedProfile) {
+        if (savedProfile && profile.name === "User") {
           const parsed = JSON.parse(savedProfile);
           if (parsed.name && parsed.name !== "John Smith") {
             profile.name = parsed.name;

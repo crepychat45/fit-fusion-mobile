@@ -89,28 +89,46 @@ export function MobileAIAssistant({ isOpen, onClose }: MobileAIAssistantProps) {
 
     const mobileResponses = {
       workout: [
-        "🏋️ Perfect! Let's create a quick mobile-friendly workout. I can guide you through exercises step-by-step with voice commands.",
-        "💪 Great question! I'll show you proper form with visual cues optimized for your phone screen.",
-        "🎯 Your progress is amazing! Tap the stats to see detailed mobile analytics.",
-        "🔥 Let's do a 5-minute HIIT session! I'll count down and motivate you through each exercise."
+        "🏋️ Perfect! Let's create a quick mobile-friendly workout. I can guide you through exercises step-by-step with voice commands. Say 'start workout' to begin!",
+        "💪 Great question! I'll show you proper form with visual cues optimized for your phone screen. Your current form score is 8.5/10 - excellent work!",
+        "🎯 Your progress is amazing! You've completed 12 workouts this month with 85% consistency. Tap the stats to see detailed mobile analytics.",
+        "🔥 Let's do a 5-minute HIIT session! I'll count down and motivate you through each exercise. Ready? 3... 2... 1... GO!",
+        "⚡ Based on your heart rate data, I recommend a moderate intensity workout today. Your recovery is at 92% - perfect for strength training!",
+        "🏃‍♂️ Your running pace has improved by 15% this month! Let's build on that momentum with interval training.",
+        "🎵 I've curated a high-energy playlist that matches your workout rhythm. Music sync activated!"
       ],
       nutrition: [
-        "🥗 I'll create a personalized meal plan you can save to your mobile gallery for grocery shopping.",
-        "⚡ Smart choice! Here's a quick nutrition tip you can screenshot and save.",
-        "💧 Hydration reminder set! I'll notify you throughout the day on your mobile.",
-        "📱 Scan your meals with your camera - I can analyze nutrition content instantly!"
+        "🥗 I'll create a personalized meal plan based on your goals: muscle gain with 2,200 calories daily. Saved to your mobile for grocery shopping!",
+        "⚡ Smart choice! Here's your macro breakdown: 40% carbs, 30% protein, 30% fats. Screenshot this for easy reference.",
+        "💧 Hydration reminder set! You need 2.5L daily. I'll notify you every 2 hours - next reminder in 1h 45m.",
+        "📱 Scan your meals with your camera - I can analyze nutrition content instantly! Just point and tap the scan button.",
+        "🍎 Your vitamin D levels look low. Consider adding salmon, eggs, or supplements. I've added suggestions to your meal plan.",
+        "⏰ Perfect meal timing! Eating protein within 30 minutes post-workout maximizes muscle recovery.",
+        "🌟 Your nutrition consistency is 88% this week - fantastic! Small improvements lead to big results."
       ],
       motivation: [
-        "🔥 You're unstoppable! Your mobile stats show incredible consistency!",
-        "⭐ Every rep counts! I'm tracking your progress right here on mobile.",
-        "💎 Champions are made in moments like this. Keep pushing!",
-        "🚀 Your mobile fitness journey is inspiring. Let's crush today's goals!"
+        "🔥 You're unstoppable! Your mobile stats show 5-day streak with 95% goal completion. That's champion-level consistency!",
+        "⭐ Every rep counts! You've lifted 12,540 lbs this week - that's literally a small car! I'm tracking your amazing progress.",
+        "💎 Champions are made in moments like this. You've overcome 3 plateau challenges - your dedication is inspiring!",
+        "🚀 Your mobile fitness journey is inspiring. 847 calories burned today, heart rate peaked at 165 BPM - you crushed those goals!",
+        "🏆 Remember why you started. You wanted to feel stronger, healthier, more confident. Look how far you've come!",
+        "⚡ Your body is adapting perfectly. Recovery heart rate improved by 8 BPM - your cardiovascular fitness is through the roof!",
+        "🌟 Tough day? I've got your back. Even 10 minutes of movement counts. Let's start small and build momentum together."
       ],
       mobile: [
-        "📱 I'm optimized for mobile! Try voice commands, camera features, or quick gestures.",
-        "🎯 Mobile fitness made easy! I adapt to your screen size and usage patterns.",
-        "⚡ Quick mobile tip: Shake your phone for instant workout suggestions!",
-        "📊 Your mobile dashboard has all your stats in bite-sized, easy-to-read cards."
+        "📱 I'm your pocket fitness expert! Try voice commands ('start workout'), camera nutrition scanning, or shake for quick suggestions!",
+        "🎯 Mobile fitness revolution! I adapt to your screen, track your movements, sync with wearables, and optimize for one-handed use.",
+        "⚡ Pro mobile tips: Double-tap for quick workouts, long-press for voice mode, swipe up for stats, and use landscape for exercise videos!",
+        "📊 Your mobile dashboard: 12 workouts completed, 5-day streak, 847 cal burned today, next workout: Upper Body (tomorrow 7 AM).",
+        "🔋 Battery-optimized AI: I use 15% less power than other fitness apps while providing 3x more personalized insights!",
+        "📲 Offline mode activated! Your workouts, progress, and AI coaching work even without internet. Sync when connected.",
+        "🎮 Gamified fitness: You've unlocked 'Consistency Champion' badge! Next: 'Calorie Crusher' (burn 1000+ in one session)."
+      ],
+      smartwatch: [
+        "⌚ Your smartwatch data shows optimal workout timing at 7 AM when your HRV is highest. Shall I schedule your next session?",
+        "📡 Smartwatch sync complete! Real-time heart rate, calories, steps, and sleep quality all integrated for perfect coaching.",
+        "🔔 Your watch detected elevated stress. I recommend 5 minutes of guided breathing. Watch will vibrate with breathing cues.",
+        "📈 Watch analytics: You're most active on Tuesdays (avg 8,500 steps) and least on Sundays (4,200 steps). Let's balance this!"
       ]
     };
 
@@ -188,18 +206,62 @@ export function MobileAIAssistant({ isOpen, onClose }: MobileAIAssistantProps) {
     if (!isRecording) {
       // Start voice recording
       if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-        toast({
-          title: "🎤 Voice Recording Started",
-          description: "Speak your fitness question now...",
-        });
+        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+        
+        recognition.onstart = () => {
+          toast({
+            title: "🎤 Voice Recording Started",
+            description: "Speak your fitness question now...",
+          });
+        };
+        
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          setInputValue(transcript);
+          setIsRecording(false);
+          toast({
+            title: "✅ Voice Captured",
+            description: `Transcribed: "${transcript}"`,
+          });
+          
+          // Auto-send the message after voice input
+          setTimeout(() => {
+            if (transcript.trim()) {
+              handleSendMessage();
+            }
+          }, 500);
+        };
+        
+        recognition.onerror = (event) => {
+          setIsRecording(false);
+          toast({
+            title: "❌ Voice Error",
+            description: "Speech recognition failed. Please try again.",
+            variant: "destructive"
+          });
+        };
+        
+        recognition.onend = () => {
+          setIsRecording(false);
+        };
+        
+        recognition.start();
       } else {
         toast({
           title: "Voice Not Supported",
           description: "Voice recognition not available on this device.",
           variant: "destructive"
         });
+        setIsRecording(false);
       }
     } else {
+      // Stop recording
+      setIsRecording(false);
       toast({
         title: "🔄 Processing Voice",
         description: "Converting your speech to text...",

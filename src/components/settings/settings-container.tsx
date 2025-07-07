@@ -12,6 +12,7 @@ import { AppUpdateManager } from "./app-update-manager";
 import { SecurityCenter } from "./security-center";
 import { VersionManager } from "./version-manager";
 import { EnhancedVersionManager } from "./enhanced-version-manager";
+import { ProfileNameEditor } from "@/components/profile-name-editor";
 import { SettingsNavigation } from "./settings-navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
