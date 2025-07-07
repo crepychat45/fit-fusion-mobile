@@ -8,12 +8,14 @@ import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
 import { motion } from "framer-motion";
+import { EnhancedProfileDisplay } from "./enhanced-profile-display";
 
 interface WelcomeHeaderProps {
   userName?: string;
+  showCompactProfile?: boolean;
 }
 
-export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
+export function WelcomeHeader({ userName, showCompactProfile = false }: WelcomeHeaderProps) {
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState<string>("User");
   const [userEmail, setUserEmail] = useState<string>("user@example.com");
@@ -179,73 +181,79 @@ export function WelcomeHeader({ userName }: WelcomeHeaderProps) {
       <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full blur-2xl" />
       
       <div className="relative z-10">
-        <div className="flex items-start justify-between mb-6">
-          {/* Enhanced User Profile Section */}
-          <div className="flex items-center gap-4">
-            <motion.div 
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="relative"
-            >
-              <Avatar className="w-16 h-16 border-3 border-white/30 shadow-lg">
-                <AvatarImage src={userAvatar || undefined} alt="Profile" />
-                <AvatarFallback className="bg-white/20 text-white font-bold text-xl backdrop-blur-sm">
-                  {getInitials()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-3 border-white shadow-sm" />
-            </motion.div>
-            
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-3 mb-1">
-                <h1 className="text-2xl font-bold text-white truncate">
-                  {getGreeting()}, {displayName}
-                </h1>
-                <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0 shadow-lg flex items-center gap-1">
-                  <Crown className="w-3 h-3" />
-                  Pro
-                </Badge>
-              </div>
-              <div className="flex flex-col gap-1">
-                <div className="text-white/90 text-sm font-medium">
-                  {format(new Date(), "EEEE, MMMM d")}
+        {showCompactProfile ? (
+          <div className="mb-6">
+            <EnhancedProfileDisplay userName={displayName} />
+          </div>
+        ) : (
+          <div className="flex items-start justify-between mb-6">
+            {/* Enhanced User Profile Section */}
+            <div className="flex items-center gap-4">
+              <motion.div 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="relative"
+              >
+                <Avatar className="w-16 h-16 border-3 border-white/30 shadow-lg">
+                  <AvatarImage src={userAvatar || undefined} alt="Profile" />
+                  <AvatarFallback className="bg-white/20 text-white font-bold text-xl backdrop-blur-sm">
+                    {getInitials()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-3 border-white shadow-sm" />
+              </motion.div>
+              
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-3 mb-1">
+                  <h1 className="text-2xl font-bold text-white truncate">
+                    {getGreeting()}, {displayName}
+                  </h1>
+                  <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0 shadow-lg flex items-center gap-1">
+                    <Crown className="w-3 h-3" />
+                    Pro
+                  </Badge>
                 </div>
-                <div className="text-white/80 text-sm truncate flex items-center gap-2">
-                  <User className="w-3 h-3" />
-                  <span className="truncate">{userEmail}</span>
+                <div className="flex flex-col gap-1">
+                  <div className="text-white/90 text-sm font-medium">
+                    {format(new Date(), "EEEE, MMMM d")}
+                  </div>
+                  <div className="text-white/80 text-sm truncate flex items-center gap-2">
+                    <User className="w-3 h-3" />
+                    <span className="truncate">{userEmail}</span>
+                  </div>
                 </div>
               </div>
             </div>
+            
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm rounded-full shadow-lg"
+                onClick={() => navigate("/notifications")}
+              >
+                <Bell className="h-5 w-5" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm rounded-full shadow-lg"
+                onClick={() => navigate("/profile")}
+              >
+                <User className="h-5 w-5" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm rounded-full shadow-lg"
+                onClick={() => navigate("/settings")}
+              >
+                <Settings className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
-          
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm rounded-full shadow-lg"
-              onClick={() => navigate("/notifications")}
-            >
-              <Bell className="h-5 w-5" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm rounded-full shadow-lg"
-              onClick={() => navigate("/profile")}
-            >
-              <User className="h-5 w-5" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm rounded-full shadow-lg"
-              onClick={() => navigate("/settings")}
-            >
-              <Settings className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
+        )}
 
         {/* Enhanced Quick Stats */}
         <motion.div 

@@ -10,6 +10,7 @@ import { ActivitySummary } from "@/components/activity-summary";
 import { userProfile } from "@/data/user";
 import { DailyTip } from "@/components/daily-tip";
 import { WelcomeHeader } from "@/components/dashboard/welcome-header";
+import { EnhancedSmartwatchHub } from "@/components/dashboard/enhanced-smartwatch-hub";
 import { TodaysWorkout } from "@/components/dashboard/todays-workout";
 import { UpcomingWorkouts } from "@/components/dashboard/upcoming-workouts";
 import { RecentActivitySection } from "@/components/dashboard/recent-activity-section";
@@ -129,7 +130,7 @@ const Index = () => {
         />
       </div>
 
-      <WelcomeHeader userName={userProfile.name} />
+      <WelcomeHeader userName={userProfile.name} showCompactProfile={true} />
       
       <motion.div
         variants={containerVariants}
@@ -233,18 +234,18 @@ const Index = () => {
           )}
         </AnimatePresence>
 
-        {/* Enhanced Watch Panel with floating animation */}
+        {/* Enhanced Smartwatch Hub */}
         <motion.div 
           variants={itemVariants} 
           className="px-4"
           whileHover={{ y: -2 }}
         >
           <motion.div
-            animate={{ y: [0, -5, 0] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+            animate={{ y: [0, -3, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             className="hover-lift"
           >
-            <WatchPanel />
+            <EnhancedSmartwatchHub />
           </motion.div>
         </motion.div>
 

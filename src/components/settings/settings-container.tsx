@@ -11,6 +11,7 @@ import { EnhancedSettingsValidation } from "./enhanced-settings-validation";
 import { AppUpdateManager } from "./app-update-manager";
 import { SecurityCenter } from "./security-center";
 import { VersionManager } from "./version-manager";
+import { EnhancedVersionManager } from "./enhanced-version-manager";
 import { SettingsNavigation } from "./settings-navigation";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -343,8 +344,8 @@ export function SettingsContainer() {
             
             <TabsContent value="updates" className="mt-0">
               <div className="space-y-6">
+                <EnhancedVersionManager />
                 <AppUpdateManager />
-                <VersionManager />
               </div>
             </TabsContent>
             
