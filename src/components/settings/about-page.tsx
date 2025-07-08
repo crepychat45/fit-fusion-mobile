@@ -156,13 +156,11 @@ export function AboutPage() {
   ];
 
   const team = [
-    { name: "Alex Johnson", role: "Lead Developer", avatar: "AJ" },
-    { name: "Sarah Chen", role: "UI/UX Designer", avatar: "SC" },
-    { name: "Mike Rodriguez", role: "Backend Engineer", avatar: "MR" },
-    { name: "Emily Davis", role: "Product Manager", avatar: "ED" },
-    { name: "David Kim", role: "AI Specialist", avatar: "DK" },
-    { name: "Lisa Wang", role: "Mobile Developer", avatar: "LW" },
-    { name: "James Smith", role: "QA Engineer", avatar: "JS" }
+    { name: "Juned Khan", role: "Lead Developer", avatar: "JK" },
+    { name: "Sara Thompson", role: "UI/UX Designer", avatar: "ST" },
+    { name: "Samir Khan", role: "Backend Engineer", avatar: "SK" },
+    { name: "Ajay Mortel", role: "Product Manager", avatar: "AM" },
+    { name: "Sahil Khan", role: "AI Specialist", avatar: "SH" }
   ];
 
   const handleFeedback = () => {

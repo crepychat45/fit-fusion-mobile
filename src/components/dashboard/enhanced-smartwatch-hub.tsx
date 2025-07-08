@@ -4,8 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import watchFacesImage from "@/assets/watch-faces-preview.jpg";
+import watchWallpapersImage from "@/assets/watch-wallpapers.jpg";
 import { 
   Watch, 
   Battery, 
@@ -25,7 +28,13 @@ import {
   TrendingUp,
   Shield,
   PlayCircle,
-  PauseCircle
+  PauseCircle,
+  Image as ImageIcon,
+  Palette,
+  Monitor,
+  Download,
+  Star,
+  Clock
 } from "lucide-react";
 
 interface SmartWatchData {
@@ -120,6 +129,15 @@ export function EnhancedSmartwatchHub() {
   const [selectedWatch, setSelectedWatch] = useState<string>(mockWatchDevices[0]?.id || "");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeWorkout, setActiveWorkout] = useState<WorkoutData | null>(currentWorkout);
+  const [selectedWallpaper, setSelectedWallpaper] = useState("nature");
+  const [watchSettings, setWatchSettings] = useState({
+    notifications: true,
+    heartRateMonitoring: true,
+    sleepTracking: true,
+    workoutAutoDetect: true,
+    alwaysOnDisplay: false,
+    waterReminder: true
+  });
   const { toast } = useToast();
 
   const selectedWatchData = watches.find(w => w.id === selectedWatch);
@@ -432,7 +450,7 @@ export function EnhancedSmartwatchHub() {
                 </div>
               </motion.div>
 
-              {/* Features & Active Workout */}
+              {/* Features & Customization */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Device Features */}
                 <Card>
@@ -460,6 +478,98 @@ export function EnhancedSmartwatchHub() {
                   </CardContent>
                 </Card>
 
+                {/* Watch Customization */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Palette className="h-5 w-5 text-purple-600" />
+                      Watch Customization
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Watch Faces */}
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" className="w-full justify-start gap-2 h-auto p-3">
+                          <Clock className="h-4 w-4" />
+                          <div className="text-left">
+                            <div className="font-medium">Watch Faces</div>
+                            <div className="text-xs text-muted-foreground">Choose from 50+ designs</div>
+                          </div>
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                          <DialogTitle>Choose Watch Face</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <img src={watchFacesImage} alt="Watch Faces" className="w-full rounded-lg" />
+                          <div className="grid grid-cols-4 gap-2">
+                            {["Digital", "Analog", "Sport", "Minimal"].map((face) => (
+                              <Button key={face} variant="outline" size="sm">
+                                {face}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+
+                    {/* Wallpapers */}
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" className="w-full justify-start gap-2 h-auto p-3">
+                          <ImageIcon className="h-4 w-4" />
+                          <div className="text-left">
+                            <div className="font-medium">Wallpapers</div>
+                            <div className="text-xs text-muted-foreground">Personalize your display</div>
+                          </div>
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                          <DialogTitle>Choose Wallpaper</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <img src={watchWallpapersImage} alt="Watch Wallpapers" className="w-full rounded-lg" />
+                          <div className="grid grid-cols-3 gap-2">
+                            {["Nature", "Abstract", "Fitness"].map((wallpaper) => (
+                              <Button 
+                                key={wallpaper} 
+                                variant={selectedWallpaper === wallpaper.toLowerCase() ? "default" : "outline"} 
+                                size="sm"
+                                onClick={() => setSelectedWallpaper(wallpaper.toLowerCase())}
+                              >
+                                {wallpaper}
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+
+                    {/* Quick Settings */}
+                    <div className="grid grid-cols-2 gap-2">
+                      {Object.entries(watchSettings).map(([key, value]) => (
+                        <div key={key} className="flex items-center justify-between p-2 border rounded">
+                          <span className="text-xs capitalize">{key.replace(/([A-Z])/g, ' $1')}</span>
+                          <Button 
+                            variant={value ? "default" : "outline"} 
+                            size="sm"
+                            onClick={() => setWatchSettings(prev => ({ ...prev, [key]: !prev[key as keyof typeof prev] }))}
+                            className="h-6 px-2"
+                          >
+                            {value ? "On" : "Off"}
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Active Workout & Device Details */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Active Workout */}
                 {activeWorkout && watch.connected && (
                   <Card>
@@ -471,51 +581,97 @@ export function EnhancedSmartwatchHub() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <h3 className="font-semibold text-lg">{activeWorkout.name}</h3>
-                          <Badge 
-                            variant={activeWorkout.status === 'active' ? "default" : "secondary"}
-                            className={activeWorkout.status === 'active' ? "bg-orange-600 animate-pulse" : ""}
-                          >
-                            {activeWorkout.status}
-                          </Badge>
+                        <div className="text-center p-4 bg-orange-50 dark:bg-orange-950/20 rounded-lg">
+                          <h4 className="font-bold text-lg text-orange-700 dark:text-orange-400">
+                            {activeWorkout.name}
+                          </h4>
+                          <div className="grid grid-cols-3 gap-3 mt-3">
+                            <div>
+                              <div className="text-2xl font-bold">{activeWorkout.duration}</div>
+                              <div className="text-xs text-muted-foreground">Duration</div>
+                            </div>
+                            <div>
+                              <div className="text-2xl font-bold text-red-600">{activeWorkout.heartRate}</div>
+                              <div className="text-xs text-muted-foreground">BPM</div>
+                            </div>
+                            <div>
+                              <div className="text-2xl font-bold text-orange-600">{activeWorkout.calories}</div>
+                              <div className="text-xs text-muted-foreground">Calories</div>
+                            </div>
+                          </div>
                         </div>
                         
-                        <div className="grid grid-cols-3 gap-3 text-center">
-                          <div className="p-3 bg-muted/50 rounded-lg">
-                            <div className="font-bold text-lg text-blue-600">{activeWorkout.duration}</div>
-                            <div className="text-xs text-muted-foreground">Duration</div>
-                          </div>
-                          <div className="p-3 bg-muted/50 rounded-lg">
-                            <div className="font-bold text-lg text-red-600">{activeWorkout.heartRate}</div>
-                            <div className="text-xs text-muted-foreground">BPM</div>
-                          </div>
-                          <div className="p-3 bg-muted/50 rounded-lg">
-                            <div className="font-bold text-lg text-orange-600">{activeWorkout.calories}</div>
-                            <div className="text-xs text-muted-foreground">Calories</div>
-                          </div>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={handleWorkoutAction}
+                            className={`flex-1 ${
+                              activeWorkout.status === 'active' 
+                                ? 'bg-orange-600 hover:bg-orange-700' 
+                                : 'bg-green-600 hover:bg-green-700'
+                            }`}
+                          >
+                            {activeWorkout.status === 'active' ? (
+                              <>
+                                <PauseCircle className="h-4 w-4 mr-2" />
+                                Pause
+                              </>
+                            ) : (
+                              <>
+                                <PlayCircle className="h-4 w-4 mr-2" />
+                                Resume
+                              </>
+                            )}
+                          </Button>
+                          <Button variant="outline" size="sm">
+                            End Workout
+                          </Button>
                         </div>
-
-                        <Button 
-                          onClick={handleWorkoutAction}
-                          className="w-full bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700"
-                        >
-                          {activeWorkout.status === 'active' ? (
-                            <>
-                              <PauseCircle className="h-4 w-4 mr-2" />
-                              Pause Workout
-                            </>
-                          ) : (
-                            <>
-                              <PlayCircle className="h-4 w-4 mr-2" />
-                              Resume Workout
-                            </>
-                          )}
-                        </Button>
                       </div>
                     </CardContent>
                   </Card>
                 )}
+
+                {/* Watch Details */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Monitor className="h-5 w-5 text-blue-600" />
+                      Device Details
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div className="flex justify-between">
+                        <span>Model:</span>
+                        <span className="font-medium">{watch.model}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Storage:</span>
+                        <span className="font-medium">32GB</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>RAM:</span>
+                        <span className="font-medium">1GB</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>OS:</span>
+                        <span className="font-medium">watchOS 10</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Water Rating:</span>
+                        <span className="font-medium">50m</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>GPS:</span>
+                        <span className="font-medium text-green-600">Active</span>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm" className="w-full">
+                      <Download className="h-4 w-4 mr-2" />
+                      Download Companion App
+                    </Button>
+                  </CardContent>
+                </Card>
               </div>
             </TabsContent>
           ))}

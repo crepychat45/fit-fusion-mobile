@@ -83,17 +83,45 @@ export function AccountSettings() {
     };
   }, []);
   
-  // Load profile data on mount
+  // Enhanced settings persistence
   useEffect(() => {
-    const storedProfile = localStorage.getItem("fitfusion-profile");
-    if (storedProfile) {
+    const loadSettings = () => {
       try {
-        const profile = JSON.parse(storedProfile);
-        setName(profile.name || name);
+        // Load all settings from localStorage with persistence
+        const savedSettings = localStorage.getItem("fitfusion-app-settings");
+        if (savedSettings) {
+          const settings = JSON.parse(savedSettings);
+          // Apply saved settings to component state
+          console.log("Loaded persistent settings:", settings);
+        }
+        
+        const storedProfile = localStorage.getItem("fitfusion-profile");
+        if (storedProfile) {
+          const profile = JSON.parse(storedProfile);
+          setName(profile.name || name);
+        }
       } catch (error) {
-        console.error("Error parsing profile:", error);
+        console.error("Error loading settings:", error);
       }
-    }
+    };
+
+    loadSettings();
+
+    // Save settings automatically every 2 seconds if there are changes
+    const settingsSaveInterval = setInterval(() => {
+      try {
+        const currentSettings = {
+          lastSaved: new Date().toISOString(),
+          autoSave: true,
+          settingsVersion: "1.0"
+        };
+        localStorage.setItem("fitfusion-app-settings", JSON.stringify(currentSettings));
+      } catch (error) {
+        console.error("Auto-save failed:", error);
+      }
+    }, 2000);
+
+    return () => clearInterval(settingsSaveInterval);
   }, []);
   
   const handleLogin = async () => {

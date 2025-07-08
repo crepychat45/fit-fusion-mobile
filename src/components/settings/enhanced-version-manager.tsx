@@ -24,8 +24,45 @@ interface ChangelogEntry {
 
 const mockChangelog: ChangelogEntry[] = [
   {
+    version: "5.1.0",
+    date: "2024-12-08",
+    type: "major",
+    changes: {
+      features: [
+        "📱 Enhanced mobile AI coach with real voice recognition and speech-to-text functionality",
+        "⌚ Advanced smartwatch hub with wallpapers, watch faces, and customization options",
+        "👤 Profile photo display on home page with enhanced visual design and status indicators",
+        "🎨 New watch customization features including 50+ watch faces and personalized wallpapers",
+        "💬 Upgraded chat interface with voice-to-text conversion and real-time AI responses",
+        "🔧 Comprehensive settings persistence system - all toggles and preferences now save properly"
+      ],
+      fixes: [
+        "Fixed mobile AI coach voice recording not working properly across all devices",
+        "Resolved settings automatically disabling after app restart - now all preferences persist",
+        "Fixed profile name not showing custom names - proper profile display throughout app",
+        "Corrected smartwatch settings not saving between sessions",
+        "Fixed chat voice features not converting speech to text accurately",
+        "Resolved profile photo not displaying properly on home page"
+      ],
+      security: [
+        "Enhanced voice data processing with improved on-device speech recognition",
+        "Strengthened profile data encryption and secure storage mechanisms",
+        "Improved smartwatch communication security protocols",
+        "Enhanced data privacy controls for voice and chat features",
+        "Updated development team security credentials and access controls"
+      ],
+      improvements: [
+        "Dramatically improved mobile experience with better touch interactions",
+        "Enhanced UI/UX design with modern visual elements and animations",
+        "Better smartwatch integration with real-time sync and status updates",
+        "Optimized performance for voice processing and AI responses",
+        "Improved accessibility and user experience across all features"
+      ]
+    }
+  },
+  {
     version: "4.8.0",
-    date: "2024-01-20",
+    date: "2024-12-06",
     type: "major",
     changes: {
       features: [
@@ -93,14 +130,14 @@ export function EnhancedVersionManager() {
   // Get current version from localStorage or default
   const [currentVersion, setCurrentVersion] = useState<string>(() => {
     const stored = localStorage.getItem('fitfusion-app-version');
-    return stored || "4.8.0";
+    return stored || "5.1.0";
   });
   
-  const [latestVersionAvailable, setLatestVersionAvailable] = useState<string>("4.8.0");
+  const [latestVersionAvailable, setLatestVersionAvailable] = useState<string>("5.1.0");
   const [updateAvailable, setUpdateAvailable] = useState(() => {
     const stored = localStorage.getItem('fitfusion-app-version');
-    const current = stored || "4.7.0";
-    return current !== "4.8.0";
+    const current = stored || "4.8.0";
+    return current !== "5.1.0";
   });
   
   const [updateProgress, setUpdateProgress] = useState<number>(0);

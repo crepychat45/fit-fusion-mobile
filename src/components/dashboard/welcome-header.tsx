@@ -214,12 +214,22 @@ export function WelcomeHeader({ userName, showCompactProfile = false }: WelcomeH
                 whileTap={{ scale: 0.95 }}
                 className="relative"
               >
-                <Avatar className="w-16 h-16 border-3 border-white/30 shadow-lg">
-                  <AvatarImage src={userAvatar || undefined} alt="Profile" />
-                  <AvatarFallback className="bg-white/20 text-white font-bold text-xl backdrop-blur-sm">
-                    {getInitials()}
-                  </AvatarFallback>
-                </Avatar>
+                <div className="relative">
+                  <Avatar className="w-20 h-20 border-4 border-white/30 shadow-xl">
+                    <AvatarImage src={userAvatar || undefined} alt="Profile" className="object-cover" />
+                    <AvatarFallback className="bg-gradient-to-br from-white/20 to-white/30 text-white font-bold text-xl backdrop-blur-md">
+                      {getInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                  {/* Profile Photo Ring */}
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-400 via-purple-500 to-pink-500 p-1">
+                    <div className="w-full h-full rounded-full bg-white/20 backdrop-blur-sm" />
+                  </div>
+                  {/* Online Status */}
+                  <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-4 border-white shadow-lg flex items-center justify-center">
+                    <div className="w-2 h-2 bg-white rounded-full" />
+                  </div>
+                </div>
                 <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-3 border-white shadow-sm" />
               </motion.div>
               
