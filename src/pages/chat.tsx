@@ -20,6 +20,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { motion, AnimatePresence } from "framer-motion";
 import { AIEnhancedChat } from "@/components/chat/ai-enhanced-chat";
+import { PrivateChat } from "@/components/chat/private-chat";
 import type { Session, User } from '@supabase/supabase-js';
 
 const ChatPage = () => {
@@ -470,7 +471,18 @@ const ChatPage = () => {
             ) : (
               <div className="flex-1 flex gap-4">
                 <div className="flex-1">
-                  <AIEnhancedChat user={user} />
+                  <Tabs defaultValue="ai-chat" className="h-full">
+                    <TabsList className="grid w-full grid-cols-2 mb-4">
+                      <TabsTrigger value="ai-chat">AI Coach</TabsTrigger>
+                      <TabsTrigger value="private">Private Messages</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="ai-chat" className="h-full">
+                      <AIEnhancedChat user={user} />
+                    </TabsContent>
+                    <TabsContent value="private" className="h-full">
+                      <PrivateChat />
+                    </TabsContent>
+                  </Tabs>
                 </div>
                 <div className="w-80">
                   <AdvancedChatInterface 

@@ -9,6 +9,7 @@ import { format } from "date-fns";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
 import { motion } from "framer-motion";
 import { EnhancedProfileDisplay } from "./enhanced-profile-display";
+import { ProfilePhotoUpload } from "@/components/profile-photo-upload";
 
 interface WelcomeHeaderProps {
   userName?: string;
@@ -209,29 +210,23 @@ export function WelcomeHeader({ userName, showCompactProfile = false }: WelcomeH
           <div className="flex items-start justify-between mb-6">
             {/* Enhanced User Profile Section */}
             <div className="flex items-center gap-4">
-              <motion.div 
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="relative"
-              >
-                <div className="relative">
-                  <Avatar className="w-20 h-20 border-4 border-white/30 shadow-xl">
-                    <AvatarImage src={userAvatar || undefined} alt="Profile" className="object-cover" />
-                    <AvatarFallback className="bg-gradient-to-br from-white/20 to-white/30 text-white font-bold text-xl backdrop-blur-md">
-                      {getInitials()}
-                    </AvatarFallback>
-                  </Avatar>
-                  {/* Profile Photo Ring */}
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-400 via-purple-500 to-pink-500 p-1">
-                    <div className="w-full h-full rounded-full bg-white/20 backdrop-blur-sm" />
-                  </div>
-                  {/* Online Status */}
-                  <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-4 border-white shadow-lg flex items-center justify-center">
-                    <div className="w-2 h-2 bg-white rounded-full" />
-                  </div>
-                </div>
-                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-3 border-white shadow-sm" />
-              </motion.div>
+              <div className="relative">
+                <ProfilePhotoUpload 
+                  name={displayName}
+                  initialImage={userAvatar}
+                  onImageUpdate={(newImage) => {
+                    setUserAvatar(newImage);
+                    // Save to user profile
+                    try {
+                      const profile = JSON.parse(localStorage.getItem('fitfusion-user-profile') || '{}');
+                      profile.avatar = newImage;
+                      localStorage.setItem('fitfusion-user-profile', JSON.stringify(profile));
+                    } catch (error) {
+                      console.error('Error saving avatar:', error);
+                    }
+                  }}
+                />
+              </div>
               
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-3 mb-1">

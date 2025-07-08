@@ -130,13 +130,29 @@ export function EnhancedSmartwatchHub() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeWorkout, setActiveWorkout] = useState<WorkoutData | null>(currentWorkout);
   const [selectedWallpaper, setSelectedWallpaper] = useState("nature");
-  const [watchSettings, setWatchSettings] = useState({
-    notifications: true,
-    heartRateMonitoring: true,
-    sleepTracking: true,
-    workoutAutoDetect: true,
-    alwaysOnDisplay: false,
-    waterReminder: true
+  const [selectedWatchFace, setSelectedWatchFace] = useState("analog");
+  const [showCustomization, setShowCustomization] = useState(false);
+  const [watchSettings, setWatchSettings] = useState(() => {
+    try {
+      const saved = localStorage.getItem('smartwatch-settings');
+      return saved ? JSON.parse(saved) : {
+        notifications: true,
+        heartRateMonitoring: true,
+        sleepTracking: true,
+        workoutAutoDetect: true,
+        alwaysOnDisplay: false,
+        waterReminder: true
+      };
+    } catch {
+      return {
+        notifications: true,
+        heartRateMonitoring: true,
+        sleepTracking: true,
+        workoutAutoDetect: true,
+        alwaysOnDisplay: false,
+        waterReminder: true
+      };
+    }
   });
   const { toast } = useToast();
 
@@ -216,6 +232,22 @@ export function EnhancedSmartwatchHub() {
         description: "All connected devices have been synchronized",
       });
     }, 1500);
+  };
+
+  const handleSettingsChange = (key: string, value: boolean) => {
+    const newSettings = { ...watchSettings, [key]: value };
+    setWatchSettings(newSettings);
+    
+    // Save to localStorage
+    try {
+      localStorage.setItem('smartwatch-settings', JSON.stringify(newSettings));
+      toast({
+        title: "Settings Updated",
+        description: `${key.replace(/([A-Z])/g, ' $1')} has been ${value ? 'enabled' : 'disabled'}`,
+      });
+    } catch (error) {
+      console.error('Failed to save settings:', error);
+    }
   };
 
   const handleWorkoutAction = () => {
@@ -421,9 +453,32 @@ export function EnhancedSmartwatchHub() {
                         >
                           Disconnect
                         </Button>
-                        <Button variant="ghost" size="sm">
-                          <Settings className="h-4 w-4" />
-                        </Button>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <Settings className="h-4 w-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Watch Settings</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              {Object.entries(watchSettings).map(([key, value]) => (
+                                <div key={key} className="flex items-center justify-between">
+                                  <span className="capitalize">{key.replace(/([A-Z])/g, ' $1')}</span>
+                                  <Button 
+                                    variant={value ? "default" : "outline"} 
+                                    size="sm"
+                                    onClick={() => handleSettingsChange(key, !value)}
+                                  >
+                                    {value ? "Enabled" : "Disabled"}
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          </DialogContent>
+                        </Dialog>
                       </>
                     ) : (
                       <Button 
@@ -556,7 +611,7 @@ export function EnhancedSmartwatchHub() {
                           <Button 
                             variant={value ? "default" : "outline"} 
                             size="sm"
-                            onClick={() => setWatchSettings(prev => ({ ...prev, [key]: !prev[key as keyof typeof prev] }))}
+                            onClick={() => handleSettingsChange(key, !value)}
                             className="h-6 px-2"
                           >
                             {value ? "On" : "Off"}

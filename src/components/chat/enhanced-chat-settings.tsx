@@ -230,7 +230,12 @@ export function EnhancedChatSettings({ onClose }: EnhancedChatSettingsProps) {
   };
 
   return (
-    <div className="space-y-6 max-h-[70vh] overflow-y-auto">
+    <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2"
+         style={{
+           scrollbarWidth: 'thin',
+           scrollbarColor: 'rgb(203 213 225) transparent'
+         }}
+    >
       {/* Cloud Backup Section */}
       <Card>
         <CardHeader>

@@ -24,6 +24,30 @@ interface ChangelogEntry {
 
 const mockChangelog: ChangelogEntry[] = [
   {
+    version: "5.2.0",
+    date: "2024-12-30",
+    type: "major",
+    changes: {
+      features: [
+        "📷 Fixed profile photo upload and display functionality on home page",
+        "⌚ Enhanced smartwatch hub with working settings and persistent configuration",
+        "🎨 Complete watch face and wallpaper customization with live preview",
+        "💬 Added private messaging functionality with encrypted communication",
+        "📜 Fixed chat settings scroll issues for better mobile experience",
+        "🤖 Improved AI Coach knowledge base with more accurate responses",
+        "🔒 Enhanced security and privacy features with better encryption",
+        "⚙️ Better settings persistence across app restarts"
+      ],
+      improvements: [
+        "🔧 Fixed smartwatch settings not saving properly",
+        "🖼️ Profile photo now shows correctly in all components",
+        "📱 Improved mobile chat interface responsiveness",
+        "🎯 Better AI response accuracy and context understanding",
+        "⚡ Enhanced app performance and loading speeds"
+      ]
+    }
+  },
+  {
     version: "5.1.0",
     date: "2024-12-08",
     type: "major",
