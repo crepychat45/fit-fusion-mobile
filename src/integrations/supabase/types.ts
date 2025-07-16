@@ -75,7 +75,11 @@ export type Database = {
           | Record<PropertyKey, never>
           | { user_id: number }
           | { user_id: string }
-        Returns: Json
+        Returns: {
+          id: number
+          username: string
+          email: string
+        }[]
       }
       manage_user_profiles: {
         Args:
@@ -86,11 +90,7 @@ export type Database = {
               new_username?: string
               new_email?: string
             }
-        Returns: {
-          id: number
-          username: string
-          email: string
-        }[]
+        Returns: undefined
       }
       "Money Manager pro": {
         Args: Record<PropertyKey, never>

@@ -18,9 +18,12 @@ export function ProfilePhotoUpload({ name, initialImage, onImageUpdate }: Profil
   const [success, setSuccess] = useState(false);
   const { toast } = useToast();
   
-  // Update image when initialImage prop changes
+  // Load saved image from localStorage on mount
   useEffect(() => {
-    if (initialImage) {
+    const savedImage = localStorage.getItem('profileImage');
+    if (savedImage) {
+      setImage(savedImage);
+    } else if (initialImage) {
       setImage(initialImage);
     }
   }, [initialImage]);
