@@ -88,8 +88,9 @@ const Index = () => {
   };
 
   const handleQuickWorkout = () => {
-    // Navigate to quick workout selection
-    window.location.href = "/workouts?quick=true";
+    // Use React Router for navigation instead of window.location
+    const event = new CustomEvent('navigate', { detail: '/workouts?quick=true' });
+    window.dispatchEvent(event);
   };
 
   const handleVoiceCommand = () => {

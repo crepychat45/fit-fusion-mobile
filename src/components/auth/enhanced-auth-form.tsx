@@ -43,7 +43,7 @@ interface PasswordStrength {
 export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { loading, signIn, signUp } = useEnhancedAuth();
+  const { loading, signIn, signUp, resetPassword } = useEnhancedAuth();
   const { toast } = useToast();
   
   // Form states
@@ -61,6 +61,8 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
   // Advanced features
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
 
   useEffect(() => {
     // Check for biometric availability
@@ -171,6 +173,37 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
       toast({
         title: "Biometric Failed",
         description: "Please try again or use password.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!resetEmail || !validateEmail(resetEmail)) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await resetPassword(resetEmail);
+      if (error) throw new Error(error);
+      
+      toast({
+        title: "Reset Email Sent",
+        description: "Check your email for the password reset link.",
+      });
+      setShowForgotPassword(false);
+      setResetEmail("");
+    } catch (error: any) {
+      toast({
+        title: "Reset Failed",
+        description: error.message,
         variant: "destructive",
       });
     }
@@ -407,7 +440,66 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
                     </>
                   )}
                 </Button>
+
+                {!isSignUp && (
+                  <Button 
+                    type="button"
+                    variant="link" 
+                    className="text-sm mt-2"
+                    onClick={() => setShowForgotPassword(true)}
+                  >
+                    Forgot your password?
+                  </Button>
+                )}
               </form>
+
+              {/* Password Reset Modal */}
+              <AnimatePresence>
+                {showForgotPassword && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+                    onClick={() => setShowForgotPassword(false)}
+                  >
+                    <motion.div
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.8, opacity: 0 }}
+                      className="bg-white rounded-lg p-6 w-full max-w-md"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <h3 className="text-lg font-semibold mb-4">Reset Password</h3>
+                      <form onSubmit={handleForgotPassword} className="space-y-4">
+                        <div>
+                          <Label htmlFor="resetEmail">Email Address</Label>
+                          <Input
+                            id="resetEmail"
+                            type="email"
+                            placeholder="Enter your email"
+                            value={resetEmail}
+                            onChange={(e) => setResetEmail(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button type="submit" className="flex-1" disabled={loading}>
+                            {loading ? "Sending..." : "Send Reset Link"}
+                          </Button>
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            onClick={() => setShowForgotPassword(false)}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </form>
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </TabsContent>
             
             <TabsContent value="advanced" className="space-y-4">

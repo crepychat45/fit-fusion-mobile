@@ -22,6 +22,7 @@ import Wearables from "./pages/wearables";
 import ExportData from "./pages/export-data";
 import Subscription from "./pages/subscription"; 
 import ChatPage from "./pages/chat";
+import AuthPage from "./components/auth/auth-page";
 import { FitAssistant } from "./components/fit-assistant";
 
 const queryClient = new QueryClient();
@@ -35,8 +36,9 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/auth" element={<AuthPage />} />
                 <Route path="/workouts" element={<Workouts />} />
                 <Route path="/workout-detail/:id" element={<WorkoutDetail />} />
                 <Route path="/exercise/:workoutId/:exerciseId" element={<ExerciseDetail />} />
