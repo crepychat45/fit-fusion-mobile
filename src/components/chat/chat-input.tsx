@@ -452,16 +452,26 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
         
         {/* Message input */}
         <div className="relative flex-1">
-          <Input
+          <textarea
             placeholder={isRecording ? `Recording... ${formatRecordingTime(recordingTime)}` : "Type a message..."}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="pr-16 focus:ring-2 focus:ring-primary"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage();
+              }
+            }}
+            className="w-full min-h-[40px] max-h-[120px] resize-none border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 rounded-md pr-16"
             disabled={isLoading || isRecording}
             maxLength={2000}
+            rows={1}
+            style={{ 
+              minHeight: '40px',
+              height: Math.min(120, Math.max(40, message.split('\n').length * 20))
+            }}
           />
-          <div className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground">
+          <div className="absolute right-2 bottom-2 text-xs text-muted-foreground">
             {message.length}/2000
           </div>
         </div>

@@ -230,10 +230,10 @@ export function EnhancedChatSettings({ onClose }: EnhancedChatSettingsProps) {
   };
 
   return (
-    <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2"
+    <div className="space-y-6 h-[70vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-400 scrollbar-track-slate-200"
          style={{
            scrollbarWidth: 'thin',
-           scrollbarColor: 'rgb(203 213 225) transparent'
+           scrollbarColor: 'hsl(var(--muted-foreground)) hsl(var(--muted))'
          }}
     >
       {/* Cloud Backup Section */}

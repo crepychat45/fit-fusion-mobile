@@ -365,6 +365,20 @@ img.lazy.loaded {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Better scrollbar styles */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--muted-foreground)) transparent;
+}
+
+.scrollbar-thumb-slate-400 {
+  scrollbar-color: #94a3b8 transparent;
+}
+
+.scrollbar-track-slate-200 {
+  scrollbar-color: #94a3b8 #e2e8f0;
+}
+
 /* Safe area support for modern mobile devices */
 .safe-area-padding {
   padding-bottom: env(safe-area-inset-bottom);
