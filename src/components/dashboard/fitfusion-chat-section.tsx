@@ -151,7 +151,7 @@ export function FitfusionChatSection() {
             </div>
             <div>
               <CardTitle className="text-lg">FitFusion Chat</CardTitle>
-              <p className="text-sm text-muted-foreground flex items-center gap-1">
+              <div className="text-sm text-muted-foreground flex items-center gap-1">
                 <span>Secure fitness community</span>
                 <Badge variant="outline" className="ml-2 text-xs">v5.0.4</Badge>
                 {isMobile ? (
@@ -159,7 +159,7 @@ export function FitfusionChatSection() {
                 ) : (
                   <Monitor className="h-3 w-3 ml-1" />
                 )}
-              </p>
+              </div>
             </div>
           </div>
           

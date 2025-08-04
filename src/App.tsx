@@ -7,6 +7,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./contexts/theme-context";
 import { LanguageProvider } from "./contexts/language-context";
 import { SettingsProvider } from "./contexts/settings-context";
+import { EnhancedErrorBoundary, NetworkErrorHandler, useGlobalErrorHandler } from "./components/enhanced-error-handling";
+import { SecurityManager } from "./components/security-manager";
+import { AccessibilityManager } from "./components/accessibility-manager";
+import { SEOManager } from "./components/seo-manager";
+import { PerformanceUtils } from "./utils/performance-utils";
 import Index from "./pages/Index";
 import Workouts from "./pages/workouts";
 import WorkoutDetail from "./pages/workout-detail";
@@ -23,44 +28,85 @@ import ExportData from "./pages/export-data";
 import Subscription from "./pages/subscription"; 
 import ChatPage from "./pages/chat";
 import AuthPage from "./components/auth/auth-page";
+import ResetPassword from "./pages/reset-password";
 import { FitAssistant } from "./components/fit-assistant";
+import React from "react";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+      retry: 3,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    },
+  },
+});
+
+function AppContent() {
+  useGlobalErrorHandler();
+  
+  React.useEffect(() => {
+    // Initialize performance monitoring
+    PerformanceUtils.measurePerformance();
+    PerformanceUtils.lazyLoadImages();
+    
+    // Register service worker for PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js');
+    }
+  }, []);
+
+  return (
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/auth" element={<AuthPage />} />
+      <Route path="/workouts" element={<Workouts />} />
+      <Route path="/workout-detail/:id" element={<WorkoutDetail />} />
+      <Route path="/exercise/:workoutId/:exerciseId" element={<ExerciseDetail />} />
+      <Route path="/progress" element={<Progress />} />
+      <Route path="/profile" element={<Profile />} />
+      <Route path="/chat" element={<ChatPage />} />
+      <Route path="/settings" element={<Settings />} />
+      <Route path="/notifications" element={<NotificationsPage />} />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/help" element={<Help />} />
+      <Route path="/wearables" element={<Wearables />} />
+      <Route path="/export-data" element={<ExportData />} />
+      <Route path="/subscription" element={<Subscription />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <LanguageProvider>
-        <SettingsProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<AuthPage />} />
-                <Route path="/workouts" element={<Workouts />} />
-                <Route path="/workout-detail/:id" element={<WorkoutDetail />} />
-                <Route path="/exercise/:workoutId/:exerciseId" element={<ExerciseDetail />} />
-                <Route path="/progress" element={<Progress />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/chat" element={<ChatPage />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/notifications" element={<NotificationsPage />} />
-                <Route path="/privacy" element={<Privacy />} />
-                <Route path="/help" element={<Help />} />
-                <Route path="/wearables" element={<Wearables />} />
-                <Route path="/export-data" element={<ExportData />} />
-                <Route path="/subscription" element={<Subscription />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-              <FitAssistant />
-            </BrowserRouter>
-          </TooltipProvider>
-        </SettingsProvider>
-      </LanguageProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
+  <EnhancedErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <SecurityManager>
+        <ThemeProvider>
+          <LanguageProvider>
+            <SettingsProvider>
+              <AccessibilityManager>
+                <TooltipProvider>
+                  <NetworkErrorHandler>
+                    <SEOManager>
+                      <Toaster />
+                      <Sonner />
+                      <BrowserRouter>
+                        <AppContent />
+                        <FitAssistant />
+                      </BrowserRouter>
+                    </SEOManager>
+                  </NetworkErrorHandler>
+                </TooltipProvider>
+              </AccessibilityManager>
+            </SettingsProvider>
+          </LanguageProvider>
+        </ThemeProvider>
+      </SecurityManager>
+    </QueryClientProvider>
+  </EnhancedErrorBoundary>
 );
 
 export default App;
