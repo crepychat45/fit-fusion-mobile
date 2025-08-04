@@ -58,25 +58,28 @@ function AppContent() {
   }, []);
 
   return (
-    <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/auth" element={<AuthPage />} />
-      <Route path="/workouts" element={<Workouts />} />
-      <Route path="/workout-detail/:id" element={<WorkoutDetail />} />
-      <Route path="/exercise/:workoutId/:exerciseId" element={<ExerciseDetail />} />
-      <Route path="/progress" element={<Progress />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/chat" element={<ChatPage />} />
-      <Route path="/settings" element={<Settings />} />
-      <Route path="/notifications" element={<NotificationsPage />} />
-      <Route path="/privacy" element={<Privacy />} />
-      <Route path="/help" element={<Help />} />
-      <Route path="/wearables" element={<Wearables />} />
-      <Route path="/export-data" element={<ExportData />} />
-      <Route path="/subscription" element={<Subscription />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <SEOManager>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/auth" element={<AuthPage />} />
+        <Route path="/workouts" element={<Workouts />} />
+        <Route path="/workout-detail/:id" element={<WorkoutDetail />} />
+        <Route path="/exercise/:workoutId/:exerciseId" element={<ExerciseDetail />} />
+        <Route path="/progress" element={<Progress />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/chat" element={<ChatPage />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/help" element={<Help />} />
+        <Route path="/wearables" element={<Wearables />} />
+        <Route path="/export-data" element={<ExportData />} />
+        <Route path="/subscription" element={<Subscription />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      <FitAssistant />
+    </SEOManager>
   );
 }
 
@@ -90,14 +93,11 @@ const App = () => (
               <AccessibilityManager>
                 <TooltipProvider>
                   <NetworkErrorHandler>
-                    <SEOManager>
-                      <Toaster />
-                      <Sonner />
-                      <BrowserRouter>
-                        <AppContent />
-                        <FitAssistant />
-                      </BrowserRouter>
-                    </SEOManager>
+                    <Toaster />
+                    <Sonner />
+                    <BrowserRouter>
+                      <AppContent />
+                    </BrowserRouter>
                   </NetworkErrorHandler>
                 </TooltipProvider>
               </AccessibilityManager>
