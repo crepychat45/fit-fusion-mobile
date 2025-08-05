@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./contexts/theme-context";
 import { LanguageProvider } from "./contexts/language-context";
 import { SettingsProvider } from "./contexts/settings-context";
-import { EnhancedErrorBoundary, NetworkErrorHandler, useGlobalErrorHandler } from "./components/enhanced-error-handling";
+import { ErrorRecovery } from "./components/error-recovery";
 import { SecurityManager } from "./components/security-manager";
 import { AccessibilityManager } from "./components/accessibility-manager";
 import { SEOManager } from "./components/seo-manager";
@@ -44,8 +44,6 @@ const queryClient = new QueryClient({
 });
 
 function AppContent() {
-  useGlobalErrorHandler();
-  
   React.useEffect(() => {
     // Initialize performance monitoring
     PerformanceUtils.measurePerformance();
@@ -84,7 +82,7 @@ function AppContent() {
 }
 
 const App = () => (
-  <EnhancedErrorBoundary>
+  <ErrorRecovery>
     <QueryClientProvider client={queryClient}>
       <SecurityManager>
         <ThemeProvider>
@@ -92,13 +90,11 @@ const App = () => (
             <SettingsProvider>
               <AccessibilityManager>
                 <TooltipProvider>
-                  <NetworkErrorHandler>
-                    <Toaster />
-                    <Sonner />
-                    <BrowserRouter>
-                      <AppContent />
-                    </BrowserRouter>
-                  </NetworkErrorHandler>
+                  <Toaster />
+                  <Sonner />
+                  <BrowserRouter>
+                    <AppContent />
+                  </BrowserRouter>
                 </TooltipProvider>
               </AccessibilityManager>
             </SettingsProvider>
@@ -106,7 +102,7 @@ const App = () => (
         </ThemeProvider>
       </SecurityManager>
     </QueryClientProvider>
-  </EnhancedErrorBoundary>
+  </ErrorRecovery>
 );
 
 export default App;

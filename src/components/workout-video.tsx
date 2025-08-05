@@ -95,12 +95,15 @@ export function WorkoutVideo({ title, thumbnailUrl, videoUrl, duration }: Workou
         >
           <video
             ref={videoRef}
-            src={videoUrl}
+            src={videoUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"}
             poster={thumbnailUrl || "/placeholder.svg"}
             className="w-full aspect-video"
             onEnded={() => setIsPlaying(false)}
             onPlay={() => setIsPlaying(true)}
             onPause={() => setIsPlaying(false)}
+            controls
+            preload="metadata"
+            style={{ maxHeight: '70vh' }}
           />
           
           {/* Video overlay controls */}

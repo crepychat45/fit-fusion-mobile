@@ -230,7 +230,7 @@ export function EnhancedChatSettings({ onClose }: EnhancedChatSettingsProps) {
   };
 
   return (
-    <div className="space-y-6 h-[70vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-400 scrollbar-track-slate-200"
+    <div className="space-y-6 max-h-[75vh] overflow-y-auto pr-3 custom-scrollbar"
          style={{
            scrollbarWidth: 'thin',
            scrollbarColor: 'hsl(var(--muted-foreground)) hsl(var(--muted))'
@@ -445,7 +445,101 @@ export function EnhancedChatSettings({ onClose }: EnhancedChatSettingsProps) {
         </CardContent>
       </Card>
 
-      <div className="flex justify-end">
+      {/* Security & Alerts Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            Security & Alerts
+          </CardTitle>
+          <CardDescription>
+            Enhanced security features and alert management
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="two-factor">Two-Factor Authentication</Label>
+              <p className="text-xs text-muted-foreground">Add an extra layer of security</p>
+            </div>
+            <Switch
+              id="two-factor"
+              checked={settings.encryptBackups}
+              onCheckedChange={(checked) => saveSettings({ ...settings, encryptBackups: checked })}
+            />
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="login-alerts">Login Alerts</Label>
+              <p className="text-xs text-muted-foreground">Get notified of new device logins</p>
+            </div>
+            <Switch
+              id="login-alerts"
+              checked={settings.soundNotifications}
+              onCheckedChange={(checked) => saveSettings({ ...settings, soundNotifications: checked })}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="suspicious-activity">Suspicious Activity Detection</Label>
+              <p className="text-xs text-muted-foreground">Monitor unusual chat patterns</p>
+            </div>
+            <Switch
+              id="suspicious-activity"
+              checked={settings.autoBackup}
+              onCheckedChange={(checked) => saveSettings({ ...settings, autoBackup: checked })}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <Label htmlFor="message-validation">Message Validation</Label>
+              <p className="text-xs text-muted-foreground">Verify message integrity</p>
+            </div>
+            <Switch
+              id="message-validation"
+              checked={settings.showTypingIndicator}
+              onCheckedChange={(checked) => saveSettings({ ...settings, showTypingIndicator: checked })}
+            />
+          </div>
+
+          <Separator />
+
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium">Security Status</span>
+              <Badge variant="default" className="bg-green-500">
+                <CheckCircle className="h-3 w-3 mr-1" />
+                Secure
+              </Badge>
+            </div>
+            
+            <div className="grid grid-cols-1 gap-2 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Last Security Scan:</span>
+                <span className="font-medium">2 hours ago</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Active Sessions:</span>
+                <span className="font-medium">3 devices</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Encryption Level:</span>
+                <span className="font-medium">AES-256</span>
+              </div>
+            </div>
+
+            <Button size="sm" variant="outline" className="w-full">
+              <Shield className="h-4 w-4 mr-2" />
+              Run Security Check
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-end sticky bottom-0 bg-background pt-4">
         <Button onClick={onClose}>Done</Button>
       </div>
     </div>

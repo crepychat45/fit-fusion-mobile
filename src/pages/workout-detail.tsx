@@ -3,12 +3,13 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ExerciseCard } from "@/components/exercise-card";
-import { ArrowLeft, Dumbbell, Clock, Play, Video, X } from "lucide-react";
+import { ArrowLeft, Dumbbell, Clock, Play, Video, X, Settings } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { workouts } from "@/data/workouts";
 import { WorkoutVideo } from "@/components/workout-video";
 import { WorkoutTimer } from "@/components/workout-timer";
 import { workoutVideos } from "@/data/workout-videos";
+import { EnhancedWorkoutCustomizer } from "@/components/enhanced-workout-customizer";
 import { motion } from "framer-motion";
 import { useToast } from "@/components/ui/use-toast";
 import { useLanguage } from "@/contexts/language-context";
@@ -35,6 +36,8 @@ const WorkoutDetail = () => {
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [isStarting, setIsStarting] = useState(false);
   const [showTimer, setShowTimer] = useState(false);
+  const [showCustomizer, setShowCustomizer] = useState(false);
+  const [workoutCustomization, setWorkoutCustomization] = useState<any>(null);
   
   const workout = workouts.find((w) => w.id === id);
   
@@ -127,42 +130,83 @@ const WorkoutDetail = () => {
             {workout.description}
           </p>
           
-          {workoutVideo && (
-            <div 
-              className="mt-4 relative aspect-video rounded-lg overflow-hidden cursor-pointer group"
-              onClick={() => openVideoPreview(workoutVideo.videoUrl)}
-            >
-              <img 
-                src={workoutVideo.thumbnailUrl || "/placeholder.svg"} 
-                alt={`${workout.title} preview`}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-black/50 flex items-center justify-center group-hover:bg-black/60 transition-colors">
-                <Video className="h-10 w-10 text-white" />
-                <span className="text-white font-medium ml-2">Watch Preview</span>
+          {/* Enhanced Video Section */}
+          <div className="mt-4 grid grid-cols-1 gap-3">
+            {workoutVideo && (
+              <div 
+                className="relative aspect-video rounded-lg overflow-hidden cursor-pointer group shadow-lg"
+                onClick={() => openVideoPreview(workoutVideo.videoUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")}
+              >
+                <img 
+                  src={workoutVideo.thumbnailUrl || "/placeholder.svg"} 
+                  alt={`${workout.title} preview`}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent flex items-center justify-center group-hover:from-black/80 transition-all">
+                  <div className="text-center">
+                    <Video className="h-12 w-12 text-white mx-auto mb-2" />
+                    <span className="text-white font-medium text-lg">HD Preview</span>
+                    <p className="text-white/80 text-sm mt-1">1080p • {workoutVideo.duration || '3:45'}</p>
+                  </div>
+                </div>
               </div>
+            )}
+            
+            {/* Additional exercise videos */}
+            <div className="grid grid-cols-2 gap-2">
+              {workout.exercises.slice(0, 4).map((exercise, index) => (
+                <div 
+                  key={exercise.id}
+                  className="relative aspect-video rounded-lg overflow-hidden cursor-pointer group bg-muted"
+                  onClick={() => openVideoPreview(`https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4`)}
+                >
+                  <img 
+                    src={`/placeholder.svg`} 
+                    alt={exercise.name}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/60 transition-colors">
+                    <Play className="h-6 w-6 text-white" fill="white" />
+                  </div>
+                  <div className="absolute bottom-2 left-2 right-2">
+                    <p className="text-white text-xs font-medium truncate">{exercise.name}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
+          </div>
         </motion.div>
         
-        <div className="mt-6 flex gap-2">
-          <Button 
-            className="flex-1" 
-            size="lg" 
-            onClick={handleStartWorkout}
-            disabled={isStarting}
-          >
-            <Play className={`h-4 w-4 mr-2 ${isStarting ? 'animate-pulse' : ''}`} />
-            {t('workout.start')}
-          </Button>
+        <div className="mt-6 space-y-3">
+          <div className="flex gap-2">
+            <Button 
+              className="flex-1" 
+              size="lg" 
+              onClick={handleStartWorkout}
+              disabled={isStarting}
+            >
+              <Play className={`h-4 w-4 mr-2 ${isStarting ? 'animate-pulse' : ''}`} />
+              {t('workout.start')}
+            </Button>
+            
+            <Button 
+              variant="outline"
+              size="lg"
+              onClick={() => setShowCustomizer(true)}
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Customize
+            </Button>
+          </div>
           
           <Button 
             variant="outline"
             size="lg"
             onClick={() => setShowTimer(!showTimer)}
+            className="w-full"
           >
             <Clock className="h-4 w-4 mr-2" />
-            Timer
+            Workout Timer
           </Button>
         </div>
         
@@ -178,9 +222,10 @@ const WorkoutDetail = () => {
       
       <div className="px-4 mt-8">
         <Tabs defaultValue="exercises">
-          <TabsList className="w-full grid grid-cols-2">
+          <TabsList className="w-full grid grid-cols-3">
             <TabsTrigger value="exercises">Exercises</TabsTrigger>
             <TabsTrigger value="details">Details</TabsTrigger>
+            <TabsTrigger value="videos">Videos</TabsTrigger>
           </TabsList>
           
           <TabsContent value="exercises" className="mt-4">
@@ -239,6 +284,28 @@ const WorkoutDetail = () => {
               </div>
             </div>
           </TabsContent>
+          
+          <TabsContent value="videos" className="mt-4">
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-3">
+                <WorkoutVideo
+                  title={`${workout.title} - Full Workout`}
+                  thumbnailUrl="/placeholder.svg"
+                  videoUrl="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                  duration="25:30"
+                />
+                {workout.exercises.slice(0, 3).map((exercise, index) => (
+                  <WorkoutVideo
+                    key={exercise.id}
+                    title={`${exercise.name} - Technique Guide`}
+                    thumbnailUrl="/placeholder.svg"
+                    videoUrl="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4"
+                    duration="2:45"
+                  />
+                ))}
+              </div>
+            </div>
+          </TabsContent>
         </Tabs>
       </div>
       
@@ -268,6 +335,26 @@ const WorkoutDetail = () => {
               />
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Workout Customizer Dialog */}
+      <Dialog open={showCustomizer} onOpenChange={setShowCustomizer}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Customize Your Workout</DialogTitle>
+          </DialogHeader>
+          <EnhancedWorkoutCustomizer
+            workoutId={workout.id}
+            onSave={(customization) => {
+              setWorkoutCustomization(customization);
+              setShowCustomizer(false);
+              toast({
+                title: "Workout Customized!",
+                description: "Your personalized workout is ready to start.",
+              });
+            }}
+          />
         </DialogContent>
       </Dialog>
     </div>
