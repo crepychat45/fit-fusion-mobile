@@ -28,6 +28,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sparkles, TrendingUp, Shield, Zap, Target, Brain, Heart, Activity } from "lucide-react";
+import { ErrorFixManager } from "@/components/error-fix-manager";
 
 const scheduledWorkouts = [
   {
@@ -432,6 +433,11 @@ const Index = () => {
             onClose={() => setShowMobileSecurity(false)}
           />
         </>
+      )}
+      
+      {/* Error Fix Manager for debugging */}
+      {process.env.NODE_ENV === 'development' && (
+        <ErrorFixManager />
       )}
       
       <MobileNav />
