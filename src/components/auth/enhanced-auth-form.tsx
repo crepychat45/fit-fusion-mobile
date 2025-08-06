@@ -415,7 +415,7 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
                         onCheckedChange={(checked) => setAcceptTerms(checked as boolean)}
                       />
                       <Label htmlFor="terms" className="text-sm">
-                        I agree to the <a href="#" className="text-blue-600 hover:underline">Terms of Service</a> and <a href="#" className="text-blue-600 hover:underline">Privacy Policy</a>
+                        I agree to the <a href="/terms-of-service" className="text-blue-600 hover:underline">Terms of Service</a> and <a href="/privacy-policy" className="text-blue-600 hover:underline">Privacy Policy</a>
                       </Label>
                     </div>
                   </motion.div>

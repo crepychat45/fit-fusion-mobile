@@ -29,7 +29,10 @@ import Subscription from "./pages/subscription";
 import ChatPage from "./pages/chat";
 import AuthPage from "./components/auth/auth-page";
 import ResetPassword from "./pages/reset-password";
+import TermsOfService from "./pages/terms-of-service";
+import PrivacyPolicy from "./pages/privacy-policy";
 import { FitAssistant } from "./components/fit-assistant";
+import { PerformanceMonitor } from "./components/performance-monitor";
 import React from "react";
 
 const queryClient = new QueryClient({
@@ -74,9 +77,12 @@ function AppContent() {
         <Route path="/export-data" element={<ExportData />} />
         <Route path="/subscription" element={<Subscription />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/terms-of-service" element={<TermsOfService />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <FitAssistant />
+      <PerformanceMonitor />
     </SEOManager>
   );
 }
