@@ -20,7 +20,7 @@ import { UserChatList } from './user-chat-list';
 import { EnhancedChatInterface } from './enhanced-chat-interface';
 import { MobileChatInterface } from './mobile-chat-interface';
 import { EnhancedChatSettings } from './enhanced-chat-settings';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface User {

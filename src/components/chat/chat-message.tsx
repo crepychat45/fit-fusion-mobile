@@ -7,7 +7,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Download, Eye, Play, Pause, Volume2, FileText, Image as ImageIcon, Video, Music } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface ChatMessageProps {
   message: ChatMessage;

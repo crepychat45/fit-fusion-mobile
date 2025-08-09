@@ -38,7 +38,7 @@ import {
   Tablet,
   Monitor
 } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface EnhancedMobileExperienceProps {
   children: React.ReactNode;

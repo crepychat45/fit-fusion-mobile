@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { userProfile } from "@/data/user";
 import { ChatAttachment, ChatConversation, ChatMessage as ChatMessageType, ChatUser } from "@/types/chat";
 import { cn } from "@/lib/utils";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -877,7 +877,8 @@ export function FitfusionChat({
                       <UserPlus className="h-3 w-3" /> Add
                     </Button>
                   </div>
-                  {mockUsers.map(user => <div key={user.id} className="flex items-center p-3 rounded-lg cursor-pointer hover:bg-muted/50" onClick={() => {
+                  {mockUsers.map(user => (
+                    <div key={user.id} className="flex items-center p-3 rounded-lg cursor-pointer hover:bg-muted/50" onClick={() => {
                   // Find or create conversation with this user
                   let conversation = conversations.find(c => c.participants.some(p => p.id === user.id));
                   if (!conversation) {
@@ -913,7 +914,8 @@ export function FitfusionChat({
                       <div className="ml-auto flex flex-col items-end">
                         {encryptedChat && <Lock className="h-3 w-3 text-green-500" />}
                       </div>
-                    </div>)}
+                     </div>
+                   ))}
                 </div>
               </ScrollArea>
             </TabsContent>

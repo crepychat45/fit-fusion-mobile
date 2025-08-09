@@ -1,4 +1,4 @@
-name: NodeJS with Webpack
+name: FitFusion CI/CD
 
 on:
   push:
@@ -27,13 +27,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build with Webpack
-        run: npx webpack --mode production
+      - name: Run linter
+        run: npm run lint
+
+      - name: Build with Vite
+        run: npm run build
 
       - name: Upload build artifacts
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: webpack-build
+          name: vite-build-${{ matrix.node-version }}
           path: |
             dist
