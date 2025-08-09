@@ -5,8 +5,15 @@
 
 version: 2
 updates:
-  - package-ecosystem: "" # See documentation for possible values
+  - package-ecosystem: "npm" # Monitor npm dependencies
     directory: "/" # Location of package manifests
     schedule:
-      interval: "weekly"  
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 '
