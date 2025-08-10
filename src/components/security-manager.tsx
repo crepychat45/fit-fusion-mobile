@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from "react";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 
 interface SecurityManagerProps {
   children: React.ReactNode;
@@ -22,11 +22,7 @@ export function SecurityManager({ children }: SecurityManagerProps) {
   // Notify once without using React hooks to avoid dispatcher issues
   if (isBrowser && !isHTTPS && !isLocalhost) {
     try {
-      toast({
-        title: "⚠️ Security Warning",
-        description: "Connection is not secure. Please use HTTPS.",
-        variant: "destructive",
-      });
+      toast.error("⚠️ Security Warning: Connection is not secure. Please use HTTPS.");
     } catch (e) {
       // no-op
       console.warn("Toast unavailable:", e);

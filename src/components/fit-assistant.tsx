@@ -36,7 +36,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/contexts/theme-context";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { 
   Tooltip,
   TooltipContent,
@@ -162,7 +162,7 @@ export function FitAssistant() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
-  const { toast } = useToast();
+  // Using sonner toast directly
   
   // Scroll to bottom when new messages arrive
   useEffect(() => {
@@ -181,11 +181,7 @@ export function FitAssistant() {
         // Check file size (limit to 5MB per file)
         const oversizedFiles = files.filter(file => file.size > 5 * 1024 * 1024);
         if (oversizedFiles.length > 0) {
-          toast({
-            title: "File too large",
-            description: "Files must be less than 5MB",
-            variant: "destructive"
-          });
+          toast.error("File too large - Files must be less than 5MB");
           return;
         }
         
@@ -289,10 +285,7 @@ export function FitAssistant() {
     link.click();
     document.body.removeChild(link);
     
-    toast({
-      title: "Download started",
-      description: `Downloading ${media.name}`,
-    });
+    toast.success(`Download started: ${media.name}`);
   };
   
   const categories = [
