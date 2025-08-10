@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface SecurityManagerProps {
@@ -15,8 +15,8 @@ interface SecurityContext {
 const SecurityContext = createContext<SecurityContext | null>(null);
 
 export function SecurityManager({ children }: SecurityManagerProps) {
-  const [isSecure, setIsSecure] = useState(false);
-  const [encryptionLevel, setEncryptionLevel] = useState<"standard" | "high" | "maximum">("high");
+  const [isSecure, setIsSecure] = React.useState(false);
+  const [encryptionLevel, setEncryptionLevel] = React.useState<"standard" | "high" | "maximum">("high");
   const { toast } = useToast();
 
   useEffect(() => {
