@@ -52,6 +52,7 @@
     "cmdk": "^1.0.0",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.3.0",
+    "esbuild": "^0.25.8",
     "eslint": "^9.33.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
@@ -60,6 +61,7 @@
     "lovable-tagger": "^1.1.9",
     "lucide-react": "^0.471.0",
     "next-themes": "^0.3.0",
+    "package-lock.json": "^1.0.0",
     "postcss": "^8.5.6",
     "react": "^18.3.1",
     "react-day-picker": "^9.4.4",
@@ -74,7 +76,7 @@
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.9.2",
     "vaul": "^0.9.1",
-    "vite": "^5.4.6",
-    "zod": "^3.23.8"
+    "vite": "^7.1.1",
+    git checkout -b fix/issue-123 main    "zod": "^3.23.8"
   }
 }
