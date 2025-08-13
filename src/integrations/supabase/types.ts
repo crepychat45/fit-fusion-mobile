@@ -104,7 +104,11 @@ export type Database = {
               new_username?: string
               new_email?: string
             }
-        Returns: undefined
+        Returns: {
+          id: number
+          username: string
+          email: string
+        }[]
       }
       "Money Manager pro": {
         Args: Record<PropertyKey, never>
