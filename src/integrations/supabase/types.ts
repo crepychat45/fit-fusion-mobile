@@ -89,10 +89,7 @@ export type Database = {
     }
     Functions: {
       get_user_profile: {
-        Args:
-          | Record<PropertyKey, never>
-          | { user_id: number }
-          | { user_id: string }
+        Args: Record<PropertyKey, never> | { user_id: string }
         Returns: Json
       }
       manage_user_profiles: {
