@@ -1,5 +1,5 @@
-
-import { Routes, Route } from "react-router-dom";
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SEOManager } from "./components/seo-manager";
 import { PerformanceUtils } from "./utils/performance-utils";
 import { AppWrapper } from "./components/app-wrapper";
@@ -16,7 +16,7 @@ import Privacy from "./pages/privacy";
 import Help from "./pages/help";
 import Wearables from "./pages/wearables";
 import ExportData from "./pages/export-data";
-import Subscription from "./pages/subscription"; 
+import Subscription from "./pages/subscription";
 import ChatPage from "./pages/chat";
 import AuthPage from "./components/auth/auth-page";
 import ResetPassword from "./pages/reset-password";
@@ -24,19 +24,16 @@ import TermsOfService from "./pages/terms-of-service";
 import PrivacyPolicy from "./pages/privacy-policy";
 import { FitAssistant } from "./components/fit-assistant";
 import { PerformanceMonitor } from "./components/performance-monitor";
-import React from "react";
-
-// QueryClient moved to AppWrapper
 
 function AppContent() {
   React.useEffect(() => {
-    // Initialize performance monitoring
+    // Performance monitoring
     PerformanceUtils.measurePerformance();
     PerformanceUtils.lazyLoadImages();
-    
-    // Register service worker for PWA
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js');
+
+    // Register service worker
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js");
     }
   }, []);
 
@@ -71,7 +68,9 @@ function AppContent() {
 
 const App = () => (
   <AppWrapper>
-    <AppContent />
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
   </AppWrapper>
 );
 
