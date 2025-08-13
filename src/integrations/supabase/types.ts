@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instanciate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "12.2.12 (cd3cf9e)"
   }
   public: {
     Tables: {
@@ -29,6 +29,24 @@ export type Database = {
           created_at?: string
           id?: number
           user_id?: string
+        }
+        Relationships: []
+      }
+      Fitfusion: {
+        Row: {
+          created_at: string
+          id: number
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -75,11 +93,7 @@ export type Database = {
           | Record<PropertyKey, never>
           | { user_id: number }
           | { user_id: string }
-        Returns: {
-          id: number
-          username: string
-          email: string
-        }[]
+        Returns: Json
       }
       manage_user_profiles: {
         Args:
@@ -97,7 +111,7 @@ export type Database = {
         Returns: undefined
       }
       recover_password: {
-        Args: { user_email: string }
+        Args: Record<PropertyKey, never> | { user_email: string }
         Returns: undefined
       }
     }
