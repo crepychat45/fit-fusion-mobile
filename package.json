@@ -79,7 +79,6 @@
     "typescript": "^5.9.2",
     "vaul": "^0.9.9",
     "vite": "^5.4.19",
-    "yarn.lock": "^0.0.1-security",
     "zod": "^3.25.76"
   },
   "devDependencies": {
