@@ -1,5 +1,5 @@
-import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Routes, Route } from "react-router-dom";
 import { SEOManager } from "./components/seo-manager";
 import { PerformanceUtils } from "./utils/performance-utils";
 import { AppWrapper } from "./components/app-wrapper";
@@ -25,15 +25,21 @@ import PrivacyPolicy from "./pages/privacy-policy";
 import { FitAssistant } from "./components/fit-assistant";
 import { PerformanceMonitor } from "./components/performance-monitor";
 
-function AppContent() {
-  React.useEffect(() => {
-    // Performance monitoring
-    PerformanceUtils.measurePerformance();
-    PerformanceUtils.lazyLoadImages();
+// QueryClient moved to AppWrapper
 
-    // Register service worker
+function AppContent(): JSX.Element {
+  useEffect(() => {
+    // Initialize performance monitoring
+    PerformanceUtils.measurePerformance?.();
+    PerformanceUtils.lazyLoadImages?.();
+
+    // Register service worker for PWA
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js");
+      navigator.serviceWorker
+        .register("/sw.js")
+        .catch((error) => {
+          console.error("Service Worker registration failed:", error);
+        });
     }
   }, []);
 
@@ -66,11 +72,9 @@ function AppContent() {
   );
 }
 
-const App = () => (
+const App = (): JSX.Element => (
   <AppWrapper>
-    <BrowserRouter>
-      <AppContent />
-    </BrowserRouter>
+    <AppContent />
   </AppWrapper>
 );
 
