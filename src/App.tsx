@@ -25,8 +25,6 @@ import PrivacyPolicy from "./pages/privacy-policy";
 import { FitAssistant } from "./components/fit-assistant";
 import { PerformanceMonitor } from "./components/performance-monitor";
 
-// QueryClient moved to AppWrapper
-
 const AppContent: React.FC = () => {
   useEffect(() => {
     // Initialize performance monitoring
@@ -35,11 +33,9 @@ const AppContent: React.FC = () => {
 
     // Register service worker for PWA (if available and window exists)
     if (typeof window !== "undefined" && "serviceWorker" in navigator) {
-      navigator.serviceWorker
-        .register("/sw.js")
-        .catch((error) => {
-          console.error("Service Worker registration failed:", error);
-        });
+      navigator.serviceWorker.register("/sw.js").catch((error) => {
+        console.error("Service Worker registration failed:", error);
+      });
     }
   }, []);
 
