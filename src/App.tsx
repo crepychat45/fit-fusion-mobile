@@ -27,14 +27,14 @@ import { PerformanceMonitor } from "./components/performance-monitor";
 
 // QueryClient moved to AppWrapper
 
-function AppContent(): JSX.Element {
+const AppContent: React.FC = () => {
   useEffect(() => {
     // Initialize performance monitoring
     PerformanceUtils.measurePerformance?.();
     PerformanceUtils.lazyLoadImages?.();
 
-    // Register service worker for PWA
-    if ("serviceWorker" in navigator) {
+    // Register service worker for PWA (if available and window exists)
+    if (typeof window !== "undefined" && "serviceWorker" in navigator) {
       navigator.serviceWorker
         .register("/sw.js")
         .catch((error) => {
@@ -70,9 +70,9 @@ function AppContent(): JSX.Element {
       <PerformanceMonitor />
     </SEOManager>
   );
-}
+};
 
-const App = (): JSX.Element => (
+const App: React.FC = () => (
   <AppWrapper>
     <AppContent />
   </AppWrapper>
