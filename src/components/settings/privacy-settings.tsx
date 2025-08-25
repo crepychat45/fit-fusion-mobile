@@ -1,18 +1,23 @@
-
 import React, { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Slider } from "@/components/ui/slider";
-import { 
-  Eye, 
-  EyeOff, 
-  Shield, 
-  Database, 
-  Globe, 
+import {
+  Eye,
+  EyeOff,
+  Shield,
+  Database,
+  Globe,
   Lock,
   UserCheck,
   AlertTriangle,
@@ -27,10 +32,16 @@ import {
   Mic,
   Bell,
   Share2,
-  Info
+  Info,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function PrivacySettings() {
   const { toast } = useToast();
@@ -55,32 +66,42 @@ export function PrivacySettings() {
   const handleDataExport = async () => {
     toast({
       title: "📦 Preparing data export",
-      description: "Compiling your personal data for download..."
+      description: "Compiling your personal data for download...",
     });
 
     // Simulate data preparation
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise((resolve) => setTimeout(resolve, 3000));
 
     const data = {
-      profile: { /* user profile data */ },
-      preferences: { /* user preferences */ },
-      activity: { /* activity data */ },
-      privacy: { /* privacy settings */ },
+      profile: {
+        /* user profile data */
+      },
+      preferences: {
+        /* user preferences */
+      },
+      activity: {
+        /* activity data */
+      },
+      privacy: {
+        /* privacy settings */
+      },
       exportDate: new Date().toISOString(),
       dataTypes: [
         "Profile Information",
-        "Activity Logs", 
+        "Activity Logs",
         "Preferences",
         "Privacy Settings",
-        "Device Information"
-      ]
+        "Device Information",
+      ],
     };
 
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `fitfusion-data-export-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `fitfusion-data-export-${new Date().toISOString().split("T")[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -94,18 +115,18 @@ export function PrivacySettings() {
 
   const handleDataDeletion = async () => {
     const confirmation = window.confirm(
-      "Are you sure you want to delete all your data? This action cannot be undone."
+      "Are you sure you want to delete all your data? This action cannot be undone.",
     );
-    
+
     if (!confirmation) return;
 
     toast({
       title: "🗑️ Deleting your data",
-      description: "Permanently removing all personal information..."
+      description: "Permanently removing all personal information...",
     });
 
     // Simulate data deletion
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     toast({
       title: "✅ Data deleted",
@@ -155,26 +176,40 @@ export function PrivacySettings() {
               <div className="text-center p-4 bg-green-50 dark:bg-green-950/20 rounded-lg">
                 <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
                 <p className="font-medium">Data Protected</p>
-                <p className="text-sm text-muted-foreground">End-to-end encryption</p>
+                <p className="text-sm text-muted-foreground">
+                  End-to-end encryption
+                </p>
               </div>
               <div className="text-center p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
                 <UserCheck className="h-8 w-8 text-blue-600 mx-auto mb-2" />
                 <p className="font-medium">You're in Control</p>
-                <p className="text-sm text-muted-foreground">Full data ownership</p>
+                <p className="text-sm text-muted-foreground">
+                  Full data ownership
+                </p>
               </div>
               <div className="text-center p-4 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
                 <Lock className="h-8 w-8 text-purple-600 mx-auto mb-2" />
                 <p className="font-medium">Zero Knowledge</p>
-                <p className="text-sm text-muted-foreground">Server-side encryption</p>
+                <p className="text-sm text-muted-foreground">
+                  Server-side encryption
+                </p>
               </div>
             </div>
 
             <div className="mt-4 flex gap-2">
-              <Button variant="outline" onClick={resetPrivacySettings} className="flex-1">
+              <Button
+                variant="outline"
+                onClick={resetPrivacySettings}
+                className="flex-1"
+              >
                 <Shield className="h-4 w-4 mr-2" />
                 Maximum Privacy
               </Button>
-              <Button variant="outline" onClick={handleDataExport} className="flex-1">
+              <Button
+                variant="outline"
+                onClick={handleDataExport}
+                className="flex-1"
+              >
                 <Download className="h-4 w-4 mr-2" />
                 Export Data
               </Button>
@@ -212,9 +247,11 @@ export function PrivacySettings() {
               </div>
               <div className="flex items-center gap-2">
                 {analyticsEnabled && (
-                  <Badge variant="secondary" className="text-xs">Active</Badge>
+                  <Badge variant="secondary" className="text-xs">
+                    Active
+                  </Badge>
                 )}
-                <Switch 
+                <Switch
                   checked={analyticsEnabled}
                   onCheckedChange={setAnalyticsEnabled}
                 />
@@ -233,9 +270,11 @@ export function PrivacySettings() {
               </div>
               <div className="flex items-center gap-2">
                 {locationTracking && (
-                  <Badge variant="secondary" className="text-xs">Active</Badge>
+                  <Badge variant="secondary" className="text-xs">
+                    Active
+                  </Badge>
                 )}
-                <Switch 
+                <Switch
                   checked={locationTracking}
                   onCheckedChange={setLocationTracking}
                 />
@@ -252,7 +291,7 @@ export function PrivacySettings() {
                   </p>
                 </div>
               </div>
-              <Switch 
+              <Switch
                 checked={personalization}
                 onCheckedChange={setPersonalization}
               />
@@ -270,9 +309,11 @@ export function PrivacySettings() {
               </div>
               <div className="flex items-center gap-2">
                 {thirdPartySharing && (
-                  <Badge variant="destructive" className="text-xs">Enabled</Badge>
+                  <Badge variant="destructive" className="text-xs">
+                    Enabled
+                  </Badge>
                 )}
-                <Switch 
+                <Switch
                   checked={thirdPartySharing}
                   onCheckedChange={setThirdPartySharing}
                 />
@@ -289,10 +330,7 @@ export function PrivacySettings() {
                   </p>
                 </div>
               </div>
-              <Switch 
-                checked={aiTraining}
-                onCheckedChange={setAiTraining}
-              />
+              <Switch checked={aiTraining} onCheckedChange={setAiTraining} />
             </div>
           </CardContent>
         </Card>
@@ -325,7 +363,7 @@ export function PrivacySettings() {
                   </p>
                 </div>
               </div>
-              <Switch 
+              <Switch
                 checked={cameraAccess}
                 onCheckedChange={setCameraAccess}
               />
@@ -341,7 +379,7 @@ export function PrivacySettings() {
                   </p>
                 </div>
               </div>
-              <Switch 
+              <Switch
                 checked={voiceRecording}
                 onCheckedChange={setVoiceRecording}
               />
@@ -357,7 +395,7 @@ export function PrivacySettings() {
                   </p>
                 </div>
               </div>
-              <Switch 
+              <Switch
                 checked={notificationTracking}
                 onCheckedChange={setNotificationTracking}
               />
@@ -373,7 +411,7 @@ export function PrivacySettings() {
                   </p>
                 </div>
               </div>
-              <Switch 
+              <Switch
                 checked={biometricData}
                 onCheckedChange={setBiometricData}
               />
@@ -406,7 +444,10 @@ export function PrivacySettings() {
                   Who can see your profile and activity
                 </p>
               </div>
-              <Select value={profileVisibility} onValueChange={setProfileVisibility}>
+              <Select
+                value={profileVisibility}
+                onValueChange={setProfileVisibility}
+              >
                 <SelectTrigger className="w-32">
                   <SelectValue />
                 </SelectTrigger>
@@ -428,7 +469,7 @@ export function PrivacySettings() {
                   </p>
                 </div>
               </div>
-              <Switch 
+              <Switch
                 checked={socialSharing}
                 onCheckedChange={setSocialSharing}
               />
@@ -477,14 +518,14 @@ export function PrivacySettings() {
             <Alert>
               <Info className="h-4 w-4" />
               <AlertDescription>
-                You have the right to access, correct, delete, or port your data at any time.
-                These actions are immediate and permanent.
+                You have the right to access, correct, delete, or port your data
+                at any time. These actions are immediate and permanent.
               </AlertDescription>
             </Alert>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={handleDataExport}
                 className="w-full h-auto p-4 justify-start"
               >
@@ -499,8 +540,8 @@ export function PrivacySettings() {
                 </div>
               </Button>
 
-              <Button 
-                variant="destructive" 
+              <Button
+                variant="destructive"
                 onClick={handleDataDeletion}
                 className="w-full h-auto p-4 justify-start"
               >
@@ -524,7 +565,7 @@ export function PrivacySettings() {
                     Automatically delete unnecessary data
                   </p>
                 </div>
-                <Switch 
+                <Switch
                   checked={dataMinimization}
                   onCheckedChange={setDataMinimization}
                 />

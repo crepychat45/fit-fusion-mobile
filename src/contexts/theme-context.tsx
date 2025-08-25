@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 type Theme = "light" | "dark" | "system";
@@ -17,8 +16,8 @@ export const useTheme = () => useContext(ThemeContext);
 
 export type { Theme }; // Export the Theme type
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ 
-  children 
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
 }) => {
   const [theme, setTheme] = useState<Theme>(() => {
     // Try to get theme from localStorage
@@ -29,14 +28,15 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   // Apply theme effect
   useEffect(() => {
     const root = window.document.documentElement;
-    
+
     // Remove existing theme classes
     root.classList.remove("light", "dark");
 
     // Apply theme based on selection
     if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches 
-        ? "dark" 
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+        .matches
+        ? "dark"
         : "light";
       root.classList.add(systemTheme);
       localStorage.setItem("fitfusion-theme", theme);
@@ -49,18 +49,18 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   // Listen for system theme changes
   useEffect(() => {
     if (theme !== "system") return;
-    
+
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    
+
     const handleChange = () => {
       const root = window.document.documentElement;
       root.classList.remove("light", "dark");
       root.classList.add(mediaQuery.matches ? "dark" : "light");
     };
-    
+
     // Initial call to handleChange to set the correct theme on mount
     handleChange();
-    
+
     mediaQuery.addEventListener("change", handleChange);
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, [theme]);

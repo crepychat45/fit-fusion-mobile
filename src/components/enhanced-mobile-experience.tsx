@@ -4,13 +4,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { 
-  Menu, 
-  X, 
-  Home, 
-  Dumbbell, 
-  MessageCircle, 
-  User, 
+import {
+  Menu,
+  X,
+  Home,
+  Dumbbell,
+  MessageCircle,
+  User,
   Settings,
   Search,
   Bell,
@@ -36,7 +36,7 @@ import {
   Lock,
   Smartphone,
   Tablet,
-  Monitor
+  Monitor,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -44,14 +44,20 @@ interface EnhancedMobileExperienceProps {
   children: React.ReactNode;
 }
 
-export function EnhancedMobileExperience({ children }: EnhancedMobileExperienceProps) {
+export function EnhancedMobileExperience({
+  children,
+}: EnhancedMobileExperienceProps) {
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const [isGestureEnabled, setIsGestureEnabled] = useState(true);
   const [hapticEnabled, setHapticEnabled] = useState(true);
   const [isPWAInstalled, setIsPWAInstalled] = useState(false);
-  const [deviceType, setDeviceType] = useState<"mobile" | "tablet" | "desktop">("mobile");
-  const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(null);
+  const [deviceType, setDeviceType] = useState<"mobile" | "tablet" | "desktop">(
+    "mobile",
+  );
+  const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(
+    null,
+  );
 
   // Detect device type
   useEffect(() => {
@@ -67,15 +73,17 @@ export function EnhancedMobileExperience({ children }: EnhancedMobileExperienceP
     };
 
     updateDeviceType();
-    window.addEventListener('resize', updateDeviceType);
-    return () => window.removeEventListener('resize', updateDeviceType);
+    window.addEventListener("resize", updateDeviceType);
+    return () => window.removeEventListener("resize", updateDeviceType);
   }, []);
 
   // PWA Installation Detection
   useEffect(() => {
     const checkPWAInstallation = () => {
       // Check if app is running in standalone mode (PWA)
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+      const isStandalone = window.matchMedia(
+        "(display-mode: standalone)",
+      ).matches;
       setIsPWAInstalled(isStandalone);
     };
 
@@ -85,12 +93,12 @@ export function EnhancedMobileExperience({ children }: EnhancedMobileExperienceP
   // Haptic Feedback
   const triggerHaptic = (type: "light" | "medium" | "heavy" = "light") => {
     if (!hapticEnabled) return;
-    
-    if ('vibrate' in navigator) {
+
+    if ("vibrate" in navigator) {
       const patterns = {
         light: [10],
         medium: [20],
-        heavy: [50]
+        heavy: [50],
       };
       navigator.vibrate(patterns[type]);
     }
@@ -104,7 +112,10 @@ export function EnhancedMobileExperience({ children }: EnhancedMobileExperienceP
     const threshold = 100;
     const velocityThreshold = 500;
 
-    if (Math.abs(offset.x) > threshold || Math.abs(velocity.x) > velocityThreshold) {
+    if (
+      Math.abs(offset.x) > threshold ||
+      Math.abs(velocity.x) > velocityThreshold
+    ) {
       if (offset.x > 0) {
         setSwipeDirection("right");
         handleSwipeRight();
@@ -112,9 +123,9 @@ export function EnhancedMobileExperience({ children }: EnhancedMobileExperienceP
         setSwipeDirection("left");
         handleSwipeLeft();
       }
-      
+
       triggerHaptic("light");
-      
+
       // Reset swipe direction after animation
       setTimeout(() => setSwipeDirection(null), 300);
     }
@@ -122,28 +133,28 @@ export function EnhancedMobileExperience({ children }: EnhancedMobileExperienceP
 
   const handleSwipeLeft = () => {
     // Navigate to next section or show quick actions
-      toast({
-        title: "Swipe Left Detected",
-        description: "Quick actions menu"
-      });
+    toast({
+      title: "Swipe Left Detected",
+      description: "Quick actions menu",
+    });
   };
 
   const handleSwipeRight = () => {
     // Navigate back or show navigation
-      toast({
-        title: "Swipe Right Detected", 
-        description: "Navigation menu"
-      });
+    toast({
+      title: "Swipe Right Detected",
+      description: "Navigation menu",
+    });
   };
 
   // Touch-friendly button component
-  const TouchButton = ({ 
-    children, 
-    onClick, 
-    variant = "default", 
+  const TouchButton = ({
+    children,
+    onClick,
+    variant = "default",
     size = "default",
     className = "",
-    hapticType = "light" 
+    hapticType = "light",
   }: {
     children: React.ReactNode;
     onClick?: () => void;
@@ -165,7 +176,7 @@ export function EnhancedMobileExperience({ children }: EnhancedMobileExperienceP
         <Button
           variant={variant}
           size={size}
-          className={`${className} ${isMobile ? 'min-h-[44px] min-w-[44px]' : ''}`}
+          className={`${className} ${isMobile ? "min-h-[44px] min-w-[44px]" : ""}`}
           onClick={handleClick}
         >
           {children}
@@ -183,7 +194,7 @@ export function EnhancedMobileExperience({ children }: EnhancedMobileExperienceP
       { icon: Dumbbell, label: "Workouts", href: "/workouts" },
       { icon: MessageCircle, label: "Chat", href: "/chat" },
       { icon: User, label: "Profile", href: "/profile" },
-      { icon: Settings, label: "Settings", href: "/settings" }
+      { icon: Settings, label: "Settings", href: "/settings" },
     ];
 
     if (deviceType === "desktop") {
@@ -206,21 +217,25 @@ export function EnhancedMobileExperience({ children }: EnhancedMobileExperienceP
     return (
       <>
         {/* Mobile/Tablet Navigation */}
-        <div className={`${deviceType === "mobile" ? "fixed bottom-0 left-0 right-0" : "relative"} z-50`}>
+        <div
+          className={`${deviceType === "mobile" ? "fixed bottom-0 left-0 right-0" : "relative"} z-50`}
+        >
           <Card className="border-t rounded-t-lg lg:rounded-lg shadow-lg">
             <CardContent className="p-2">
               <div className="flex justify-around items-center">
-                {navItems.slice(0, deviceType === "mobile" ? 4 : 5).map((item) => (
-                  <TouchButton
-                    key={item.label}
-                    variant="ghost"
-                    size="sm"
-                    className="flex flex-col items-center gap-1 py-3 px-2"
-                  >
-                    <item.icon className="h-5 w-5" />
-                    <span className="text-xs">{item.label}</span>
-                  </TouchButton>
-                ))}
+                {navItems
+                  .slice(0, deviceType === "mobile" ? 4 : 5)
+                  .map((item) => (
+                    <TouchButton
+                      key={item.label}
+                      variant="ghost"
+                      size="sm"
+                      className="flex flex-col items-center gap-1 py-3 px-2"
+                    >
+                      <item.icon className="h-5 w-5" />
+                      <span className="text-xs">{item.label}</span>
+                    </TouchButton>
+                  ))}
                 {deviceType === "mobile" && (
                   <TouchButton
                     variant="ghost"
@@ -291,11 +306,14 @@ export function EnhancedMobileExperience({ children }: EnhancedMobileExperienceP
                     >
                       <Smartphone className="h-5 w-5" />
                       <span className="text-sm">Gestures</span>
-                      <Badge variant={isGestureEnabled ? "default" : "secondary"} className="text-xs">
+                      <Badge
+                        variant={isGestureEnabled ? "default" : "secondary"}
+                        className="text-xs"
+                      >
                         {isGestureEnabled ? "On" : "Off"}
                       </Badge>
                     </TouchButton>
-                    
+
                     <TouchButton
                       variant="outline"
                       className="flex flex-col items-center gap-2 py-4"
@@ -303,7 +321,10 @@ export function EnhancedMobileExperience({ children }: EnhancedMobileExperienceP
                     >
                       <Vibrate className="h-5 w-5" />
                       <span className="text-sm">Haptics</span>
-                      <Badge variant={hapticEnabled ? "default" : "secondary"} className="text-xs">
+                      <Badge
+                        variant={hapticEnabled ? "default" : "secondary"}
+                        className="text-xs"
+                      >
                         {hapticEnabled ? "On" : "Off"}
                       </Badge>
                     </TouchButton>
@@ -322,14 +343,10 @@ export function EnhancedMobileExperience({ children }: EnhancedMobileExperienceP
     const layoutClasses = {
       mobile: "pb-20 px-4",
       tablet: "px-6 pb-6",
-      desktop: "px-8 pb-8"
+      desktop: "px-8 pb-8",
     };
 
-    return (
-      <div className={layoutClasses[deviceType]}>
-        {children}
-      </div>
-    );
+    return <div className={layoutClasses[deviceType]}>{children}</div>;
   };
 
   // PWA Installation Prompt
@@ -415,7 +432,9 @@ export function EnhancedMobileExperience({ children }: EnhancedMobileExperienceP
             >
               <div className="bg-primary/20 backdrop-blur-sm rounded-full p-4">
                 <motion.div
-                  animate={{ x: swipeDirection === "right" ? [0, 10, 0] : [0, -10, 0] }}
+                  animate={{
+                    x: swipeDirection === "right" ? [0, 10, 0] : [0, -10, 0],
+                  }}
                   transition={{ duration: 0.3 }}
                 >
                   {swipeDirection === "right" ? (
@@ -435,9 +454,7 @@ export function EnhancedMobileExperience({ children }: EnhancedMobileExperienceP
   return (
     <div className="relative min-h-screen">
       {/* Enhanced responsive layout */}
-      <DeviceLayout>
-        {children}
-      </DeviceLayout>
+      <DeviceLayout>{children}</DeviceLayout>
 
       {/* Enhanced navigation */}
       <ResponsiveNavigation />
@@ -451,7 +468,10 @@ export function EnhancedMobileExperience({ children }: EnhancedMobileExperienceP
       {/* Device info badge for debugging */}
       {process.env.NODE_ENV === "development" && (
         <div className="fixed top-4 right-4 z-50">
-          <Badge variant="outline" className="bg-background/90 backdrop-blur-sm">
+          <Badge
+            variant="outline"
+            className="bg-background/90 backdrop-blur-sm"
+          >
             <div className="flex items-center gap-1">
               {deviceType === "mobile" && <Smartphone className="h-3 w-3" />}
               {deviceType === "tablet" && <Tablet className="h-3 w-3" />}

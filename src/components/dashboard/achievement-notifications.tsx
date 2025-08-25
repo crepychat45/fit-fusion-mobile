@@ -1,17 +1,8 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  Trophy, 
-  Star, 
-  Target, 
-  Flame, 
-  Medal, 
-  X,
-  Sparkles
-} from "lucide-react";
+import { Trophy, Star, Target, Flame, Medal, X, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 
@@ -21,33 +12,35 @@ interface Achievement {
   description: string;
   icon: React.ElementType;
   points: number;
-  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  rarity: "common" | "rare" | "epic" | "legendary";
   unlocked: boolean;
 }
 
 export function AchievementNotifications() {
   const [achievements, setAchievements] = useState<Achievement[]>([
     {
-      id: '1',
-      title: 'Morning Warrior',
-      description: 'Completed 5 morning workouts this week',
+      id: "1",
+      title: "Morning Warrior",
+      description: "Completed 5 morning workouts this week",
       icon: Trophy,
       points: 50,
-      rarity: 'rare',
-      unlocked: true
+      rarity: "rare",
+      unlocked: true,
     },
     {
-      id: '2',
-      title: 'Streak Master',
-      description: '7-day workout streak achieved!',
+      id: "2",
+      title: "Streak Master",
+      description: "7-day workout streak achieved!",
       icon: Flame,
       points: 100,
-      rarity: 'epic',
-      unlocked: true
-    }
+      rarity: "epic",
+      unlocked: true,
+    },
   ]);
 
-  const [visibleAchievements, setVisibleAchievements] = useState<Achievement[]>([]);
+  const [visibleAchievements, setVisibleAchievements] = useState<Achievement[]>(
+    [],
+  );
   const { toast } = useToast();
 
   useEffect(() => {
@@ -55,8 +48,8 @@ export function AchievementNotifications() {
     achievements.forEach((achievement, index) => {
       if (achievement.unlocked) {
         setTimeout(() => {
-          setVisibleAchievements(prev => {
-            if (!prev.find(a => a.id === achievement.id)) {
+          setVisibleAchievements((prev) => {
+            if (!prev.find((a) => a.id === achievement.id)) {
               return [...prev, achievement];
             }
             return prev;
@@ -67,21 +60,23 @@ export function AchievementNotifications() {
   }, [achievements]);
 
   const dismissAchievement = (achievementId: string) => {
-    setVisibleAchievements(prev => prev.filter(a => a.id !== achievementId));
+    setVisibleAchievements((prev) =>
+      prev.filter((a) => a.id !== achievementId),
+    );
   };
 
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
-      case 'common':
-        return 'bg-gray-100 text-gray-700 border-gray-300';
-      case 'rare':
-        return 'bg-blue-100 text-blue-700 border-blue-300';
-      case 'epic':
-        return 'bg-purple-100 text-purple-700 border-purple-300';
-      case 'legendary':
-        return 'bg-yellow-100 text-yellow-700 border-yellow-300';
+      case "common":
+        return "bg-gray-100 text-gray-700 border-gray-300";
+      case "rare":
+        return "bg-blue-100 text-blue-700 border-blue-300";
+      case "epic":
+        return "bg-purple-100 text-purple-700 border-purple-300";
+      case "legendary":
+        return "bg-yellow-100 text-yellow-700 border-yellow-300";
       default:
-        return 'bg-gray-100 text-gray-700 border-gray-300';
+        return "bg-gray-100 text-gray-700 border-gray-300";
     }
   };
 
@@ -112,10 +107,10 @@ export function AchievementNotifications() {
               initial={{ opacity: 0, scale: 0.8, y: 50 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.8, x: 100 }}
-              transition={{ 
-                type: "spring", 
-                stiffness: 300, 
-                damping: 20 
+              transition={{
+                type: "spring",
+                stiffness: 300,
+                damping: 20,
               }}
               layout
             >
@@ -131,29 +126,31 @@ export function AchievementNotifications() {
                       >
                         <achievement.icon className="h-5 w-5" />
                       </motion.div>
-                      
+
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-primary">{achievement.title}</h3>
-                          <Badge 
-                            variant="outline" 
+                          <h3 className="font-semibold text-primary">
+                            {achievement.title}
+                          </h3>
+                          <Badge
+                            variant="outline"
                             className={`text-xs ${getRarityColor(achievement.rarity)}`}
                           >
                             {achievement.rarity}
                           </Badge>
                         </div>
-                        
+
                         <p className="text-sm text-muted-foreground mb-2">
                           {achievement.description}
                         </p>
-                        
+
                         <div className="flex items-center gap-2">
                           <Badge className="bg-primary/10 text-primary">
                             +{achievement.points} XP
                           </Badge>
-                          
-                          <Button 
-                            size="sm" 
+
+                          <Button
+                            size="sm"
                             variant="ghost"
                             onClick={() => celebrateAchievement(achievement)}
                             className="text-xs h-6 px-2"
@@ -163,7 +160,7 @@ export function AchievementNotifications() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <Button
                       size="sm"
                       variant="ghost"

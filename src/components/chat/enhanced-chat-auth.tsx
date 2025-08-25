@@ -1,13 +1,25 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Shield, CheckCircle, AlertTriangle, Eye, EyeOff } from "lucide-react";
+import {
+  Loader2,
+  Shield,
+  CheckCircle,
+  AlertTriangle,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { Label } from "@/components/ui/label";
 
 interface EnhancedChatAuthProps {
@@ -15,57 +27,64 @@ interface EnhancedChatAuthProps {
   onAuthError: (error: string) => void;
 }
 
-export function EnhancedChatAuth({ onAuthSuccess, onAuthError }: EnhancedChatAuthProps) {
+export function EnhancedChatAuth({
+  onAuthSuccess,
+  onAuthError,
+}: EnhancedChatAuthProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<{[key: string]: string}>({});
-  const [authStep, setAuthStep] = useState<'form' | 'verification' | 'success'>('form');
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [authStep, setAuthStep] = useState<"form" | "verification" | "success">(
+    "form",
+  );
   const { toast } = useToast();
 
   useEffect(() => {
     // Check if user is already authenticated
     const checkAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
         if (session) {
-          setAuthStep('success');
+          setAuthStep("success");
           onAuthSuccess();
         }
       } catch (error) {
         console.error("Auth check error:", error);
       }
     };
-    
+
     checkAuth();
   }, [onAuthSuccess]);
 
   const validateForm = () => {
-    const newErrors: {[key: string]: string} = {};
-    
+    const newErrors: { [key: string]: string } = {};
+
     if (!email) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = "Please enter a valid email address";
     }
-    
+
     if (!password) {
       newErrors.password = "Password is required";
     } else if (!isLogin && password.length < 6) {
       newErrors.password = "Password must be at least 6 characters long";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
-    
+
     setIsLoading(true);
     setErrors({});
 
@@ -79,7 +98,7 @@ export function EnhancedChatAuth({ onAuthSuccess, onAuthError }: EnhancedChatAut
         if (error) throw error;
 
         if (data.user) {
-          setAuthStep('success');
+          setAuthStep("success");
           toast({
             title: "Login Successful",
             description: "Welcome back to FitFusion Chat!",
@@ -91,45 +110,48 @@ export function EnhancedChatAuth({ onAuthSuccess, onAuthError }: EnhancedChatAut
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/chat`
-          }
+            emailRedirectTo: `${window.location.origin}/chat`,
+          },
         });
 
         if (error) throw error;
 
         if (data.user) {
           if (data.user.email_confirmed_at) {
-            setAuthStep('success');
+            setAuthStep("success");
             onAuthSuccess();
           } else {
-            setAuthStep('verification');
+            setAuthStep("verification");
             toast({
               title: "Check Your Email",
-              description: "We've sent you a verification link to complete your registration.",
+              description:
+                "We've sent you a verification link to complete your registration.",
             });
           }
         }
       }
     } catch (error: any) {
       console.error("Auth error:", error);
-      
+
       let errorMessage = "An unexpected error occurred";
-      
+
       if (error.message?.includes("Invalid login credentials")) {
         errorMessage = "Invalid email or password. Please try again.";
       } else if (error.message?.includes("User already registered")) {
-        errorMessage = "This email is already registered. Please try logging in instead.";
+        errorMessage =
+          "This email is already registered. Please try logging in instead.";
         setIsLogin(true);
       } else if (error.message?.includes("Email not confirmed")) {
-        errorMessage = "Please check your email and click the verification link.";
-        setAuthStep('verification');
+        errorMessage =
+          "Please check your email and click the verification link.";
+        setAuthStep("verification");
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       setErrors({ general: errorMessage });
       onAuthError(errorMessage);
-      
+
       toast({
         title: "Authentication Error",
         description: errorMessage,
@@ -143,12 +165,12 @@ export function EnhancedChatAuth({ onAuthSuccess, onAuthError }: EnhancedChatAut
   const resendVerification = async () => {
     try {
       const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: email
+        type: "signup",
+        email: email,
       });
-      
+
       if (error) throw error;
-      
+
       toast({
         title: "Verification Email Sent",
         description: "Please check your email for the verification link.",
@@ -162,7 +184,7 @@ export function EnhancedChatAuth({ onAuthSuccess, onAuthError }: EnhancedChatAut
     }
   };
 
-  if (authStep === 'verification') {
+  if (authStep === "verification") {
     return (
       <Card className="w-full max-w-md mx-auto">
         <CardHeader className="text-center">
@@ -178,17 +200,22 @@ export function EnhancedChatAuth({ onAuthSuccess, onAuthError }: EnhancedChatAut
           <Alert>
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              Please check your email and click the verification link to complete your registration.
+              Please check your email and click the verification link to
+              complete your registration.
             </AlertDescription>
           </Alert>
-          
+
           <div className="flex flex-col gap-2">
-            <Button onClick={resendVerification} variant="outline" className="w-full">
+            <Button
+              onClick={resendVerification}
+              variant="outline"
+              className="w-full"
+            >
               Resend Verification Email
             </Button>
-            <Button 
-              onClick={() => setAuthStep('form')} 
-              variant="ghost" 
+            <Button
+              onClick={() => setAuthStep("form")}
+              variant="ghost"
               className="w-full"
             >
               Back to Login
@@ -199,7 +226,7 @@ export function EnhancedChatAuth({ onAuthSuccess, onAuthError }: EnhancedChatAut
     );
   }
 
-  if (authStep === 'success') {
+  if (authStep === "success") {
     return (
       <Card className="w-full max-w-md mx-auto">
         <CardHeader className="text-center">
@@ -220,10 +247,9 @@ export function EnhancedChatAuth({ onAuthSuccess, onAuthError }: EnhancedChatAut
       <CardHeader className="text-center">
         <CardTitle>{isLogin ? "Sign In" : "Create Account"}</CardTitle>
         <CardDescription>
-          {isLogin 
-            ? "Welcome back! Please sign in to continue." 
-            : "Join FitFusion Chat to connect with fitness enthusiasts"
-          }
+          {isLogin
+            ? "Welcome back! Please sign in to continue."
+            : "Join FitFusion Chat to connect with fitness enthusiasts"}
         </CardDescription>
         <div className="flex items-center justify-center gap-2 mt-2">
           <Badge variant="outline" className="text-xs">
@@ -232,7 +258,7 @@ export function EnhancedChatAuth({ onAuthSuccess, onAuthError }: EnhancedChatAut
           </Badge>
         </div>
       </CardHeader>
-      
+
       <CardContent>
         {errors.general && (
           <Alert variant="destructive" className="mb-4">
@@ -240,7 +266,7 @@ export function EnhancedChatAuth({ onAuthSuccess, onAuthError }: EnhancedChatAut
             <AlertDescription>{errors.general}</AlertDescription>
           </Alert>
         )}
-        
+
         <form onSubmit={handleAuth} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -258,17 +284,23 @@ export function EnhancedChatAuth({ onAuthSuccess, onAuthError }: EnhancedChatAut
               <p className="text-sm text-destructive">{errors.email}</p>
             )}
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
             <div className="relative">
               <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
-                placeholder={isLogin ? "Enter your password" : "Create a password (min 6 characters)"}
+                placeholder={
+                  isLogin
+                    ? "Enter your password"
+                    : "Create a password (min 6 characters)"
+                }
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className={errors.password ? "border-destructive pr-10" : "pr-10"}
+                className={
+                  errors.password ? "border-destructive pr-10" : "pr-10"
+                }
                 disabled={isLoading}
                 required
               />
@@ -279,25 +311,31 @@ export function EnhancedChatAuth({ onAuthSuccess, onAuthError }: EnhancedChatAut
                 className="absolute right-0 top-0 h-full"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
               </Button>
             </div>
             {errors.password && (
               <p className="text-sm text-destructive">{errors.password}</p>
             )}
           </div>
-          
+
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 {isLogin ? "Signing In..." : "Creating Account..."}
               </>
+            ) : isLogin ? (
+              "Sign In"
             ) : (
-              isLogin ? "Sign In" : "Create Account"
+              "Create Account"
             )}
           </Button>
-          
+
           <div className="text-center">
             <Button
               type="button"
@@ -310,10 +348,9 @@ export function EnhancedChatAuth({ onAuthSuccess, onAuthError }: EnhancedChatAut
               }}
               disabled={isLoading}
             >
-              {isLogin 
-                ? "Don't have an account? Sign up" 
-                : "Already have an account? Sign in"
-              }
+              {isLogin
+                ? "Don't have an account? Sign up"
+                : "Already have an account? Sign in"}
             </Button>
           </div>
         </form>

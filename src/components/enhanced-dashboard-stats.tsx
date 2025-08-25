@@ -1,18 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  BarChart3, 
-  PieChart, 
+import React, { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import {
+  TrendingUp,
+  TrendingDown,
+  BarChart3,
+  PieChart,
   Calendar,
   Download,
   Filter,
@@ -24,11 +36,24 @@ import {
   Activity,
   Zap,
   Award,
-  Info
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Cell, Pie } from 'recharts';
-import { useToast } from '@/hooks/use-toast';
+  Info,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  PieChart as RechartsPieChart,
+  Cell,
+  Pie,
+} from "recharts";
+import { useToast } from "@/hooks/use-toast";
 
 interface ActivityData {
   name: string;
@@ -46,39 +71,39 @@ interface GoalData {
   value: number;
 }
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
 
 const weeklyActivity: ActivityData[] = [
-  { name: 'Mon', workouts: 3, calories: 350 },
-  { name: 'Tue', workouts: 2, calories: 280 },
-  { name: 'Wed', workouts: 1, calories: 150 },
-  { name: 'Thu', workouts: 3, calories: 400 },
-  { name: 'Fri', workouts: 2, calories: 320 },
-  { name: 'Sat', workouts: 4, calories: 510 },
-  { name: 'Sun', workouts: 1, calories: 190 },
+  { name: "Mon", workouts: 3, calories: 350 },
+  { name: "Tue", workouts: 2, calories: 280 },
+  { name: "Wed", workouts: 1, calories: 150 },
+  { name: "Thu", workouts: 3, calories: 400 },
+  { name: "Fri", workouts: 2, calories: 320 },
+  { name: "Sat", workouts: 4, calories: 510 },
+  { name: "Sun", workouts: 1, calories: 190 },
 ];
 
 const weightProgress: WeightData[] = [
-  { name: 'Week 1', weight: 80 },
-  { name: 'Week 2', weight: 79.5 },
-  { name: 'Week 3', weight: 79 },
-  { name: 'Week 4', weight: 78.3 },
-  { name: 'Week 5', weight: 77.8 },
-  { name: 'Week 6', weight: 77.2 },
+  { name: "Week 1", weight: 80 },
+  { name: "Week 2", weight: 79.5 },
+  { name: "Week 3", weight: 79 },
+  { name: "Week 4", weight: 78.3 },
+  { name: "Week 5", weight: 77.8 },
+  { name: "Week 6", weight: 77.2 },
 ];
 
 const fitnessGoals: GoalData[] = [
-  { name: 'Strength', value: 30 },
-  { name: 'Endurance', value: 25 },
-  { name: 'Cardio', value: 20 },
-  { name: 'Flexibility', value: 15 },
-  { name: 'Balance', value: 10 },
+  { name: "Strength", value: 30 },
+  { name: "Endurance", value: 25 },
+  { name: "Cardio", value: 20 },
+  { name: "Flexibility", value: 15 },
+  { name: "Balance", value: 10 },
 ];
 
 export function EnhancedDashboardStats() {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('overview');
-  const [timeframe, setTimeframe] = useState('weekly');
+  const [activeTab, setActiveTab] = useState("overview");
+  const [timeframe, setTimeframe] = useState("weekly");
   const [showExportOptions, setShowExportOptions] = useState(false);
   const [isSubscriptionActive, setIsSubscriptionActive] = useState(true);
   const [isCompareMode, setIsCompareMode] = useState(false);
@@ -90,31 +115,33 @@ export function EnhancedDashboardStats() {
   const handleExport = () => {
     setShowExportOptions(true);
     toast({
-      title: 'Exporting Data',
-      description: 'Preparing your data for export. This may take a moment.',
+      title: "Exporting Data",
+      description: "Preparing your data for export. This may take a moment.",
     });
 
     setTimeout(() => {
       setShowExportOptions(false);
       toast({
-        title: 'Data Exported',
-        description: 'Your data has been successfully exported.',
+        title: "Data Exported",
+        description: "Your data has been successfully exported.",
       });
     }, 3000);
   };
 
   const handleShare = () => {
     toast({
-      title: 'Sharing Stats',
-      description: 'Sharing your stats with friends and followers.',
+      title: "Sharing Stats",
+      description: "Sharing your stats with friends and followers.",
     });
   };
 
   const handleCompare = () => {
     setIsCompareMode(!isCompareMode);
     toast({
-      title: 'Compare Mode',
-      description: isCompareMode ? 'Compare mode disabled.' : 'Compare mode enabled.',
+      title: "Compare Mode",
+      description: isCompareMode
+        ? "Compare mode disabled."
+        : "Compare mode enabled.",
     });
   };
 
@@ -125,7 +152,7 @@ export function EnhancedDashboardStats() {
         <h2 className="text-2xl font-bold">Analytics Dashboard</h2>
         <div className="flex items-center space-x-2">
           <Button variant="outline" size="sm" onClick={handleCompare}>
-            {isCompareMode ? 'Disable Compare' : 'Enable Compare'}
+            {isCompareMode ? "Disable Compare" : "Enable Compare"}
           </Button>
           <Select value={timeframe} onValueChange={handleTimeframeChange}>
             <SelectTrigger className="w-[180px]">
@@ -185,16 +212,36 @@ export function EnhancedDashboardStats() {
           </CardContent>
         </Card>
       </div>
-      
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         {/* Tabs List */}
         <TabsList className="bg-secondary rounded-md p-1">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Overview</TabsTrigger>
-          <TabsTrigger value="detailed" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Detailed Stats</TabsTrigger>
-          <TabsTrigger value="achievements" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Achievements</TabsTrigger>
-          <TabsTrigger value="compare" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">Compare</TabsTrigger>
+          <TabsTrigger
+            value="overview"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+          >
+            Overview
+          </TabsTrigger>
+          <TabsTrigger
+            value="detailed"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+          >
+            Detailed Stats
+          </TabsTrigger>
+          <TabsTrigger
+            value="achievements"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+          >
+            Achievements
+          </TabsTrigger>
+          <TabsTrigger
+            value="compare"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+          >
+            Compare
+          </TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="overview" className="mt-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Line Chart */}
@@ -205,14 +252,45 @@ export function EnhancedDashboardStats() {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={weeklyActivity} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <LineChart
+                    data={weeklyActivity}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
-                    <YAxis yAxisId="left" label={{ value: 'Workouts', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle' } }} />
-                    <YAxis yAxisId="right" orientation="right" label={{ value: 'Calories', angle: 90, position: 'insideRight', style: { textAnchor: 'middle' } }} />
+                    <YAxis
+                      yAxisId="left"
+                      label={{
+                        value: "Workouts",
+                        angle: -90,
+                        position: "insideLeft",
+                        style: { textAnchor: "middle" },
+                      }}
+                    />
+                    <YAxis
+                      yAxisId="right"
+                      orientation="right"
+                      label={{
+                        value: "Calories",
+                        angle: 90,
+                        position: "insideRight",
+                        style: { textAnchor: "middle" },
+                      }}
+                    />
                     <Tooltip />
-                    <Line yAxisId="left" type="monotone" dataKey="workouts" stroke="#8884d8" activeDot={{ r: 8 }} />
-                    <Line yAxisId="right" type="monotone" dataKey="calories" stroke="#82ca9d" />
+                    <Line
+                      yAxisId="left"
+                      type="monotone"
+                      dataKey="workouts"
+                      stroke="#8884d8"
+                      activeDot={{ r: 8 }}
+                    />
+                    <Line
+                      yAxisId="right"
+                      type="monotone"
+                      dataKey="calories"
+                      stroke="#82ca9d"
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -222,14 +300,26 @@ export function EnhancedDashboardStats() {
             <Card>
               <CardHeader>
                 <CardTitle>Weight Progress</CardTitle>
-                <CardDescription>Your weight over the last 6 weeks</CardDescription>
+                <CardDescription>
+                  Your weight over the last 6 weeks
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={weightProgress} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <BarChart
+                    data={weightProgress}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
-                    <YAxis label={{ value: 'Weight (kg)', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle' } }} />
+                    <YAxis
+                      label={{
+                        value: "Weight (kg)",
+                        angle: -90,
+                        position: "insideLeft",
+                        style: { textAnchor: "middle" },
+                      }}
+                    />
                     <Tooltip />
                     <Bar dataKey="weight" fill="#a855f7" />
                   </BarChart>
@@ -237,40 +327,44 @@ export function EnhancedDashboardStats() {
               </CardContent>
             </Card>
           </div>
-          
+
           {/* Enhanced Alert with proper components */}
           <Alert className="mt-6 border-blue-200 bg-blue-50 dark:bg-blue-950/20">
             <Info className="h-4 w-4 text-blue-600" />
             <AlertDescription className="text-blue-800 dark:text-blue-200">
-              Your performance has improved by 23% this month. Keep up the excellent work!
+              Your performance has improved by 23% this month. Keep up the
+              excellent work!
             </AlertDescription>
           </Alert>
         </TabsContent>
-        
+
         <TabsContent value="detailed" className="mt-6">
           {/* Detailed View */}
           <div className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle>Fitness Goals Distribution</CardTitle>
-                <CardDescription>Distribution of your fitness goals</CardDescription>
+                <CardDescription>
+                  Distribution of your fitness goals
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={350}>
                   <RechartsPieChart>
-                    <Pie 
-                      dataKey="value" 
-                      data={fitnessGoals} 
-                      cx="50%" 
-                      cy="50%" 
-                      outerRadius={120} 
+                    <Pie
+                      dataKey="value"
+                      data={fitnessGoals}
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={120}
                       label
                     >
-                      {
-                        fitnessGoals.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))
-                      }
+                      {fitnessGoals.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                        />
+                      ))}
                     </Pie>
                     <Tooltip />
                   </RechartsPieChart>
@@ -295,7 +389,7 @@ export function EnhancedDashboardStats() {
               </CardContent>
             </Card>
           </div>
-          
+
           {showExportOptions && (
             <Alert className="border-green-200 bg-green-50 dark:bg-green-950/20">
               <Download className="h-4 w-4 text-green-600" />
@@ -305,13 +399,15 @@ export function EnhancedDashboardStats() {
             </Alert>
           )}
         </TabsContent>
-        
+
         {/* Achievements Tab */}
         <TabsContent value="achievements" className="mt-6">
           <Card>
             <CardHeader>
               <CardTitle>Your Achievements</CardTitle>
-              <CardDescription>Track your progress and achievements</CardDescription>
+              <CardDescription>
+                Track your progress and achievements
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -322,9 +418,7 @@ export function EnhancedDashboardStats() {
                       Workout Warrior
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    Complete 50 workouts.
-                  </CardContent>
+                  <CardContent>Complete 50 workouts.</CardContent>
                 </Card>
 
                 <Card className="bg-blue-50 border-blue-200">
@@ -334,9 +428,7 @@ export function EnhancedDashboardStats() {
                       Calorie Crusher
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    Burn 10,000 calories.
-                  </CardContent>
+                  <CardContent>Burn 10,000 calories.</CardContent>
                 </Card>
 
                 <Card className="bg-yellow-50 border-yellow-200">
@@ -346,15 +438,13 @@ export function EnhancedDashboardStats() {
                       Goal Getter
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    Achieve your fitness goal.
-                  </CardContent>
+                  <CardContent>Achieve your fitness goal.</CardContent>
                 </Card>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         {/* Compare Tab */}
         <TabsContent value="compare" className="mt-6">
           <Card>

@@ -9,11 +9,11 @@ export interface ActivitySummaryProps {
   avgHeartRate?: number;
 }
 
-export function ActivitySummary({ 
-  workoutsCompleted = 0, 
-  streakDays = 0, 
-  caloriesBurned = 0, 
-  avgHeartRate = 0 
+export function ActivitySummary({
+  workoutsCompleted = 0,
+  streakDays = 0,
+  caloriesBurned = 0,
+  avgHeartRate = 0,
 }: ActivitySummaryProps) {
   return (
     <Card className="col-span-1 md:col-span-2 lg:col-span-3">
@@ -27,7 +27,7 @@ export function ActivitySummary({
             <p className="text-2xl font-bold">{workoutsCompleted}</p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <div className="rounded-full bg-secondary p-2">
             <Flame className="h-4 w-4 text-secondary-foreground" />
@@ -37,7 +37,7 @@ export function ActivitySummary({
             <p className="text-2xl font-bold">{caloriesBurned}</p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <div className="rounded-full bg-secondary p-2">
             <Heart className="h-4 w-4 text-secondary-foreground" />
@@ -47,7 +47,7 @@ export function ActivitySummary({
             <p className="text-2xl font-bold">{avgHeartRate}</p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <div className="rounded-full bg-secondary p-2">
             <Zap className="h-4 w-4 text-secondary-foreground" />

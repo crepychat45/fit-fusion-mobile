@@ -11,7 +11,14 @@ export interface ActivityCardProps {
   onClick?: () => void;
 }
 
-export function ActivityCard({ title, description, date, icon, stats, onClick }: ActivityCardProps) {
+export function ActivityCard({
+  title,
+  description,
+  date,
+  icon,
+  stats,
+  onClick,
+}: ActivityCardProps) {
   return (
     <Card
       className="overflow-hidden border-primary/10 shadow-sm hover:bg-secondary/5"
@@ -31,7 +38,10 @@ export function ActivityCard({ title, description, date, icon, stats, onClick }:
         </div>
         <div className="mt-4 flex flex-col gap-2">
           {stats.map((stat) => (
-            <div key={stat.label} className="flex items-center justify-between text-xs">
+            <div
+              key={stat.label}
+              className="flex items-center justify-between text-xs"
+            >
               <span className="text-muted-foreground">{stat.label}</span>
               <span className="font-medium">{stat.value}</span>
             </div>

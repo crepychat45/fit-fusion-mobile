@@ -1,12 +1,18 @@
+import React from "react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
+import { Check } from "lucide-react";
+import { useSettings } from "@/contexts/settings-context";
 
-import React from 'react';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { Card } from '@/components/ui/card';
-import { Check } from 'lucide-react';
-import { useSettings } from '@/contexts/settings-context';
-
-type PaymentMethod = "Cash" | "GPay" | "PhonePe" | "NetBanking" | "CreditCard" | "DebitCard" | "UPI";
+type PaymentMethod =
+  | "Cash"
+  | "GPay"
+  | "PhonePe"
+  | "NetBanking"
+  | "CreditCard"
+  | "DebitCard"
+  | "UPI";
 
 interface PaymentMethodSelectorProps {
   selectedMethod: PaymentMethod;
@@ -15,7 +21,7 @@ interface PaymentMethodSelectorProps {
 
 export function PaymentMethodSelector({
   selectedMethod,
-  onSelectMethod
+  onSelectMethod,
 }: PaymentMethodSelectorProps) {
   const paymentMethods = [
     { id: "CreditCard", name: "Credit Card", icon: "💳" },
@@ -28,7 +34,10 @@ export function PaymentMethodSelector({
   ];
 
   return (
-    <RadioGroup value={selectedMethod} onValueChange={(value) => onSelectMethod(value as PaymentMethod)}>
+    <RadioGroup
+      value={selectedMethod}
+      onValueChange={(value) => onSelectMethod(value as PaymentMethod)}
+    >
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {paymentMethods.map((method) => (
           <div key={method.id}>
@@ -44,7 +53,9 @@ export function PaymentMethodSelector({
               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted mb-2">
                 {method.icon}
               </div>
-              <div className="text-sm font-medium leading-none">{method.name}</div>
+              <div className="text-sm font-medium leading-none">
+                {method.name}
+              </div>
             </Label>
           </div>
         ))}

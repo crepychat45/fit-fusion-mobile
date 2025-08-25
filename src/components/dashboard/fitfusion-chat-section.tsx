@@ -1,8 +1,28 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronRight, MessageCircle, Users, Shield, Zap, Settings, Smartphone, Monitor, LucideIcon, BellRing, Lock, Brain, User, HeartHandshake, Video, Sticker, FileImage, Mic, Search, Check } from "lucide-react";
+import {
+  ChevronRight,
+  MessageCircle,
+  Users,
+  Shield,
+  Zap,
+  Settings,
+  Smartphone,
+  Monitor,
+  LucideIcon,
+  BellRing,
+  Lock,
+  Brain,
+  User,
+  HeartHandshake,
+  Video,
+  Sticker,
+  FileImage,
+  Mic,
+  Search,
+  Check,
+} from "lucide-react";
 import { AdvancedChatInterface } from "@/components/chat/advanced-chat-interface";
 import { MobileChatInterface } from "@/components/chat/mobile-chat-interface";
 import { EnhancedFitfusionChat } from "@/components/chat/enhanced-fitfusion-chat";
@@ -12,7 +32,12 @@ import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 
 interface ChatFeature {
@@ -30,15 +55,21 @@ export function FitfusionChatSection() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { toast } = useToast();
-  const [securityLevel, setSecurityLevel] = useState<"standard" | "high" | "maximum">("high");
+  const [securityLevel, setSecurityLevel] = useState<
+    "standard" | "high" | "maximum"
+  >("high");
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [availableUsers, setAvailableUsers] = useState(Math.floor(Math.random() * 100) + 120);
+  const [availableUsers, setAvailableUsers] = useState(
+    Math.floor(Math.random() * 100) + 120,
+  );
   const [activeConversations, setActiveConversations] = useState(3);
-  
+
   useEffect(() => {
     // Simulate changing online users
     const interval = setInterval(() => {
-      setAvailableUsers(prev => Math.max(100, prev + Math.floor(Math.random() * 7) - 3));
+      setAvailableUsers((prev) =>
+        Math.max(100, prev + Math.floor(Math.random() * 7) - 3),
+      );
     }, 60000);
 
     return () => clearInterval(interval);
@@ -49,80 +80,80 @@ export function FitfusionChatSection() {
   };
 
   const features: ChatFeature[] = [
-    { 
-      name: "Group Chats", 
-      icon: Users, 
+    {
+      name: "Group Chats",
+      icon: Users,
       description: "Connect with workout buddies in group conversations",
-      enabled: true 
+      enabled: true,
     },
-    { 
-      name: "Media Sharing", 
-      icon: FileImage, 
+    {
+      name: "Media Sharing",
+      icon: FileImage,
       description: "Share photos, videos and files with your contacts",
-      enabled: true 
+      enabled: true,
     },
-    { 
-      name: "Advanced Security", 
-      icon: Shield, 
+    {
+      name: "Advanced Security",
+      icon: Shield,
       description: "End-to-end encryption for all messages",
-      enabled: true 
+      enabled: true,
     },
-    { 
-      name: "Voice Messages", 
-      icon: Mic, 
+    {
+      name: "Voice Messages",
+      icon: Mic,
       description: "Record and send voice notes",
       isNew: true,
-      enabled: true 
+      enabled: true,
     },
-    { 
-      name: "AI Fitness Chat", 
-      icon: Brain, 
+    {
+      name: "AI Fitness Chat",
+      icon: Brain,
       description: "Get workout advice from our AI assistant",
       isNew: true,
       premium: true,
-      enabled: true 
+      enabled: true,
     },
-    { 
-      name: "Video Calls", 
-      icon: Video, 
+    {
+      name: "Video Calls",
+      icon: Video,
       description: "Face-to-face coaching sessions",
       premium: true,
-      enabled: false 
+      enabled: false,
     },
-    { 
-      name: "Search History", 
-      icon: Search, 
+    {
+      name: "Search History",
+      icon: Search,
       description: "Full search across all conversations",
-      enabled: true
+      enabled: true,
     },
-    { 
-      name: "Smart Stickers", 
-      icon: Sticker, 
+    {
+      name: "Smart Stickers",
+      icon: Sticker,
       description: "Fitness-themed stickers and GIFs",
       enabled: true,
-      isNew: true 
+      isNew: true,
     },
-    { 
-      name: "Trainer Connect", 
-      icon: HeartHandshake, 
+    {
+      name: "Trainer Connect",
+      icon: HeartHandshake,
       description: "Connect with certified fitness trainers",
       premium: true,
-      enabled: false 
-    }
+      enabled: false,
+    },
   ];
 
   const toggleFeature = (index: number) => {
     if (features[index].premium) {
       toast({
         title: "✨ Premium Feature",
-        description: "Upgrade to FitFusion Pro to enable this feature."
+        description: "Upgrade to FitFusion Pro to enable this feature.",
       });
       return;
     }
-    
+
     toast({
       title: features[index].enabled ? "Feature Disabled" : "Feature Enabled",
-      description: `${features[index].name} has been ${features[index].enabled ? "disabled" : "enabled"}.`
+      description: `${features[index].name} has been ${features[index].enabled ? "disabled" : "enabled"}.`,
     });
   };
 
@@ -130,15 +161,17 @@ export function FitfusionChatSection() {
     setSecurityLevel(level);
     toast({
       title: "🔒 Security Level Updated",
-      description: `Chat security set to ${level} protection.`
+      description: `Chat security set to ${level} protection.`,
     });
   };
 
   const toggleNotifications = () => {
     setNotificationsEnabled(!notificationsEnabled);
     toast({
-      title: notificationsEnabled ? "Notifications Disabled" : "Notifications Enabled",
-      description: `Chat notifications have been ${notificationsEnabled ? "disabled" : "enabled"}.`
+      title: notificationsEnabled
+        ? "Notifications Disabled"
+        : "Notifications Enabled",
+      description: `Chat notifications have been ${notificationsEnabled ? "disabled" : "enabled"}.`,
     });
   };
 
@@ -154,7 +187,9 @@ export function FitfusionChatSection() {
               <CardTitle className="text-lg">FitFusion Chat</CardTitle>
               <div className="text-sm text-muted-foreground flex items-center gap-1">
                 <span>Secure fitness community</span>
-                <Badge variant="outline" className="ml-2 text-xs">v5.0.4</Badge>
+                <Badge variant="outline" className="ml-2 text-xs">
+                  v5.0.4
+                </Badge>
                 {isMobile ? (
                   <Smartphone className="h-3 w-3 ml-1" />
                 ) : (
@@ -163,28 +198,37 @@ export function FitfusionChatSection() {
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+            <Badge
+              variant="outline"
+              className="text-xs bg-green-50 text-green-700 border-green-200"
+            >
               <Shield className="h-3 w-3 mr-1" />
-              {securityLevel === "maximum" ? "Max Security" : securityLevel === "high" ? "Enhanced" : "Standard"}
+              {securityLevel === "maximum"
+                ? "Max Security"
+                : securityLevel === "high"
+                  ? "Enhanced"
+                  : "Standard"}
             </Badge>
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               className="flex items-center text-xs"
               onClick={() => setShowSettings(!showSettings)}
             >
               <Settings className="h-4 w-4" />
             </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               className="flex items-center text-xs"
               onClick={() => setShowChat(!showChat)}
             >
-              {showChat ? "Hide" : "Show"} 
-              <ChevronRight className={`h-4 w-4 ml-1 transition-transform ${showChat ? 'rotate-90' : ''}`} />
+              {showChat ? "Hide" : "Show"}
+              <ChevronRight
+                className={`h-4 w-4 ml-1 transition-transform ${showChat ? "rotate-90" : ""}`}
+              />
             </Button>
           </div>
         </div>
@@ -199,42 +243,54 @@ export function FitfusionChatSection() {
             >
               <div className="mt-4 pt-4 border-t">
                 <h4 className="font-medium mb-3">Chat Settings</h4>
-                
+
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <div>
-                      <Label htmlFor="notifications" className="font-medium">Notifications</Label>
-                      <p className="text-xs text-muted-foreground">Receive alerts for new messages</p>
+                      <Label htmlFor="notifications" className="font-medium">
+                        Notifications
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        Receive alerts for new messages
+                      </p>
                     </div>
-                    <Switch 
-                      id="notifications" 
-                      checked={notificationsEnabled} 
-                      onCheckedChange={toggleNotifications} 
+                    <Switch
+                      id="notifications"
+                      checked={notificationsEnabled}
+                      onCheckedChange={toggleNotifications}
                     />
                   </div>
-                  
+
                   <div>
-                    <Label className="font-medium mb-1.5 block">Security Level</Label>
+                    <Label className="font-medium mb-1.5 block">
+                      Security Level
+                    </Label>
                     <div className="flex gap-2">
-                      <Button 
-                        size="sm" 
-                        variant={securityLevel === "standard" ? "default" : "outline"}
+                      <Button
+                        size="sm"
+                        variant={
+                          securityLevel === "standard" ? "default" : "outline"
+                        }
                         onClick={() => handleSecurityChange("standard")}
                         className={`flex-1 ${securityLevel === "standard" ? "" : "border-dashed"}`}
                       >
                         Standard
                       </Button>
-                      <Button 
-                        size="sm" 
-                        variant={securityLevel === "high" ? "default" : "outline"}
+                      <Button
+                        size="sm"
+                        variant={
+                          securityLevel === "high" ? "default" : "outline"
+                        }
                         onClick={() => handleSecurityChange("high")}
                         className={`flex-1 ${securityLevel === "high" ? "" : "border-dashed"}`}
                       >
                         Enhanced
                       </Button>
-                      <Button 
-                        size="sm" 
-                        variant={securityLevel === "maximum" ? "default" : "outline"}
+                      <Button
+                        size="sm"
+                        variant={
+                          securityLevel === "maximum" ? "default" : "outline"
+                        }
                         onClick={() => handleSecurityChange("maximum")}
                         className={`flex-1 ${securityLevel === "maximum" ? "" : "border-dashed"}`}
                       >
@@ -243,28 +299,38 @@ export function FitfusionChatSection() {
                     </div>
                   </div>
                 </div>
-                
+
                 <h4 className="font-medium mt-4 mb-3">Features</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                   {features.map((feature, index) => (
                     <TooltipProvider key={index}>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div 
-                            className={`flex items-center gap-2 p-2 rounded-md cursor-pointer border ${feature.enabled ? 'bg-muted/50' : 'bg-background'} ${feature.premium && !feature.enabled ? 'opacity-50' : ''}`}
+                          <div
+                            className={`flex items-center gap-2 p-2 rounded-md cursor-pointer border ${feature.enabled ? "bg-muted/50" : "bg-background"} ${feature.premium && !feature.enabled ? "opacity-50" : ""}`}
                             onClick={() => toggleFeature(index)}
                           >
-                            <div className={`p-1.5 rounded-md ${feature.enabled ? 'bg-primary/10' : 'bg-muted'}`}>
-                              <feature.icon className={`h-4 w-4 ${feature.enabled ? 'text-primary' : 'text-muted-foreground'}`} />
+                            <div
+                              className={`p-1.5 rounded-md ${feature.enabled ? "bg-primary/10" : "bg-muted"}`}
+                            >
+                              <feature.icon
+                                className={`h-4 w-4 ${feature.enabled ? "text-primary" : "text-muted-foreground"}`}
+                              />
                             </div>
                             <div className="flex-1 overflow-hidden">
                               <div className="flex items-center gap-1">
-                                <p className="text-sm truncate">{feature.name}</p>
+                                <p className="text-sm truncate">
+                                  {feature.name}
+                                </p>
                                 {feature.isNew && (
-                                  <Badge className="text-[10px] h-4 bg-green-600">NEW</Badge>
+                                  <Badge className="text-[10px] h-4 bg-green-600">
+                                    NEW
+                                  </Badge>
                                 )}
                                 {feature.premium && (
-                                  <Badge className="text-[10px] h-4 bg-amber-600">PRO</Badge>
+                                  <Badge className="text-[10px] h-4 bg-amber-600">
+                                    PRO
+                                  </Badge>
                                 )}
                               </div>
                             </div>
@@ -280,7 +346,9 @@ export function FitfusionChatSection() {
                         <TooltipContent>
                           <p>{feature.description}</p>
                           {feature.premium && !feature.enabled && (
-                            <p className="text-xs text-amber-500 mt-1">Premium feature</p>
+                            <p className="text-xs text-amber-500 mt-1">
+                              Premium feature
+                            </p>
                           )}
                         </TooltipContent>
                       </Tooltip>
@@ -295,20 +363,32 @@ export function FitfusionChatSection() {
         {/* Enhanced Feature Highlights */}
         {!showSettings && (
           <div className="flex flex-wrap gap-2 mt-3">
-            <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700 border-blue-200 animate-pulse">
+            <Badge
+              variant="secondary"
+              className="text-xs bg-blue-50 text-blue-700 border-blue-200 animate-pulse"
+            >
               <Users className="h-3 w-3 mr-1" />
               {availableUsers}+ Online
             </Badge>
-            <Badge variant="secondary" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
+            <Badge
+              variant="secondary"
+              className="text-xs bg-purple-50 text-purple-700 border-purple-200"
+            >
               <Zap className="h-3 w-3 mr-1" />
               Media Sharing
             </Badge>
-            <Badge variant="secondary" className="text-xs bg-green-50 text-green-700 border-green-200">
+            <Badge
+              variant="secondary"
+              className="text-xs bg-green-50 text-green-700 border-green-200"
+            >
               <Brain className="h-3 w-3 mr-1" />
               AI Powered
             </Badge>
             {isMobile && (
-              <Badge variant="secondary" className="text-xs bg-orange-50 text-orange-700 border-orange-200">
+              <Badge
+                variant="secondary"
+                className="text-xs bg-orange-50 text-orange-700 border-orange-200"
+              >
                 <Smartphone className="h-3 w-3 mr-1" />
                 Mobile Ready
               </Badge>
@@ -316,7 +396,7 @@ export function FitfusionChatSection() {
           </div>
         )}
       </CardHeader>
-      
+
       <AnimatePresence>
         {showChat && (
           <motion.div
@@ -327,15 +407,19 @@ export function FitfusionChatSection() {
             className="overflow-hidden"
           >
             <CardContent className="p-0">
-              <div className={`${isMobile ? 'h-[500px]' : 'h-[600px]'} w-full border-t relative`}>
+              <div
+                className={`${isMobile ? "h-[500px]" : "h-[600px]"} w-full border-t relative`}
+              >
                 <EnhancedFitfusionChat />
               </div>
-              
+
               {/* Enhanced Quick Action Bar */}
               <div className="p-4 bg-gradient-to-r from-muted/30 to-muted/20 border-t flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="font-medium">{activeConversations} active conversations</span>
+                  <span className="font-medium">
+                    {activeConversations} active conversations
+                  </span>
                   {isMobile && (
                     <>
                       <span>•</span>
@@ -343,10 +427,10 @@ export function FitfusionChatSection() {
                     </>
                   )}
                 </div>
-                
-                <Button 
+
+                <Button
                   onClick={handleOpenFullChat}
-                  size="sm" 
+                  size="sm"
                   className="bg-primary hover:bg-primary/90 shadow-sm"
                 >
                   Open Full Chat
@@ -373,18 +457,19 @@ export function FitfusionChatSection() {
                 <Badge variant="outline" className="text-xs">
                   {availableUsers}+ online
                 </Badge>
-                {isMobile && <Smartphone className="h-4 w-4 text-primary ml-1" />}
+                {isMobile && (
+                  <Smartphone className="h-4 w-4 text-primary ml-1" />
+                )}
               </div>
               <p className="text-xs text-muted-foreground mb-4">
-                {isMobile 
+                {isMobile
                   ? "Mobile-optimized secure messaging with AI fitness assistance"
-                  : "Start conversations with fitness enthusiasts worldwide"
-                }
+                  : "Start conversations with fitness enthusiasts worldwide"}
               </p>
               <div className="flex gap-2">
-                <Button 
+                <Button
                   onClick={handleOpenFullChat}
-                  size="sm" 
+                  size="sm"
                   className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg"
                 >
                   {isMobile ? "Launch Mobile Chat" : "Launch Chat"}

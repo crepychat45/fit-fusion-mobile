@@ -1,14 +1,19 @@
-
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
-import { 
-  Info, 
-  Download, 
-  ExternalLink, 
-  Heart, 
+import {
+  Info,
+  Download,
+  ExternalLink,
+  Heart,
   Star,
   Users,
   Calendar,
@@ -27,7 +32,7 @@ import {
   UserCheck,
   Gift,
   MessageCircle,
-  Network
+  Network,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Progress } from "@/components/ui/progress";
@@ -42,7 +47,7 @@ export function AboutPage() {
     totalUsers: 125000,
     activeToday: 8500,
     workoutsCompleted: 2500000,
-    countriesServed: 85
+    countriesServed: 85,
   });
 
   const features = [
@@ -50,38 +55,38 @@ export function AboutPage() {
       icon: Brain,
       title: "AI-Powered Workouts",
       description: "Personalized fitness routines using machine learning",
-      version: "5.0.0"
+      version: "5.0.0",
     },
     {
       icon: Shield,
       title: "Advanced Security",
       description: "End-to-end encryption and biometric authentication",
-      version: "5.0.1"
+      version: "5.0.1",
     },
     {
       icon: Database,
       title: "Smart Analytics",
       description: "Comprehensive fitness tracking and insights",
-      version: "4.8.0"
+      version: "4.8.0",
     },
     {
       icon: Smartphone,
       title: "Mobile Optimized",
       description: "Seamless experience across all devices",
-      version: "5.0.3"
+      version: "5.0.3",
     },
     {
       icon: MessageCircle,
       title: "Enhanced Chat",
       description: "Secure communication with fitness community",
-      version: "5.0.4"
+      version: "5.0.4",
     },
     {
       icon: Network,
       title: "AI Integration",
       description: "Integrated AI throughout the platform",
-      version: "5.0.4"
-    }
+      version: "5.0.4",
+    },
   ];
 
   const changelog = [
@@ -99,8 +104,8 @@ export function AboutPage() {
         "🎨 UI/UX improvements across all pages",
         "📱 Better mobile experience with responsive design",
         "🏆 Expanded achievements and goals system",
-        "🔄 Sync optimizations for faster data transfer"
-      ]
+        "🔄 Sync optimizations for faster data transfer",
+      ],
     },
     {
       version: "5.0.3",
@@ -116,8 +121,8 @@ export function AboutPage() {
         "🔧 Enhanced settings validation and auto-fix features",
         "📊 Real-time analytics dashboard",
         "🎯 Personalized goal tracking system",
-        "🔄 Seamless data sync across devices"
-      ]
+        "🔄 Seamless data sync across devices",
+      ],
     },
     {
       version: "5.0.2",
@@ -127,8 +132,8 @@ export function AboutPage() {
         "🏥 Health app integrations (Apple Health, Google Fit)",
         "🔔 Smart notification system",
         "🐛 Critical bug fixes for data synchronization",
-        "⚡ Performance optimizations"
-      ]
+        "⚡ Performance optimizations",
+      ],
     },
     {
       version: "5.0.1",
@@ -138,8 +143,8 @@ export function AboutPage() {
         "🔐 Enhanced security protocols",
         "🌐 Added 5 new language translations",
         "🔧 Minor UI improvements",
-        "🐛 Bug fixes and stability improvements"
-      ]
+        "🐛 Bug fixes and stability improvements",
+      ],
     },
     {
       version: "5.0.0",
@@ -150,9 +155,9 @@ export function AboutPage() {
         "💡 Intelligent workout planning",
         "📈 Advanced progress tracking",
         "🎨 Complete visual overhaul",
-        "⚡ Rewritten for better performance"
-      ]
-    }
+        "⚡ Rewritten for better performance",
+      ],
+    },
   ];
 
   const team = [
@@ -160,7 +165,7 @@ export function AboutPage() {
     { name: "Sara Thompson", role: "UI/UX Designer", avatar: "ST" },
     { name: "Samir Khan", role: "Backend Engineer", avatar: "SK" },
     { name: "Ajay Mortel", role: "Product Manager", avatar: "AM" },
-    { name: "Sahil Khan", role: "AI Specialist", avatar: "SH" }
+    { name: "Sahil Khan", role: "AI Specialist", avatar: "SH" },
   ];
 
   const handleFeedback = () => {
@@ -180,10 +185,11 @@ export function AboutPage() {
   useEffect(() => {
     // Simulate real-time stats updates
     const interval = setInterval(() => {
-      setUserStats(prev => ({
+      setUserStats((prev) => ({
         ...prev,
         activeToday: prev.activeToday + Math.floor(Math.random() * 3),
-        workoutsCompleted: prev.workoutsCompleted + Math.floor(Math.random() * 5)
+        workoutsCompleted:
+          prev.workoutsCompleted + Math.floor(Math.random() * 5),
       }));
     }, 5000);
 
@@ -211,12 +217,13 @@ export function AboutPage() {
                     AI-Powered Fitness Companion
                   </CardDescription>
                   <div className="flex items-center gap-2 mt-2">
-                    <Badge variant="default" className="bg-gradient-to-r from-purple-500 to-pink-500">
+                    <Badge
+                      variant="default"
+                      className="bg-gradient-to-r from-purple-500 to-pink-500"
+                    >
                       v{appVersion}
                     </Badge>
-                    <Badge variant="outline">
-                      Build {buildNumber}
-                    </Badge>
+                    <Badge variant="outline">Build {buildNumber}</Badge>
                   </div>
                 </div>
               </div>
@@ -230,17 +237,23 @@ export function AboutPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
                 <Users className="h-6 w-6 text-blue-600 mx-auto mb-1" />
-                <p className="text-lg font-bold">{userStats.totalUsers.toLocaleString()}</p>
+                <p className="text-lg font-bold">
+                  {userStats.totalUsers.toLocaleString()}
+                </p>
                 <p className="text-xs text-muted-foreground">Total Users</p>
               </div>
               <div className="text-center p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
                 <TrendingUp className="h-6 w-6 text-green-600 mx-auto mb-1" />
-                <p className="text-lg font-bold">{userStats.activeToday.toLocaleString()}</p>
+                <p className="text-lg font-bold">
+                  {userStats.activeToday.toLocaleString()}
+                </p>
                 <p className="text-xs text-muted-foreground">Active Today</p>
               </div>
               <div className="text-center p-3 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
                 <Award className="h-6 w-6 text-purple-600 mx-auto mb-1" />
-                <p className="text-lg font-bold">{(userStats.workoutsCompleted / 1000000).toFixed(1)}M</p>
+                <p className="text-lg font-bold">
+                  {(userStats.workoutsCompleted / 1000000).toFixed(1)}M
+                </p>
                 <p className="text-xs text-muted-foreground">Workouts</p>
               </div>
               <div className="text-center p-3 bg-orange-50 dark:bg-orange-950/20 rounded-lg">
@@ -290,10 +303,17 @@ export function AboutPage() {
                         {feature.version}
                       </Badge>
                       {feature.version === appVersion && (
-                        <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">New</Badge>
+                        <Badge
+                          variant="secondary"
+                          className="text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                        >
+                          New
+                        </Badge>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground">{feature.description}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {feature.description}
+                    </p>
                   </div>
                 </motion.div>
               );
@@ -327,17 +347,27 @@ export function AboutPage() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: releaseIndex * 0.1 }}
                   className={`border-l-4 pl-4 mb-6 ${
-                    release.version === appVersion 
-                      ? 'border-primary' 
-                      : 'border-muted'
+                    release.version === appVersion
+                      ? "border-primary"
+                      : "border-muted"
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <h4 className="font-semibold">Version {release.version}</h4>
-                    <Badge variant={release.type === "major" ? "default" : release.type === "minor" ? "secondary" : "outline"}>
+                    <Badge
+                      variant={
+                        release.type === "major"
+                          ? "default"
+                          : release.type === "minor"
+                            ? "secondary"
+                            : "outline"
+                      }
+                    >
                       {release.type}
                     </Badge>
-                    <span className="text-sm text-muted-foreground">{release.date}</span>
+                    <span className="text-sm text-muted-foreground">
+                      {release.date}
+                    </span>
                   </div>
                   <ul className="space-y-1">
                     {release.changes.map((change, changeIndex) => (
@@ -345,7 +375,10 @@ export function AboutPage() {
                         key={changeIndex}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.2, delay: (releaseIndex * 0.1) + (changeIndex * 0.05) }}
+                        transition={{
+                          duration: 0.2,
+                          delay: releaseIndex * 0.1 + changeIndex * 0.05,
+                        }}
                         className="text-sm text-muted-foreground flex items-start gap-2"
                       >
                         <CheckCircle className="h-3 w-3 text-green-500 mt-0.5 flex-shrink-0" />
@@ -391,7 +424,9 @@ export function AboutPage() {
                   </div>
                   <div>
                     <h4 className="font-medium">{member.name}</h4>
-                    <p className="text-sm text-muted-foreground">{member.role}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {member.role}
+                    </p>
                   </div>
                 </motion.div>
               ))}
@@ -418,7 +453,11 @@ export function AboutPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Button variant="outline" onClick={handleRateApp} className="w-full justify-start h-auto p-4">
+              <Button
+                variant="outline"
+                onClick={handleRateApp}
+                className="w-full justify-start h-auto p-4"
+              >
                 <div className="text-left">
                   <div className="flex items-center gap-2 mb-1">
                     <Star className="h-4 w-4" />
@@ -430,7 +469,11 @@ export function AboutPage() {
                 </div>
               </Button>
 
-              <Button variant="outline" onClick={handleFeedback} className="w-full justify-start h-auto p-4">
+              <Button
+                variant="outline"
+                onClick={handleFeedback}
+                className="w-full justify-start h-auto p-4"
+              >
                 <div className="text-left">
                   <div className="flex items-center gap-2 mb-1">
                     <Info className="h-4 w-4" />
@@ -442,7 +485,10 @@ export function AboutPage() {
                 </div>
               </Button>
 
-              <Button variant="outline" className="w-full justify-start h-auto p-4">
+              <Button
+                variant="outline"
+                className="w-full justify-start h-auto p-4"
+              >
                 <div className="text-left">
                   <div className="flex items-center gap-2 mb-1">
                     <ExternalLink className="h-4 w-4" />
@@ -454,7 +500,10 @@ export function AboutPage() {
                 </div>
               </Button>
 
-              <Button variant="outline" className="w-full justify-start h-auto p-4">
+              <Button
+                variant="outline"
+                className="w-full justify-start h-auto p-4"
+              >
                 <div className="text-left">
                   <div className="flex items-center gap-2 mb-1">
                     <Code className="h-4 w-4" />
@@ -468,9 +517,13 @@ export function AboutPage() {
             </div>
 
             <div className="pt-4 border-t text-center text-sm text-muted-foreground">
-              <p>© 2025 FitFusion. Made with ❤️ for fitness enthusiasts worldwide.</p>
+              <p>
+                © 2025 FitFusion. Made with ❤️ for fitness enthusiasts
+                worldwide.
+              </p>
               <p className="mt-1">
-                Built with React, TypeScript, and Supabase • Lovable AI-assisted development
+                Built with React, TypeScript, and Supabase • Lovable AI-assisted
+                development
               </p>
             </div>
           </CardContent>

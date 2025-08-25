@@ -1,5 +1,4 @@
-
-import { ChatConversation, ChatMessage, ChatUser } from '@/types/chat';
+import { ChatConversation, ChatMessage, ChatUser } from "@/types/chat";
 
 export interface ChatBackup {
   version: string;
@@ -16,20 +15,23 @@ export interface ChatBackup {
 
 class ChatStorageManager {
   private readonly STORAGE_KEYS = {
-    CONVERSATIONS: 'fitfusion_chat_conversations',
-    MESSAGES: 'fitfusion_chat_messages',
-    USERS: 'fitfusion_chat_users',
-    SETTINGS: 'fitfusion_chat_settings',
-    BACKUP_TIMESTAMP: 'fitfusion_chat_backup_timestamp'
+    CONVERSATIONS: "fitfusion_chat_conversations",
+    MESSAGES: "fitfusion_chat_messages",
+    USERS: "fitfusion_chat_users",
+    SETTINGS: "fitfusion_chat_settings",
+    BACKUP_TIMESTAMP: "fitfusion_chat_backup_timestamp",
   };
 
   // Conversations
   saveConversations(conversations: ChatConversation[]): void {
     try {
-      localStorage.setItem(this.STORAGE_KEYS.CONVERSATIONS, JSON.stringify(conversations));
+      localStorage.setItem(
+        this.STORAGE_KEYS.CONVERSATIONS,
+        JSON.stringify(conversations),
+      );
       this.updateBackupTimestamp();
     } catch (error) {
-      console.error('Failed to save conversations:', error);
+      console.error("Failed to save conversations:", error);
     }
   }
 
@@ -42,12 +44,12 @@ class ChatStorageManager {
         return conversations.map((conv: any) => ({
           ...conv,
           updatedAt: new Date(conv.updatedAt),
-          createdAt: conv.createdAt ? new Date(conv.createdAt) : new Date()
+          createdAt: conv.createdAt ? new Date(conv.createdAt) : new Date(),
         }));
       }
       return [];
     } catch (error) {
-      console.error('Failed to load conversations:', error);
+      console.error("Failed to load conversations:", error);
       return [];
     }
   }
@@ -57,10 +59,13 @@ class ChatStorageManager {
     try {
       const allMessages = this.getAllMessages();
       allMessages[conversationId] = messages;
-      localStorage.setItem(this.STORAGE_KEYS.MESSAGES, JSON.stringify(allMessages));
+      localStorage.setItem(
+        this.STORAGE_KEYS.MESSAGES,
+        JSON.stringify(allMessages),
+      );
       this.updateBackupTimestamp();
     } catch (error) {
-      console.error('Failed to save messages:', error);
+      console.error("Failed to save messages:", error);
     }
   }
 
@@ -72,16 +77,26 @@ class ChatStorageManager {
       return messages.map((msg: any) => ({
         ...msg,
         timestamp: new Date(msg.timestamp),
-        metadata: msg.metadata ? {
-          ...msg.metadata,
-          deliveredAt: msg.metadata.deliveredAt ? new Date(msg.metadata.deliveredAt) : undefined,
-          readAt: msg.metadata.readAt ? new Date(msg.metadata.readAt) : undefined,
-          editedAt: msg.metadata.editedAt ? new Date(msg.metadata.editedAt) : undefined,
-          deletedAt: msg.metadata.deletedAt ? new Date(msg.metadata.deletedAt) : undefined
-        } : undefined
+        metadata: msg.metadata
+          ? {
+              ...msg.metadata,
+              deliveredAt: msg.metadata.deliveredAt
+                ? new Date(msg.metadata.deliveredAt)
+                : undefined,
+              readAt: msg.metadata.readAt
+                ? new Date(msg.metadata.readAt)
+                : undefined,
+              editedAt: msg.metadata.editedAt
+                ? new Date(msg.metadata.editedAt)
+                : undefined,
+              deletedAt: msg.metadata.deletedAt
+                ? new Date(msg.metadata.deletedAt)
+                : undefined,
+            }
+          : undefined,
       }));
     } catch (error) {
-      console.error('Failed to load messages:', error);
+      console.error("Failed to load messages:", error);
       return [];
     }
   }
@@ -91,7 +106,7 @@ class ChatStorageManager {
       const data = localStorage.getItem(this.STORAGE_KEYS.MESSAGES);
       return data ? JSON.parse(data) : {};
     } catch (error) {
-      console.error('Failed to load all messages:', error);
+      console.error("Failed to load all messages:", error);
       return {};
     }
   }
@@ -101,7 +116,7 @@ class ChatStorageManager {
     try {
       localStorage.setItem(this.STORAGE_KEYS.USERS, JSON.stringify(users));
     } catch (error) {
-      console.error('Failed to save users:', error);
+      console.error("Failed to save users:", error);
     }
   }
 
@@ -113,12 +128,14 @@ class ChatStorageManager {
         return users.map((user: any) => ({
           ...user,
           lastSeen: user.lastSeen ? new Date(user.lastSeen) : undefined,
-          lastSecurityCheck: user.lastSecurityCheck ? new Date(user.lastSecurityCheck) : undefined
+          lastSecurityCheck: user.lastSecurityCheck
+            ? new Date(user.lastSecurityCheck)
+            : undefined,
         }));
       }
       return [];
     } catch (error) {
-      console.error('Failed to load users:', error);
+      console.error("Failed to load users:", error);
       return [];
     }
   }
@@ -126,26 +143,31 @@ class ChatStorageManager {
   // Settings
   saveSettings(settings: any): void {
     try {
-      localStorage.setItem(this.STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
+      localStorage.setItem(
+        this.STORAGE_KEYS.SETTINGS,
+        JSON.stringify(settings),
+      );
     } catch (error) {
-      console.error('Failed to save settings:', error);
+      console.error("Failed to save settings:", error);
     }
   }
 
   getSettings(): any {
     try {
       const data = localStorage.getItem(this.STORAGE_KEYS.SETTINGS);
-      return data ? JSON.parse(data) : {
-        background: 'bg-background',
-        notifications: true,
-        encryption: true
-      };
+      return data
+        ? JSON.parse(data)
+        : {
+            background: "bg-background",
+            notifications: true,
+            encryption: true,
+          };
     } catch (error) {
-      console.error('Failed to load settings:', error);
+      console.error("Failed to load settings:", error);
       return {
-        background: 'bg-background',
+        background: "bg-background",
         notifications: true,
-        encryption: true
+        encryption: true,
       };
     }
   }
@@ -158,17 +180,17 @@ class ChatStorageManager {
     const messages: Record<string, ChatMessage[]> = {};
 
     // Get all messages for all conversations
-    conversations.forEach(conv => {
+    conversations.forEach((conv) => {
       messages[conv.id] = this.getMessages(conv.id);
     });
 
     return {
-      version: '1.0.0',
+      version: "1.0.0",
       timestamp: new Date(),
       conversations,
       users,
       messages,
-      settings
+      settings,
     };
   }
 
@@ -176,7 +198,7 @@ class ChatStorageManager {
     try {
       // Validate backup structure
       if (!backup.version || !backup.conversations || !backup.messages) {
-        throw new Error('Invalid backup format');
+        throw new Error("Invalid backup format");
       }
 
       // Clear existing data
@@ -192,10 +214,10 @@ class ChatStorageManager {
         this.saveMessages(conversationId, messages);
       });
 
-      console.log('Chat backup imported successfully');
+      console.log("Chat backup imported successfully");
       return true;
     } catch (error) {
-      console.error('Failed to import backup:', error);
+      console.error("Failed to import backup:", error);
       return false;
     }
   }
@@ -204,16 +226,16 @@ class ChatStorageManager {
     try {
       const backup = this.exportBackup();
       const dataStr = JSON.stringify(backup, null, 2);
-      const dataBlob = new Blob([dataStr], { type: 'application/json' });
-      
-      const link = document.createElement('a');
+      const dataBlob = new Blob([dataStr], { type: "application/json" });
+
+      const link = document.createElement("a");
       link.href = URL.createObjectURL(dataBlob);
-      link.download = `fitfusion-chat-backup-${new Date().toISOString().split('T')[0]}.json`;
+      link.download = `fitfusion-chat-backup-${new Date().toISOString().split("T")[0]}.json`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     } catch (error) {
-      console.error('Failed to download backup:', error);
+      console.error("Failed to download backup:", error);
     }
   }
 
@@ -221,22 +243,25 @@ class ChatStorageManager {
   async syncData(): Promise<boolean> {
     try {
       // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // In a real implementation, this would sync with a server
       // For now, we'll just update the backup timestamp
       this.updateBackupTimestamp();
-      
-      console.log('Chat data synced successfully');
+
+      console.log("Chat data synced successfully");
       return true;
     } catch (error) {
-      console.error('Failed to sync data:', error);
+      console.error("Failed to sync data:", error);
       return false;
     }
   }
 
   private updateBackupTimestamp(): void {
-    localStorage.setItem(this.STORAGE_KEYS.BACKUP_TIMESTAMP, new Date().toISOString());
+    localStorage.setItem(
+      this.STORAGE_KEYS.BACKUP_TIMESTAMP,
+      new Date().toISOString(),
+    );
   }
 
   getLastBackupTime(): Date | null {
@@ -245,26 +270,28 @@ class ChatStorageManager {
   }
 
   clearAllData(): void {
-    Object.values(this.STORAGE_KEYS).forEach(key => {
+    Object.values(this.STORAGE_KEYS).forEach((key) => {
       localStorage.removeItem(key);
     });
   }
 
   // Search functionality
-  searchMessages(query: string): { conversationId: string; messages: ChatMessage[] }[] {
+  searchMessages(
+    query: string,
+  ): { conversationId: string; messages: ChatMessage[] }[] {
     const conversations = this.getConversations();
     const results: { conversationId: string; messages: ChatMessage[] }[] = [];
 
-    conversations.forEach(conv => {
+    conversations.forEach((conv) => {
       const messages = this.getMessages(conv.id);
-      const matchingMessages = messages.filter(msg =>
-        msg.content.toLowerCase().includes(query.toLowerCase())
+      const matchingMessages = messages.filter((msg) =>
+        msg.content.toLowerCase().includes(query.toLowerCase()),
       );
 
       if (matchingMessages.length > 0) {
         results.push({
           conversationId: conv.id,
-          messages: matchingMessages
+          messages: matchingMessages,
         });
       }
     });
@@ -276,8 +303,8 @@ class ChatStorageManager {
   getStorageUsage(): { used: number; total: number; percentage: number } {
     try {
       let totalSize = 0;
-      
-      Object.values(this.STORAGE_KEYS).forEach(key => {
+
+      Object.values(this.STORAGE_KEYS).forEach((key) => {
         const item = localStorage.getItem(key);
         if (item) {
           totalSize += new Blob([item]).size;
@@ -286,14 +313,14 @@ class ChatStorageManager {
 
       // Estimate total available storage (5MB for most browsers)
       const totalAvailable = 5 * 1024 * 1024;
-      
+
       return {
         used: totalSize,
         total: totalAvailable,
-        percentage: Math.round((totalSize / totalAvailable) * 100)
+        percentage: Math.round((totalSize / totalAvailable) * 100),
       };
     } catch (error) {
-      console.error('Failed to calculate storage usage:', error);
+      console.error("Failed to calculate storage usage:", error);
       return { used: 0, total: 0, percentage: 0 };
     }
   }

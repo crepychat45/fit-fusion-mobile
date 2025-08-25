@@ -9,11 +9,9 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
-  plugins: [
-    react(),
-    mode === 'development' &&
-    componentTagger(),
-  ].filter(Boolean),
+  plugins: [react(), mode === "development" && componentTagger()].filter(
+    Boolean,
+  ),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -21,10 +19,10 @@ export default defineConfig(({ mode }) => ({
     dedupe: ["react", "react-dom"],
   },
   define: {
-    global: 'globalThis',
+    global: "globalThis",
   },
   optimizeDeps: {
-    exclude: ['react', 'react-dom'],
-    include: ['@radix-ui/react-dialog', '@radix-ui/react-slot'],
+    exclude: ["react", "react-dom"],
+    include: ["@radix-ui/react-dialog", "@radix-ui/react-slot"],
   },
 }));

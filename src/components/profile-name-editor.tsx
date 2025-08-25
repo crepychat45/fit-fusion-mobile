@@ -20,14 +20,14 @@ export function ProfileNameEditor({ onSave, onClose }: ProfileNameEditorProps) {
   useEffect(() => {
     // Load current profile name
     try {
-      const customProfile = localStorage.getItem('fitfusion-custom-profile');
+      const customProfile = localStorage.getItem("fitfusion-custom-profile");
       if (customProfile) {
         const parsed = JSON.parse(customProfile);
         setDisplayName(parsed.displayName || "");
         setOriginalName(parsed.displayName || "");
       } else {
         // Check legacy profile
-        const legacyProfile = localStorage.getItem('fitfusion-user-profile');
+        const legacyProfile = localStorage.getItem("fitfusion-user-profile");
         if (legacyProfile) {
           const parsed = JSON.parse(legacyProfile);
           setDisplayName(parsed.name || "");
@@ -35,7 +35,7 @@ export function ProfileNameEditor({ onSave, onClose }: ProfileNameEditorProps) {
         }
       }
     } catch (error) {
-      console.error('Error loading profile name:', error);
+      console.error("Error loading profile name:", error);
     }
   }, []);
 
@@ -44,7 +44,7 @@ export function ProfileNameEditor({ onSave, onClose }: ProfileNameEditorProps) {
       toast({
         title: "Error",
         description: "Please enter a valid name.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -53,14 +53,19 @@ export function ProfileNameEditor({ onSave, onClose }: ProfileNameEditorProps) {
       // Save to custom profile storage
       const customProfile = {
         displayName: displayName.trim(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
-      localStorage.setItem('fitfusion-custom-profile', JSON.stringify(customProfile));
+      localStorage.setItem(
+        "fitfusion-custom-profile",
+        JSON.stringify(customProfile),
+      );
 
       // Trigger profile update event
-      window.dispatchEvent(new CustomEvent('profileUpdated', { 
-        detail: { name: displayName.trim() } 
-      }));
+      window.dispatchEvent(
+        new CustomEvent("profileUpdated", {
+          detail: { name: displayName.trim() },
+        }),
+      );
 
       toast({
         title: "Profile Updated",
@@ -70,11 +75,11 @@ export function ProfileNameEditor({ onSave, onClose }: ProfileNameEditorProps) {
       onSave?.(displayName.trim());
       onClose?.();
     } catch (error) {
-      console.error('Error saving profile name:', error);
+      console.error("Error saving profile name:", error);
       toast({
         title: "Error",
         description: "Failed to save profile name. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -115,21 +120,19 @@ export function ProfileNameEditor({ onSave, onClose }: ProfileNameEditorProps) {
               }}
             />
           </div>
-          
+
           <div className="flex gap-2 pt-4">
-            <Button 
-              onClick={handleSave} 
+            <Button
+              onClick={handleSave}
               className="flex-1"
-              disabled={!displayName.trim() || displayName.trim() === originalName}
+              disabled={
+                !displayName.trim() || displayName.trim() === originalName
+              }
             >
               <Save className="h-4 w-4 mr-2" />
               Save
             </Button>
-            <Button 
-              variant="outline" 
-              onClick={handleCancel}
-              className="flex-1"
-            >
+            <Button variant="outline" onClick={handleCancel} className="flex-1">
               <X className="h-4 w-4 mr-2" />
               Cancel
             </Button>

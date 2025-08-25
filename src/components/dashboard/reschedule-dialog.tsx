@@ -1,7 +1,6 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { 
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -32,23 +31,35 @@ interface RescheduleDialogProps {
 }
 
 const availableTimes = [
-  "05:00 AM", "05:30 AM", "06:00 AM", "06:30 AM", 
-  "07:00 AM", "07:30 AM", "08:00 AM", "08:30 AM",
-  "05:00 PM", "05:30 PM", "06:00 PM", "06:30 PM", 
-  "07:00 PM", "07:30 PM", "08:00 PM", "08:30 PM"
+  "05:00 AM",
+  "05:30 AM",
+  "06:00 AM",
+  "06:30 AM",
+  "07:00 AM",
+  "07:30 AM",
+  "08:00 AM",
+  "08:30 AM",
+  "05:00 PM",
+  "05:30 PM",
+  "06:00 PM",
+  "06:30 PM",
+  "07:00 PM",
+  "07:30 PM",
+  "08:00 PM",
+  "08:30 PM",
 ];
 
-export function RescheduleDialog({ 
-  isOpen, 
-  onClose, 
-  workout, 
-  scheduledDate, 
-  onDateChange, 
-  scheduledTime, 
-  onTimeChange 
+export function RescheduleDialog({
+  isOpen,
+  onClose,
+  workout,
+  scheduledDate,
+  onDateChange,
+  scheduledTime,
+  onTimeChange,
 }: RescheduleDialogProps) {
   const { toast } = useToast();
-  
+
   const handleReschedule = () => {
     if (workout && scheduledDate) {
       toast({
@@ -58,7 +69,7 @@ export function RescheduleDialog({
       onClose();
     }
   };
-  
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
@@ -68,7 +79,7 @@ export function RescheduleDialog({
             Choose a new date and time for your workout
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="py-4">
           <div className="mb-4">
             <h4 className="text-sm font-medium mb-2">Select Date</h4>
@@ -80,28 +91,28 @@ export function RescheduleDialog({
               initialFocus
             />
           </div>
-          
+
           <div className="mb-4">
             <h4 className="text-sm font-medium mb-2">Select Time</h4>
-            <select 
+            <select
               value={scheduledTime}
               onChange={(e) => onTimeChange(e.target.value)}
               className="w-full border rounded-md p-2"
             >
               {availableTimes.map((time) => (
-                <option key={time} value={time}>{time}</option>
+                <option key={time} value={time}>
+                  {time}
+                </option>
               ))}
             </select>
           </div>
         </div>
-        
+
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleReschedule}>
-            Confirm
-          </Button>
+          <Button onClick={handleReschedule}>Confirm</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -1,16 +1,21 @@
-
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
-  CheckCircle, 
-  AlertTriangle, 
-  RefreshCw, 
-  Shield, 
+import {
+  CheckCircle,
+  AlertTriangle,
+  RefreshCw,
+  Shield,
   Zap,
   Database,
   Settings,
@@ -19,7 +24,7 @@ import {
   Lock,
   Eye,
   Smartphone,
-  Globe
+  Globe,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -36,7 +41,9 @@ export function EnhancedSettingsValidation() {
   const { toast } = useToast();
   const [isValidating, setIsValidating] = useState(false);
   const [validationProgress, setValidationProgress] = useState(0);
-  const [validationResults, setValidationResults] = useState<ValidationResult[]>([]);
+  const [validationResults, setValidationResults] = useState<
+    ValidationResult[]
+  >([]);
   const [overallScore, setOverallScore] = useState(0);
   const [lastValidation, setLastValidation] = useState<Date | null>(null);
   const [autoValidation, setAutoValidation] = useState(true);
@@ -47,12 +54,12 @@ export function EnhancedSettingsValidation() {
     { name: "Database Integrity", icon: Database, weight: 20 },
     { name: "System Configuration", icon: Settings, weight: 15 },
     { name: "Network Security", icon: Network, weight: 10 },
-    { name: "Privacy Controls", icon: Lock, weight: 10 }
+    { name: "Privacy Controls", icon: Lock, weight: 10 },
   ];
 
   const runComprehensiveValidation = async () => {
     if (isValidating) return;
-    
+
     setIsValidating(true);
     setValidationProgress(0);
     setValidationResults([]);
@@ -63,12 +70,12 @@ export function EnhancedSettingsValidation() {
     try {
       for (let i = 0; i < validationCategories.length; i++) {
         const category = validationCategories[i];
-        
+
         // Simulate validation time
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
+        await new Promise((resolve) => setTimeout(resolve, 800));
+
         setValidationProgress(((i + 1) / validationCategories.length) * 100);
-        
+
         toast({
           title: `Validating ${category.name}...`,
           description: `Step ${i + 1} of ${validationCategories.length}`,
@@ -77,9 +84,11 @@ export function EnhancedSettingsValidation() {
         // Simulate validation results
         const categoryResults = await validateCategory(category.name);
         results.push(...categoryResults);
-        
+
         // Calculate score for this category
-        const passedTests = categoryResults.filter(r => r.status === "passed").length;
+        const passedTests = categoryResults.filter(
+          (r) => r.status === "passed",
+        ).length;
         const totalTests = categoryResults.length;
         const categoryScore = (passedTests / totalTests) * category.weight;
         totalScore += categoryScore;
@@ -88,14 +97,17 @@ export function EnhancedSettingsValidation() {
       setValidationResults(results);
       setOverallScore(Math.round(totalScore));
       setLastValidation(new Date());
-      
-      const criticalIssues = results.filter(r => r.status === "failed").length;
-      const warnings = results.filter(r => r.status === "warning").length;
+
+      const criticalIssues = results.filter(
+        (r) => r.status === "failed",
+      ).length;
+      const warnings = results.filter((r) => r.status === "warning").length;
 
       if (criticalIssues === 0 && warnings === 0) {
         toast({
           title: "🎉 Perfect Configuration!",
-          description: "All settings validated successfully with no issues found.",
+          description:
+            "All settings validated successfully with no issues found.",
         });
       } else if (criticalIssues === 0) {
         toast({
@@ -106,7 +118,7 @@ export function EnhancedSettingsValidation() {
         toast({
           title: "⚠️ Issues Found",
           description: `Found ${criticalIssues} critical issues and ${warnings} warnings.`,
-          variant: "destructive"
+          variant: "destructive",
         });
       }
     } catch (error) {
@@ -121,7 +133,9 @@ export function EnhancedSettingsValidation() {
     }
   };
 
-  const validateCategory = async (categoryName: string): Promise<ValidationResult[]> => {
+  const validateCategory = async (
+    categoryName: string,
+  ): Promise<ValidationResult[]> => {
     // Simulate different validation scenarios
     const mockResults: Record<string, ValidationResult[]> = {
       "Security Configuration": [
@@ -130,23 +144,24 @@ export function EnhancedSettingsValidation() {
           status: "passed",
           message: "Two-Factor Authentication",
           details: "2FA is properly configured and active",
-          icon: CheckCircle
+          icon: CheckCircle,
         },
         {
           category: "Security",
           status: "warning",
           message: "Session Timeout",
-          details: "Session timeout could be more restrictive for better security",
+          details:
+            "Session timeout could be more restrictive for better security",
           icon: AlertTriangle,
-          fix: () => toast({ title: "Applied recommended session timeout" })
+          fix: () => toast({ title: "Applied recommended session timeout" }),
         },
         {
           category: "Security",
           status: "passed",
           message: "Password Policy",
           details: "Strong password requirements are enforced",
-          icon: CheckCircle
-        }
+          icon: CheckCircle,
+        },
       ],
       "Performance Settings": [
         {
@@ -154,7 +169,7 @@ export function EnhancedSettingsValidation() {
           status: "passed",
           message: "Cache Configuration",
           details: "Application cache is optimally configured",
-          icon: CheckCircle
+          icon: CheckCircle,
         },
         {
           category: "Performance",
@@ -162,8 +177,8 @@ export function EnhancedSettingsValidation() {
           message: "Image Optimization",
           details: "Large images detected that could be compressed",
           icon: AlertTriangle,
-          fix: () => toast({ title: "Optimized image compression settings" })
-        }
+          fix: () => toast({ title: "Optimized image compression settings" }),
+        },
       ],
       "Database Integrity": [
         {
@@ -171,15 +186,15 @@ export function EnhancedSettingsValidation() {
           status: "passed",
           message: "Connection Pool",
           details: "Database connections are properly managed",
-          icon: CheckCircle
+          icon: CheckCircle,
         },
         {
           category: "Database",
           status: "passed",
           message: "Query Optimization",
           details: "All queries are using appropriate indexes",
-          icon: CheckCircle
-        }
+          icon: CheckCircle,
+        },
       ],
       "System Configuration": [
         {
@@ -187,7 +202,7 @@ export function EnhancedSettingsValidation() {
           status: "passed",
           message: "Environment Variables",
           details: "All required environment variables are set",
-          icon: CheckCircle
+          icon: CheckCircle,
         },
         {
           category: "System",
@@ -195,8 +210,8 @@ export function EnhancedSettingsValidation() {
           message: "Log Retention",
           details: "Log retention period could be optimized",
           icon: AlertTriangle,
-          fix: () => toast({ title: "Updated log retention settings" })
-        }
+          fix: () => toast({ title: "Updated log retention settings" }),
+        },
       ],
       "Network Security": [
         {
@@ -204,15 +219,15 @@ export function EnhancedSettingsValidation() {
           status: "passed",
           message: "HTTPS Configuration",
           details: "SSL/TLS is properly configured",
-          icon: CheckCircle
+          icon: CheckCircle,
         },
         {
           category: "Network",
           status: "passed",
           message: "CORS Settings",
           details: "Cross-origin requests are properly restricted",
-          icon: CheckCircle
-        }
+          icon: CheckCircle,
+        },
       ],
       "Privacy Controls": [
         {
@@ -220,24 +235,26 @@ export function EnhancedSettingsValidation() {
           status: "passed",
           message: "Data Encryption",
           details: "All sensitive data is encrypted at rest",
-          icon: CheckCircle
+          icon: CheckCircle,
         },
         {
           category: "Privacy",
           status: "passed",
           message: "Access Controls",
           details: "User permissions are properly configured",
-          icon: CheckCircle
-        }
-      ]
+          icon: CheckCircle,
+        },
+      ],
     };
 
     return mockResults[categoryName] || [];
   };
 
   const fixAllIssues = async () => {
-    const fixableIssues = validationResults.filter(r => r.fix && r.status !== "passed");
-    
+    const fixableIssues = validationResults.filter(
+      (r) => r.fix && r.status !== "passed",
+    );
+
     if (fixableIssues.length === 0) {
       toast({
         title: "No fixable issues",
@@ -254,7 +271,7 @@ export function EnhancedSettingsValidation() {
     for (const issue of fixableIssues) {
       if (issue.fix) {
         issue.fix();
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
       }
     }
 
@@ -297,7 +314,8 @@ export function EnhancedSettingsValidation() {
               Advanced Settings Validation
             </CardTitle>
             <CardDescription>
-              AI-powered validation and optimization of your application settings
+              AI-powered validation and optimization of your application
+              settings
             </CardDescription>
           </CardHeader>
           <CardContent className="p-6">
@@ -308,7 +326,15 @@ export function EnhancedSettingsValidation() {
                     {overallScore}
                     <span className="text-lg text-muted-foreground">/100</span>
                   </span>
-                  <Badge variant={overallScore >= 90 ? "default" : overallScore >= 70 ? "secondary" : "destructive"}>
+                  <Badge
+                    variant={
+                      overallScore >= 90
+                        ? "default"
+                        : overallScore >= 70
+                          ? "secondary"
+                          : "destructive"
+                    }
+                  >
                     {getScoreLabel(overallScore)}
                   </Badge>
                 </div>
@@ -317,21 +343,21 @@ export function EnhancedSettingsValidation() {
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={runComprehensiveValidation}
                   disabled={isValidating}
                 >
-                  <RefreshCw className={`h-4 w-4 mr-1 ${isValidating ? 'animate-spin' : ''}`} />
-                  {isValidating ? 'Validating...' : 'Run Validation'}
+                  <RefreshCw
+                    className={`h-4 w-4 mr-1 ${isValidating ? "animate-spin" : ""}`}
+                  />
+                  {isValidating ? "Validating..." : "Run Validation"}
                 </Button>
-                {validationResults.some(r => r.fix && r.status !== "passed") && (
-                  <Button 
-                    variant="default" 
-                    size="sm" 
-                    onClick={fixAllIssues}
-                  >
+                {validationResults.some(
+                  (r) => r.fix && r.status !== "passed",
+                ) && (
+                  <Button variant="default" size="sm" onClick={fixAllIssues}>
                     <Zap className="h-4 w-4 mr-1" />
                     Auto-Fix
                   </Button>
@@ -343,7 +369,8 @@ export function EnhancedSettingsValidation() {
               <div className="space-y-2">
                 <Progress value={validationProgress} className="h-2" />
                 <p className="text-sm text-muted-foreground text-center">
-                  Running comprehensive validation... {Math.round(validationProgress)}%
+                  Running comprehensive validation...{" "}
+                  {Math.round(validationProgress)}%
                 </p>
               </div>
             )}
@@ -376,10 +403,17 @@ export function EnhancedSettingsValidation() {
           <CardContent className="space-y-4">
             {validationCategories.map((category, index) => {
               const CategoryIcon = category.icon;
-              const categoryResults = validationResults.filter(r => r.category.toLowerCase().includes(category.name.toLowerCase().split(' ')[0]));
-              const passed = categoryResults.filter(r => r.status === "passed").length;
+              const categoryResults = validationResults.filter((r) =>
+                r.category
+                  .toLowerCase()
+                  .includes(category.name.toLowerCase().split(" ")[0]),
+              );
+              const passed = categoryResults.filter(
+                (r) => r.status === "passed",
+              ).length;
               const total = categoryResults.length;
-              const percentage = total > 0 ? Math.round((passed / total) * 100) : 0;
+              const percentage =
+                total > 0 ? Math.round((passed / total) * 100) : 0;
 
               return (
                 <motion.div
@@ -396,7 +430,8 @@ export function EnhancedSettingsValidation() {
                     <div>
                       <p className="font-medium">{category.name}</p>
                       <p className="text-sm text-muted-foreground">
-                        Weight: {category.weight}% | {passed}/{total} checks passed
+                        Weight: {category.weight}% | {passed}/{total} checks
+                        passed
                       </p>
                     </div>
                   </div>
@@ -446,16 +481,24 @@ export function EnhancedSettingsValidation() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3, delay: index * 0.05 }}
                     >
-                      <Alert className={
-                        result.status === "passed" ? "border-green-200 bg-green-50/50" :
-                        result.status === "warning" ? "border-yellow-200 bg-yellow-50/50" :
-                        "border-red-200 bg-red-50/50"
-                      }>
-                        <ResultIcon className={`h-4 w-4 ${
-                          result.status === "passed" ? "text-green-600" :
-                          result.status === "warning" ? "text-yellow-600" :
-                          "text-red-600"
-                        }`} />
+                      <Alert
+                        className={
+                          result.status === "passed"
+                            ? "border-green-200 bg-green-50/50"
+                            : result.status === "warning"
+                              ? "border-yellow-200 bg-yellow-50/50"
+                              : "border-red-200 bg-red-50/50"
+                        }
+                      >
+                        <ResultIcon
+                          className={`h-4 w-4 ${
+                            result.status === "passed"
+                              ? "text-green-600"
+                              : result.status === "warning"
+                                ? "text-yellow-600"
+                                : "text-red-600"
+                          }`}
+                        />
                         <AlertDescription>
                           <div className="flex items-center justify-between">
                             <div>
@@ -464,8 +507,8 @@ export function EnhancedSettingsValidation() {
                               <span className="text-sm">{result.details}</span>
                             </div>
                             {isFixable && result.status !== "passed" && (
-                              <Button 
-                                variant="outline" 
+                              <Button
+                                variant="outline"
                                 size="sm"
                                 onClick={result.fix}
                               >
@@ -498,7 +541,8 @@ export function EnhancedSettingsValidation() {
               AI Optimization Suggestions
             </CardTitle>
             <CardDescription>
-              Machine learning-powered recommendations to improve your configuration
+              Machine learning-powered recommendations to improve your
+              configuration
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -507,7 +551,8 @@ export function EnhancedSettingsValidation() {
               <AlertDescription>
                 <strong>Performance Optimization</strong>
                 <br />
-                Enable aggressive caching for static assets to improve load times by up to 40%.
+                Enable aggressive caching for static assets to improve load
+                times by up to 40%.
               </AlertDescription>
             </Alert>
 
@@ -516,7 +561,8 @@ export function EnhancedSettingsValidation() {
               <AlertDescription>
                 <strong>Security Enhancement</strong>
                 <br />
-                Consider implementing Content Security Policy (CSP) headers for additional protection.
+                Consider implementing Content Security Policy (CSP) headers for
+                additional protection.
               </AlertDescription>
             </Alert>
 
@@ -525,7 +571,8 @@ export function EnhancedSettingsValidation() {
               <AlertDescription>
                 <strong>Database Optimization</strong>
                 <br />
-                Query performance could be improved by adding composite indexes on frequently joined tables.
+                Query performance could be improved by adding composite indexes
+                on frequently joined tables.
               </AlertDescription>
             </Alert>
           </CardContent>

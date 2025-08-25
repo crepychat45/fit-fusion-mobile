@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,31 +15,34 @@ interface WelcomeHeaderProps {
   showCompactProfile?: boolean;
 }
 
-export function WelcomeHeader({ userName, showCompactProfile = false }: WelcomeHeaderProps) {
+export function WelcomeHeader({
+  userName,
+  showCompactProfile = false,
+}: WelcomeHeaderProps) {
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState<string>("User");
   const [userEmail, setUserEmail] = useState<string>("user@example.com");
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
   const { user } = useEnhancedAuth();
-  
+
   useEffect(() => {
     // Enhanced user profile detection with better fallbacks
     const getUserProfile = () => {
       console.log("Getting user profile - checking all sources...");
-      
+
       let profile = {
         name: "User",
         firstName: "",
         lastName: "",
         fullName: "User",
         email: "user@example.com",
-        avatar: null
+        avatar: null,
       };
 
       // Check for custom profile name first
       try {
-        const customProfile = localStorage.getItem('fitfusion-custom-profile');
+        const customProfile = localStorage.getItem("fitfusion-custom-profile");
         if (customProfile) {
           const parsed = JSON.parse(customProfile);
           if (parsed.displayName && parsed.displayName.trim()) {
@@ -50,13 +52,14 @@ export function WelcomeHeader({ userName, showCompactProfile = false }: WelcomeH
           }
         }
       } catch (error) {
-        console.error('Error loading custom profile:', error);
+        console.error("Error loading custom profile:", error);
       }
 
       // Check userName prop next
       if (userName && userName.trim() && userName !== "John Smith") {
         console.log("Found userName prop:", userName);
-        if (profile.name === "User") { // Only use if no custom profile
+        if (profile.name === "User") {
+          // Only use if no custom profile
           profile.name = userName.trim();
           profile.fullName = userName.trim();
         }
@@ -65,7 +68,7 @@ export function WelcomeHeader({ userName, showCompactProfile = false }: WelcomeH
       // Check auth user data
       if (user) {
         console.log("Found auth user:", user);
-        
+
         // Only use auth data if no custom profile exists
         if (profile.name === "User") {
           // Check for full name in metadata
@@ -73,13 +76,13 @@ export function WelcomeHeader({ userName, showCompactProfile = false }: WelcomeH
             profile.fullName = user.user_metadata.full_name;
             profile.name = user.user_metadata.full_name;
           }
-          
+
           // Check for display name
           if (user.user_metadata?.display_name) {
             profile.name = user.user_metadata.display_name;
             profile.fullName = user.user_metadata.display_name;
           }
-          
+
           // Check for first and last name
           if (user.user_metadata?.first_name) {
             profile.firstName = user.user_metadata.first_name;
@@ -87,25 +90,26 @@ export function WelcomeHeader({ userName, showCompactProfile = false }: WelcomeH
           if (user.user_metadata?.last_name) {
             profile.lastName = user.user_metadata.last_name;
           }
-          
+
           // Check for name field
           if (user.user_metadata?.name) {
             profile.name = user.user_metadata.name;
           }
         }
-        
+
         // Always use email if available
         if (user.email) {
           profile.email = user.email;
-          
+
           // If no name found anywhere, use email prefix as final fallback
           if (profile.name === "User") {
-            const emailPrefix = user.email.split('@')[0];
-            profile.name = emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
+            const emailPrefix = user.email.split("@")[0];
+            profile.name =
+              emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
             profile.fullName = profile.name;
           }
         }
-        
+
         // Check for avatar
         if (user.user_metadata?.avatar_url) {
           profile.avatar = user.user_metadata.avatar_url;
@@ -120,7 +124,7 @@ export function WelcomeHeader({ userName, showCompactProfile = false }: WelcomeH
 
       // Check localStorage for saved profile (legacy support)
       try {
-        const savedProfile = localStorage.getItem('fitfusion-user-profile');
+        const savedProfile = localStorage.getItem("fitfusion-user-profile");
         if (savedProfile && profile.name === "User") {
           const parsed = JSON.parse(savedProfile);
           if (parsed.name && parsed.name !== "John Smith") {
@@ -135,32 +139,35 @@ export function WelcomeHeader({ userName, showCompactProfile = false }: WelcomeH
           }
         }
       } catch (error) {
-        console.error('Error loading saved profile:', error);
+        console.error("Error loading saved profile:", error);
       }
 
       console.log("Final user profile:", profile);
       return profile;
     };
-    
+
     const profile = getUserProfile();
     setUserProfile(profile);
     setDisplayName(profile.fullName || profile.name);
     setUserEmail(profile.email);
     setUserAvatar(profile.avatar);
-    
+
     // Save enhanced profile
     try {
       const enhancedProfile = {
         ...profile,
         lastUpdated: new Date().toISOString(),
-        lastSeen: new Date().toISOString()
+        lastSeen: new Date().toISOString(),
       };
-      localStorage.setItem('fitfusion-user-profile', JSON.stringify(enhancedProfile));
+      localStorage.setItem(
+        "fitfusion-user-profile",
+        JSON.stringify(enhancedProfile),
+      );
     } catch (error) {
-      console.error('Error saving enhanced profile:', error);
+      console.error("Error saving enhanced profile:", error);
     }
   }, [userName, user]);
-  
+
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good morning";
@@ -170,28 +177,28 @@ export function WelcomeHeader({ userName, showCompactProfile = false }: WelcomeH
 
   const getInitials = () => {
     if (!userProfile) return "U";
-    
+
     if (userProfile.firstName && userProfile.lastName) {
       return `${userProfile.firstName[0]}${userProfile.lastName[0]}`.toUpperCase();
     }
-    
+
     if (userProfile.name && userProfile.name !== "User") {
-      const names = userProfile.name.split(' ');
+      const names = userProfile.name.split(" ");
       if (names.length >= 2) {
         return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
       }
       return userProfile.name[0].toUpperCase();
     }
-    
+
     if (userProfile.email) {
       return userProfile.email[0].toUpperCase();
     }
-    
+
     return "U";
   };
-  
+
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       className="fitness-gradient pt-12 pb-8 px-4 relative overflow-hidden"
@@ -200,7 +207,7 @@ export function WelcomeHeader({ userName, showCompactProfile = false }: WelcomeH
       <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-pink-600/20" />
       <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl" />
       <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full blur-2xl" />
-      
+
       <div className="relative z-10">
         {showCompactProfile ? (
           <div className="mb-6">
@@ -211,23 +218,28 @@ export function WelcomeHeader({ userName, showCompactProfile = false }: WelcomeH
             {/* Enhanced User Profile Section */}
             <div className="flex items-center gap-4">
               <div className="relative">
-                <ProfilePhotoUpload 
+                <ProfilePhotoUpload
                   name={displayName}
                   initialImage={userAvatar}
                   onImageUpdate={(newImage) => {
                     setUserAvatar(newImage);
                     // Save to user profile
                     try {
-                      const profile = JSON.parse(localStorage.getItem('fitfusion-user-profile') || '{}');
+                      const profile = JSON.parse(
+                        localStorage.getItem("fitfusion-user-profile") || "{}",
+                      );
                       profile.avatar = newImage;
-                      localStorage.setItem('fitfusion-user-profile', JSON.stringify(profile));
+                      localStorage.setItem(
+                        "fitfusion-user-profile",
+                        JSON.stringify(profile),
+                      );
                     } catch (error) {
-                      console.error('Error saving avatar:', error);
+                      console.error("Error saving avatar:", error);
                     }
                   }}
                 />
               </div>
-              
+
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-3 mb-1">
                   <h1 className="text-2xl font-bold text-white truncate">
@@ -249,28 +261,28 @@ export function WelcomeHeader({ userName, showCompactProfile = false }: WelcomeH
                 </div>
               </div>
             </div>
-            
+
             {/* Action Buttons */}
             <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm rounded-full shadow-lg"
                 onClick={() => navigate("/notifications")}
               >
                 <Bell className="h-5 w-5" />
               </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm rounded-full shadow-lg"
                 onClick={() => navigate("/profile")}
               >
                 <User className="h-5 w-5" />
               </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm rounded-full shadow-lg"
                 onClick={() => navigate("/settings")}
               >
@@ -281,7 +293,7 @@ export function WelcomeHeader({ userName, showCompactProfile = false }: WelcomeH
         )}
 
         {/* Enhanced Quick Stats */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}

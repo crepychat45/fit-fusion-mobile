@@ -1,18 +1,29 @@
-
-import React, { useState, useEffect, useCallback } from 'react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ProfilePhotoUpload } from '@/components/profile-photo-upload';
-import { Loader2, Save, CheckCircle, AlertCircle } from 'lucide-react';
-import { useSettings } from '@/contexts/settings-context';
-import { useToast } from '@/components/ui/use-toast';
-import { userProfile } from '@/data/user';
-import { Badge } from '@/components/ui/badge';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useCallback } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ProfilePhotoUpload } from "@/components/profile-photo-upload";
+import { Loader2, Save, CheckCircle, AlertCircle } from "lucide-react";
+import { useSettings } from "@/contexts/settings-context";
+import { useToast } from "@/components/ui/use-toast";
+import { userProfile } from "@/data/user";
+import { Badge } from "@/components/ui/badge";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ProfileEditorProps {
   onSave?: () => void;
@@ -21,39 +32,48 @@ interface ProfileEditorProps {
 export function ProfileEditor({ onSave }: ProfileEditorProps) {
   const [name, setName] = useState(userProfile.name);
   const [goal, setGoal] = useState(userProfile.goal);
-  const [bio, setBio] = useState('Fitness enthusiast focused on consistent progress');
+  const [bio, setBio] = useState(
+    "Fitness enthusiast focused on consistent progress",
+  );
   const [level, setLevel] = useState(userProfile.level);
-  const [age, setAge] = useState('35');
-  const [gender, setGender] = useState('Male');
-  const [height, setHeight] = useState('175');
-  const [weight, setWeight] = useState('78');
+  const [age, setAge] = useState("35");
+  const [gender, setGender] = useState("Male");
+  const [height, setHeight] = useState("175");
+  const [weight, setWeight] = useState("78");
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error' | null>(null);
+  const [saveStatus, setSaveStatus] = useState<
+    "saved" | "saving" | "error" | null
+  >(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  
+
   const { saveProfileInfo } = useSettings();
   const { toast } = useToast();
-  
+
   // Load saved profile data from localStorage on component mount
   useEffect(() => {
-    const savedProfile = localStorage.getItem('fitfusion-profile');
+    const savedProfile = localStorage.getItem("fitfusion-profile");
     if (savedProfile) {
       try {
         const profileData = JSON.parse(savedProfile);
         setName(profileData.name || userProfile.name);
         setGoal(profileData.goal || userProfile.goal);
-        setBio(profileData.bio || 'Fitness enthusiast focused on consistent progress');
+        setBio(
+          profileData.bio ||
+            "Fitness enthusiast focused on consistent progress",
+        );
         setLevel(profileData.level || userProfile.level);
-        setAge(profileData.age || '35');
-        setGender(profileData.gender || 'Male');
-        setHeight(profileData.height || '175');
-        setWeight(profileData.weight || '78');
+        setAge(profileData.age || "35");
+        setGender(profileData.gender || "Male");
+        setHeight(profileData.height || "175");
+        setWeight(profileData.weight || "78");
         setProfileImage(profileData.profileImage || null);
-        setLastSaved(profileData.lastSaved ? new Date(profileData.lastSaved) : null);
+        setLastSaved(
+          profileData.lastSaved ? new Date(profileData.lastSaved) : null,
+        );
       } catch (error) {
-        console.error('Error loading profile data:', error);
+        console.error("Error loading profile data:", error);
       }
     }
   }, []);
@@ -61,9 +81,9 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
   // Auto-save functionality
   const autoSave = useCallback(async () => {
     if (!hasUnsavedChanges) return;
-    
-    setSaveStatus('saving');
-    
+
+    setSaveStatus("saving");
+
     const profileData = {
       name,
       goal,
@@ -74,32 +94,45 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
       height,
       weight,
       profileImage,
-      lastSaved: new Date().toISOString()
+      lastSaved: new Date().toISOString(),
     };
-    
+
     try {
       const success = await saveProfileInfo(profileData);
-      
+
       if (success) {
-        setSaveStatus('saved');
+        setSaveStatus("saved");
         setHasUnsavedChanges(false);
         setLastSaved(new Date());
-        
+
         // Update the welcome message on homepage by storing in localStorage
-        localStorage.setItem('user_display_name', name);
-        
+        localStorage.setItem("user_display_name", name);
+
         if (onSave) {
           onSave();
         }
       } else {
-        setSaveStatus('error');
+        setSaveStatus("error");
       }
     } catch (error) {
-      setSaveStatus('error');
+      setSaveStatus("error");
     }
-    
+
     setTimeout(() => setSaveStatus(null), 3000);
-  }, [name, goal, bio, level, age, gender, height, weight, profileImage, hasUnsavedChanges, saveProfileInfo, onSave]);
+  }, [
+    name,
+    goal,
+    bio,
+    level,
+    age,
+    gender,
+    height,
+    weight,
+    profileImage,
+    hasUnsavedChanges,
+    saveProfileInfo,
+    onSave,
+  ]);
 
   // Auto-save when changes occur
   useEffect(() => {
@@ -107,7 +140,7 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
       const timeoutId = setTimeout(() => {
         autoSave();
       }, 2000); // Auto-save after 2 seconds of inactivity
-      
+
       return () => clearTimeout(timeoutId);
     }
   }, [hasUnsavedChanges, autoSave]);
@@ -116,46 +149,46 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
   const handleFieldChange = (field: string, value: string) => {
     setHasUnsavedChanges(true);
     setSaveStatus(null);
-    
+
     switch (field) {
-      case 'name':
+      case "name":
         setName(value);
         break;
-      case 'goal':
+      case "goal":
         setGoal(value);
         break;
-      case 'bio':
+      case "bio":
         setBio(value);
         break;
-      case 'level':
+      case "level":
         setLevel(value);
         break;
-      case 'age':
+      case "age":
         setAge(value);
         break;
-      case 'gender':
+      case "gender":
         setGender(value);
         break;
-      case 'height':
+      case "height":
         setHeight(value);
         break;
-      case 'weight':
+      case "weight":
         setWeight(value);
         break;
     }
   };
-  
+
   const handleManualSave = async () => {
     setIsSaving(true);
     await autoSave();
     setIsSaving(false);
-    
+
     toast({
-      title: '✅ Profile Saved',
-      description: 'Your profile information has been saved successfully.'
+      title: "✅ Profile Saved",
+      description: "Your profile information has been saved successfully.",
     });
   };
-  
+
   const handleImageUpdate = (image: string) => {
     setProfileImage(image);
     setHasUnsavedChanges(true);
@@ -163,21 +196,21 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
 
   const getSaveStatusIndicator = () => {
     switch (saveStatus) {
-      case 'saving':
+      case "saving":
         return (
           <div className="flex items-center gap-2 text-blue-600">
             <Loader2 className="h-4 w-4 animate-spin" />
             <span className="text-sm">Saving...</span>
           </div>
         );
-      case 'saved':
+      case "saved":
         return (
           <div className="flex items-center gap-2 text-green-600">
             <CheckCircle className="h-4 w-4" />
             <span className="text-sm">Saved</span>
           </div>
         );
-      case 'error':
+      case "error":
         return (
           <div className="flex items-center gap-2 text-red-600">
             <AlertCircle className="h-4 w-4" />
@@ -188,7 +221,7 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
         return null;
     }
   };
-  
+
   return (
     <div className="space-y-6">
       {/* Save Status Header */}
@@ -211,13 +244,16 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
               </motion.div>
             )}
           </AnimatePresence>
-          
+
           {hasUnsavedChanges && (
-            <Badge variant="outline" className="text-orange-600 border-orange-200">
+            <Badge
+              variant="outline"
+              className="text-orange-600 border-orange-200"
+            >
               Unsaved changes
             </Badge>
           )}
-          
+
           {lastSaved && (
             <span className="text-xs text-muted-foreground">
               Last saved: {lastSaved.toLocaleTimeString()}
@@ -236,32 +272,32 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
         <CardContent>
           <div className="flex flex-col md:flex-row gap-6">
             <div className="flex justify-center">
-              <ProfilePhotoUpload 
-                name={name} 
+              <ProfilePhotoUpload
+                name={name}
                 initialImage={profileImage}
-                onImageUpdate={handleImageUpdate} 
+                onImageUpdate={handleImageUpdate}
               />
             </div>
-            
+
             <div className="flex-1 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="name">Full Name *</Label>
-                  <Input 
-                    id="name" 
-                    value={name} 
-                    onChange={(e) => handleFieldChange('name', e.target.value)} 
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => handleFieldChange("name", e.target.value)}
                     placeholder="Your full name"
                     className="mt-1"
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="age">Age</Label>
-                  <Input 
-                    id="age" 
-                    value={age} 
-                    onChange={(e) => handleFieldChange('age', e.target.value)} 
+                  <Input
+                    id="age"
+                    value={age}
+                    onChange={(e) => handleFieldChange("age", e.target.value)}
                     type="number"
                     min="16"
                     max="100"
@@ -269,10 +305,13 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
                   />
                 </div>
               </div>
-              
+
               <div>
                 <Label htmlFor="gender">Gender</Label>
-                <Select value={gender} onValueChange={(value) => handleFieldChange('gender', value)}>
+                <Select
+                  value={gender}
+                  onValueChange={(value) => handleFieldChange("gender", value)}
+                >
                   <SelectTrigger id="gender" className="mt-1">
                     <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
@@ -280,7 +319,9 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
                     <SelectItem value="Male">Male</SelectItem>
                     <SelectItem value="Female">Female</SelectItem>
                     <SelectItem value="Other">Other</SelectItem>
-                    <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
+                    <SelectItem value="Prefer not to say">
+                      Prefer not to say
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -288,7 +329,7 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
           </div>
         </CardContent>
       </Card>
-      
+
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Fitness Profile</CardTitle>
@@ -299,56 +340,82 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
         <CardContent className="space-y-4">
           <div>
             <Label htmlFor="goal">Primary Fitness Goal</Label>
-            <Select value={goal} onValueChange={(value) => handleFieldChange('goal', value)}>
+            <Select
+              value={goal}
+              onValueChange={(value) => handleFieldChange("goal", value)}
+            >
               <SelectTrigger id="goal" className="mt-1">
                 <SelectValue placeholder="Select your main goal" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Build muscle & improve fitness">Build muscle & improve fitness</SelectItem>
+                <SelectItem value="Build muscle & improve fitness">
+                  Build muscle & improve fitness
+                </SelectItem>
                 <SelectItem value="Lose weight">Lose weight</SelectItem>
-                <SelectItem value="Increase strength">Increase strength</SelectItem>
-                <SelectItem value="Improve endurance">Improve endurance</SelectItem>
-                <SelectItem value="Maintain fitness">Maintain fitness</SelectItem>
-                <SelectItem value="Improve flexibility">Improve flexibility</SelectItem>
-                <SelectItem value="General health">General health & wellness</SelectItem>
+                <SelectItem value="Increase strength">
+                  Increase strength
+                </SelectItem>
+                <SelectItem value="Improve endurance">
+                  Improve endurance
+                </SelectItem>
+                <SelectItem value="Maintain fitness">
+                  Maintain fitness
+                </SelectItem>
+                <SelectItem value="Improve flexibility">
+                  Improve flexibility
+                </SelectItem>
+                <SelectItem value="General health">
+                  General health & wellness
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
-          
+
           <div>
             <Label htmlFor="level">Current Fitness Level</Label>
-            <Select value={level} onValueChange={(value) => handleFieldChange('level', value)}>
+            <Select
+              value={level}
+              onValueChange={(value) => handleFieldChange("level", value)}
+            >
               <SelectTrigger id="level" className="mt-1">
                 <SelectValue placeholder="Select your level" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Beginner">Beginner (Just starting out)</SelectItem>
-                <SelectItem value="Intermediate">Intermediate (Some experience)</SelectItem>
-                <SelectItem value="Advanced">Advanced (Very experienced)</SelectItem>
-                <SelectItem value="Professional">Professional (Expert level)</SelectItem>
+                <SelectItem value="Beginner">
+                  Beginner (Just starting out)
+                </SelectItem>
+                <SelectItem value="Intermediate">
+                  Intermediate (Some experience)
+                </SelectItem>
+                <SelectItem value="Advanced">
+                  Advanced (Very experienced)
+                </SelectItem>
+                <SelectItem value="Professional">
+                  Professional (Expert level)
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
-          
+
           <div>
             <Label htmlFor="bio">Bio & Motivation</Label>
-            <Textarea 
-              id="bio" 
-              value={bio} 
-              onChange={(e) => handleFieldChange('bio', e.target.value)} 
+            <Textarea
+              id="bio"
+              value={bio}
+              onChange={(e) => handleFieldChange("bio", e.target.value)}
               placeholder="Tell us about yourself, your fitness journey, and what motivates you..."
               rows={4}
               className="mt-1"
             />
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="height">Height (cm)</Label>
-              <Input 
-                id="height" 
-                value={height} 
-                onChange={(e) => handleFieldChange('height', e.target.value)} 
+              <Input
+                id="height"
+                value={height}
+                onChange={(e) => handleFieldChange("height", e.target.value)}
                 type="number"
                 min="100"
                 max="250"
@@ -356,13 +423,13 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
                 className="mt-1"
               />
             </div>
-            
+
             <div>
               <Label htmlFor="weight">Weight (kg)</Label>
-              <Input 
-                id="weight" 
-                value={weight} 
-                onChange={(e) => handleFieldChange('weight', e.target.value)} 
+              <Input
+                id="weight"
+                value={weight}
+                onChange={(e) => handleFieldChange("weight", e.target.value)}
                 type="number"
                 min="30"
                 max="300"
@@ -373,20 +440,18 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
           </div>
         </CardContent>
       </Card>
-      
+
       <div className="flex items-center justify-between pt-4">
         <div className="text-sm text-muted-foreground">
-          {hasUnsavedChanges ? (
-            "Changes will be saved automatically"
-          ) : (
-            "All changes saved"
-          )}
+          {hasUnsavedChanges
+            ? "Changes will be saved automatically"
+            : "All changes saved"}
         </div>
-        
-        <Button 
+
+        <Button
           size="lg"
           onClick={handleManualSave}
-          disabled={isSaving || (!hasUnsavedChanges && saveStatus !== 'error')}
+          disabled={isSaving || (!hasUnsavedChanges && saveStatus !== "error")}
           className="min-w-[140px]"
         >
           {isSaving ? (
@@ -397,7 +462,7 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
           ) : (
             <>
               <Save className="mr-2 h-4 w-4" />
-              {hasUnsavedChanges ? 'Save Now' : 'Saved'}
+              {hasUnsavedChanges ? "Save Now" : "Saved"}
             </>
           )}
         </Button>

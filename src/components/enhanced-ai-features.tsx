@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Brain, Zap, Shield, Eye, Star, Sparkles, Lock, Heart, TrendingUp, Target } from "lucide-react";
+import {
+  Brain,
+  Zap,
+  Shield,
+  Eye,
+  Star,
+  Sparkles,
+  Lock,
+  Heart,
+  TrendingUp,
+  Target,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,20 +33,22 @@ export function EnhancedAIFeatures() {
     {
       id: "neural-coach",
       name: "Neural Fitness Coach",
-      description: "AI-powered personalized coaching with real-time form analysis",
+      description:
+        "AI-powered personalized coaching with real-time form analysis",
       icon: <Brain className="h-5 w-5" />,
       status: "active",
       progress: 95,
-      impact: "high"
+      impact: "high",
     },
     {
       id: "predictive-analytics",
       name: "Predictive Health Analytics",
-      description: "Forecasts your fitness journey and prevents potential injuries",
+      description:
+        "Forecasts your fitness journey and prevents potential injuries",
       icon: <TrendingUp className="h-5 w-5" />,
       status: "analyzing",
       progress: 78,
-      impact: "high"
+      impact: "high",
     },
     {
       id: "biometric-sync",
@@ -44,35 +57,38 @@ export function EnhancedAIFeatures() {
       icon: <Heart className="h-5 w-5" />,
       status: "learning",
       progress: 67,
-      impact: "medium"
+      impact: "medium",
     },
     {
       id: "nutrition-ai",
       name: "Smart Nutrition AI",
-      description: "Personalized meal planning based on your goals and preferences",
+      description:
+        "Personalized meal planning based on your goals and preferences",
       icon: <Target className="h-5 w-5" />,
       status: "optimizing",
       progress: 85,
-      impact: "high"
+      impact: "high",
     },
     {
       id: "mood-analysis",
       name: "Mood & Recovery Analysis",
-      description: "AI-driven insights into your mental state and recovery needs",
+      description:
+        "AI-driven insights into your mental state and recovery needs",
       icon: <Sparkles className="h-5 w-5" />,
       status: "active",
       progress: 92,
-      impact: "medium"
+      impact: "medium",
     },
     {
       id: "form-checker",
       name: "Real-time Form Checker",
-      description: "Computer vision analysis of your workout form and technique",
+      description:
+        "Computer vision analysis of your workout form and technique",
       icon: <Eye className="h-5 w-5" />,
       status: "learning",
       progress: 71,
-      impact: "high"
-    }
+      impact: "high",
+    },
   ]);
 
   const [overallAIScore, setOverallAIScore] = useState(82);
@@ -80,12 +96,14 @@ export function EnhancedAIFeatures() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setAiFeatures(prev => prev.map(feature => ({
-        ...feature,
-        progress: Math.min(100, feature.progress + Math.random() * 2)
-      })));
-      
-      setOverallAIScore(prev => Math.min(100, prev + Math.random() * 0.5));
+      setAiFeatures((prev) =>
+        prev.map((feature) => ({
+          ...feature,
+          progress: Math.min(100, feature.progress + Math.random() * 2),
+        })),
+      );
+
+      setOverallAIScore((prev) => Math.min(100, prev + Math.random() * 0.5));
     }, 3000);
 
     return () => clearInterval(interval);
@@ -93,30 +111,41 @@ export function EnhancedAIFeatures() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "active": return "bg-green-500";
-      case "learning": return "bg-blue-500";
-      case "analyzing": return "bg-purple-500";
-      case "optimizing": return "bg-orange-500";
-      default: return "bg-gray-500";
+      case "active":
+        return "bg-green-500";
+      case "learning":
+        return "bg-blue-500";
+      case "analyzing":
+        return "bg-purple-500";
+      case "optimizing":
+        return "bg-orange-500";
+      default:
+        return "bg-gray-500";
     }
   };
 
   const getImpactColor = (impact: string) => {
     switch (impact) {
-      case "high": return "text-red-500";
-      case "medium": return "text-yellow-500";
-      case "low": return "text-green-500";
-      default: return "text-gray-500";
+      case "high":
+        return "text-red-500";
+      case "medium":
+        return "text-yellow-500";
+      case "low":
+        return "text-green-500";
+      default:
+        return "text-gray-500";
     }
   };
 
   const activateAllAI = () => {
-    setAiFeatures(prev => prev.map(feature => ({
-      ...feature,
-      status: "active",
-      progress: Math.min(100, feature.progress + 10)
-    })));
-    
+    setAiFeatures((prev) =>
+      prev.map((feature) => ({
+        ...feature,
+        status: "active",
+        progress: Math.min(100, feature.progress + 10),
+      })),
+    );
+
     toast({
       title: "AI Systems Activated",
       description: "All AI features are now running at full capacity",
@@ -133,12 +162,12 @@ export function EnhancedAIFeatures() {
       >
         <Card className="ai-card text-white overflow-hidden relative">
           <motion.div
-            animate={{ 
+            animate={{
               background: [
                 "linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1))",
                 "linear-gradient(45deg, rgba(139, 92, 246, 0.1), rgba(168, 85, 247, 0.1))",
-                "linear-gradient(45deg, rgba(168, 85, 247, 0.1), rgba(59, 130, 246, 0.1))"
-              ]
+                "linear-gradient(45deg, rgba(168, 85, 247, 0.1), rgba(59, 130, 246, 0.1))",
+              ],
             }}
             transition={{ duration: 5, repeat: Infinity }}
             className="absolute inset-0"
@@ -154,8 +183,12 @@ export function EnhancedAIFeatures() {
                   <Brain className="h-8 w-8" />
                 </motion.div>
                 <div>
-                  <CardTitle className="text-2xl">FitFusion AI Engine</CardTitle>
-                  <p className="text-white/90">Next-generation artificial intelligence</p>
+                  <CardTitle className="text-2xl">
+                    FitFusion AI Engine
+                  </CardTitle>
+                  <p className="text-white/90">
+                    Next-generation artificial intelligence
+                  </p>
                 </div>
               </div>
               <Badge className="bg-white/20 text-white border-white/30 neural-animation">
@@ -167,20 +200,32 @@ export function EnhancedAIFeatures() {
           <CardContent className="relative z-10">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div className="text-center">
-                <div className="text-3xl font-bold">{aiFeatures.filter(f => f.status === "active").length}</div>
+                <div className="text-3xl font-bold">
+                  {aiFeatures.filter((f) => f.status === "active").length}
+                </div>
                 <div className="text-white/80 text-sm">Active Systems</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold">{Math.round(aiFeatures.reduce((acc, f) => acc + f.progress, 0) / aiFeatures.length)}%</div>
+                <div className="text-3xl font-bold">
+                  {Math.round(
+                    aiFeatures.reduce((acc, f) => acc + f.progress, 0) /
+                      aiFeatures.length,
+                  )}
+                  %
+                </div>
                 <div className="text-white/80 text-sm">Avg Performance</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold">{aiFeatures.filter(f => f.impact === "high").length}</div>
-                <div className="text-white/80 text-sm">High Impact Features</div>
+                <div className="text-3xl font-bold">
+                  {aiFeatures.filter((f) => f.impact === "high").length}
+                </div>
+                <div className="text-white/80 text-sm">
+                  High Impact Features
+                </div>
               </div>
             </div>
             <Progress value={overallAIScore} className="mb-4" />
-            <Button 
+            <Button
               onClick={activateAllAI}
               className="w-full interactive-button bg-white/20 hover:bg-white/30 text-white border-white/30"
             >
@@ -206,12 +251,14 @@ export function EnhancedAIFeatures() {
               <Card className="glass-card h-full hover-lift">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between mb-2">
-                    <div className={`p-2 rounded-full ${getStatusColor(feature.status)}`}>
+                    <div
+                      className={`p-2 rounded-full ${getStatusColor(feature.status)}`}
+                    >
                       {feature.icon}
                     </div>
                     <div className="flex items-center gap-1">
-                      <Badge 
-                        variant="outline" 
+                      <Badge
+                        variant="outline"
                         className={`text-xs ${getStatusColor(feature.status)} text-white border-0`}
                       >
                         {feature.status.toUpperCase()}
@@ -222,19 +269,27 @@ export function EnhancedAIFeatures() {
                     </div>
                   </div>
                   <CardTitle className="text-base">{feature.name}</CardTitle>
-                  <p className="text-sm text-muted-foreground">{feature.description}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {feature.description}
+                  </p>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-xs">
                       <span>Performance</span>
-                      <span className="font-medium">{Math.round(feature.progress)}%</span>
+                      <span className="font-medium">
+                        {Math.round(feature.progress)}%
+                      </span>
                     </div>
                     <Progress value={feature.progress} className="h-2" />
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1">
-                        <Star className={`h-3 w-3 ${getImpactColor(feature.impact)}`} />
-                        <span className="text-xs capitalize">{feature.impact} Impact</span>
+                        <Star
+                          className={`h-3 w-3 ${getImpactColor(feature.impact)}`}
+                        />
+                        <span className="text-xs capitalize">
+                          {feature.impact} Impact
+                        </span>
                       </div>
                       {feature.status === "active" && (
                         <motion.div
@@ -273,9 +328,15 @@ export function EnhancedAIFeatures() {
                 <h4 className="font-semibold">Today's AI Recommendations</h4>
                 <ul className="space-y-1 text-sm text-white/90">
                   <li>• Increase protein intake by 15g for optimal recovery</li>
-                  <li>• Your heart rate variability suggests active recovery today</li>
-                  <li>• Sleep quality improved 23% - maintain current schedule</li>
-                  <li>• Form analysis shows 92% efficiency in squat movement</li>
+                  <li>
+                    • Your heart rate variability suggests active recovery today
+                  </li>
+                  <li>
+                    • Sleep quality improved 23% - maintain current schedule
+                  </li>
+                  <li>
+                    • Form analysis shows 92% efficiency in squat movement
+                  </li>
                 </ul>
               </div>
               <div className="space-y-2">

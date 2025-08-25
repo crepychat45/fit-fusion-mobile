@@ -1,7 +1,14 @@
-
 import React, { useState } from "react";
 import { MobileNav } from "@/components/mobile-nav";
-import { ChevronLeft, Download, FileText, Calendar, Clock, Filter, Check } from "lucide-react";
+import {
+  ChevronLeft,
+  Download,
+  FileText,
+  Calendar,
+  Clock,
+  Filter,
+  Check,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -9,17 +16,33 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/components/ui/use-toast";
-import { exportUserData, downloadFile, getEstimatedFileSize, ExportFileType, DataCategory } from "@/utils/sound-exports";
+import {
+  exportUserData,
+  downloadFile,
+  getEstimatedFileSize,
+  ExportFileType,
+  DataCategory,
+} from "@/utils/sound-exports";
 import { DateRange } from "react-day-picker";
 
 const ExportData = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [fileType, setFileType] = useState<ExportFileType>("json");
-  const [selectedCategories, setSelectedCategories] = useState<DataCategory[]>(["workouts", "progress"]);
+  const [selectedCategories, setSelectedCategories] = useState<DataCategory[]>([
+    "workouts",
+    "progress",
+  ]);
   const [dateRange, setDateRange] = useState<{
     from: Date | undefined;
     to: Date | undefined;
@@ -52,7 +75,8 @@ const ExportData = () => {
     setIsExporting(true);
     toast({
       title: "Preparing Export",
-      description: "Your data is being prepared for export. This may take a moment.",
+      description:
+        "Your data is being prepared for export. This may take a moment.",
     });
 
     try {
@@ -82,7 +106,8 @@ const ExportData = () => {
       console.error("Export failed:", error);
       toast({
         title: "Export Failed",
-        description: "There was an error exporting your data. Please try again.",
+        description:
+          "There was an error exporting your data. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -97,7 +122,7 @@ const ExportData = () => {
     } else {
       setDateRange({
         from: range.from,
-        to: range.to || range.from // If 'to' is missing, use 'from' as fallback
+        to: range.to || range.from, // If 'to' is missing, use 'from' as fallback
       });
     }
   };
@@ -107,13 +132,15 @@ const ExportData = () => {
       {/* Header */}
       <div className="fitness-gradient pt-12 pb-6 px-4">
         <div className="flex items-center">
-          <button 
-            onClick={() => navigate(-1)} 
+          <button
+            onClick={() => navigate(-1)}
             className="text-white p-2 rounded-full hover:bg-white/10"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
-          <h1 className="text-xl font-bold text-white ml-2">Export Your Data</h1>
+          <h1 className="text-xl font-bold text-white ml-2">
+            Export Your Data
+          </h1>
         </div>
       </div>
 
@@ -163,7 +190,9 @@ const ExportData = () => {
             <Separator />
 
             <div>
-              <Label className="text-base font-medium">Select Data Categories</Label>
+              <Label className="text-base font-medium">
+                Select Data Categories
+              </Label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
                 {[
                   { id: "workouts", label: "Workouts" },
@@ -174,17 +203,19 @@ const ExportData = () => {
                   { id: "heart-rate", label: "Heart Rate" },
                   { id: "all", label: "All Data" },
                 ].map((category) => (
-                  <div 
+                  <div
                     key={category.id}
                     className={`flex items-center justify-between p-3 border rounded-md cursor-pointer hover:bg-secondary/10 transition-colors ${
-                      selectedCategories.includes(category.id as DataCategory) ? "border-primary bg-primary/5" : ""
+                      selectedCategories.includes(category.id as DataCategory)
+                        ? "border-primary bg-primary/5"
+                        : ""
                     }`}
                     onClick={() => toggleCategory(category.id as DataCategory)}
                   >
                     <span>{category.label}</span>
-                    {selectedCategories.includes(category.id as DataCategory) && (
-                      <Check className="h-4 w-4 text-primary" />
-                    )}
+                    {selectedCategories.includes(
+                      category.id as DataCategory,
+                    ) && <Check className="h-4 w-4 text-primary" />}
                   </div>
                 ))}
               </div>
@@ -205,12 +236,20 @@ const ExportData = () => {
                 </TabsList>
                 <TabsContent value="30days">
                   <p className="text-sm text-muted-foreground">
-                    Exporting data from {new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toLocaleDateString()} to {new Date().toLocaleDateString()}
+                    Exporting data from{" "}
+                    {new Date(
+                      Date.now() - 30 * 24 * 60 * 60 * 1000,
+                    ).toLocaleDateString()}{" "}
+                    to {new Date().toLocaleDateString()}
                   </p>
                 </TabsContent>
                 <TabsContent value="6months">
                   <p className="text-sm text-muted-foreground">
-                    Exporting data from {new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toLocaleDateString()} to {new Date().toLocaleDateString()}
+                    Exporting data from{" "}
+                    {new Date(
+                      Date.now() - 180 * 24 * 60 * 60 * 1000,
+                    ).toLocaleDateString()}{" "}
+                    to {new Date().toLocaleDateString()}
                   </p>
                 </TabsContent>
                 <TabsContent value="custom">
@@ -235,23 +274,31 @@ const ExportData = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label htmlFor="include-media" className="font-medium">Include Media Files</Label>
-                  <p className="text-sm text-muted-foreground">Export photos and videos</p>
+                  <Label htmlFor="include-media" className="font-medium">
+                    Include Media Files
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Export photos and videos
+                  </p>
                 </div>
-                <Switch 
-                  id="include-media" 
+                <Switch
+                  id="include-media"
                   checked={includeMedia}
                   onCheckedChange={setIncludeMedia}
                 />
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div>
-                  <Label htmlFor="anonymized" className="font-medium">Anonymize Personal Data</Label>
-                  <p className="text-sm text-muted-foreground">Remove identifying information</p>
+                  <Label htmlFor="anonymized" className="font-medium">
+                    Anonymize Personal Data
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Remove identifying information
+                  </p>
                 </div>
-                <Switch 
-                  id="anonymized" 
+                <Switch
+                  id="anonymized"
                   checked={anonymized}
                   onCheckedChange={setAnonymized}
                 />
@@ -259,8 +306,8 @@ const ExportData = () => {
             </div>
           </CardContent>
           <CardFooter>
-            <Button 
-              onClick={handleExport} 
+            <Button
+              onClick={handleExport}
               disabled={isExporting || selectedCategories.length === 0}
               className="w-full"
             >
@@ -277,8 +324,10 @@ const ExportData = () => {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Your exported data is for your personal use. Be cautious about sharing files that contain personal information.
-                When anonymization is enabled, personal identifiers will be removed from the export.
+                Your exported data is for your personal use. Be cautious about
+                sharing files that contain personal information. When
+                anonymization is enabled, personal identifiers will be removed
+                from the export.
               </p>
             </CardContent>
           </Card>

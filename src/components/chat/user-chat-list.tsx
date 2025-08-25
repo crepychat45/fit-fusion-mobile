@@ -1,34 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  Search, 
-  Plus, 
-  Users, 
-  MessageCircle, 
-  Video, 
+import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Search,
+  Plus,
+  Users,
+  MessageCircle,
+  Video,
   Phone,
   MoreVertical,
   Crown,
   Shield,
-  Star
-} from 'lucide-react';
-import { motion } from 'framer-motion';
-import { useToast } from '@/components/ui/use-toast';
+  Star,
+} from "lucide-react";
+import { motion } from "framer-motion";
+import { useToast } from "@/components/ui/use-toast";
 
 interface User {
   id: string;
   name: string;
   username: string;
   avatar?: string;
-  status: 'online' | 'offline' | 'away' | 'busy';
+  status: "online" | "offline" | "away" | "busy";
   lastSeen?: Date;
   isVerified?: boolean;
   isPremium?: boolean;
-  fitnessLevel?: 'beginner' | 'intermediate' | 'advanced' | 'expert';
+  fitnessLevel?: "beginner" | "intermediate" | "advanced" | "expert";
   specialties?: string[];
   mutualConnections?: number;
 }
@@ -40,115 +40,133 @@ interface UserChatListProps {
 
 const mockUsers: User[] = [
   {
-    id: '1',
-    name: 'Sarah Johnson',
-    username: '@sarah_fit',
-    status: 'online',
+    id: "1",
+    name: "Sarah Johnson",
+    username: "@sarah_fit",
+    status: "online",
     isVerified: true,
     isPremium: true,
-    fitnessLevel: 'expert',
-    specialties: ['Yoga', 'Pilates', 'Nutrition'],
-    mutualConnections: 12
+    fitnessLevel: "expert",
+    specialties: ["Yoga", "Pilates", "Nutrition"],
+    mutualConnections: 12,
   },
   {
-    id: '2',
-    name: 'Mike Chen',
-    username: '@mike_gains',
-    status: 'online',
+    id: "2",
+    name: "Mike Chen",
+    username: "@mike_gains",
+    status: "online",
     isVerified: false,
     isPremium: false,
-    fitnessLevel: 'intermediate',
-    specialties: ['Weightlifting', 'CrossFit'],
-    mutualConnections: 8
+    fitnessLevel: "intermediate",
+    specialties: ["Weightlifting", "CrossFit"],
+    mutualConnections: 8,
   },
   {
-    id: '3',
-    name: 'Emily Rodriguez',
-    username: '@emily_runner',
-    status: 'away',
+    id: "3",
+    name: "Emily Rodriguez",
+    username: "@emily_runner",
+    status: "away",
     isVerified: true,
     isPremium: true,
-    fitnessLevel: 'advanced',
-    specialties: ['Running', 'Marathon Training'],
+    fitnessLevel: "advanced",
+    specialties: ["Running", "Marathon Training"],
     mutualConnections: 15,
-    lastSeen: new Date(Date.now() - 30 * 60 * 1000) // 30 minutes ago
+    lastSeen: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
   },
   {
-    id: '4',
-    name: 'Alex Thompson',
-    username: '@alex_coach',
-    status: 'busy',
+    id: "4",
+    name: "Alex Thompson",
+    username: "@alex_coach",
+    status: "busy",
     isVerified: true,
     isPremium: true,
-    fitnessLevel: 'expert',
-    specialties: ['Personal Training', 'Strength Training', 'Nutrition'],
-    mutualConnections: 25
+    fitnessLevel: "expert",
+    specialties: ["Personal Training", "Strength Training", "Nutrition"],
+    mutualConnections: 25,
   },
   {
-    id: '5',
-    name: 'Jessica Wang',
-    username: '@jess_wellness',
-    status: 'offline',
+    id: "5",
+    name: "Jessica Wang",
+    username: "@jess_wellness",
+    status: "offline",
     isVerified: false,
     isPremium: false,
-    fitnessLevel: 'beginner',
-    specialties: ['Wellness', 'Meditation'],
+    fitnessLevel: "beginner",
+    specialties: ["Wellness", "Meditation"],
     mutualConnections: 3,
-    lastSeen: new Date(Date.now() - 2 * 60 * 60 * 1000) // 2 hours ago
-  }
+    lastSeen: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+  },
 ];
 
-export function UserChatList({ onUserSelect, onGroupChatCreate }: UserChatListProps) {
+export function UserChatList({
+  onUserSelect,
+  onGroupChatCreate,
+}: UserChatListProps) {
   const [users, setUsers] = useState<User[]>(mockUsers);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [filteredUsers, setFilteredUsers] = useState<User[]>(mockUsers);
-  const [filter, setFilter] = useState<'all' | 'online' | 'verified' | 'premium'>('all');
+  const [filter, setFilter] = useState<
+    "all" | "online" | "verified" | "premium"
+  >("all");
   const { toast } = useToast();
 
   useEffect(() => {
-    const filtered = users.filter(user => {
-      const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           user.specialties?.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()));
-      
-      const matchesFilter = filter === 'all' || 
-                           (filter === 'online' && user.status === 'online') ||
-                           (filter === 'verified' && user.isVerified) ||
-                           (filter === 'premium' && user.isPremium);
-      
+    const filtered = users.filter((user) => {
+      const matchesSearch =
+        user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.specialties?.some((s) =>
+          s.toLowerCase().includes(searchQuery.toLowerCase()),
+        );
+
+      const matchesFilter =
+        filter === "all" ||
+        (filter === "online" && user.status === "online") ||
+        (filter === "verified" && user.isVerified) ||
+        (filter === "premium" && user.isPremium);
+
       return matchesSearch && matchesFilter;
     });
-    
+
     setFilteredUsers(filtered);
   }, [searchQuery, filter, users]);
 
-  const getStatusColor = (status: User['status']) => {
+  const getStatusColor = (status: User["status"]) => {
     switch (status) {
-      case 'online': return 'bg-green-500';
-      case 'away': return 'bg-yellow-500';
-      case 'busy': return 'bg-red-500';
-      default: return 'bg-gray-400';
+      case "online":
+        return "bg-green-500";
+      case "away":
+        return "bg-yellow-500";
+      case "busy":
+        return "bg-red-500";
+      default:
+        return "bg-gray-400";
     }
   };
 
-  const getFitnessLevelColor = (level: User['fitnessLevel']) => {
+  const getFitnessLevelColor = (level: User["fitnessLevel"]) => {
     switch (level) {
-      case 'beginner': return 'bg-blue-500';
-      case 'intermediate': return 'bg-purple-500';
-      case 'advanced': return 'bg-orange-500';
-      case 'expert': return 'bg-red-500';
-      default: return 'bg-gray-500';
+      case "beginner":
+        return "bg-blue-500";
+      case "intermediate":
+        return "bg-purple-500";
+      case "advanced":
+        return "bg-orange-500";
+      case "expert":
+        return "bg-red-500";
+      default:
+        return "bg-gray-500";
     }
   };
 
   const formatLastSeen = (lastSeen?: Date) => {
-    if (!lastSeen) return '';
+    if (!lastSeen) return "";
     const now = new Date();
     const diff = now.getTime() - lastSeen.getTime();
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
-    
+
     if (minutes < 60) return `${minutes}m ago`;
     if (hours < 24) return `${hours}h ago`;
     return `${days}d ago`;
@@ -157,16 +175,16 @@ export function UserChatList({ onUserSelect, onGroupChatCreate }: UserChatListPr
   const handleStartChat = (user: User) => {
     toast({
       title: "Starting chat",
-      description: `Opening conversation with ${user.name}`
+      description: `Opening conversation with ${user.name}`,
     });
     onUserSelect(user);
   };
 
   const filterOptions = [
-    { value: 'all', label: 'All Users', icon: Users },
-    { value: 'online', label: 'Online', icon: MessageCircle },
-    { value: 'verified', label: 'Verified', icon: Shield },
-    { value: 'premium', label: 'Premium', icon: Crown }
+    { value: "all", label: "All Users", icon: Users },
+    { value: "online", label: "Online", icon: MessageCircle },
+    { value: "verified", label: "Verified", icon: Shield },
+    { value: "premium", label: "Premium", icon: Crown },
   ];
 
   return (
@@ -175,8 +193,12 @@ export function UserChatList({ onUserSelect, onGroupChatCreate }: UserChatListPr
       <div className="p-4 border-b border-border">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-xl font-bold">Connect with Fitness Community</h2>
-            <p className="text-sm text-muted-foreground">{filteredUsers.length} members available</p>
+            <h2 className="text-xl font-bold">
+              Connect with Fitness Community
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {filteredUsers.length} members available
+            </p>
           </div>
           <Button
             onClick={onGroupChatCreate}
@@ -200,7 +222,7 @@ export function UserChatList({ onUserSelect, onGroupChatCreate }: UserChatListPr
 
         {/* Filters */}
         <div className="flex gap-2 overflow-x-auto pb-2">
-          {filterOptions.map(option => (
+          {filterOptions.map((option) => (
             <Button
               key={option.value}
               variant={filter === option.value ? "default" : "outline"}
@@ -233,10 +255,15 @@ export function UserChatList({ onUserSelect, onGroupChatCreate }: UserChatListPr
                   <Avatar className="w-12 h-12">
                     <AvatarImage src={user.avatar} />
                     <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                      {user.name.split(' ').map(n => n[0]).join('')}
+                      {user.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
                     </AvatarFallback>
                   </Avatar>
-                  <div className={`absolute -bottom-1 -right-1 w-4 h-4 ${getStatusColor(user.status)} rounded-full border-2 border-background`} />
+                  <div
+                    className={`absolute -bottom-1 -right-1 w-4 h-4 ${getStatusColor(user.status)} rounded-full border-2 border-background`}
+                  />
                   {user.isVerified && (
                     <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
                       <Shield className="h-2 w-2 text-white" />
@@ -255,7 +282,9 @@ export function UserChatList({ onUserSelect, onGroupChatCreate }: UserChatListPr
                       </Badge>
                     )}
                     {user.fitnessLevel && (
-                      <Badge className={`text-xs text-white ${getFitnessLevelColor(user.fitnessLevel)}`}>
+                      <Badge
+                        className={`text-xs text-white ${getFitnessLevelColor(user.fitnessLevel)}`}
+                      >
                         {user.fitnessLevel}
                       </Badge>
                     )}
@@ -263,8 +292,10 @@ export function UserChatList({ onUserSelect, onGroupChatCreate }: UserChatListPr
 
                   {/* Username and status */}
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-sm text-muted-foreground">{user.username}</span>
-                    {user.status === 'offline' && user.lastSeen && (
+                    <span className="text-sm text-muted-foreground">
+                      {user.username}
+                    </span>
+                    {user.status === "offline" && user.lastSeen && (
                       <span className="text-xs text-muted-foreground">
                         • {formatLastSeen(user.lastSeen)}
                       </span>
@@ -274,8 +305,12 @@ export function UserChatList({ onUserSelect, onGroupChatCreate }: UserChatListPr
                   {/* Specialties */}
                   {user.specialties && user.specialties.length > 0 && (
                     <div className="flex flex-wrap gap-1 mb-2">
-                      {user.specialties.slice(0, 3).map(specialty => (
-                        <Badge key={specialty} variant="outline" className="text-xs">
+                      {user.specialties.slice(0, 3).map((specialty) => (
+                        <Badge
+                          key={specialty}
+                          variant="outline"
+                          className="text-xs"
+                        >
                           {specialty}
                         </Badge>
                       ))}

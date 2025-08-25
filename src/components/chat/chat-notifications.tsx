@@ -1,24 +1,35 @@
-
 import React, { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  Bell, 
-  BellOff, 
-  Volume2, 
-  Vibrate, 
-  Clock, 
+import {
+  Bell,
+  BellOff,
+  Volume2,
+  Vibrate,
+  Clock,
   Users,
   MessageSquare,
   Shield,
   Smartphone,
   Moon,
-  Zap
+  Zap,
 } from "lucide-react";
 
 interface ChatNotificationsProps {
@@ -27,7 +38,11 @@ interface ChatNotificationsProps {
   onClose: () => void;
 }
 
-export function ChatNotifications({ enabled, onEnabledChange, onClose }: ChatNotificationsProps) {
+export function ChatNotifications({
+  enabled,
+  onEnabledChange,
+  onClose,
+}: ChatNotificationsProps) {
   const { toast } = useToast();
   const [pushNotifications, setPushNotifications] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(false);
@@ -44,23 +59,24 @@ export function ChatNotifications({ enabled, onEnabledChange, onClose }: ChatNot
   const [priority, setPriority] = useState("normal");
 
   const testNotification = () => {
-    if ('Notification' in window) {
-      if (Notification.permission === 'granted') {
-        new Notification('FitFusion Chat', {
-          body: 'This is a test notification from FitFusion Chat!',
-          icon: '/favicon.ico'
+    if ("Notification" in window) {
+      if (Notification.permission === "granted") {
+        new Notification("FitFusion Chat", {
+          body: "This is a test notification from FitFusion Chat!",
+          icon: "/favicon.ico",
         });
-        
+
         toast({
           title: "Test notification sent",
-          description: "Check your notification panel to see the test notification."
+          description:
+            "Check your notification panel to see the test notification.",
         });
-      } else if (Notification.permission !== 'denied') {
+      } else if (Notification.permission !== "denied") {
         Notification.requestPermission().then((permission) => {
-          if (permission === 'granted') {
-            new Notification('FitFusion Chat', {
-              body: 'Notifications are now enabled!',
-              icon: '/favicon.ico'
+          if (permission === "granted") {
+            new Notification("FitFusion Chat", {
+              body: "Notifications are now enabled!",
+              icon: "/favicon.ico",
             });
           }
         });
@@ -69,24 +85,24 @@ export function ChatNotifications({ enabled, onEnabledChange, onClose }: ChatNot
       toast({
         title: "Notifications not supported",
         description: "Your browser doesn't support notifications.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
 
   const requestNotificationPermission = async () => {
-    if ('Notification' in window) {
+    if ("Notification" in window) {
       const permission = await Notification.requestPermission();
-      if (permission === 'granted') {
+      if (permission === "granted") {
         toast({
           title: "Notifications enabled",
-          description: "You'll now receive desktop notifications."
+          description: "You'll now receive desktop notifications.",
         });
       } else {
         toast({
           title: "Notifications denied",
           description: "Please enable notifications in your browser settings.",
-          variant: "destructive"
+          variant: "destructive",
         });
       }
     }
@@ -108,7 +124,11 @@ export function ChatNotifications({ enabled, onEnabledChange, onClose }: ChatNot
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              {enabled ? <Bell className="h-4 w-4 text-primary" /> : <BellOff className="h-4 w-4 text-muted-foreground" />}
+              {enabled ? (
+                <Bell className="h-4 w-4 text-primary" />
+              ) : (
+                <BellOff className="h-4 w-4 text-muted-foreground" />
+              )}
               <div>
                 <p className="font-medium">Enable Notifications</p>
                 <p className="text-sm text-muted-foreground">
@@ -124,7 +144,9 @@ export function ChatNotifications({ enabled, onEnabledChange, onClose }: ChatNot
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium">Notification Priority</p>
-                  <p className="text-sm text-muted-foreground">How urgent should notifications appear</p>
+                  <p className="text-sm text-muted-foreground">
+                    How urgent should notifications appear
+                  </p>
                 </div>
                 <Select value={priority} onValueChange={setPriority}>
                   <SelectTrigger className="w-32">
@@ -140,10 +162,18 @@ export function ChatNotifications({ enabled, onEnabledChange, onClose }: ChatNot
               </div>
 
               <div className="flex gap-3">
-                <Button onClick={testNotification} variant="outline" className="flex-1">
+                <Button
+                  onClick={testNotification}
+                  variant="outline"
+                  className="flex-1"
+                >
                   Test Notification
                 </Button>
-                <Button onClick={requestNotificationPermission} variant="outline" className="flex-1">
+                <Button
+                  onClick={requestNotificationPermission}
+                  variant="outline"
+                  className="flex-1"
+                >
                   Request Permission
                 </Button>
               </div>
@@ -170,10 +200,15 @@ export function ChatNotifications({ enabled, onEnabledChange, onClose }: ChatNot
                 <MessageSquare className="h-4 w-4 text-primary" />
                 <div>
                   <p className="font-medium">Private Messages</p>
-                  <p className="text-sm text-muted-foreground">Direct messages from other users</p>
+                  <p className="text-sm text-muted-foreground">
+                    Direct messages from other users
+                  </p>
                 </div>
               </div>
-              <Switch checked={privateNotifications} onCheckedChange={setPrivateNotifications} />
+              <Switch
+                checked={privateNotifications}
+                onCheckedChange={setPrivateNotifications}
+              />
             </div>
 
             <div className="flex items-center justify-between">
@@ -181,10 +216,15 @@ export function ChatNotifications({ enabled, onEnabledChange, onClose }: ChatNot
                 <Users className="h-4 w-4 text-primary" />
                 <div>
                   <p className="font-medium">Group Messages</p>
-                  <p className="text-sm text-muted-foreground">Messages in group conversations</p>
+                  <p className="text-sm text-muted-foreground">
+                    Messages in group conversations
+                  </p>
                 </div>
               </div>
-              <Switch checked={groupNotifications} onCheckedChange={setGroupNotifications} />
+              <Switch
+                checked={groupNotifications}
+                onCheckedChange={setGroupNotifications}
+              />
             </div>
 
             <div className="flex items-center justify-between">
@@ -192,12 +232,19 @@ export function ChatNotifications({ enabled, onEnabledChange, onClose }: ChatNot
                 <Zap className="h-4 w-4 text-primary" />
                 <div>
                   <p className="font-medium">Mentions</p>
-                  <p className="text-sm text-muted-foreground">When someone mentions you specifically</p>
+                  <p className="text-sm text-muted-foreground">
+                    When someone mentions you specifically
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant="default" className="text-xs">High Priority</Badge>
-                <Switch checked={mentionNotifications} onCheckedChange={setMentionNotifications} />
+                <Badge variant="default" className="text-xs">
+                  High Priority
+                </Badge>
+                <Switch
+                  checked={mentionNotifications}
+                  onCheckedChange={setMentionNotifications}
+                />
               </div>
             </div>
 
@@ -206,12 +253,19 @@ export function ChatNotifications({ enabled, onEnabledChange, onClose }: ChatNot
                 <Shield className="h-4 w-4 text-primary" />
                 <div>
                   <p className="font-medium">Security Alerts</p>
-                  <p className="text-sm text-muted-foreground">Important security notifications</p>
+                  <p className="text-sm text-muted-foreground">
+                    Important security notifications
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant="destructive" className="text-xs">Critical</Badge>
-                <Switch checked={securityAlerts} onCheckedChange={setSecurityAlerts} />
+                <Badge variant="destructive" className="text-xs">
+                  Critical
+                </Badge>
+                <Switch
+                  checked={securityAlerts}
+                  onCheckedChange={setSecurityAlerts}
+                />
               </div>
             </div>
           </CardContent>
@@ -236,10 +290,15 @@ export function ChatNotifications({ enabled, onEnabledChange, onClose }: ChatNot
                 <Bell className="h-4 w-4 text-primary" />
                 <div>
                   <p className="font-medium">Push Notifications</p>
-                  <p className="text-sm text-muted-foreground">Desktop and mobile push notifications</p>
+                  <p className="text-sm text-muted-foreground">
+                    Desktop and mobile push notifications
+                  </p>
                 </div>
               </div>
-              <Switch checked={pushNotifications} onCheckedChange={setPushNotifications} />
+              <Switch
+                checked={pushNotifications}
+                onCheckedChange={setPushNotifications}
+              />
             </div>
 
             <div className="flex items-center justify-between">
@@ -247,10 +306,15 @@ export function ChatNotifications({ enabled, onEnabledChange, onClose }: ChatNot
                 <Volume2 className="h-4 w-4 text-primary" />
                 <div>
                   <p className="font-medium">Sound Alerts</p>
-                  <p className="text-sm text-muted-foreground">Play sound when notifications arrive</p>
+                  <p className="text-sm text-muted-foreground">
+                    Play sound when notifications arrive
+                  </p>
                 </div>
               </div>
-              <Switch checked={soundEnabled} onCheckedChange={setSoundEnabled} />
+              <Switch
+                checked={soundEnabled}
+                onCheckedChange={setSoundEnabled}
+              />
             </div>
 
             {soundEnabled && (
@@ -275,10 +339,15 @@ export function ChatNotifications({ enabled, onEnabledChange, onClose }: ChatNot
                 <Vibrate className="h-4 w-4 text-primary" />
                 <div>
                   <p className="font-medium">Vibration</p>
-                  <p className="text-sm text-muted-foreground">Vibrate device for notifications</p>
+                  <p className="text-sm text-muted-foreground">
+                    Vibrate device for notifications
+                  </p>
                 </div>
               </div>
-              <Switch checked={vibrationEnabled} onCheckedChange={setVibrationEnabled} />
+              <Switch
+                checked={vibrationEnabled}
+                onCheckedChange={setVibrationEnabled}
+              />
             </div>
           </CardContent>
         </Card>
@@ -310,14 +379,16 @@ export function ChatNotifications({ enabled, onEnabledChange, onClose }: ChatNot
             {quietHours && (
               <div className="grid grid-cols-2 gap-4 mt-4">
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Start Time</label>
+                  <label className="text-sm font-medium mb-2 block">
+                    Start Time
+                  </label>
                   <Select value={quietStart} onValueChange={setQuietStart}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {Array.from({ length: 24 }, (_, i) => {
-                        const hour = i.toString().padStart(2, '0');
+                        const hour = i.toString().padStart(2, "0");
                         return (
                           <SelectItem key={`${hour}:00`} value={`${hour}:00`}>
                             {`${hour}:00`}
@@ -327,16 +398,18 @@ export function ChatNotifications({ enabled, onEnabledChange, onClose }: ChatNot
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div>
-                  <label className="text-sm font-medium mb-2 block">End Time</label>
+                  <label className="text-sm font-medium mb-2 block">
+                    End Time
+                  </label>
                   <Select value={quietEnd} onValueChange={setQuietEnd}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {Array.from({ length: 24 }, (_, i) => {
-                        const hour = i.toString().padStart(2, '0');
+                        const hour = i.toString().padStart(2, "0");
                         return (
                           <SelectItem key={`${hour}:00`} value={`${hour}:00`}>
                             {`${hour}:00`}

@@ -1,22 +1,33 @@
-
 import React, { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  Palette, 
-  Volume2, 
-  Eye, 
-  Clock, 
+import {
+  Palette,
+  Volume2,
+  Eye,
+  Clock,
   Smartphone,
   Download,
   Upload,
   Trash2,
-  RefreshCw
+  RefreshCw,
 } from "lucide-react";
 
 interface ChatSettingsProps {
@@ -48,16 +59,18 @@ export function ChatSettings({ onClose }: ChatSettingsProps) {
         onlineStatus,
         readReceipts,
         typingIndicators,
-        messageRetention
+        messageRetention,
       },
-      exportDate: new Date().toISOString()
+      exportDate: new Date().toISOString(),
     };
 
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `fitfusion-chat-settings-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `fitfusion-chat-settings-${new Date().toISOString().split("T")[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -65,25 +78,25 @@ export function ChatSettings({ onClose }: ChatSettingsProps) {
 
     toast({
       title: "Settings exported",
-      description: "Your chat settings have been downloaded."
+      description: "Your chat settings have been downloaded.",
     });
   };
 
   const handleClearCache = () => {
     // Clear various cache items
-    const cacheKeys = Object.keys(localStorage).filter(key => 
-      key.startsWith('chat_') || key.startsWith('fitfusion_')
+    const cacheKeys = Object.keys(localStorage).filter(
+      (key) => key.startsWith("chat_") || key.startsWith("fitfusion_"),
     );
-    
-    cacheKeys.forEach(key => {
-      if (!key.includes('auth') && !key.includes('token')) {
+
+    cacheKeys.forEach((key) => {
+      if (!key.includes("auth") && !key.includes("token")) {
         localStorage.removeItem(key);
       }
     });
 
     toast({
       title: "Cache cleared",
-      description: "Chat cache and temporary data have been cleared."
+      description: "Chat cache and temporary data have been cleared.",
     });
   };
 
@@ -101,7 +114,7 @@ export function ChatSettings({ onClose }: ChatSettingsProps) {
 
     toast({
       title: "Settings reset",
-      description: "All settings have been restored to defaults."
+      description: "All settings have been restored to defaults.",
     });
   };
 
@@ -122,7 +135,9 @@ export function ChatSettings({ onClose }: ChatSettingsProps) {
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Theme</p>
-              <p className="text-sm text-muted-foreground">Choose your preferred color scheme</p>
+              <p className="text-sm text-muted-foreground">
+                Choose your preferred color scheme
+              </p>
             </div>
             <Select value={theme} onValueChange={setTheme}>
               <SelectTrigger className="w-32">
@@ -168,7 +183,9 @@ export function ChatSettings({ onClose }: ChatSettingsProps) {
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Sound Effects</p>
-              <p className="text-sm text-muted-foreground">Play sounds for new messages</p>
+              <p className="text-sm text-muted-foreground">
+                Play sounds for new messages
+              </p>
             </div>
             <Switch checked={soundEnabled} onCheckedChange={setSoundEnabled} />
           </div>
@@ -207,7 +224,9 @@ export function ChatSettings({ onClose }: ChatSettingsProps) {
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Online Status</p>
-              <p className="text-sm text-muted-foreground">Show when you're online</p>
+              <p className="text-sm text-muted-foreground">
+                Show when you're online
+              </p>
             </div>
             <Switch checked={onlineStatus} onCheckedChange={setOnlineStatus} />
           </div>
@@ -215,7 +234,9 @@ export function ChatSettings({ onClose }: ChatSettingsProps) {
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Read Receipts</p>
-              <p className="text-sm text-muted-foreground">Let others know when you've read their messages</p>
+              <p className="text-sm text-muted-foreground">
+                Let others know when you've read their messages
+              </p>
             </div>
             <Switch checked={readReceipts} onCheckedChange={setReadReceipts} />
           </div>
@@ -223,17 +244,27 @@ export function ChatSettings({ onClose }: ChatSettingsProps) {
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Typing Indicators</p>
-              <p className="text-sm text-muted-foreground">Show when you're typing</p>
+              <p className="text-sm text-muted-foreground">
+                Show when you're typing
+              </p>
             </div>
-            <Switch checked={typingIndicators} onCheckedChange={setTypingIndicators} />
+            <Switch
+              checked={typingIndicators}
+              onCheckedChange={setTypingIndicators}
+            />
           </div>
 
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Message Previews</p>
-              <p className="text-sm text-muted-foreground">Show message content in notifications</p>
+              <p className="text-sm text-muted-foreground">
+                Show message content in notifications
+              </p>
             </div>
-            <Switch checked={messagePreview} onCheckedChange={setMessagePreview} />
+            <Switch
+              checked={messagePreview}
+              onCheckedChange={setMessagePreview}
+            />
           </div>
         </CardContent>
       </Card>
@@ -253,7 +284,9 @@ export function ChatSettings({ onClose }: ChatSettingsProps) {
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Auto-save Messages</p>
-              <p className="text-sm text-muted-foreground">Automatically save conversations</p>
+              <p className="text-sm text-muted-foreground">
+                Automatically save conversations
+              </p>
             </div>
             <Switch checked={autoSave} onCheckedChange={setAutoSave} />
           </div>
@@ -261,9 +294,14 @@ export function ChatSettings({ onClose }: ChatSettingsProps) {
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Message Retention</p>
-              <p className="text-sm text-muted-foreground">How long to keep messages locally</p>
+              <p className="text-sm text-muted-foreground">
+                How long to keep messages locally
+              </p>
             </div>
-            <Select value={messageRetention} onValueChange={setMessageRetention}>
+            <Select
+              value={messageRetention}
+              onValueChange={setMessageRetention}
+            >
               <SelectTrigger className="w-32">
                 <SelectValue />
               </SelectTrigger>
@@ -277,17 +315,29 @@ export function ChatSettings({ onClose }: ChatSettingsProps) {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" onClick={handleExportData} className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={handleExportData}
+              className="flex items-center gap-2"
+            >
               <Download className="h-4 w-4" />
               Export Settings
             </Button>
-            <Button variant="outline" onClick={handleClearCache} className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={handleClearCache}
+              className="flex items-center gap-2"
+            >
               <Trash2 className="h-4 w-4" />
               Clear Cache
             </Button>
           </div>
 
-          <Button variant="destructive" onClick={handleResetSettings} className="w-full flex items-center gap-2">
+          <Button
+            variant="destructive"
+            onClick={handleResetSettings}
+            className="w-full flex items-center gap-2"
+          >
             <RefreshCw className="h-4 w-4" />
             Reset All Settings
           </Button>

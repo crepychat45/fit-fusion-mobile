@@ -1,23 +1,22 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Watch, 
-  Battery, 
-  Bluetooth, 
-  Heart, 
-  Activity, 
+import {
+  Watch,
+  Battery,
+  Bluetooth,
+  Heart,
+  Activity,
   Wifi,
   Settings,
   RefreshCw,
   Signal,
   Zap,
   CheckCircle,
-  AlertTriangle
+  AlertTriangle,
 } from "lucide-react";
 
 interface WatchDevice {
@@ -31,7 +30,7 @@ interface WatchDevice {
   heartRate?: number;
   steps?: number;
   lastSync: string;
-  status: 'connected' | 'disconnected' | 'syncing';
+  status: "connected" | "disconnected" | "syncing";
 }
 
 const mockWatches: WatchDevice[] = [
@@ -46,10 +45,10 @@ const mockWatches: WatchDevice[] = [
     heartRate: 72,
     steps: 8432,
     lastSync: "2 minutes ago",
-    status: 'connected'
+    status: "connected",
   },
   {
-    id: "2", 
+    id: "2",
     name: "Samsung Galaxy Watch 6",
     model: "44mm LTE",
     image: "/placeholder.svg",
@@ -57,21 +56,21 @@ const mockWatches: WatchDevice[] = [
     batteryLevel: 34,
     signalStrength: 0,
     lastSync: "1 hour ago",
-    status: 'disconnected'
+    status: "disconnected",
   },
   {
     id: "3",
     name: "Garmin Forerunner 965",
     model: "Sport Edition",
-    image: "/placeholder.svg", 
+    image: "/placeholder.svg",
     connected: true,
     batteryLevel: 92,
     signalStrength: 87,
     heartRate: 68,
     steps: 12847,
     lastSync: "Just now",
-    status: 'connected'
-  }
+    status: "connected",
+  },
 ];
 
 export function WatchPanel() {
@@ -80,54 +79,70 @@ export function WatchPanel() {
   const [selectedWatch, setSelectedWatch] = useState<string | null>(null);
 
   const handleConnect = async (watchId: string) => {
-    setWatches(prev => prev.map(watch => 
-      watch.id === watchId 
-        ? { ...watch, status: 'syncing' as const }
-        : watch
-    ));
+    setWatches((prev) =>
+      prev.map((watch) =>
+        watch.id === watchId ? { ...watch, status: "syncing" as const } : watch,
+      ),
+    );
 
     // Simulate connection process
     setTimeout(() => {
-      setWatches(prev => prev.map(watch => 
-        watch.id === watchId 
-          ? { 
-              ...watch, 
-              connected: true, 
-              status: 'connected' as const,
-              lastSync: 'Just now',
-              signalStrength: 85 + Math.floor(Math.random() * 15)
-            }
-          : watch
-      ));
+      setWatches((prev) =>
+        prev.map((watch) =>
+          watch.id === watchId
+            ? {
+                ...watch,
+                connected: true,
+                status: "connected" as const,
+                lastSync: "Just now",
+                signalStrength: 85 + Math.floor(Math.random() * 15),
+              }
+            : watch,
+        ),
+      );
     }, 2000);
   };
 
   const handleDisconnect = (watchId: string) => {
-    setWatches(prev => prev.map(watch => 
-      watch.id === watchId 
-        ? { 
-            ...watch, 
-            connected: false, 
-            status: 'disconnected' as const,
-            signalStrength: 0,
-            heartRate: undefined,
-            steps: undefined
-          }
-        : watch
-    ));
+    setWatches((prev) =>
+      prev.map((watch) =>
+        watch.id === watchId
+          ? {
+              ...watch,
+              connected: false,
+              status: "disconnected" as const,
+              signalStrength: 0,
+              heartRate: undefined,
+              steps: undefined,
+            }
+          : watch,
+      ),
+    );
   };
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
     // Simulate refresh
     setTimeout(() => {
-      setWatches(prev => prev.map(watch => ({
-        ...watch,
-        batteryLevel: Math.max(0, Math.min(100, watch.batteryLevel + Math.floor(Math.random() * 10) - 5)),
-        lastSync: watch.connected ? 'Just now' : watch.lastSync,
-        heartRate: watch.connected ? 65 + Math.floor(Math.random() * 20) : undefined,
-        steps: watch.connected ? (watch.steps || 0) + Math.floor(Math.random() * 100) : undefined
-      })));
+      setWatches((prev) =>
+        prev.map((watch) => ({
+          ...watch,
+          batteryLevel: Math.max(
+            0,
+            Math.min(
+              100,
+              watch.batteryLevel + Math.floor(Math.random() * 10) - 5,
+            ),
+          ),
+          lastSync: watch.connected ? "Just now" : watch.lastSync,
+          heartRate: watch.connected
+            ? 65 + Math.floor(Math.random() * 20)
+            : undefined,
+          steps: watch.connected
+            ? (watch.steps || 0) + Math.floor(Math.random() * 100)
+            : undefined,
+        })),
+      );
       setIsRefreshing(false);
     }, 1500);
   };
@@ -140,9 +155,9 @@ export function WatchPanel() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'connected':
+      case "connected":
         return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'syncing':
+      case "syncing":
         return <RefreshCw className="h-4 w-4 text-blue-500 animate-spin" />;
       default:
         return <AlertTriangle className="h-4 w-4 text-red-500" />;
@@ -159,19 +174,21 @@ export function WatchPanel() {
             </div>
             Connected Devices
           </CardTitle>
-          
-          <Button 
-            variant="outline" 
-            size="sm" 
+
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleRefresh}
             disabled={isRefreshing}
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
+            />
             Sync
           </Button>
         </div>
       </CardHeader>
-      
+
       <CardContent>
         <div className="space-y-4">
           <AnimatePresence>
@@ -182,9 +199,9 @@ export function WatchPanel() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 className={`p-4 rounded-lg border transition-all duration-200 hover:shadow-md ${
-                  watch.connected 
-                    ? 'border-green-200 bg-green-50 dark:bg-green-950/20' 
-                    : 'border-gray-200 bg-gray-50 dark:bg-gray-900'
+                  watch.connected
+                    ? "border-green-200 bg-green-50 dark:bg-green-950/20"
+                    : "border-gray-200 bg-gray-50 dark:bg-gray-900"
                 }`}
               >
                 <div className="flex items-center gap-4">
@@ -201,34 +218,40 @@ export function WatchPanel() {
                   {/* Watch Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
-                      <h3 className="font-semibold text-sm truncate">{watch.name}</h3>
-                      <Badge 
+                      <h3 className="font-semibold text-sm truncate">
+                        {watch.name}
+                      </h3>
+                      <Badge
                         variant={watch.connected ? "default" : "secondary"}
                         className="text-xs"
                       >
                         {watch.status}
                       </Badge>
                     </div>
-                    <p className="text-xs text-muted-foreground mb-2">{watch.model}</p>
-                    
+                    <p className="text-xs text-muted-foreground mb-2">
+                      {watch.model}
+                    </p>
+
                     {/* Stats Grid */}
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       {/* Battery */}
                       <div className="flex items-center gap-1">
-                        <Battery className={`h-3 w-3 ${getBatteryColor(watch.batteryLevel)}`} />
+                        <Battery
+                          className={`h-3 w-3 ${getBatteryColor(watch.batteryLevel)}`}
+                        />
                         <span>{watch.batteryLevel}%</span>
-                        <Progress 
-                          value={watch.batteryLevel} 
+                        <Progress
+                          value={watch.batteryLevel}
                           className="h-1 w-8"
                         />
                       </div>
-                      
+
                       {/* Signal */}
                       <div className="flex items-center gap-1">
                         <Signal className="h-3 w-3 text-blue-500" />
                         <span>{watch.signalStrength}%</span>
                       </div>
-                      
+
                       {/* Heart Rate */}
                       {watch.heartRate && (
                         <div className="flex items-center gap-1">
@@ -236,7 +259,7 @@ export function WatchPanel() {
                           <span>{watch.heartRate} BPM</span>
                         </div>
                       )}
-                      
+
                       {/* Steps */}
                       {watch.steps && (
                         <div className="flex items-center gap-1">
@@ -245,7 +268,7 @@ export function WatchPanel() {
                         </div>
                       )}
                     </div>
-                    
+
                     <p className="text-xs text-muted-foreground mt-2">
                       Last sync: {watch.lastSync}
                     </p>
@@ -255,16 +278,16 @@ export function WatchPanel() {
                   <div className="flex flex-col gap-2">
                     {watch.connected ? (
                       <>
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => handleDisconnect(watch.id)}
                           className="h-7 text-xs"
                         >
                           Disconnect
                         </Button>
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="sm"
                           className="h-7 text-xs"
                         >
@@ -272,14 +295,14 @@ export function WatchPanel() {
                         </Button>
                       </>
                     ) : (
-                      <Button 
-                        variant="default" 
+                      <Button
+                        variant="default"
                         size="sm"
                         onClick={() => handleConnect(watch.id)}
-                        disabled={watch.status === 'syncing'}
+                        disabled={watch.status === "syncing"}
                         className="h-7 text-xs bg-gradient-to-r from-blue-500 to-purple-600"
                       >
-                        {watch.status === 'syncing' ? (
+                        {watch.status === "syncing" ? (
                           <>
                             <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
                             Connecting...
@@ -308,19 +331,28 @@ export function WatchPanel() {
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <div className="text-lg font-bold text-blue-600">
-                {watches.filter(w => w.connected).length}
+                {watches.filter((w) => w.connected).length}
               </div>
               <div className="text-xs text-muted-foreground">Connected</div>
             </div>
             <div>
               <div className="text-lg font-bold text-green-600">
-                {Math.round(watches.filter(w => w.connected).reduce((acc, w) => acc + w.batteryLevel, 0) / watches.filter(w => w.connected).length) || 0}%
+                {Math.round(
+                  watches
+                    .filter((w) => w.connected)
+                    .reduce((acc, w) => acc + w.batteryLevel, 0) /
+                    watches.filter((w) => w.connected).length,
+                ) || 0}
+                %
               </div>
               <div className="text-xs text-muted-foreground">Avg Battery</div>
             </div>
             <div>
               <div className="text-lg font-bold text-purple-600">
-                {watches.filter(w => w.steps).reduce((acc, w) => acc + (w.steps || 0), 0).toLocaleString()}
+                {watches
+                  .filter((w) => w.steps)
+                  .reduce((acc, w) => acc + (w.steps || 0), 0)
+                  .toLocaleString()}
               </div>
               <div className="text-xs text-muted-foreground">Total Steps</div>
             </div>

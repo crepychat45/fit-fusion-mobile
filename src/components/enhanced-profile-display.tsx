@@ -5,13 +5,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ProfilePhotoUpload } from "./profile-photo-upload";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  User, 
-  Camera, 
-  Edit2, 
-  Award, 
-  Target, 
-  TrendingUp, 
+import {
+  User,
+  Camera,
+  Edit2,
+  Award,
+  Target,
+  TrendingUp,
   Calendar,
   MapPin,
   Heart,
@@ -19,7 +19,7 @@ import {
   Trophy,
   Star,
   Clock,
-  Activity
+  Activity,
 } from "lucide-react";
 
 interface UserProfile {
@@ -61,20 +61,22 @@ interface EnhancedProfileDisplayProps {
   variant?: "minimal" | "card" | "detailed";
 }
 
-export function EnhancedProfileDisplay({ 
-  user, 
-  onEdit, 
+export function EnhancedProfileDisplay({
+  user,
+  onEdit,
   showEditButton = true,
   size = "medium",
-  variant = "detailed"
+  variant = "detailed",
 }: EnhancedProfileDisplayProps) {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [showFullBio, setShowFullBio] = useState(false);
-  const [activeTab, setActiveTab] = useState<"overview" | "achievements" | "stats">("overview");
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "achievements" | "stats"
+  >("overview");
 
   // Load profile image from localStorage
   useEffect(() => {
-    const savedImage = localStorage.getItem('profileImage');
+    const savedImage = localStorage.getItem("profileImage");
     if (savedImage) {
       setProfileImage(savedImage);
     }
@@ -82,13 +84,18 @@ export function EnhancedProfileDisplay({
 
   // Mock user data if none provided
   const defaultUser: UserProfile = {
-    name: localStorage.getItem('userName') || "Fitness Enthusiast",
+    name: localStorage.getItem("userName") || "Fitness Enthusiast",
     email: "user@fitfusion.com",
     bio: "Passionate about fitness and healthy living. Currently training for a marathon and focusing on strength building. Love trying new workout routines and sharing tips with the community!",
     location: "New York, NY",
     joinDate: "January 2024",
     fitnessLevel: "Intermediate",
-    goals: ["Build Muscle", "Lose Weight", "Improve Endurance", "Better Flexibility"],
+    goals: [
+      "Build Muscle",
+      "Lose Weight",
+      "Improve Endurance",
+      "Better Flexibility",
+    ],
     achievements: [
       {
         id: "1",
@@ -96,15 +103,15 @@ export function EnhancedProfileDisplay({
         description: "Completed your first week of workouts",
         icon: "🎯",
         unlockedAt: new Date("2024-01-07"),
-        rarity: "common"
+        rarity: "common",
       },
       {
-        id: "2", 
+        id: "2",
         title: "Streak Master",
         description: "Maintained a 30-day workout streak",
         icon: "🔥",
         unlockedAt: new Date("2024-02-01"),
-        rarity: "rare"
+        rarity: "rare",
       },
       {
         id: "3",
@@ -112,8 +119,8 @@ export function EnhancedProfileDisplay({
         description: "Burned 10,000 total calories",
         icon: "⚡",
         unlockedAt: new Date("2024-02-15"),
-        rarity: "epic"
-      }
+        rarity: "epic",
+      },
     ],
     stats: {
       totalWorkouts: 156,
@@ -121,8 +128,8 @@ export function EnhancedProfileDisplay({
       longestStreak: 45,
       totalMinutes: 3840,
       caloriesBurned: 18750,
-      favoriteWorkout: "HIIT Training"
-    }
+      favoriteWorkout: "HIIT Training",
+    },
   };
 
   const profileData = user || defaultUser;
@@ -132,7 +139,11 @@ export function EnhancedProfileDisplay({
   };
 
   const getInitials = (name: string) => {
-    return name.split(" ").map(word => word[0]).join("").toUpperCase();
+    return name
+      .split(" ")
+      .map((word) => word[0])
+      .join("")
+      .toUpperCase();
   };
 
   const getSizeClasses = (size: string) => {
@@ -141,30 +152,35 @@ export function EnhancedProfileDisplay({
         return {
           avatar: "h-12 w-12",
           name: "text-lg font-semibold",
-          bio: "text-sm"
+          bio: "text-sm",
         };
       case "large":
         return {
           avatar: "h-32 w-32",
           name: "text-3xl font-bold",
-          bio: "text-base"
+          bio: "text-base",
         };
       default:
         return {
           avatar: "h-20 w-20",
           name: "text-xl font-bold",
-          bio: "text-sm"
+          bio: "text-sm",
         };
     }
   };
 
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
-      case "common": return "bg-gray-100 text-gray-800 border-gray-300";
-      case "rare": return "bg-blue-100 text-blue-800 border-blue-300";
-      case "epic": return "bg-purple-100 text-purple-800 border-purple-300";
-      case "legendary": return "bg-yellow-100 text-yellow-800 border-yellow-300";
-      default: return "bg-gray-100 text-gray-800 border-gray-300";
+      case "common":
+        return "bg-gray-100 text-gray-800 border-gray-300";
+      case "rare":
+        return "bg-blue-100 text-blue-800 border-blue-300";
+      case "epic":
+        return "bg-purple-100 text-purple-800 border-purple-300";
+      case "legendary":
+        return "bg-yellow-100 text-yellow-800 border-yellow-300";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-300";
     }
   };
 
@@ -178,10 +194,12 @@ export function EnhancedProfileDisplay({
             <AvatarFallback className="bg-primary/10 text-primary font-semibold">
               {getInitials(profileData.name)}
             </AvatarFallback>
-            {profileImage && <AvatarImage src={profileImage} alt={profileData.name} />}
+            {profileImage && (
+              <AvatarImage src={profileImage} alt={profileData.name} />
+            )}
           </Avatar>
           {size !== "small" && (
-            <ProfilePhotoUpload 
+            <ProfilePhotoUpload
               name={profileData.name}
               initialImage={profileImage}
               onImageUpdate={handleImageUpdate}
@@ -191,7 +209,9 @@ export function EnhancedProfileDisplay({
         <div className="flex-1 min-w-0">
           <h3 className={sizeClasses.name}>{profileData.name}</h3>
           {profileData.email && (
-            <p className="text-muted-foreground text-sm truncate">{profileData.email}</p>
+            <p className="text-muted-foreground text-sm truncate">
+              {profileData.email}
+            </p>
           )}
         </div>
         {showEditButton && onEdit && (
@@ -213,19 +233,24 @@ export function EnhancedProfileDisplay({
                 <AvatarFallback className="bg-primary/10 text-primary font-semibold text-2xl">
                   {getInitials(profileData.name)}
                 </AvatarFallback>
-                {profileImage && <AvatarImage src={profileImage} alt={profileData.name} />}
+                {profileImage && (
+                  <AvatarImage src={profileImage} alt={profileData.name} />
+                )}
               </Avatar>
-              <ProfilePhotoUpload 
+              <ProfilePhotoUpload
                 name={profileData.name}
                 initialImage={profileImage}
                 onImageUpdate={handleImageUpdate}
               />
             </div>
-            
+
             <div className="space-y-2">
               <h3 className={sizeClasses.name}>{profileData.name}</h3>
               {profileData.fitnessLevel && (
-                <Badge variant="secondary" className="bg-primary/10 text-primary">
+                <Badge
+                  variant="secondary"
+                  className="bg-primary/10 text-primary"
+                >
                   {profileData.fitnessLevel}
                 </Badge>
               )}
@@ -262,24 +287,31 @@ export function EnhancedProfileDisplay({
                   <AvatarFallback className="bg-primary/20 text-primary font-bold text-3xl">
                     {getInitials(profileData.name)}
                   </AvatarFallback>
-                  {profileImage && <AvatarImage src={profileImage} alt={profileData.name} />}
+                  {profileImage && (
+                    <AvatarImage src={profileImage} alt={profileData.name} />
+                  )}
                 </Avatar>
-                <ProfilePhotoUpload 
+                <ProfilePhotoUpload
                   name={profileData.name}
                   initialImage={profileImage}
                   onImageUpdate={handleImageUpdate}
                 />
               </div>
-              
+
               <div className="text-center md:text-left">
                 <h2 className="text-2xl font-bold mb-2">{profileData.name}</h2>
                 {profileData.email && (
-                  <p className="text-muted-foreground mb-2">{profileData.email}</p>
+                  <p className="text-muted-foreground mb-2">
+                    {profileData.email}
+                  </p>
                 )}
-                
+
                 <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-4">
                   {profileData.fitnessLevel && (
-                    <Badge variant="secondary" className="bg-primary/10 text-primary">
+                    <Badge
+                      variant="secondary"
+                      className="bg-primary/10 text-primary"
+                    >
                       <Target className="h-3 w-3 mr-1" />
                       {profileData.fitnessLevel}
                     </Badge>
@@ -313,29 +345,43 @@ export function EnhancedProfileDisplay({
                 <div className="text-center">
                   <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg">
                     <Activity className="h-6 w-6 text-blue-600 mx-auto mb-1" />
-                    <div className="text-2xl font-bold text-blue-600">{profileData.stats?.totalWorkouts || 0}</div>
-                    <div className="text-xs text-muted-foreground">Workouts</div>
+                    <div className="text-2xl font-bold text-blue-600">
+                      {profileData.stats?.totalWorkouts || 0}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Workouts
+                    </div>
                   </div>
                 </div>
                 <div className="text-center">
                   <div className="bg-orange-50 dark:bg-orange-950/20 p-3 rounded-lg">
                     <Zap className="h-6 w-6 text-orange-600 mx-auto mb-1" />
-                    <div className="text-2xl font-bold text-orange-600">{profileData.stats?.currentStreak || 0}</div>
-                    <div className="text-xs text-muted-foreground">Day Streak</div>
+                    <div className="text-2xl font-bold text-orange-600">
+                      {profileData.stats?.currentStreak || 0}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Day Streak
+                    </div>
                   </div>
                 </div>
                 <div className="text-center">
                   <div className="bg-purple-50 dark:bg-purple-950/20 p-3 rounded-lg">
                     <Clock className="h-6 w-6 text-purple-600 mx-auto mb-1" />
-                    <div className="text-2xl font-bold text-purple-600">{Math.round((profileData.stats?.totalMinutes || 0) / 60)}</div>
+                    <div className="text-2xl font-bold text-purple-600">
+                      {Math.round((profileData.stats?.totalMinutes || 0) / 60)}
+                    </div>
                     <div className="text-xs text-muted-foreground">Hours</div>
                   </div>
                 </div>
                 <div className="text-center">
                   <div className="bg-green-50 dark:bg-green-950/20 p-3 rounded-lg">
                     <Trophy className="h-6 w-6 text-green-600 mx-auto mb-1" />
-                    <div className="text-2xl font-bold text-green-600">{profileData.achievements?.length || 0}</div>
-                    <div className="text-xs text-muted-foreground">Achievements</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      {profileData.achievements?.length || 0}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Achievements
+                    </div>
                   </div>
                 </div>
               </div>
@@ -349,8 +395,8 @@ export function EnhancedProfileDisplay({
             <button
               onClick={() => setActiveTab("overview")}
               className={`pb-2 px-1 border-b-2 transition-colors ${
-                activeTab === "overview" 
-                  ? "border-primary text-primary" 
+                activeTab === "overview"
+                  ? "border-primary text-primary"
                   : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -359,8 +405,8 @@ export function EnhancedProfileDisplay({
             <button
               onClick={() => setActiveTab("achievements")}
               className={`pb-2 px-1 border-b-2 transition-colors ${
-                activeTab === "achievements" 
-                  ? "border-primary text-primary" 
+                activeTab === "achievements"
+                  ? "border-primary text-primary"
                   : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -369,8 +415,8 @@ export function EnhancedProfileDisplay({
             <button
               onClick={() => setActiveTab("stats")}
               className={`pb-2 px-1 border-b-2 transition-colors ${
-                activeTab === "stats" 
-                  ? "border-primary text-primary" 
+                activeTab === "stats"
+                  ? "border-primary text-primary"
                   : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -419,7 +465,11 @@ export function EnhancedProfileDisplay({
                     </h4>
                     <div className="flex flex-wrap gap-2">
                       {profileData.goals.map((goal, index) => (
-                        <Badge key={index} variant="outline" className="bg-primary/5">
+                        <Badge
+                          key={index}
+                          variant="outline"
+                          className="bg-primary/5"
+                        >
                           {goal}
                         </Badge>
                       ))}
@@ -437,7 +487,8 @@ export function EnhancedProfileDisplay({
                 exit={{ opacity: 0, y: -20 }}
                 className="space-y-4"
               >
-                {profileData.achievements && profileData.achievements.length > 0 ? (
+                {profileData.achievements &&
+                profileData.achievements.length > 0 ? (
                   <div className="grid gap-4">
                     {profileData.achievements.map((achievement) => (
                       <motion.div
@@ -448,10 +499,15 @@ export function EnhancedProfileDisplay({
                         <div className="flex items-center gap-3">
                           <div className="text-2xl">{achievement.icon}</div>
                           <div className="flex-1">
-                            <h5 className="font-semibold">{achievement.title}</h5>
-                            <p className="text-sm opacity-80">{achievement.description}</p>
+                            <h5 className="font-semibold">
+                              {achievement.title}
+                            </h5>
+                            <p className="text-sm opacity-80">
+                              {achievement.description}
+                            </p>
                             <p className="text-xs mt-1 opacity-60">
-                              Unlocked {achievement.unlockedAt.toLocaleDateString()}
+                              Unlocked{" "}
+                              {achievement.unlockedAt.toLocaleDateString()}
                             </p>
                           </div>
                           <Badge variant="outline" className="capitalize">
@@ -464,7 +520,10 @@ export function EnhancedProfileDisplay({
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
                     <Award className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No achievements yet. Start working out to earn your first badge!</p>
+                    <p>
+                      No achievements yet. Start working out to earn your first
+                      badge!
+                    </p>
                   </div>
                 )}
               </motion.div>
@@ -486,16 +545,28 @@ export function EnhancedProfileDisplay({
                     </h4>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                        <span className="text-sm font-medium">Total Workouts</span>
-                        <span className="text-lg font-bold text-blue-600">{profileData.stats?.totalWorkouts || 0}</span>
+                        <span className="text-sm font-medium">
+                          Total Workouts
+                        </span>
+                        <span className="text-lg font-bold text-blue-600">
+                          {profileData.stats?.totalWorkouts || 0}
+                        </span>
                       </div>
                       <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                        <span className="text-sm font-medium">Total Minutes</span>
-                        <span className="text-lg font-bold text-purple-600">{profileData.stats?.totalMinutes || 0}</span>
+                        <span className="text-sm font-medium">
+                          Total Minutes
+                        </span>
+                        <span className="text-lg font-bold text-purple-600">
+                          {profileData.stats?.totalMinutes || 0}
+                        </span>
                       </div>
                       <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                        <span className="text-sm font-medium">Calories Burned</span>
-                        <span className="text-lg font-bold text-orange-600">{profileData.stats?.caloriesBurned || 0}</span>
+                        <span className="text-sm font-medium">
+                          Calories Burned
+                        </span>
+                        <span className="text-lg font-bold text-orange-600">
+                          {profileData.stats?.caloriesBurned || 0}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -507,16 +578,28 @@ export function EnhancedProfileDisplay({
                     </h4>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                        <span className="text-sm font-medium">Current Streak</span>
-                        <span className="text-lg font-bold text-green-600">{profileData.stats?.currentStreak || 0} days</span>
+                        <span className="text-sm font-medium">
+                          Current Streak
+                        </span>
+                        <span className="text-lg font-bold text-green-600">
+                          {profileData.stats?.currentStreak || 0} days
+                        </span>
                       </div>
                       <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                        <span className="text-sm font-medium">Longest Streak</span>
-                        <span className="text-lg font-bold text-yellow-600">{profileData.stats?.longestStreak || 0} days</span>
+                        <span className="text-sm font-medium">
+                          Longest Streak
+                        </span>
+                        <span className="text-lg font-bold text-yellow-600">
+                          {profileData.stats?.longestStreak || 0} days
+                        </span>
                       </div>
                       <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                        <span className="text-sm font-medium">Favorite Workout</span>
-                        <span className="text-sm font-medium text-primary">{profileData.stats?.favoriteWorkout || "N/A"}</span>
+                        <span className="text-sm font-medium">
+                          Favorite Workout
+                        </span>
+                        <span className="text-sm font-medium text-primary">
+                          {profileData.stats?.favoriteWorkout || "N/A"}
+                        </span>
                       </div>
                     </div>
                   </div>

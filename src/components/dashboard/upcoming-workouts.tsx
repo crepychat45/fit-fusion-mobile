@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,36 +17,38 @@ interface UpcomingWorkoutsProps {
 }
 
 export function UpcomingWorkouts({ workouts }: UpcomingWorkoutsProps) {
-  const upcomingWorkouts = workouts.filter(workout => workout.day !== "Today");
-  
+  const upcomingWorkouts = workouts.filter(
+    (workout) => workout.day !== "Today",
+  );
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
-  
+
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
       y: 0,
       opacity: 1,
-      transition: { duration: 0.5 }
-    }
+      transition: { duration: 0.5 },
+    },
   };
-  
+
   if (upcomingWorkouts.length === 0) {
     return null;
   }
-  
+
   return (
     <div className="px-4 mt-6">
       <h2 className="font-medium mb-3">Upcoming Workouts</h2>
-      
-      <motion.div 
+
+      <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"

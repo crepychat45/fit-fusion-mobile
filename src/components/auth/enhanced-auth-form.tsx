@@ -1,21 +1,26 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Eye, 
-  EyeOff, 
-  ArrowRight, 
-  Mail, 
-  Lock, 
-  UserPlus, 
+import {
+  Eye,
+  EyeOff,
+  ArrowRight,
+  Mail,
+  Lock,
+  UserPlus,
   LogIn,
   Shield,
   CheckCircle,
@@ -24,7 +29,7 @@ import {
   Fingerprint,
   Smartphone,
   Zap,
-  Star
+  Star,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
@@ -45,17 +50,18 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const { loading, signIn, signUp, resetPassword } = useEnhancedAuth();
   const { toast } = useToast();
-  
+
   // Form states
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
-  
+
   // Validation states
   const [emailValid, setEmailValid] = useState<boolean | null>(null);
-  const [passwordStrength, setPasswordStrength] = useState<PasswordStrength | null>(null);
+  const [passwordStrength, setPasswordStrength] =
+    useState<PasswordStrength | null>(null);
   const [formValid, setFormValid] = useState(false);
 
   // Advanced features
@@ -66,7 +72,7 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
 
   useEffect(() => {
     // Check for biometric availability
-    if ('credentials' in navigator && 'create' in navigator.credentials) {
+    if ("credentials" in navigator && "create" in navigator.credentials) {
       setBiometricAvailable(true);
     }
   }, []);
@@ -84,10 +90,23 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
   }, [password]);
 
   useEffect(() => {
-    const isValid = emailValid && 
-                   (!isSignUp || (passwordStrength?.score >= 3 && password === confirmPassword && acceptTerms && name.length >= 2));
+    const isValid =
+      emailValid &&
+      (!isSignUp ||
+        (passwordStrength?.score >= 3 &&
+          password === confirmPassword &&
+          acceptTerms &&
+          name.length >= 2));
     setFormValid(isValid);
-  }, [emailValid, passwordStrength, password, confirmPassword, acceptTerms, name, isSignUp]);
+  }, [
+    emailValid,
+    passwordStrength,
+    password,
+    confirmPassword,
+    acceptTerms,
+    name,
+    isSignUp,
+  ]);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -121,19 +140,19 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
       2: { color: "text-yellow-500", label: "Fair" },
       3: { color: "text-blue-500", label: "Good" },
       4: { color: "text-green-500", label: "Strong" },
-      5: { color: "text-green-600", label: "Very Strong" }
+      5: { color: "text-green-600", label: "Very Strong" },
     };
 
     return {
       score,
       feedback,
-      ...strengthMap[score as keyof typeof strengthMap]
+      ...strengthMap[score as keyof typeof strengthMap],
     };
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formValid) {
       toast({
         title: "Form Invalid",
@@ -151,7 +170,7 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
         const { error } = await signIn(email, password);
         if (error) throw new Error(error);
       }
-      
+
       if (onSuccess) onSuccess();
     } catch (error: any) {
       toast({
@@ -180,7 +199,7 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!resetEmail || !validateEmail(resetEmail)) {
       toast({
         title: "Invalid Email",
@@ -193,7 +212,7 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
     try {
       const { error } = await resetPassword(resetEmail);
       if (error) throw new Error(error);
-      
+
       toast({
         title: "Reset Email Sent",
         description: "Check your email for the password reset link.",
@@ -225,13 +244,15 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
           >
             <Shield className="h-8 w-8 text-white" />
           </motion.div>
-          
+
           <div>
             <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               {isSignUp ? "Join FitFusion" : "Welcome Back"}
             </CardTitle>
             <p className="text-muted-foreground mt-2">
-              {isSignUp ? "Create your account with advanced security" : "Sign in to your secure account"}
+              {isSignUp
+                ? "Create your account with advanced security"
+                : "Sign in to your secure account"}
             </p>
           </div>
 
@@ -262,7 +283,7 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
                 Advanced
               </TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="email">
               <form onSubmit={handleSubmit} className="space-y-4">
                 {isSignUp && (
@@ -286,7 +307,7 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
                     </div>
                   </motion.div>
                 )}
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address</Label>
                   <div className="relative">
@@ -297,8 +318,11 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className={`pl-10 pr-10 ${
-                        emailValid === true ? 'border-green-500' : 
-                        emailValid === false ? 'border-red-500' : ''
+                        emailValid === true
+                          ? "border-green-500"
+                          : emailValid === false
+                            ? "border-red-500"
+                            : ""
                       }`}
                     />
                     <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
@@ -313,7 +337,7 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
                     )}
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
                   <div className="relative">
@@ -340,7 +364,7 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
                       )}
                     </Button>
                   </div>
-                  
+
                   {/* Password Strength Indicator */}
                   <AnimatePresence>
                     {passwordStrength && isSignUp && (
@@ -351,19 +375,26 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
                         className="space-y-2"
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">Password Strength</span>
-                          <span className={`text-sm font-medium ${passwordStrength.color}`}>
+                          <span className="text-sm text-muted-foreground">
+                            Password Strength
+                          </span>
+                          <span
+                            className={`text-sm font-medium ${passwordStrength.color}`}
+                          >
                             {passwordStrength.label}
                           </span>
                         </div>
-                        <Progress 
-                          value={(passwordStrength.score / 5) * 100} 
+                        <Progress
+                          value={(passwordStrength.score / 5) * 100}
                           className="h-2"
                         />
                         {passwordStrength.feedback.length > 0 && (
                           <ul className="text-xs text-muted-foreground space-y-1">
                             {passwordStrength.feedback.map((item, index) => (
-                              <li key={index} className="flex items-center gap-1">
+                              <li
+                                key={index}
+                                className="flex items-center gap-1"
+                              >
                                 <AlertTriangle className="h-3 w-3" />
                                 {item}
                               </li>
@@ -391,8 +422,11 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           className={`pl-10 pr-10 ${
-                            confirmPassword && password === confirmPassword ? 'border-green-500' :
-                            confirmPassword && password !== confirmPassword ? 'border-red-500' : ''
+                            confirmPassword && password === confirmPassword
+                              ? "border-green-500"
+                              : confirmPassword && password !== confirmPassword
+                                ? "border-red-500"
+                                : ""
                           }`}
                         />
                         <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
@@ -409,20 +443,35 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
                     </div>
 
                     <div className="flex items-center space-x-2">
-                      <Checkbox 
-                        id="terms" 
+                      <Checkbox
+                        id="terms"
                         checked={acceptTerms}
-                        onCheckedChange={(checked) => setAcceptTerms(checked as boolean)}
+                        onCheckedChange={(checked) =>
+                          setAcceptTerms(checked as boolean)
+                        }
                       />
                       <Label htmlFor="terms" className="text-sm">
-                        I agree to the <a href="/terms-of-service" className="text-blue-600 hover:underline">Terms of Service</a> and <a href="/privacy-policy" className="text-blue-600 hover:underline">Privacy Policy</a>
+                        I agree to the{" "}
+                        <a
+                          href="/terms-of-service"
+                          className="text-blue-600 hover:underline"
+                        >
+                          Terms of Service
+                        </a>{" "}
+                        and{" "}
+                        <a
+                          href="/privacy-policy"
+                          className="text-blue-600 hover:underline"
+                        >
+                          Privacy Policy
+                        </a>
                       </Label>
                     </div>
                   </motion.div>
                 )}
-                
-                <Button 
-                  type="submit" 
+
+                <Button
+                  type="submit"
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                   disabled={loading || !formValid}
                 >
@@ -442,9 +491,9 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
                 </Button>
 
                 {!isSignUp && (
-                  <Button 
+                  <Button
                     type="button"
-                    variant="link" 
+                    variant="link"
                     className="text-sm mt-2"
                     onClick={() => setShowForgotPassword(true)}
                   >
@@ -470,8 +519,13 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
                       className="bg-white rounded-lg p-6 w-full max-w-md"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      <h3 className="text-lg font-semibold mb-4">Reset Password</h3>
-                      <form onSubmit={handleForgotPassword} className="space-y-4">
+                      <h3 className="text-lg font-semibold mb-4">
+                        Reset Password
+                      </h3>
+                      <form
+                        onSubmit={handleForgotPassword}
+                        className="space-y-4"
+                      >
                         <div>
                           <Label htmlFor="resetEmail">Email Address</Label>
                           <Input
@@ -484,12 +538,16 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
                           />
                         </div>
                         <div className="flex gap-2">
-                          <Button type="submit" className="flex-1" disabled={loading}>
+                          <Button
+                            type="submit"
+                            className="flex-1"
+                            disabled={loading}
+                          >
                             {loading ? "Sending..." : "Send Reset Link"}
                           </Button>
-                          <Button 
-                            type="button" 
-                            variant="outline" 
+                          <Button
+                            type="button"
+                            variant="outline"
                             onClick={() => setShowForgotPassword(false)}
                           >
                             Cancel
@@ -501,14 +559,14 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
                 )}
               </AnimatePresence>
             </TabsContent>
-            
+
             <TabsContent value="advanced" className="space-y-4">
               <div className="text-center space-y-4">
                 <h3 className="font-semibold">Advanced Authentication</h3>
-                
+
                 {biometricAvailable && (
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="w-full"
                     onClick={handleBiometricAuth}
                   >
@@ -516,12 +574,12 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
                     Use Biometric Authentication
                   </Button>
                 )}
-                
+
                 <Button variant="outline" className="w-full">
                   <Smartphone className="mr-2 h-4 w-4" />
                   SMS Two-Factor Authentication
                 </Button>
-                
+
                 <div className="text-xs text-muted-foreground">
                   Advanced features require account setup
                 </div>
@@ -531,15 +589,17 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
         </CardContent>
 
         <CardFooter className="flex flex-col space-y-4">
-          <Button 
-            variant="link" 
+          <Button
+            variant="link"
             onClick={() => setIsSignUp(!isSignUp)}
             className="text-sm"
             disabled={loading}
           >
-            {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
+            {isSignUp
+              ? "Already have an account? Sign in"
+              : "Don't have an account? Sign up"}
           </Button>
-          
+
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Shield className="h-3 w-3" />
             Secured with end-to-end encryption

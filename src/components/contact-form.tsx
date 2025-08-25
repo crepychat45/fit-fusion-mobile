@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,8 +5,21 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -17,7 +29,9 @@ const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   email: z.string().email({ message: "Please enter a valid email address" }),
   category: z.string().min(1, { message: "Please select a category" }),
-  message: z.string().min(10, { message: "Message must be at least 10 characters" }),
+  message: z
+    .string()
+    .min(10, { message: "Message must be at least 10 characters" }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -26,7 +40,7 @@ export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const { toast } = useToast();
-  
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -36,21 +50,21 @@ export function ContactForm() {
       message: "",
     },
   });
-  
+
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
-    
+
     // Simulate API call
     setTimeout(() => {
       console.log("Form submitted:", data);
       setIsSubmitting(false);
       setIsSuccess(true);
-      
+
       toast({
         title: "Message sent!",
         description: "We'll get back to you as soon as possible.",
       });
-      
+
       // Reset form after 2 seconds
       setTimeout(() => {
         form.reset();
@@ -58,7 +72,7 @@ export function ContactForm() {
       }, 2000);
     }, 1500);
   };
-  
+
   return (
     <Card>
       <CardHeader>
@@ -80,7 +94,7 @@ export function ContactForm() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="email"
@@ -94,14 +108,17 @@ export function ContactForm() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="category"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a category" />
@@ -119,7 +136,7 @@ export function ContactForm() {
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="message"
@@ -127,20 +144,20 @@ export function ContactForm() {
                 <FormItem>
                   <FormLabel>Message</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="How can we help you?" 
-                      className="min-h-[120px]" 
-                      {...field} 
+                    <Textarea
+                      placeholder="How can we help you?"
+                      className="min-h-[120px]"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
-            <Button 
-              type="submit" 
-              className="w-full" 
+
+            <Button
+              type="submit"
+              className="w-full"
               disabled={isSubmitting || isSuccess}
             >
               {isSubmitting ? (
@@ -162,11 +179,11 @@ export function ContactForm() {
             </Button>
           </form>
         </Form>
-        
+
         <div className="mt-6 text-center text-sm text-muted-foreground">
           <p>You can also email us directly at:</p>
-          <a 
-            href="mailto:jkenterprise.email@gmail.com" 
+          <a
+            href="mailto:jkenterprise.email@gmail.com"
             className="text-primary hover:underline"
           >
             jkenterprise.email@gmail.com

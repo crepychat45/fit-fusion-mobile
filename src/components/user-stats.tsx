@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Dumbbell, Calendar, Flame, Heart } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,15 +10,15 @@ interface UserStatsProps {
 }
 
 // Creating a simplified ActivityCard component specifically for UserStats
-const StatCard = ({ 
-  title, 
-  value, 
-  subtitle, 
-  icon 
-}: { 
-  title: string; 
-  value: number; 
-  subtitle: string; 
+const StatCard = ({
+  title,
+  value,
+  subtitle,
+  icon,
+}: {
+  title: string;
+  value: number;
+  subtitle: string;
   icon: React.ReactNode;
 }) => {
   return (
@@ -38,11 +37,11 @@ const StatCard = ({
   );
 };
 
-export function UserStats({ 
-  workoutsCompleted = 0, 
-  streakDays = 0, 
-  caloriesBurned = 0, 
-  avgHeartRate = 0 
+export function UserStats({
+  workoutsCompleted = 0,
+  streakDays = 0,
+  caloriesBurned = 0,
+  avgHeartRate = 0,
 }: UserStatsProps) {
   return (
     <div className="grid grid-cols-2 gap-3">
@@ -52,21 +51,21 @@ export function UserStats({
         subtitle="Total completed"
         icon={<Dumbbell className="h-4 w-4" />}
       />
-      
+
       <StatCard
         title="Streak"
         value={streakDays}
         subtitle="Days in a row"
         icon={<Calendar className="h-4 w-4" />}
       />
-      
+
       <StatCard
         title="Calories"
         value={caloriesBurned}
         subtitle="Burned this week"
         icon={<Flame className="h-4 w-4" />}
       />
-      
+
       <StatCard
         title="Heart Rate"
         value={avgHeartRate}

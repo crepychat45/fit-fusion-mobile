@@ -6,14 +6,23 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { 
-  Search, 
-  Send, 
-  MoreVertical, 
-  Users, 
-  Shield, 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Search,
+  Send,
+  MoreVertical,
+  Users,
+  Shield,
   Settings,
   Phone,
   Video,
@@ -27,7 +36,7 @@ import {
   MessageSquarePlus,
   Archive,
   Trash2,
-  UserPlus
+  UserPlus,
 } from "lucide-react";
 import { MediaUpload } from "./media-upload";
 import { EmojiPicker } from "./emoji-picker";
@@ -42,14 +51,16 @@ interface AdvancedChatInterfaceProps {
   notificationsEnabled?: boolean;
 }
 
-export function AdvancedChatInterface({ 
-  onLogout, 
-  securityLevel = "high", 
-  notificationsEnabled = true 
+export function AdvancedChatInterface({
+  onLogout,
+  securityLevel = "high",
+  notificationsEnabled = true,
 }: AdvancedChatInterfaceProps) {
   const { toast } = useToast();
   const [conversations, setConversations] = useState<ChatConversation[]>([]);
-  const [activeConversation, setActiveConversation] = useState<string | null>(null);
+  const [activeConversation, setActiveConversation] = useState<string | null>(
+    null,
+  );
   const [messages, setMessages] = useState<Record<string, ChatMessage[]>>({});
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -63,7 +74,7 @@ export function AdvancedChatInterface({
   const [chatBackground, setChatBackground] = useState("bg-background");
   const [isTyping, setIsTyping] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
-  
+
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -83,17 +94,17 @@ export function AdvancedChatInterface({
   const loadChatData = () => {
     const savedConversations = chatStorage.getConversations();
     const savedSettings = chatStorage.getSettings();
-    
+
     setConversations(savedConversations);
     setChatBackground(savedSettings.background || "bg-background");
-    
+
     // Load initial conversation if exists
     if (savedConversations.length > 0 && !activeConversation) {
       const firstConv = savedConversations[0];
       setActiveConversation(firstConv.id);
       loadMessages(firstConv.id);
     }
-    
+
     // Create default conversation if none exist
     if (savedConversations.length === 0) {
       createDefaultConversation();
@@ -105,14 +116,14 @@ export function AdvancedChatInterface({
       id: "default-fitbot",
       participants: [
         { id: "user", name: "You", status: "online" },
-        { id: "fitbot", name: "FitBot", status: "online", isVerified: true }
+        { id: "fitbot", name: "FitBot", status: "online", isVerified: true },
       ],
       unreadCount: 0,
       updatedAt: new Date(),
       createdAt: new Date(),
       name: "FitBot Assistant",
       isGroupChat: false,
-      metadata: { isSecure: true, encryptionEnabled: true }
+      metadata: { isSecure: true, encryptionEnabled: true },
     };
 
     const defaultMessages: ChatMessage[] = [
@@ -120,25 +131,26 @@ export function AdvancedChatInterface({
         id: "welcome-1",
         senderId: "fitbot",
         receiverId: "user",
-        content: "Welcome to FitFusion Chat! 🎉 How can I help you with your fitness journey today?",
+        content:
+          "Welcome to FitFusion Chat! 🎉 How can I help you with your fitness journey today?",
         timestamp: new Date(Date.now() - 3600000),
-        isRead: true
-      }
+        isRead: true,
+      },
     ];
 
     setConversations([defaultConversation]);
     setMessages({ [defaultConversation.id]: defaultMessages });
     setActiveConversation(defaultConversation.id);
-    
+
     chatStorage.saveConversations([defaultConversation]);
     chatStorage.saveMessages(defaultConversation.id, defaultMessages);
   };
 
   const loadMessages = (conversationId: string) => {
     const conversationMessages = chatStorage.getMessages(conversationId);
-    setMessages(prev => ({
+    setMessages((prev) => ({
       ...prev,
-      [conversationId]: conversationMessages
+      [conversationId]: conversationMessages,
     }));
   };
 
@@ -147,7 +159,7 @@ export function AdvancedChatInterface({
       toast({
         title: "Error",
         description: "Please enter a username to start a chat.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -156,14 +168,18 @@ export function AdvancedChatInterface({
       id: `user-${Date.now()}`,
       participants: [
         { id: "user", name: "You", status: "online" },
-        { id: newChatUsername.toLowerCase(), name: newChatUsername, status: "online" }
+        {
+          id: newChatUsername.toLowerCase(),
+          name: newChatUsername,
+          status: "online",
+        },
       ],
       unreadCount: 0,
       updatedAt: new Date(),
       createdAt: new Date(),
       name: newChatUsername,
       isGroupChat: false,
-      metadata: { isSecure: true, encryptionEnabled: true }
+      metadata: { isSecure: true, encryptionEnabled: true },
     };
 
     const welcomeMessage: ChatMessage = {
@@ -172,14 +188,14 @@ export function AdvancedChatInterface({
       receiverId: newConversation.id,
       content: `Chat started with ${newChatUsername}. Say hello! 👋`,
       timestamp: new Date(),
-      isRead: true
+      isRead: true,
     };
 
     const updatedConversations = [newConversation, ...conversations];
     setConversations(updatedConversations);
-    setMessages(prev => ({
+    setMessages((prev) => ({
       ...prev,
-      [newConversation.id]: [welcomeMessage]
+      [newConversation.id]: [welcomeMessage],
     }));
 
     chatStorage.saveConversations(updatedConversations);
@@ -191,7 +207,7 @@ export function AdvancedChatInterface({
 
     toast({
       title: "New chat created",
-      description: `Started a conversation with ${newChatUsername}`
+      description: `Started a conversation with ${newChatUsername}`,
     });
   };
 
@@ -201,16 +217,17 @@ export function AdvancedChatInterface({
     const message: ChatMessage = {
       id: `msg-${Date.now()}`,
       senderId: "user",
-      receiverId: activeConversation === "default-fitbot" ? "fitbot" : activeConversation,
+      receiverId:
+        activeConversation === "default-fitbot" ? "fitbot" : activeConversation,
       content: newMessage,
       timestamp: new Date(),
-      isRead: false
+      isRead: false,
     };
 
     const updatedMessages = [...(messages[activeConversation] || []), message];
-    setMessages(prev => ({
+    setMessages((prev) => ({
       ...prev,
-      [activeConversation]: updatedMessages
+      [activeConversation]: updatedMessages,
     }));
 
     chatStorage.saveMessages(activeConversation, updatedMessages);
@@ -233,15 +250,18 @@ export function AdvancedChatInterface({
     });
   };
 
-  const simulateUserResponse = (userMessage: string, conversationId: string) => {
-    const conv = conversations.find(c => c.id === conversationId);
+  const simulateUserResponse = (
+    userMessage: string,
+    conversationId: string,
+  ) => {
+    const conv = conversations.find((c) => c.id === conversationId);
     if (!conv || conv.isGroupChat) return;
 
-    const otherUser = conv.participants.find(p => p.id !== "user");
+    const otherUser = conv.participants.find((p) => p.id !== "user");
     if (!otherUser) return;
 
     setIsTyping(true);
-    
+
     setTimeout(() => {
       const responses = [
         "Thanks for the message! 😊",
@@ -249,10 +269,11 @@ export function AdvancedChatInterface({
         "I'm excited about our fitness journey!",
         "Great idea! When should we start?",
         "That's awesome! Count me in! 🔥",
-        "Perfect! I'm ready for the challenge 💪"
+        "Perfect! I'm ready for the challenge 💪",
       ];
 
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+      const randomResponse =
+        responses[Math.floor(Math.random() * responses.length)];
 
       const userResponse: ChatMessage = {
         id: `response-${Date.now()}`,
@@ -260,15 +281,15 @@ export function AdvancedChatInterface({
         receiverId: "user",
         content: randomResponse,
         timestamp: new Date(),
-        isRead: true
+        isRead: true,
       };
 
       const currentMessages = messages[conversationId] || [];
       const updatedMessages = [...currentMessages, userResponse];
-      
-      setMessages(prev => ({
+
+      setMessages((prev) => ({
         ...prev,
-        [conversationId]: updatedMessages
+        [conversationId]: updatedMessages,
       }));
 
       chatStorage.saveMessages(conversationId, updatedMessages);
@@ -279,7 +300,7 @@ export function AdvancedChatInterface({
 
   const simulateBotResponse = (userMessage: string, conversationId: string) => {
     setIsTyping(true);
-    
+
     setTimeout(() => {
       const botResponse: ChatMessage = {
         id: `bot-${Date.now()}`,
@@ -287,15 +308,15 @@ export function AdvancedChatInterface({
         receiverId: "user",
         content: getBotResponse(userMessage),
         timestamp: new Date(),
-        isRead: true
+        isRead: true,
       };
 
       const currentMessages = messages[conversationId] || [];
       const updatedMessages = [...currentMessages, botResponse];
-      
-      setMessages(prev => ({
+
+      setMessages((prev) => ({
         ...prev,
-        [conversationId]: updatedMessages
+        [conversationId]: updatedMessages,
       }));
 
       chatStorage.saveMessages(conversationId, updatedMessages);
@@ -306,7 +327,7 @@ export function AdvancedChatInterface({
 
   const getBotResponse = (userMessage: string): string => {
     const message = userMessage.toLowerCase();
-    
+
     if (message.includes("workout") || message.includes("exercise")) {
       return "I can help you with personalized workout plans! 💪 What's your fitness level and what are your goals?";
     } else if (message.includes("diet") || message.includes("nutrition")) {
@@ -321,45 +342,51 @@ export function AdvancedChatInterface({
   };
 
   const updateConversationTimestamp = (conversationId: string) => {
-    const updatedConversations = conversations.map(conv =>
-      conv.id === conversationId
-        ? { ...conv, updatedAt: new Date() }
-        : conv
+    const updatedConversations = conversations.map((conv) =>
+      conv.id === conversationId ? { ...conv, updatedAt: new Date() } : conv,
     );
-    
+
     setConversations(updatedConversations);
     chatStorage.saveConversations(updatedConversations);
   };
 
   const handleEmojiSelect = (emoji: string) => {
-    setNewMessage(prev => prev + emoji);
+    setNewMessage((prev) => prev + emoji);
     setShowEmojiPicker(false);
   };
 
   const handleMediaUpload = (files: any[]) => {
     if (!activeConversation) return;
 
-    files.forEach(file => {
+    files.forEach((file) => {
       const message: ChatMessage = {
         id: `media-${Date.now()}-${Math.random()}`,
         senderId: "user",
-        receiverId: activeConversation === "default-fitbot" ? "fitbot" : activeConversation,
+        receiverId:
+          activeConversation === "default-fitbot"
+            ? "fitbot"
+            : activeConversation,
         content: `📎 ${file.file.name}`,
         timestamp: new Date(),
         isRead: false,
-        attachments: [{
-          id: file.id,
-          type: file.type,
-          url: file.preview || URL.createObjectURL(file.file),
-          name: file.file.name,
-          size: file.file.size
-        }]
+        attachments: [
+          {
+            id: file.id,
+            type: file.type,
+            url: file.preview || URL.createObjectURL(file.file),
+            name: file.file.name,
+            size: file.file.size,
+          },
+        ],
       };
 
-      const updatedMessages = [...(messages[activeConversation] || []), message];
-      setMessages(prev => ({
+      const updatedMessages = [
+        ...(messages[activeConversation] || []),
+        message,
+      ];
+      setMessages((prev) => ({
         ...prev,
-        [activeConversation]: updatedMessages
+        [activeConversation]: updatedMessages,
       }));
 
       chatStorage.saveMessages(activeConversation, updatedMessages);
@@ -379,14 +406,14 @@ export function AdvancedChatInterface({
       id: `group-${Date.now()}`,
       participants: [
         { id: "user", name: "You", status: "online" },
-        ...selectedUsers
+        ...selectedUsers,
       ],
       unreadCount: 0,
       updatedAt: new Date(),
       createdAt: new Date(),
       name: groupName,
       isGroupChat: true,
-      metadata: { isSecure: true, encryptionEnabled: true }
+      metadata: { isSecure: true, encryptionEnabled: true },
     };
 
     const welcomeMessage: ChatMessage = {
@@ -395,14 +422,14 @@ export function AdvancedChatInterface({
       receiverId: newGroup.id,
       content: `🎉 Group "${groupName}" has been created! Welcome everyone!`,
       timestamp: new Date(),
-      isRead: true
+      isRead: true,
     };
 
     const updatedConversations = [newGroup, ...conversations];
     setConversations(updatedConversations);
-    setMessages(prev => ({
+    setMessages((prev) => ({
       ...prev,
-      [newGroup.id]: [welcomeMessage]
+      [newGroup.id]: [welcomeMessage],
     }));
 
     chatStorage.saveConversations(updatedConversations);
@@ -426,10 +453,10 @@ export function AdvancedChatInterface({
 
     toast({
       title: success ? "Sync completed" : "Sync failed",
-      description: success 
-        ? "Your chat data has been synchronized." 
+      description: success
+        ? "Your chat data has been synchronized."
         : "Failed to sync data. Please try again.",
-      variant: success ? "default" : "destructive"
+      variant: success ? "default" : "destructive",
     });
   };
 
@@ -437,7 +464,7 @@ export function AdvancedChatInterface({
     chatStorage.downloadBackup();
     toast({
       title: "Backup downloaded",
-      description: "Your chat backup has been saved to your device."
+      description: "Your chat backup has been saved to your device.",
     });
   };
 
@@ -450,25 +477,25 @@ export function AdvancedChatInterface({
       try {
         const backup = JSON.parse(e.target?.result as string);
         const success = chatStorage.importBackup(backup);
-        
+
         if (success) {
           loadChatData();
           toast({
             title: "Backup restored",
-            description: "Your chat data has been successfully restored."
+            description: "Your chat data has been successfully restored.",
           });
         } else {
           toast({
             title: "Restore failed",
             description: "Invalid backup file format.",
-            variant: "destructive"
+            variant: "destructive",
           });
         }
       } catch (error) {
         toast({
           title: "Restore failed",
           description: "Could not read backup file.",
-          variant: "destructive"
+          variant: "destructive",
         });
       }
     };
@@ -482,8 +509,10 @@ export function AdvancedChatInterface({
     }
   };
 
-  const activeMessages = activeConversation ? (messages[activeConversation] || []) : [];
-  const activeConv = conversations.find(c => c.id === activeConversation);
+  const activeMessages = activeConversation
+    ? messages[activeConversation] || []
+    : [];
+  const activeConv = conversations.find((c) => c.id === activeConversation);
 
   return (
     <div className="flex h-full w-full bg-background border rounded-lg overflow-hidden">
@@ -565,7 +594,9 @@ export function AdvancedChatInterface({
               <Card
                 key={conversation.id}
                 className={`p-3 cursor-pointer transition-colors hover:bg-muted ${
-                  activeConversation === conversation.id ? 'bg-primary/10 border-primary' : ''
+                  activeConversation === conversation.id
+                    ? "bg-primary/10 border-primary"
+                    : ""
                 }`}
                 onClick={() => {
                   setActiveConversation(conversation.id);
@@ -580,32 +611,31 @@ export function AdvancedChatInterface({
                       ) : conversation.id === "default-fitbot" ? (
                         "🤖"
                       ) : (
-                        conversation.name?.charAt(0) || 'C'
+                        conversation.name?.charAt(0) || "C"
                       )}
                     </AvatarFallback>
                   </Avatar>
-                  
+
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <p className="font-medium text-sm truncate">
-                        {conversation.name || 'Unnamed Chat'}
+                        {conversation.name || "Unnamed Chat"}
                       </p>
                       <span className="text-xs text-muted-foreground">
-                        {conversation.updatedAt.toLocaleTimeString([], { 
-                          hour: '2-digit', 
-                          minute: '2-digit' 
+                        {conversation.updatedAt.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
                         })}
                       </span>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <p className="text-xs text-muted-foreground truncate">
-                        {conversation.isGroupChat 
+                        {conversation.isGroupChat
                           ? `${conversation.participants.length} members`
                           : conversation.id === "default-fitbot"
-                          ? "AI Assistant"
-                          : "Private chat"
-                        }
+                            ? "AI Assistant"
+                            : "Private chat"}
                       </p>
                       {conversation.unreadCount > 0 && (
                         <Badge variant="default" className="text-xs">
@@ -643,7 +673,7 @@ export function AdvancedChatInterface({
                     ) : activeConv.id === "default-fitbot" ? (
                       "🤖"
                     ) : (
-                      activeConv.name?.charAt(0) || 'C'
+                      activeConv.name?.charAt(0) || "C"
                     )}
                   </AvatarFallback>
                 </Avatar>
@@ -652,10 +682,9 @@ export function AdvancedChatInterface({
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                     <span className="text-xs text-muted-foreground">
-                      {activeConv.isGroupChat 
+                      {activeConv.isGroupChat
                         ? `${activeConv.participants.length} members`
-                        : 'Online'
-                      }
+                        : "Online"}
                     </span>
                     <Badge variant="outline" className="text-xs">
                       <Shield className="h-3 w-3 mr-1" />
@@ -664,7 +693,7 @@ export function AdvancedChatInterface({
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-1">
                 <Button
                   variant="ghost"
@@ -718,77 +747,92 @@ export function AdvancedChatInterface({
               {activeMessages.map((message) => (
                 <div
                   key={message.id}
-                  className={`flex gap-3 ${message.senderId === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex gap-3 ${message.senderId === "user" ? "justify-end" : "justify-start"}`}
                 >
-                  {message.senderId !== 'user' && (
+                  {message.senderId !== "user" && (
                     <Avatar className="h-6 w-6 mt-1">
                       <AvatarFallback className="text-xs">
-                        {message.senderId === 'fitbot' ? '🤖' : message.senderId.charAt(0).toUpperCase()}
+                        {message.senderId === "fitbot"
+                          ? "🤖"
+                          : message.senderId.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                   )}
-                  
-                  <div className={`max-w-[70%] ${message.senderId === 'user' ? 'order-first' : ''}`}>
+
+                  <div
+                    className={`max-w-[70%] ${message.senderId === "user" ? "order-first" : ""}`}
+                  >
                     <div
                       className={`p-3 rounded-lg ${
-                        message.senderId === 'user'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-background/80 backdrop-blur border'
+                        message.senderId === "user"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-background/80 backdrop-blur border"
                       }`}
                     >
                       <p className="text-sm break-words">{message.content}</p>
-                      
-                      {message.attachments && message.attachments.map((attachment) => (
-                        <div key={attachment.id} className="mt-2">
-                          {attachment.type === 'image' && (
-                            <img 
-                              src={attachment.url} 
-                              alt={attachment.name}
-                              className="max-w-48 rounded"
-                            />
-                          )}
-                          {attachment.type !== 'image' && (
-                            <div className="flex items-center gap-2 p-2 bg-muted rounded">
-                              <Paperclip className="h-4 w-4" />
-                              <span className="text-xs">{attachment.name}</span>
-                            </div>
-                          )}
-                        </div>
-                      ))}
+
+                      {message.attachments &&
+                        message.attachments.map((attachment) => (
+                          <div key={attachment.id} className="mt-2">
+                            {attachment.type === "image" && (
+                              <img
+                                src={attachment.url}
+                                alt={attachment.name}
+                                className="max-w-48 rounded"
+                              />
+                            )}
+                            {attachment.type !== "image" && (
+                              <div className="flex items-center gap-2 p-2 bg-muted rounded">
+                                <Paperclip className="h-4 w-4" />
+                                <span className="text-xs">
+                                  {attachment.name}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        ))}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {message.timestamp.toLocaleTimeString([], { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
+                      {message.timestamp.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
                       })}
                     </p>
                   </div>
-                  
-                  {message.senderId === 'user' && (
+
+                  {message.senderId === "user" && (
                     <Avatar className="h-6 w-6 mt-1">
                       <AvatarFallback className="text-xs">You</AvatarFallback>
                     </Avatar>
                   )}
                 </div>
               ))}
-              
+
               {isTyping && (
                 <div className="flex gap-3 justify-start">
                   <Avatar className="h-6 w-6 mt-1">
                     <AvatarFallback className="text-xs">
-                      {activeConv?.id === "default-fitbot" ? "🤖" : activeConv?.name?.charAt(0)}
+                      {activeConv?.id === "default-fitbot"
+                        ? "🤖"
+                        : activeConv?.name?.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="bg-background/80 backdrop-blur border p-3 rounded-lg">
                     <div className="flex gap-1">
                       <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      <div
+                        className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"
+                        style={{ animationDelay: "0.1s" }}
+                      ></div>
+                      <div
+                        className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"
+                        style={{ animationDelay: "0.2s" }}
+                      ></div>
                     </div>
                   </div>
                 </div>
               )}
-              
+
               <div ref={messagesEndRef} />
             </div>
           </ScrollArea>
@@ -817,27 +861,30 @@ export function AdvancedChatInterface({
                   onKeyPress={handleKeyPress}
                   className="pr-10"
                 />
-                
-                <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
+
+                <Popover
+                  open={showEmojiPicker}
+                  onOpenChange={setShowEmojiPicker}
+                >
                   <PopoverTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6"
                     >
                       <Smile className="h-4 w-4" />
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" side="top">
-                    <EmojiPicker 
+                    <EmojiPicker
                       onEmojiSelect={handleEmojiSelect}
                       onClose={() => setShowEmojiPicker(false)}
                     />
                   </PopoverContent>
                 </Popover>
               </div>
-              
-              <Button 
+
+              <Button
                 onClick={sendMessage}
                 disabled={!newMessage.trim()}
                 size="icon"
@@ -858,7 +905,10 @@ export function AdvancedChatInterface({
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label htmlFor="username" className="block text-sm font-medium mb-2">
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium mb-2"
+              >
                 Enter username to chat with:
               </label>
               <Input
@@ -866,14 +916,20 @@ export function AdvancedChatInterface({
                 placeholder="e.g. john_doe"
                 value={newChatUsername}
                 onChange={(e) => setNewChatUsername(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && createNewUserChat()}
+                onKeyPress={(e) => e.key === "Enter" && createNewUserChat()}
               />
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowNewChatDialog(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setShowNewChatDialog(false)}
+              >
                 Cancel
               </Button>
-              <Button onClick={createNewUserChat} disabled={!newChatUsername.trim()}>
+              <Button
+                onClick={createNewUserChat}
+                disabled={!newChatUsername.trim()}
+              >
                 Start Chat
               </Button>
             </div>
@@ -890,7 +946,10 @@ export function AdvancedChatInterface({
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showBackgroundSelector} onOpenChange={setShowBackgroundSelector}>
+      <Dialog
+        open={showBackgroundSelector}
+        onOpenChange={setShowBackgroundSelector}
+      >
         <DialogContent className="p-0">
           <ChatBackgroundSelector
             currentBackground={chatBackground}

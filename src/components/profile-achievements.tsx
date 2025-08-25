@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,16 +6,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/components/ui/use-toast";
 
 export function ProfileAchievements() {
-  const [selectedAchievement, setSelectedAchievement] = useState<number | null>(null);
+  const [selectedAchievement, setSelectedAchievement] = useState<number | null>(
+    null,
+  );
   const { toast } = useToast();
-  
-  const earnedCount = achievements.filter(a => a.earned).length;
+
+  const earnedCount = achievements.filter((a) => a.earned).length;
   const totalCount = achievements.length;
   const completionPercentage = Math.round((earnedCount / totalCount) * 100);
-  
+
   const handleAchievementClick = (index: number) => {
     setSelectedAchievement(selectedAchievement === index ? null : index);
-    
+
     // Show toast only when opening a new achievement, not when closing
     if (selectedAchievement !== index) {
       const achievement = achievements[index];
@@ -28,24 +29,24 @@ export function ProfileAchievements() {
       }
     }
   };
-  
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
-  
+
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
-    visible: { y: 0, opacity: 1 }
+    visible: { y: 0, opacity: 1 },
   };
-  
+
   return (
-    <motion.div 
+    <motion.div
       className="space-y-4"
       initial="hidden"
       animate="visible"
@@ -57,17 +58,17 @@ export function ProfileAchievements() {
           {earnedCount}/{totalCount} Earned
         </Badge>
       </div>
-      
+
       <div className="relative w-full bg-muted/30 h-2 rounded-full overflow-hidden">
-        <motion.div 
+        <motion.div
           className="bg-primary h-full rounded-full"
           initial={{ width: 0 }}
           animate={{ width: `${completionPercentage}%` }}
           transition={{ duration: 1, ease: "easeOut" }}
         />
       </div>
-      
-      <motion.div 
+
+      <motion.div
         className="grid grid-cols-2 gap-3"
         variants={containerVariants}
       >
@@ -80,10 +81,10 @@ export function ProfileAchievements() {
             onClick={() => handleAchievementClick(index)}
             layout
           >
-            <Card 
+            <Card
               className={`${
-                achievement.earned 
-                  ? "border-primary/30 shadow-sm" 
+                achievement.earned
+                  ? "border-primary/30 shadow-sm"
                   : "border-muted/50 opacity-70"
               } ${
                 selectedAchievement === index
@@ -92,19 +93,19 @@ export function ProfileAchievements() {
               } transition-all hover:shadow-md cursor-pointer`}
             >
               <CardContent className="p-3 flex flex-col items-center text-center">
-                <motion.div 
+                <motion.div
                   className={`rounded-full p-2.5 mb-2 ${
-                    achievement.earned 
-                      ? "bg-primary/10 text-primary" 
+                    achievement.earned
+                      ? "bg-primary/10 text-primary"
                       : "bg-muted/10 text-muted-foreground"
                   }`}
-                  whileHover={{ 
+                  whileHover={{
                     scale: achievement.earned ? 1.1 : 1.05,
                     rotate: achievement.earned ? [0, -5, 5, -5, 5, 0] : 0,
-                    transition: { 
+                    transition: {
                       duration: achievement.earned ? 0.5 : 0.2,
-                      ease: "easeInOut" 
-                    }
+                      ease: "easeInOut",
+                    },
                   }}
                 >
                   <achievement.icon className="h-5 w-5" />
@@ -123,20 +124,22 @@ export function ProfileAchievements() {
                     </span>
                   )}
                 </h4>
-                <p className="text-xs text-muted-foreground mt-1">{achievement.description}</p>
-                
+                <p className="text-xs text-muted-foreground mt-1">
+                  {achievement.description}
+                </p>
+
                 <AnimatePresence>
                   {selectedAchievement === index && (
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
+                      animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.3 }}
                       className="mt-2 pt-2 border-t border-muted/30 w-full"
                     >
                       <p className="text-xs">
-                        {achievement.earned 
-                          ? "Earned on April 8, 2025" 
+                        {achievement.earned
+                          ? "Earned on April 8, 2025"
                           : "Keep training to unlock this achievement!"}
                       </p>
                     </motion.div>

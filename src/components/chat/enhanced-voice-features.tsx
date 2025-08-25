@@ -4,15 +4,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Mic, 
-  MicOff, 
-  Volume2, 
-  VolumeX, 
-  Play, 
-  Pause, 
+import {
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX,
+  Play,
+  Pause,
   Square,
   Download,
   Upload,
@@ -24,7 +30,7 @@ import {
   Settings,
   Brain,
   Languages,
-  Ear
+  Ear,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -44,23 +50,23 @@ interface EnhancedVoiceFeaturesProps {
   isAIResponding?: boolean;
 }
 
-export function EnhancedVoiceFeatures({ 
+export function EnhancedVoiceFeatures({
   onVoiceInput,
   onPlaybackComplete,
-  isAIResponding = false
+  isAIResponding = false,
 }: EnhancedVoiceFeaturesProps) {
   const { toast } = useToast();
-  
+
   // Recording state
   const [isRecording, setIsRecording] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [audioLevel, setAudioLevel] = useState(0);
-  
+
   // Voice messages
   const [voiceMessages, setVoiceMessages] = useState<VoiceMessage[]>([]);
   const [selectedMessage, setSelectedMessage] = useState<string | null>(null);
-  
+
   // Settings
   const [voiceSettings, setVoiceSettings] = useState({
     inputVolume: 80,
@@ -72,9 +78,9 @@ export function EnhancedVoiceFeatures({
     language: "en-US",
     speechRate: 1.0,
     speechPitch: 1.0,
-    voiceProfile: "alloy"
+    voiceProfile: "alloy",
   });
-  
+
   // Refs
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -91,7 +97,7 @@ export function EnhancedVoiceFeatures({
     { id: "fable", name: "Fable", description: "Expressive, storytelling" },
     { id: "onyx", name: "Onyx", description: "Deep, authoritative" },
     { id: "nova", name: "Nova", description: "Bright, energetic" },
-    { id: "shimmer", name: "Shimmer", description: "Gentle, soothing" }
+    { id: "shimmer", name: "Shimmer", description: "Gentle, soothing" },
   ];
 
   // Supported languages
@@ -107,15 +113,15 @@ export function EnhancedVoiceFeatures({
     { code: "ja-JP", name: "Japanese" },
     { code: "ko-KR", name: "Korean" },
     { code: "zh-CN", name: "Chinese (Simplified)" },
-    { code: "hi-IN", name: "Hindi" }
+    { code: "hi-IN", name: "Hindi" },
   ];
 
   // Initialize audio context
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       audioElementRef.current = new Audio();
     }
-    
+
     return () => {
       cleanupRecording();
     };
@@ -124,13 +130,13 @@ export function EnhancedVoiceFeatures({
   // Audio level monitoring
   const monitorAudioLevel = () => {
     if (!analyserRef.current) return;
-    
+
     const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
     analyserRef.current.getByteFrequencyData(dataArray);
-    
+
     const average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
     setAudioLevel(average);
-    
+
     if (isRecording) {
       animationFrameRef.current = requestAnimationFrame(monitorAudioLevel);
     }
@@ -145,12 +151,12 @@ export function EnhancedVoiceFeatures({
           noiseSuppression: voiceSettings.noiseReduction,
           autoGainControl: voiceSettings.autoGainControl,
           sampleRate: 44100,
-          channelCount: 1
-        }
+          channelCount: 1,
+        },
       });
 
       streamRef.current = stream;
-      
+
       // Setup audio context for visualization
       audioContextRef.current = new AudioContext();
       const source = audioContextRef.current.createMediaStreamSource(stream);
@@ -160,9 +166,11 @@ export function EnhancedVoiceFeatures({
 
       // Setup MediaRecorder
       const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4'
+        mimeType: MediaRecorder.isTypeSupported("audio/webm")
+          ? "audio/webm"
+          : "audio/mp4",
       });
-      
+
       mediaRecorderRef.current = mediaRecorder;
       const chunks: BlobPart[] = [];
 
@@ -173,8 +181,8 @@ export function EnhancedVoiceFeatures({
       };
 
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(chunks, { type: 'audio/webm' });
-        
+        const audioBlob = new Blob(chunks, { type: "audio/webm" });
+
         // Create voice message
         const voiceMessage: VoiceMessage = {
           id: Date.now().toString(),
@@ -182,10 +190,10 @@ export function EnhancedVoiceFeatures({
           audioBlob,
           timestamp: new Date(),
           duration: recordingTime,
-          processed: false
+          processed: false,
         };
 
-        setVoiceMessages(prev => [...prev, voiceMessage]);
+        setVoiceMessages((prev) => [...prev, voiceMessage]);
 
         // Process voice to text
         await processVoiceToText(voiceMessage);
@@ -194,25 +202,24 @@ export function EnhancedVoiceFeatures({
       mediaRecorder.start();
       setIsRecording(true);
       setRecordingTime(0);
-      
+
       // Start timer and audio monitoring
       recordingIntervalRef.current = setInterval(() => {
-        setRecordingTime(prev => prev + 1);
+        setRecordingTime((prev) => prev + 1);
       }, 1000);
-      
+
       monitorAudioLevel();
 
       toast({
         title: "🎤 Recording Started",
         description: "Speak clearly into your microphone",
       });
-
     } catch (error) {
-      console.error('Error starting recording:', error);
+      console.error("Error starting recording:", error);
       toast({
         title: "❌ Recording Error",
         description: "Unable to access microphone. Please check permissions.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -222,7 +229,7 @@ export function EnhancedVoiceFeatures({
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       cleanupRecording();
-      
+
       toast({
         title: "✅ Recording Complete",
         description: "Processing your voice message...",
@@ -233,27 +240,27 @@ export function EnhancedVoiceFeatures({
   // Cleanup recording resources
   const cleanupRecording = () => {
     setIsRecording(false);
-    
+
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
-    
+
     if (audioContextRef.current) {
       audioContextRef.current.close();
       audioContextRef.current = null;
     }
-    
+
     if (recordingIntervalRef.current) {
       clearInterval(recordingIntervalRef.current);
       recordingIntervalRef.current = null;
     }
-    
+
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
       animationFrameRef.current = null;
     }
-    
+
     setAudioLevel(0);
   };
 
@@ -267,18 +274,19 @@ export function EnhancedVoiceFeatures({
         "Can you suggest a 30-minute cardio routine?",
         "What are some healthy post-workout snacks?",
         "How do I improve my running endurance?",
-        "What's the proper form for deadlifts?"
+        "What's the proper form for deadlifts?",
       ];
-      
-      const randomTranscript = mockTranscripts[Math.floor(Math.random() * mockTranscripts.length)];
-      
+
+      const randomTranscript =
+        mockTranscripts[Math.floor(Math.random() * mockTranscripts.length)];
+
       // Update voice message with transcript
-      setVoiceMessages(prev => 
-        prev.map(msg => 
-          msg.id === voiceMessage.id 
+      setVoiceMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === voiceMessage.id
             ? { ...msg, transcript: randomTranscript, processed: true }
-            : msg
-        )
+            : msg,
+        ),
       );
 
       // Call callback with transcript and audio
@@ -290,13 +298,12 @@ export function EnhancedVoiceFeatures({
         title: "🎯 Voice Processed",
         description: "Your message has been transcribed successfully!",
       });
-
     } catch (error) {
-      console.error('Error processing voice:', error);
+      console.error("Error processing voice:", error);
       toast({
         title: "❌ Processing Error",
         description: "Failed to process voice message. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -309,7 +316,7 @@ export function EnhancedVoiceFeatures({
       const audioUrl = URL.createObjectURL(voiceMessage.audioBlob);
       audioElementRef.current.src = audioUrl;
       audioElementRef.current.volume = voiceSettings.outputVolume / 100;
-      
+
       audioElementRef.current.onended = () => {
         setIsPlaying(false);
         setSelectedMessage(null);
@@ -320,13 +327,12 @@ export function EnhancedVoiceFeatures({
       await audioElementRef.current.play();
       setIsPlaying(true);
       setSelectedMessage(voiceMessage.id);
-
     } catch (error) {
-      console.error('Error playing audio:', error);
+      console.error("Error playing audio:", error);
       toast({
         title: "❌ Playback Error",
         description: "Unable to play audio message.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -345,24 +351,27 @@ export function EnhancedVoiceFeatures({
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   // Voice level visualization
   const VoiceLevelVisualizer = () => {
     const level = (audioLevel / 255) * 100;
-    
+
     return (
       <div className="flex items-center gap-1">
         {[...Array(10)].map((_, i) => (
           <motion.div
             key={i}
             className={`w-1 bg-primary rounded-full ${
-              level > i * 10 ? 'opacity-100' : 'opacity-20'
+              level > i * 10 ? "opacity-100" : "opacity-20"
             }`}
             style={{ height: `${Math.max(4, (level / 10) * (i + 1))}px` }}
-            animate={{ 
-              height: level > i * 10 ? `${Math.max(8, (level / 5) * (i + 1))}px` : '4px'
+            animate={{
+              height:
+                level > i * 10
+                  ? `${Math.max(8, (level / 5) * (i + 1))}px`
+                  : "4px",
             }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
           />
@@ -384,14 +393,11 @@ export function EnhancedVoiceFeatures({
         <CardContent className="space-y-4">
           {/* Recording Button and Status */}
           <div className="flex flex-col items-center space-y-4">
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Button
                 variant={isRecording ? "destructive" : "default"}
                 size="lg"
-                className={`rounded-full h-20 w-20 ${isRecording ? 'bg-red-500 hover:bg-red-600' : ''}`}
+                className={`rounded-full h-20 w-20 ${isRecording ? "bg-red-500 hover:bg-red-600" : ""}`}
                 onClick={isRecording ? stopRecording : startRecording}
                 disabled={isAIResponding}
               >
@@ -439,9 +445,11 @@ export function EnhancedVoiceFeatures({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Language</label>
-              <Select 
+              <Select
                 value={voiceSettings.language}
-                onValueChange={(value) => setVoiceSettings(prev => ({ ...prev, language: value }))}
+                onValueChange={(value) =>
+                  setVoiceSettings((prev) => ({ ...prev, language: value }))
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -461,9 +469,11 @@ export function EnhancedVoiceFeatures({
 
             <div className="space-y-2">
               <label className="text-sm font-medium">Voice Profile</label>
-              <Select 
+              <Select
                 value={voiceSettings.voiceProfile}
-                onValueChange={(value) => setVoiceSettings(prev => ({ ...prev, voiceProfile: value }))}
+                onValueChange={(value) =>
+                  setVoiceSettings((prev) => ({ ...prev, voiceProfile: value }))
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -473,7 +483,9 @@ export function EnhancedVoiceFeatures({
                     <SelectItem key={profile.id} value={profile.id}>
                       <div>
                         <div className="font-medium">{profile.name}</div>
-                        <div className="text-xs text-muted-foreground">{profile.description}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {profile.description}
+                        </div>
                       </div>
                     </SelectItem>
                   ))}
@@ -491,7 +503,9 @@ export function EnhancedVoiceFeatures({
               </label>
               <Slider
                 value={[voiceSettings.inputVolume]}
-                onValueChange={([value]) => setVoiceSettings(prev => ({ ...prev, inputVolume: value }))}
+                onValueChange={([value]) =>
+                  setVoiceSettings((prev) => ({ ...prev, inputVolume: value }))
+                }
                 max={100}
                 step={1}
                 className="w-full"
@@ -508,7 +522,9 @@ export function EnhancedVoiceFeatures({
               </label>
               <Slider
                 value={[voiceSettings.outputVolume]}
-                onValueChange={([value]) => setVoiceSettings(prev => ({ ...prev, outputVolume: value }))}
+                onValueChange={([value]) =>
+                  setVoiceSettings((prev) => ({ ...prev, outputVolume: value }))
+                }
                 max={100}
                 step={1}
                 className="w-full"
@@ -525,7 +541,12 @@ export function EnhancedVoiceFeatures({
               <label className="text-sm font-medium">Noise Reduction</label>
               <Switch
                 checked={voiceSettings.noiseReduction}
-                onCheckedChange={(checked) => setVoiceSettings(prev => ({ ...prev, noiseReduction: checked }))}
+                onCheckedChange={(checked) =>
+                  setVoiceSettings((prev) => ({
+                    ...prev,
+                    noiseReduction: checked,
+                  }))
+                }
               />
             </div>
 
@@ -533,7 +554,12 @@ export function EnhancedVoiceFeatures({
               <label className="text-sm font-medium">Echo Cancellation</label>
               <Switch
                 checked={voiceSettings.echoCancellation}
-                onCheckedChange={(checked) => setVoiceSettings(prev => ({ ...prev, echoCancellation: checked }))}
+                onCheckedChange={(checked) =>
+                  setVoiceSettings((prev) => ({
+                    ...prev,
+                    echoCancellation: checked,
+                  }))
+                }
               />
             </div>
 
@@ -541,7 +567,12 @@ export function EnhancedVoiceFeatures({
               <label className="text-sm font-medium">Auto Gain Control</label>
               <Switch
                 checked={voiceSettings.autoGainControl}
-                onCheckedChange={(checked) => setVoiceSettings(prev => ({ ...prev, autoGainControl: checked }))}
+                onCheckedChange={(checked) =>
+                  setVoiceSettings((prev) => ({
+                    ...prev,
+                    autoGainControl: checked,
+                  }))
+                }
               />
             </div>
           </div>
@@ -565,7 +596,9 @@ export function EnhancedVoiceFeatures({
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   className={`p-4 rounded-lg border ${
-                    selectedMessage === message.id ? 'border-primary bg-primary/5' : 'border-muted'
+                    selectedMessage === message.id
+                      ? "border-primary bg-primary/5"
+                      : "border-muted"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -587,10 +620,11 @@ export function EnhancedVoiceFeatures({
                           <Play className="h-4 w-4" />
                         )}
                       </Button>
-                      
+
                       <div>
                         <div className="text-sm font-medium">
-                          {formatTime(message.duration)} • {message.timestamp.toLocaleTimeString()}
+                          {formatTime(message.duration)} •{" "}
+                          {message.timestamp.toLocaleTimeString()}
                         </div>
                         {message.transcript && (
                           <div className="text-sm text-muted-foreground mt-1">

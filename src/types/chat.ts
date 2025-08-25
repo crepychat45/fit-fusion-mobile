@@ -1,9 +1,8 @@
-
 export interface ChatUser {
   id: string;
   name: string;
   avatar?: string;
-  status?: 'online' | 'offline' | 'away';
+  status?: "online" | "offline" | "away";
   lastSeen?: Date;
   isVerified?: boolean;
   email?: string;
@@ -17,10 +16,10 @@ export interface ChatUser {
       showLastSeen?: boolean;
       readReceipts?: boolean;
       allowMessageRequests?: boolean;
-    }
+    };
   };
   blockedUsers?: string[];
-  securityLevel?: 'standard' | 'enhanced' | 'maximum';
+  securityLevel?: "standard" | "enhanced" | "maximum";
   twoFactorEnabled?: boolean;
   lastSecurityCheck?: Date;
   verified?: boolean; // Legacy field for backward compatibility
@@ -28,7 +27,7 @@ export interface ChatUser {
 
 export interface ChatAttachment {
   id: string;
-  type: 'image' | 'video' | 'document' | 'audio';
+  type: "image" | "video" | "document" | "audio";
   url: string;
   name: string;
   size?: number;
@@ -37,8 +36,8 @@ export interface ChatAttachment {
   mimeType?: string;
   createdAt?: Date;
   encryptionKey?: string;
-  securityLevel?: 'standard' | 'encrypted' | 'ephemeral';
-  virusScanStatus?: 'pending' | 'clean' | 'infected';
+  securityLevel?: "standard" | "encrypted" | "ephemeral";
+  virusScanStatus?: "pending" | "clean" | "infected";
   hashSignature?: string;
 }
 
@@ -72,14 +71,14 @@ export interface ChatMessage {
     content: string;
     language: string;
   };
-  securityLevel?: 'standard' | 'encrypted' | 'private' | 'ephemeral';
+  securityLevel?: "standard" | "encrypted" | "private" | "ephemeral";
   serverReceipt?: {
     deliveredToServer: boolean;
     timestamp?: Date;
     serverSignature?: string;
   };
-  backupStatus?: 'pending' | 'completed' | 'failed' | 'excluded';
-  validationStatus?: 'valid' | 'invalid' | 'pending';
+  backupStatus?: "pending" | "completed" | "failed" | "excluded";
+  validationStatus?: "valid" | "invalid" | "pending";
 }
 
 export interface ChatReaction {
@@ -109,7 +108,7 @@ export interface ChatConversation {
     encryptionEnabled?: boolean;
     autoDeletePeriod?: number; // in days
     isSecure?: boolean;
-    category?: 'personal' | 'work' | 'fitness' | 'social' | 'family';
+    category?: "personal" | "work" | "fitness" | "social" | "family";
   };
   securitySettings?: {
     encryptionEnabled: boolean;
@@ -121,7 +120,7 @@ export interface ChatConversation {
     encryptionProtocol?: string;
   };
   databaseId?: string; // Reference to database record
-  syncStatus?: 'synced' | 'pending' | 'failed';
+  syncStatus?: "synced" | "pending" | "failed";
 }
 
 export interface ChatSettings {
@@ -130,9 +129,9 @@ export interface ChatSettings {
   showTypingIndicator: boolean;
   notificationsEnabled: boolean;
   autoTranslate: boolean;
-  defaultSecurityLevel: 'standard' | 'encrypted' | 'private' | 'ephemeral';
+  defaultSecurityLevel: "standard" | "encrypted" | "private" | "ephemeral";
   autoDeletePeriod?: number;
-  mediaQuality: 'low' | 'medium' | 'high' | 'original';
+  mediaQuality: "low" | "medium" | "high" | "original";
   cloudBackupEnabled: boolean;
   blockUnknownSenders: boolean;
   version?: string;
@@ -167,7 +166,12 @@ export interface ChatVersion {
   updateInstalled?: boolean;
   installationDate?: Date;
   updateError?: string;
-  updateStatus?: 'not_started' | 'downloading' | 'installing' | 'completed' | 'failed';
+  updateStatus?:
+    | "not_started"
+    | "downloading"
+    | "installing"
+    | "completed"
+    | "failed";
 }
 
 export interface VersionChange {

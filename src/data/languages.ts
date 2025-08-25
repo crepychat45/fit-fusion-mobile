@@ -1,4 +1,3 @@
-
 export interface Language {
   code: string;
   name: string;
@@ -36,61 +35,82 @@ export const Languages: Language[] = [
 export const LanguageGroups: LanguageGroup[] = [
   {
     name: "Popular",
-    languages: Languages.filter(lang => 
-      ["en", "es", "fr", "de", "zh", "ja", "ru", "ar", "pt", "hi"].includes(lang.code)
-    )
+    languages: Languages.filter((lang) =>
+      ["en", "es", "fr", "de", "zh", "ja", "ru", "ar", "pt", "hi"].includes(
+        lang.code,
+      ),
+    ),
   },
   {
     name: "European",
-    languages: Languages.filter(lang => 
-      ["en", "es", "fr", "de", "it", "nl", "sv", "fi", "da", "pl", "ru", "tr", "pt"].includes(lang.code)
-    )
+    languages: Languages.filter((lang) =>
+      [
+        "en",
+        "es",
+        "fr",
+        "de",
+        "it",
+        "nl",
+        "sv",
+        "fi",
+        "da",
+        "pl",
+        "ru",
+        "tr",
+        "pt",
+      ].includes(lang.code),
+    ),
   },
   {
     name: "Asian",
-    languages: Languages.filter(lang => 
-      ["zh", "ja", "ko", "hi", "bn", "th", "ar"].includes(lang.code)
-    )
-  }
+    languages: Languages.filter((lang) =>
+      ["zh", "ja", "ko", "hi", "bn", "th", "ar"].includes(lang.code),
+    ),
+  },
 ];
 
 export const getLanguageByCode = (code: string): Language => {
-  return Languages.find(lang => lang.code === code) || 
-    { code: "en", name: "English", nativeName: "English" };
+  return (
+    Languages.find((lang) => lang.code === code) || {
+      code: "en",
+      name: "English",
+      nativeName: "English",
+    }
+  );
 };
 
 export const getFlagEmoji = (countryCode: string): string => {
   // Convert language code to country code for flag emoji
   const countryCodeMap: Record<string, string> = {
-    "en": "gb",
-    "ar": "sa",
-    "bn": "bd",
-    "zh": "cn",
-    "fr": "fr",
-    "de": "de",
-    "hi": "in",
-    "it": "it",
-    "ja": "jp",
-    "ko": "kr",
-    "nl": "nl",
-    "pl": "pl", 
-    "pt": "pt",
-    "ru": "ru",
-    "es": "es",
-    "sv": "se",
-    "th": "th",
-    "tr": "tr",
-    "fi": "fi",
-    "da": "dk"
+    en: "gb",
+    ar: "sa",
+    bn: "bd",
+    zh: "cn",
+    fr: "fr",
+    de: "de",
+    hi: "in",
+    it: "it",
+    ja: "jp",
+    ko: "kr",
+    nl: "nl",
+    pl: "pl",
+    pt: "pt",
+    ru: "ru",
+    es: "es",
+    sv: "se",
+    th: "th",
+    tr: "tr",
+    fi: "fi",
+    da: "dk",
   };
-  
+
   const code = countryCodeMap[countryCode] || countryCode;
-  
+
   // Convert country code to flag emoji
   const codePoints = code
     .toUpperCase()
-    .split('')
-    .map(char => 127397 + char.charCodeAt(0));
-  
+    .split("")
+    .map((char) => 127397 + char.charCodeAt(0));
+
   return String.fromCodePoint(...codePoints);
 };

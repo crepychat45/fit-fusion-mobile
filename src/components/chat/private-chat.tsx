@@ -5,12 +5,18 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  MessageCircle, 
-  Send, 
-  Lock, 
+import {
+  MessageCircle,
+  Send,
+  Lock,
   Shield,
   User,
   Bot,
@@ -20,7 +26,7 @@ import {
   Mic,
   MoreHorizontal,
   UserPlus,
-  Search
+  Search,
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
@@ -31,7 +37,7 @@ interface PrivateMessage {
   receiverId: string;
   content: string;
   timestamp: Date;
-  type: 'text' | 'voice' | 'image';
+  type: "text" | "voice" | "image";
   encrypted: boolean;
   read: boolean;
 }
@@ -42,7 +48,7 @@ interface ChatUser {
   avatar?: string;
   online: boolean;
   lastSeen?: Date;
-  role: 'user' | 'ai' | 'coach';
+  role: "user" | "ai" | "coach";
 }
 
 const mockUsers: ChatUser[] = [
@@ -51,14 +57,14 @@ const mockUsers: ChatUser[] = [
     name: "FitFusion AI Coach",
     avatar: "/api/placeholder/40/40",
     online: true,
-    role: 'ai'
+    role: "ai",
   },
   {
     id: "trainer-sarah",
     name: "Sarah (Trainer)",
     avatar: "/api/placeholder/40/40",
     online: true,
-    role: 'coach'
+    role: "coach",
   },
   {
     id: "user-alex",
@@ -66,12 +72,14 @@ const mockUsers: ChatUser[] = [
     avatar: "/api/placeholder/40/40",
     online: false,
     lastSeen: new Date(Date.now() - 2 * 60 * 60 * 1000),
-    role: 'user'
-  }
+    role: "user",
+  },
 ];
 
 export function PrivateChat() {
-  const [selectedUser, setSelectedUser] = useState<ChatUser | null>(mockUsers[0]);
+  const [selectedUser, setSelectedUser] = useState<ChatUser | null>(
+    mockUsers[0],
+  );
   const [messages, setMessages] = useState<PrivateMessage[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -99,16 +107,17 @@ export function PrivateChat() {
         id: "1",
         senderId: userId,
         receiverId: user?.id || "current-user",
-        content: userId === "ai-coach" 
-          ? "Hello! I'm your AI fitness coach. How can I help you achieve your fitness goals today?"
-          : userId === "trainer-sarah"
-          ? "Hi! Ready for today's workout session? I've prepared a custom routine for you."
-          : "Hey! How's your fitness journey going?",
+        content:
+          userId === "ai-coach"
+            ? "Hello! I'm your AI fitness coach. How can I help you achieve your fitness goals today?"
+            : userId === "trainer-sarah"
+              ? "Hi! Ready for today's workout session? I've prepared a custom routine for you."
+              : "Hey! How's your fitness journey going?",
         timestamp: new Date(Date.now() - 10 * 60 * 1000),
-        type: 'text',
+        type: "text",
         encrypted: true,
-        read: true
-      }
+        read: true,
+      },
     ];
     setMessages(mockMessages);
   };
@@ -122,51 +131,56 @@ export function PrivateChat() {
       receiverId: selectedUser.id,
       content: inputValue.trim(),
       timestamp: new Date(),
-      type: 'text',
+      type: "text",
       encrypted: true,
-      read: false
+      read: false,
     };
 
-    setMessages(prev => [...prev, newMessage]);
+    setMessages((prev) => [...prev, newMessage]);
     setInputValue("");
 
     // Simulate AI or trainer response
-    if (selectedUser.role === 'ai' || selectedUser.role === 'coach') {
+    if (selectedUser.role === "ai" || selectedUser.role === "coach") {
       setIsTyping(true);
-      
-      setTimeout(() => {
-        const responses = {
-          ai: [
-            "That's a great question! Based on your fitness profile, I'd recommend...",
-            "I can help you create a personalized workout plan. What are your current fitness goals?",
-            "Remember to stay hydrated and listen to your body during workouts!",
-            "Your progress is looking excellent! Keep up the great work! 💪"
-          ],
-          coach: [
-            "Excellent mindset! Let's focus on proper form and consistent effort.",
-            "I'm proud of your dedication. Remember, progress takes time and patience.",
-            "That's exactly the kind of commitment that leads to results!",
-            "Let's schedule your next session. How does Wednesday sound?"
-          ]
-        };
 
-        const responseArray = responses[selectedUser.role as keyof typeof responses];
-        const randomResponse = responseArray[Math.floor(Math.random() * responseArray.length)];
+      setTimeout(
+        () => {
+          const responses = {
+            ai: [
+              "That's a great question! Based on your fitness profile, I'd recommend...",
+              "I can help you create a personalized workout plan. What are your current fitness goals?",
+              "Remember to stay hydrated and listen to your body during workouts!",
+              "Your progress is looking excellent! Keep up the great work! 💪",
+            ],
+            coach: [
+              "Excellent mindset! Let's focus on proper form and consistent effort.",
+              "I'm proud of your dedication. Remember, progress takes time and patience.",
+              "That's exactly the kind of commitment that leads to results!",
+              "Let's schedule your next session. How does Wednesday sound?",
+            ],
+          };
 
-        const aiResponse: PrivateMessage = {
-          id: (Date.now() + 1).toString(),
-          senderId: selectedUser.id,
-          receiverId: user?.id || "current-user",
-          content: randomResponse,
-          timestamp: new Date(),
-          type: 'text',
-          encrypted: true,
-          read: false
-        };
+          const responseArray =
+            responses[selectedUser.role as keyof typeof responses];
+          const randomResponse =
+            responseArray[Math.floor(Math.random() * responseArray.length)];
 
-        setMessages(prev => [...prev, aiResponse]);
-        setIsTyping(false);
-      }, 1000 + Math.random() * 2000);
+          const aiResponse: PrivateMessage = {
+            id: (Date.now() + 1).toString(),
+            senderId: selectedUser.id,
+            receiverId: user?.id || "current-user",
+            content: randomResponse,
+            timestamp: new Date(),
+            type: "text",
+            encrypted: true,
+            read: false,
+          };
+
+          setMessages((prev) => [...prev, aiResponse]);
+          setIsTyping(false);
+        },
+        1000 + Math.random() * 2000,
+      );
     }
 
     toast({
@@ -178,8 +192,11 @@ export function PrivateChat() {
   const getUserStatus = (user: ChatUser) => {
     if (user.online) return { text: "Online", color: "bg-green-500" };
     if (user.lastSeen) {
-      const minutesAgo = Math.floor((Date.now() - user.lastSeen.getTime()) / (1000 * 60));
-      if (minutesAgo < 60) return { text: `${minutesAgo}m ago`, color: "bg-yellow-500" };
+      const minutesAgo = Math.floor(
+        (Date.now() - user.lastSeen.getTime()) / (1000 * 60),
+      );
+      if (minutesAgo < 60)
+        return { text: `${minutesAgo}m ago`, color: "bg-yellow-500" };
       const hoursAgo = Math.floor(minutesAgo / 60);
       return { text: `${hoursAgo}h ago`, color: "bg-gray-500" };
     }
@@ -188,17 +205,23 @@ export function PrivateChat() {
 
   const getRoleIcon = (role: string) => {
     switch (role) {
-      case 'ai': return <Bot className="h-4 w-4" />;
-      case 'coach': return <Heart className="h-4 w-4" />;
-      default: return <User className="h-4 w-4" />;
+      case "ai":
+        return <Bot className="h-4 w-4" />;
+      case "coach":
+        return <Heart className="h-4 w-4" />;
+      default:
+        return <User className="h-4 w-4" />;
     }
   };
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
-      case 'ai': return "bg-blue-600";
-      case 'coach': return "bg-purple-600";
-      default: return "bg-gray-600";
+      case "ai":
+        return "bg-blue-600";
+      case "coach":
+        return "bg-purple-600";
+      default:
+        return "bg-gray-600";
     }
   };
 
@@ -209,12 +232,15 @@ export function PrivateChat() {
           <CardTitle className="flex items-center gap-2">
             <MessageCircle className="h-5 w-5" />
             Private Messages
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            <Badge
+              variant="outline"
+              className="bg-green-50 text-green-700 border-green-200"
+            >
               <Shield className="h-3 w-3 mr-1" />
               Encrypted
             </Badge>
           </CardTitle>
-          
+
           <div className="flex items-center gap-2">
             <Dialog open={showUserList} onOpenChange={setShowUserList}>
               <DialogTrigger asChild>
@@ -234,7 +260,9 @@ export function PrivateChat() {
                       <div
                         key={chatUser.id}
                         className={`p-3 rounded-lg border cursor-pointer hover:bg-muted/50 transition-colors ${
-                          selectedUser?.id === chatUser.id ? 'border-primary bg-primary/10' : ''
+                          selectedUser?.id === chatUser.id
+                            ? "border-primary bg-primary/10"
+                            : ""
                         }`}
                         onClick={() => {
                           setSelectedUser(chatUser);
@@ -249,17 +277,26 @@ export function PrivateChat() {
                                 {getRoleIcon(chatUser.role)}
                               </AvatarFallback>
                             </Avatar>
-                            <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${status.color}`} />
+                            <div
+                              className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${status.color}`}
+                            />
                           </div>
-                          
+
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="font-medium truncate">{chatUser.name}</span>
-                              <Badge variant="outline" className={`${getRoleBadgeColor(chatUser.role)} text-white border-0`}>
+                              <span className="font-medium truncate">
+                                {chatUser.name}
+                              </span>
+                              <Badge
+                                variant="outline"
+                                className={`${getRoleBadgeColor(chatUser.role)} text-white border-0`}
+                              >
                                 {chatUser.role}
                               </Badge>
                             </div>
-                            <p className="text-xs text-muted-foreground">{status.text}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {status.text}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -270,7 +307,7 @@ export function PrivateChat() {
             </Dialog>
           </div>
         </div>
-        
+
         {selectedUser && (
           <div className="flex items-center gap-3 pt-2 border-t">
             <div className="relative">
@@ -280,17 +317,24 @@ export function PrivateChat() {
                   {getRoleIcon(selectedUser.role)}
                 </AvatarFallback>
               </Avatar>
-              <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${getUserStatus(selectedUser).color}`} />
+              <div
+                className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${getUserStatus(selectedUser).color}`}
+              />
             </div>
-            
+
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <span className="font-medium">{selectedUser.name}</span>
-                <Badge variant="outline" className={`${getRoleBadgeColor(selectedUser.role)} text-white border-0`}>
+                <Badge
+                  variant="outline"
+                  className={`${getRoleBadgeColor(selectedUser.role)} text-white border-0`}
+                >
                   {selectedUser.role}
                 </Badge>
               </div>
-              <p className="text-xs text-muted-foreground">{getUserStatus(selectedUser).text}</p>
+              <p className="text-xs text-muted-foreground">
+                {getUserStatus(selectedUser).text}
+              </p>
             </div>
           </div>
         )}
@@ -309,14 +353,16 @@ export function PrivateChat() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
+                    className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
                   >
-                    <div className={`max-w-[80%] ${isOwn ? 'order-2' : 'order-1'}`}>
+                    <div
+                      className={`max-w-[80%] ${isOwn ? "order-2" : "order-1"}`}
+                    >
                       <div
                         className={`p-3 rounded-2xl ${
                           isOwn
-                            ? 'bg-primary text-primary-foreground rounded-br-md'
-                            : 'bg-muted rounded-bl-md'
+                            ? "bg-primary text-primary-foreground rounded-br-md"
+                            : "bg-muted rounded-bl-md"
                         }`}
                       >
                         <p className="text-sm">{message.content}</p>
@@ -334,7 +380,7 @@ export function PrivateChat() {
                 );
               })}
             </AnimatePresence>
-            
+
             {isTyping && (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -366,7 +412,7 @@ export function PrivateChat() {
               <Input
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                placeholder={`Message ${selectedUser?.name || 'someone'}...`}
+                placeholder={`Message ${selectedUser?.name || "someone"}...`}
                 className="pr-20"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
@@ -387,7 +433,7 @@ export function PrivateChat() {
                 </Button>
               </div>
             </div>
-            
+
             <Button
               onClick={handleSendMessage}
               disabled={!inputValue.trim()}

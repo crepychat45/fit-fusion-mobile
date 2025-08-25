@@ -17,32 +17,35 @@ interface ErrorBoundaryProps {
   onError?: (error: Error, errorInfo: ErrorInfo) => void;
 }
 
-export class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class EnhancedErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = {
       hasError: false,
       error: null,
-      errorInfo: null
+      errorInfo: null,
     };
   }
 
   static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
     return {
       hasError: true,
-      error
+      error,
     };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     this.setState({
       error,
-      errorInfo
+      errorInfo,
     });
-    
+
     // Log error to external service
-    console.error('Error caught by boundary:', error, errorInfo);
-    
+    console.error("Error caught by boundary:", error, errorInfo);
+
     // Call optional error handler
     if (this.props.onError) {
       this.props.onError(error, errorInfo);
@@ -53,19 +56,29 @@ export class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, E
     this.setState({
       hasError: false,
       error: null,
-      errorInfo: null
+      errorInfo: null,
     });
   };
 
   render() {
     if (this.state.hasError) {
       const { fallback: FallbackComponent } = this.props;
-      
+
       if (FallbackComponent && this.state.error) {
-        return <FallbackComponent error={this.state.error} retry={this.handleRetry} />;
+        return (
+          <FallbackComponent
+            error={this.state.error}
+            retry={this.handleRetry}
+          />
+        );
       }
-      
-      return <DefaultErrorFallback error={this.state.error} retry={this.handleRetry} />;
+
+      return (
+        <DefaultErrorFallback
+          error={this.state.error}
+          retry={this.handleRetry}
+        />
+      );
     }
 
     return this.props.children;
@@ -78,8 +91,8 @@ interface ErrorFallbackProps {
 }
 
 export function DefaultErrorFallback({ error, retry }: ErrorFallbackProps) {
-  const isDevelopment = process.env.NODE_ENV === 'development';
-  
+  const isDevelopment = process.env.NODE_ENV === "development";
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -96,9 +109,11 @@ export function DefaultErrorFallback({ error, retry }: ErrorFallbackProps) {
           >
             <AlertTriangle className="h-8 w-8 text-red-600" />
           </motion.div>
-          
+
           <div>
-            <CardTitle className="text-xl text-red-800">Something went wrong</CardTitle>
+            <CardTitle className="text-xl text-red-800">
+              Something went wrong
+            </CardTitle>
             <p className="text-red-600 mt-2">
               We apologize for the inconvenience. Our team has been notified.
             </p>
@@ -118,7 +133,9 @@ export function DefaultErrorFallback({ error, retry }: ErrorFallbackProps) {
                   Development Error
                 </Badge>
               </div>
-              <p className="text-sm text-red-700 font-medium mb-2">{error.message}</p>
+              <p className="text-sm text-red-700 font-medium mb-2">
+                {error.message}
+              </p>
               <pre className="text-xs text-red-600 overflow-auto max-h-32 bg-white p-2 rounded border">
                 {error.stack}
               </pre>
@@ -130,9 +147,9 @@ export function DefaultErrorFallback({ error, retry }: ErrorFallbackProps) {
               <RefreshCcw className="mr-2 h-4 w-4" />
               Try Again
             </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => window.location.href = '/'}
+            <Button
+              variant="outline"
+              onClick={() => (window.location.href = "/")}
               className="flex-1"
             >
               <Home className="mr-2 h-4 w-4" />
@@ -159,12 +176,12 @@ export function NetworkErrorHandler({ children }: { children: ReactNode }) {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, []);
 
@@ -186,12 +203,12 @@ export function NetworkErrorHandler({ children }: { children: ReactNode }) {
 }
 
 // Form validation error display
-export function FormErrorDisplay({ 
-  errors, 
-  className = "" 
-}: { 
-  errors: string[]; 
-  className?: string; 
+export function FormErrorDisplay({
+  errors,
+  className = "",
+}: {
+  errors: string[];
+  className?: string;
 }) {
   if (errors.length === 0) return null;
 
@@ -220,21 +237,24 @@ export function FormErrorDisplay({
 export function useGlobalErrorHandler() {
   React.useEffect(() => {
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      console.error('Unhandled promise rejection:', event.reason);
+      console.error("Unhandled promise rejection:", event.reason);
       // You could send this to an error tracking service
     };
 
     const handleError = (event: ErrorEvent) => {
-      console.error('Global error:', event.error);
+      console.error("Global error:", event.error);
       // You could send this to an error tracking service
     };
 
-    window.addEventListener('unhandledrejection', handleUnhandledRejection);
-    window.addEventListener('error', handleError);
+    window.addEventListener("unhandledrejection", handleUnhandledRejection);
+    window.addEventListener("error", handleError);
 
     return () => {
-      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
-      window.removeEventListener('error', handleError);
+      window.removeEventListener(
+        "unhandledrejection",
+        handleUnhandledRejection,
+      );
+      window.removeEventListener("error", handleError);
     };
   }, []);
 }
@@ -243,23 +263,25 @@ export function useGlobalErrorHandler() {
 export function withRetry<T extends (...args: any[]) => Promise<any>>(
   fn: T,
   maxRetries = 3,
-  delay = 1000
+  delay = 1000,
 ): T {
   return (async (...args: Parameters<T>) => {
     let lastError: any;
-    
+
     for (let i = 0; i <= maxRetries; i++) {
       try {
         return await fn(...args);
       } catch (error) {
         lastError = error;
-        
+
         if (i < maxRetries) {
-          await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
+          await new Promise((resolve) =>
+            setTimeout(resolve, delay * Math.pow(2, i)),
+          );
         }
       }
     }
-    
+
     throw lastError;
   }) as T;
 }

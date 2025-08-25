@@ -1,6 +1,11 @@
-
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,14 +16,14 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Calendar, 
-  Target, 
-  Activity, 
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  Target,
+  Activity,
   Heart,
   Scale,
   Ruler,
@@ -34,7 +39,7 @@ import {
   Clock,
   TrendingUp,
   Users,
-  Star
+  Star,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSettings } from "@/contexts/settings-context";
@@ -77,7 +82,8 @@ export function EnhancedProfileForm() {
   const { saveProfileInfo, unitSystem } = useSettings();
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setSaving] = useState(false);
-  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
+  const [validationResult, setValidationResult] =
+    useState<ValidationResult | null>(null);
   const [profileData, setProfileData] = useState<ProfileData>({
     personalInfo: {
       firstName: "",
@@ -86,7 +92,7 @@ export function EnhancedProfileForm() {
       phone: "",
       dateOfBirth: "",
       location: "",
-      bio: ""
+      bio: "",
     },
     fitnessInfo: {
       height: "",
@@ -94,14 +100,14 @@ export function EnhancedProfileForm() {
       fitnessLevel: "beginner",
       goals: [],
       preferredWorkouts: [],
-      weeklyTarget: "3"
+      weeklyTarget: "3",
     },
     preferences: {
       units: unitSystem,
       privacy: "friends",
       notifications: true,
-      sharing: false
-    }
+      sharing: false,
+    },
   });
   const [completionPercentage, setCompletionPercentage] = useState(0);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
@@ -113,29 +119,29 @@ export function EnhancedProfileForm() {
       title: "Personal Information",
       description: "Basic details about you",
       icon: User,
-      color: "text-blue-600"
+      color: "text-blue-600",
     },
     {
       id: "fitness",
       title: "Fitness Profile",
       description: "Your fitness journey details",
       icon: Activity,
-      color: "text-green-600"
+      color: "text-green-600",
     },
     {
       id: "preferences",
       title: "Preferences",
       description: "Customize your experience",
       icon: Settings,
-      color: "text-purple-600"
+      color: "text-purple-600",
     },
     {
       id: "review",
       title: "Review & Save",
       description: "Confirm your information",
       icon: CheckCircle,
-      color: "text-orange-600"
-    }
+      color: "text-orange-600",
+    },
   ];
 
   const fitnessGoals = [
@@ -144,7 +150,7 @@ export function EnhancedProfileForm() {
     { id: "endurance", label: "Build Endurance", icon: Heart },
     { id: "strength", label: "Increase Strength", icon: Zap },
     { id: "flexibility", label: "Improve Flexibility", icon: Activity },
-    { id: "general", label: "General Fitness", icon: Target }
+    { id: "general", label: "General Fitness", icon: Target },
   ];
 
   const workoutTypes = [
@@ -155,7 +161,7 @@ export function EnhancedProfileForm() {
     { id: "hiit", label: "HIIT", icon: TrendingUp },
     { id: "swimming", label: "Swimming", icon: Activity },
     { id: "running", label: "Running", icon: Activity },
-    { id: "cycling", label: "Cycling", icon: Activity }
+    { id: "cycling", label: "Cycling", icon: Activity },
   ];
 
   useEffect(() => {
@@ -166,7 +172,11 @@ export function EnhancedProfileForm() {
   useEffect(() => {
     // Auto-save every 30 seconds if there are unsaved changes
     const interval = setInterval(() => {
-      if (hasUnsavedChanges && validationResult?.score && validationResult.score > 50) {
+      if (
+        hasUnsavedChanges &&
+        validationResult?.score &&
+        validationResult.score > 50
+      ) {
         handleAutoSave();
       }
     }, 30000);
@@ -177,15 +187,22 @@ export function EnhancedProfileForm() {
   const calculateCompletion = () => {
     const allFields = [
       ...Object.values(profileData.personalInfo),
-      ...Object.values(profileData.fitnessInfo).filter(v => Array.isArray(v) ? v.length > 0 : v),
-      ...Object.values(profileData.preferences)
+      ...Object.values(profileData.fitnessInfo).filter((v) =>
+        Array.isArray(v) ? v.length > 0 : v,
+      ),
+      ...Object.values(profileData.preferences),
     ];
-    
-    const filledFields = allFields.filter(field => 
-      field !== "" && field !== false && (Array.isArray(field) ? field.length > 0 : true)
+
+    const filledFields = allFields.filter(
+      (field) =>
+        field !== "" &&
+        field !== false &&
+        (Array.isArray(field) ? field.length > 0 : true),
     );
-    
-    const percentage = Math.round((filledFields.length / allFields.length) * 100);
+
+    const percentage = Math.round(
+      (filledFields.length / allFields.length) * 100,
+    );
     setCompletionPercentage(percentage);
   };
 
@@ -195,10 +212,12 @@ export function EnhancedProfileForm() {
     let score = 0;
 
     // Personal Info Validation
-    if (!profileData.personalInfo.firstName) errors.firstName = "First name is required";
+    if (!profileData.personalInfo.firstName)
+      errors.firstName = "First name is required";
     else score += 15;
 
-    if (!profileData.personalInfo.lastName) errors.lastName = "Last name is required";
+    if (!profileData.personalInfo.lastName)
+      errors.lastName = "Last name is required";
     else score += 15;
 
     if (!profileData.personalInfo.email) {
@@ -209,7 +228,10 @@ export function EnhancedProfileForm() {
       score += 20;
     }
 
-    if (profileData.personalInfo.phone && !/^\+?[\d\s\-\(\)]+$/.test(profileData.personalInfo.phone)) {
+    if (
+      profileData.personalInfo.phone &&
+      !/^\+?[\d\s\-\(\)]+$/.test(profileData.personalInfo.phone)
+    ) {
       warnings.phone = "Phone number format may be invalid";
     } else if (profileData.personalInfo.phone) {
       score += 10;
@@ -217,13 +239,15 @@ export function EnhancedProfileForm() {
 
     // Fitness Info Validation
     if (profileData.fitnessInfo.goals.length === 0) {
-      warnings.goals = "Setting fitness goals helps personalize your experience";
+      warnings.goals =
+        "Setting fitness goals helps personalize your experience";
     } else {
       score += 20;
     }
 
     if (profileData.fitnessInfo.preferredWorkouts.length === 0) {
-      warnings.workouts = "Select preferred workouts for better recommendations";
+      warnings.workouts =
+        "Select preferred workouts for better recommendations";
     } else {
       score += 10;
     }
@@ -236,34 +260,42 @@ export function EnhancedProfileForm() {
       isValid: Object.keys(errors).length === 0,
       errors,
       warnings,
-      score: Math.min(score, 100)
+      score: Math.min(score, 100),
     });
   };
 
-  const updateProfileData = (section: keyof ProfileData, field: string, value: any) => {
-    setProfileData(prev => ({
+  const updateProfileData = (
+    section: keyof ProfileData,
+    field: string,
+    value: any,
+  ) => {
+    setProfileData((prev) => ({
       ...prev,
       [section]: {
         ...prev[section],
-        [field]: value
-      }
+        [field]: value,
+      },
     }));
     setHasUnsavedChanges(true);
   };
 
-  const toggleArrayValue = (section: keyof ProfileData, field: string, value: string) => {
-    setProfileData(prev => {
+  const toggleArrayValue = (
+    section: keyof ProfileData,
+    field: string,
+    value: string,
+  ) => {
+    setProfileData((prev) => {
       const currentArray = (prev[section] as any)[field] as string[];
       const newArray = currentArray.includes(value)
-        ? currentArray.filter(item => item !== value)
+        ? currentArray.filter((item) => item !== value)
         : [...currentArray, value];
-      
+
       return {
         ...prev,
         [section]: {
           ...prev[section],
-          [field]: newArray
-        }
+          [field]: newArray,
+        },
       };
     });
     setHasUnsavedChanges(true);
@@ -296,10 +328,10 @@ export function EnhancedProfileForm() {
     }
 
     setSaving(true);
-    
+
     try {
       const success = await saveProfileInfo(profileData);
-      
+
       if (success) {
         setHasUnsavedChanges(false);
         setLastSaved(new Date());
@@ -340,10 +372,29 @@ export function EnhancedProfileForm() {
   };
 
   const getScoreBadge = (score: number) => {
-    if (score >= 90) return { label: "Excellent", variant: "default" as const, color: "bg-green-600" };
-    if (score >= 70) return { label: "Good", variant: "secondary" as const, color: "bg-blue-600" };
-    if (score >= 50) return { label: "Fair", variant: "outline" as const, color: "bg-yellow-600" };
-    return { label: "Needs Work", variant: "destructive" as const, color: "bg-red-600" };
+    if (score >= 90)
+      return {
+        label: "Excellent",
+        variant: "default" as const,
+        color: "bg-green-600",
+      };
+    if (score >= 70)
+      return {
+        label: "Good",
+        variant: "secondary" as const,
+        color: "bg-blue-600",
+      };
+    if (score >= 50)
+      return {
+        label: "Fair",
+        variant: "outline" as const,
+        color: "bg-yellow-600",
+      };
+    return {
+      label: "Needs Work",
+      variant: "destructive" as const,
+      color: "bg-red-600",
+    };
   };
 
   return (
@@ -359,7 +410,8 @@ export function EnhancedProfileForm() {
                 Enhanced Profile Setup
               </CardTitle>
               <CardDescription className="mt-1">
-                Complete your profile to get personalized recommendations and track your progress
+                Complete your profile to get personalized recommendations and
+                track your progress
               </CardDescription>
             </div>
             <div className="flex items-center gap-4">
@@ -370,7 +422,7 @@ export function EnhancedProfileForm() {
                 </div>
               )}
               {validationResult && (
-                <Badge 
+                <Badge
                   variant={getScoreBadge(validationResult.score).variant}
                   className={`${getScoreBadge(validationResult.score).color} text-white`}
                 >
@@ -380,7 +432,7 @@ export function EnhancedProfileForm() {
               )}
             </div>
           </div>
-          
+
           {/* Progress Bar */}
           <div className="mt-4 space-y-2">
             <div className="flex items-center justify-between text-sm">
@@ -394,42 +446,48 @@ export function EnhancedProfileForm() {
 
       {/* Validation Alerts */}
       <AnimatePresence>
-        {validationResult && (Object.keys(validationResult.errors).length > 0 || Object.keys(validationResult.warnings).length > 0) && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="space-y-2"
-          >
-            {Object.keys(validationResult.errors).length > 0 && (
-              <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  <strong>Please fix these errors:</strong>
-                  <ul className="mt-1 ml-4 list-disc">
-                    {Object.entries(validationResult.errors).map(([field, error]) => (
-                      <li key={field}>{error}</li>
-                    ))}
-                  </ul>
-                </AlertDescription>
-              </Alert>
-            )}
-            
-            {Object.keys(validationResult.warnings).length > 0 && (
-              <Alert>
-                <Info className="h-4 w-4" />
-                <AlertDescription>
-                  <strong>Suggestions:</strong>
-                  <ul className="mt-1 ml-4 list-disc">
-                    {Object.entries(validationResult.warnings).map(([field, warning]) => (
-                      <li key={field}>{warning}</li>
-                    ))}
-                  </ul>
-                </AlertDescription>
-              </Alert>
-            )}
-          </motion.div>
-        )}
+        {validationResult &&
+          (Object.keys(validationResult.errors).length > 0 ||
+            Object.keys(validationResult.warnings).length > 0) && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-2"
+            >
+              {Object.keys(validationResult.errors).length > 0 && (
+                <Alert variant="destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>Please fix these errors:</strong>
+                    <ul className="mt-1 ml-4 list-disc">
+                      {Object.entries(validationResult.errors).map(
+                        ([field, error]) => (
+                          <li key={field}>{error}</li>
+                        ),
+                      )}
+                    </ul>
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {Object.keys(validationResult.warnings).length > 0 && (
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>Suggestions:</strong>
+                    <ul className="mt-1 ml-4 list-disc">
+                      {Object.entries(validationResult.warnings).map(
+                        ([field, warning]) => (
+                          <li key={field}>{warning}</li>
+                        ),
+                      )}
+                    </ul>
+                  </AlertDescription>
+                </Alert>
+              )}
+            </motion.div>
+          )}
       </AnimatePresence>
 
       {/* Step Navigation */}
@@ -439,7 +497,13 @@ export function EnhancedProfileForm() {
             {steps.map((step, index) => (
               <div key={step.id} className="flex items-center">
                 <Button
-                  variant={currentStep === index ? "default" : currentStep > index ? "secondary" : "outline"}
+                  variant={
+                    currentStep === index
+                      ? "default"
+                      : currentStep > index
+                        ? "secondary"
+                        : "outline"
+                  }
                   size="sm"
                   onClick={() => setCurrentStep(index)}
                   className="relative"
@@ -452,7 +516,9 @@ export function EnhancedProfileForm() {
                   )}
                 </Button>
                 {index < steps.length - 1 && (
-                  <div className={`w-8 h-px mx-2 ${currentStep > index ? 'bg-green-500' : 'bg-muted'}`} />
+                  <div
+                    className={`w-8 h-px mx-2 ${currentStep > index ? "bg-green-500" : "bg-muted"}`}
+                  />
                 )}
               </div>
             ))}
@@ -464,14 +530,14 @@ export function EnhancedProfileForm() {
       <Card className="min-h-[500px]">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            {React.createElement(steps[currentStep].icon, { 
-              className: `h-5 w-5 ${steps[currentStep].color}` 
+            {React.createElement(steps[currentStep].icon, {
+              className: `h-5 w-5 ${steps[currentStep].color}`,
             })}
             {steps[currentStep].title}
           </CardTitle>
           <CardDescription>{steps[currentStep].description}</CardDescription>
         </CardHeader>
-        
+
         <CardContent className="space-y-6">
           <AnimatePresence mode="wait">
             <motion.div
@@ -490,24 +556,48 @@ export function EnhancedProfileForm() {
                       <Input
                         id="firstName"
                         value={profileData.personalInfo.firstName}
-                        onChange={(e) => updateProfileData('personalInfo', 'firstName', e.target.value)}
-                        className={validationResult?.errors.firstName ? "border-red-500" : ""}
+                        onChange={(e) =>
+                          updateProfileData(
+                            "personalInfo",
+                            "firstName",
+                            e.target.value,
+                          )
+                        }
+                        className={
+                          validationResult?.errors.firstName
+                            ? "border-red-500"
+                            : ""
+                        }
                       />
                       {validationResult?.errors.firstName && (
-                        <p className="text-xs text-red-500">{validationResult.errors.firstName}</p>
+                        <p className="text-xs text-red-500">
+                          {validationResult.errors.firstName}
+                        </p>
                       )}
                     </div>
-                    
+
                     <div className="space-y-2">
                       <Label htmlFor="lastName">Last Name *</Label>
                       <Input
                         id="lastName"
                         value={profileData.personalInfo.lastName}
-                        onChange={(e) => updateProfileData('personalInfo', 'lastName', e.target.value)}
-                        className={validationResult?.errors.lastName ? "border-red-500" : ""}
+                        onChange={(e) =>
+                          updateProfileData(
+                            "personalInfo",
+                            "lastName",
+                            e.target.value,
+                          )
+                        }
+                        className={
+                          validationResult?.errors.lastName
+                            ? "border-red-500"
+                            : ""
+                        }
                       />
                       {validationResult?.errors.lastName && (
-                        <p className="text-xs text-red-500">{validationResult.errors.lastName}</p>
+                        <p className="text-xs text-red-500">
+                          {validationResult.errors.lastName}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -518,11 +608,21 @@ export function EnhancedProfileForm() {
                       id="email"
                       type="email"
                       value={profileData.personalInfo.email}
-                      onChange={(e) => updateProfileData('personalInfo', 'email', e.target.value)}
-                      className={validationResult?.errors.email ? "border-red-500" : ""}
+                      onChange={(e) =>
+                        updateProfileData(
+                          "personalInfo",
+                          "email",
+                          e.target.value,
+                        )
+                      }
+                      className={
+                        validationResult?.errors.email ? "border-red-500" : ""
+                      }
                     />
                     {validationResult?.errors.email && (
-                      <p className="text-xs text-red-500">{validationResult.errors.email}</p>
+                      <p className="text-xs text-red-500">
+                        {validationResult.errors.email}
+                      </p>
                     )}
                   </div>
 
@@ -533,21 +633,39 @@ export function EnhancedProfileForm() {
                         id="phone"
                         type="tel"
                         value={profileData.personalInfo.phone}
-                        onChange={(e) => updateProfileData('personalInfo', 'phone', e.target.value)}
-                        className={validationResult?.warnings.phone ? "border-yellow-500" : ""}
+                        onChange={(e) =>
+                          updateProfileData(
+                            "personalInfo",
+                            "phone",
+                            e.target.value,
+                          )
+                        }
+                        className={
+                          validationResult?.warnings.phone
+                            ? "border-yellow-500"
+                            : ""
+                        }
                       />
                       {validationResult?.warnings.phone && (
-                        <p className="text-xs text-yellow-600">{validationResult.warnings.phone}</p>
+                        <p className="text-xs text-yellow-600">
+                          {validationResult.warnings.phone}
+                        </p>
                       )}
                     </div>
-                    
+
                     <div className="space-y-2">
                       <Label htmlFor="dateOfBirth">Date of Birth</Label>
                       <Input
                         id="dateOfBirth"
                         type="date"
                         value={profileData.personalInfo.dateOfBirth}
-                        onChange={(e) => updateProfileData('personalInfo', 'dateOfBirth', e.target.value)}
+                        onChange={(e) =>
+                          updateProfileData(
+                            "personalInfo",
+                            "dateOfBirth",
+                            e.target.value,
+                          )
+                        }
                       />
                     </div>
                   </div>
@@ -558,7 +676,13 @@ export function EnhancedProfileForm() {
                       id="location"
                       placeholder="City, Country"
                       value={profileData.personalInfo.location}
-                      onChange={(e) => updateProfileData('personalInfo', 'location', e.target.value)}
+                      onChange={(e) =>
+                        updateProfileData(
+                          "personalInfo",
+                          "location",
+                          e.target.value,
+                        )
+                      }
                     />
                   </div>
 
@@ -569,7 +693,9 @@ export function EnhancedProfileForm() {
                       placeholder="Tell us about yourself and your fitness journey..."
                       rows={4}
                       value={profileData.personalInfo.bio}
-                      onChange={(e) => updateProfileData('personalInfo', 'bio', e.target.value)}
+                      onChange={(e) =>
+                        updateProfileData("personalInfo", "bio", e.target.value)
+                      }
                     />
                     <p className="text-xs text-muted-foreground">
                       {profileData.personalInfo.bio.length}/500 characters
@@ -583,32 +709,56 @@ export function EnhancedProfileForm() {
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="height">Height ({unitSystem === 'metric' ? 'cm' : 'ft/in'})</Label>
+                      <Label htmlFor="height">
+                        Height ({unitSystem === "metric" ? "cm" : "ft/in"})
+                      </Label>
                       <Input
                         id="height"
-                        placeholder={unitSystem === 'metric' ? '170' : '5\'8"'}
+                        placeholder={unitSystem === "metric" ? "170" : "5'8\""}
                         value={profileData.fitnessInfo.height}
-                        onChange={(e) => updateProfileData('fitnessInfo', 'height', e.target.value)}
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="weight">Weight ({unitSystem === 'metric' ? 'kg' : 'lbs'})</Label>
-                      <Input
-                        id="weight"
-                        placeholder={unitSystem === 'metric' ? '70' : '155'}
-                        value={profileData.fitnessInfo.weight}
-                        onChange={(e) => updateProfileData('fitnessInfo', 'weight', e.target.value)}
+                        onChange={(e) =>
+                          updateProfileData(
+                            "fitnessInfo",
+                            "height",
+                            e.target.value,
+                          )
+                        }
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="weeklyTarget">Weekly Workout Target</Label>
+                      <Label htmlFor="weight">
+                        Weight ({unitSystem === "metric" ? "kg" : "lbs"})
+                      </Label>
+                      <Input
+                        id="weight"
+                        placeholder={unitSystem === "metric" ? "70" : "155"}
+                        value={profileData.fitnessInfo.weight}
+                        onChange={(e) =>
+                          updateProfileData(
+                            "fitnessInfo",
+                            "weight",
+                            e.target.value,
+                          )
+                        }
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="weeklyTarget">
+                        Weekly Workout Target
+                      </Label>
                       <select
                         id="weeklyTarget"
                         className="w-full p-2 border rounded-md"
                         value={profileData.fitnessInfo.weeklyTarget}
-                        onChange={(e) => updateProfileData('fitnessInfo', 'weeklyTarget', e.target.value)}
+                        onChange={(e) =>
+                          updateProfileData(
+                            "fitnessInfo",
+                            "weeklyTarget",
+                            e.target.value,
+                          )
+                        }
                       >
                         <option value="1">1 workout per week</option>
                         <option value="2">2 workouts per week</option>
@@ -625,17 +775,26 @@ export function EnhancedProfileForm() {
 
                   <div className="space-y-4">
                     <div>
-                      <Label className="text-base font-medium">Fitness Goals</Label>
+                      <Label className="text-base font-medium">
+                        Fitness Goals
+                      </Label>
                       <p className="text-sm text-muted-foreground mb-3">
-                        Select your primary fitness objectives (you can choose multiple)
+                        Select your primary fitness objectives (you can choose
+                        multiple)
                       </p>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                         {fitnessGoals.map((goal) => (
                           <Button
                             key={goal.id}
-                            variant={profileData.fitnessInfo.goals.includes(goal.id) ? "default" : "outline"}
+                            variant={
+                              profileData.fitnessInfo.goals.includes(goal.id)
+                                ? "default"
+                                : "outline"
+                            }
                             className="h-auto p-3 flex flex-col items-center gap-2"
-                            onClick={() => toggleArrayValue('fitnessInfo', 'goals', goal.id)}
+                            onClick={() =>
+                              toggleArrayValue("fitnessInfo", "goals", goal.id)
+                            }
                           >
                             <goal.icon className="h-5 w-5" />
                             <span className="text-sm">{goal.label}</span>
@@ -643,12 +802,16 @@ export function EnhancedProfileForm() {
                         ))}
                       </div>
                       {validationResult?.warnings.goals && (
-                        <p className="text-xs text-yellow-600 mt-2">{validationResult.warnings.goals}</p>
+                        <p className="text-xs text-yellow-600 mt-2">
+                          {validationResult.warnings.goals}
+                        </p>
                       )}
                     </div>
 
                     <div>
-                      <Label className="text-base font-medium">Preferred Workouts</Label>
+                      <Label className="text-base font-medium">
+                        Preferred Workouts
+                      </Label>
                       <p className="text-sm text-muted-foreground mb-3">
                         Choose the types of workouts you enjoy or want to try
                       </p>
@@ -656,9 +819,21 @@ export function EnhancedProfileForm() {
                         {workoutTypes.map((workout) => (
                           <Button
                             key={workout.id}
-                            variant={profileData.fitnessInfo.preferredWorkouts.includes(workout.id) ? "default" : "outline"}
+                            variant={
+                              profileData.fitnessInfo.preferredWorkouts.includes(
+                                workout.id,
+                              )
+                                ? "default"
+                                : "outline"
+                            }
                             className="h-auto p-3 flex flex-col items-center gap-2"
-                            onClick={() => toggleArrayValue('fitnessInfo', 'preferredWorkouts', workout.id)}
+                            onClick={() =>
+                              toggleArrayValue(
+                                "fitnessInfo",
+                                "preferredWorkouts",
+                                workout.id,
+                              )
+                            }
                           >
                             <workout.icon className="h-4 w-4" />
                             <span className="text-xs">{workout.label}</span>
@@ -666,7 +841,9 @@ export function EnhancedProfileForm() {
                         ))}
                       </div>
                       {validationResult?.warnings.workouts && (
-                        <p className="text-xs text-yellow-600 mt-2">{validationResult.warnings.workouts}</p>
+                        <p className="text-xs text-yellow-600 mt-2">
+                          {validationResult.warnings.workouts}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -689,16 +866,36 @@ export function EnhancedProfileForm() {
                           <Label>Measurement Units</Label>
                           <div className="flex gap-2">
                             <Button
-                              variant={profileData.preferences.units === 'metric' ? "default" : "outline"}
+                              variant={
+                                profileData.preferences.units === "metric"
+                                  ? "default"
+                                  : "outline"
+                              }
                               size="sm"
-                              onClick={() => updateProfileData('preferences', 'units', 'metric')}
+                              onClick={() =>
+                                updateProfileData(
+                                  "preferences",
+                                  "units",
+                                  "metric",
+                                )
+                              }
                             >
                               Metric (kg, cm)
                             </Button>
                             <Button
-                              variant={profileData.preferences.units === 'imperial' ? "default" : "outline"}
+                              variant={
+                                profileData.preferences.units === "imperial"
+                                  ? "default"
+                                  : "outline"
+                              }
                               size="sm"
-                              onClick={() => updateProfileData('preferences', 'units', 'imperial')}
+                              onClick={() =>
+                                updateProfileData(
+                                  "preferences",
+                                  "units",
+                                  "imperial",
+                                )
+                              }
                             >
                               Imperial (lbs, ft)
                             </Button>
@@ -710,9 +907,17 @@ export function EnhancedProfileForm() {
                           <select
                             className="w-full p-2 border rounded-md"
                             value={profileData.preferences.privacy}
-                            onChange={(e) => updateProfileData('preferences', 'privacy', e.target.value)}
+                            onChange={(e) =>
+                              updateProfileData(
+                                "preferences",
+                                "privacy",
+                                e.target.value,
+                              )
+                            }
                           >
-                            <option value="public">Public - Anyone can see</option>
+                            <option value="public">
+                              Public - Anyone can see
+                            </option>
                             <option value="friends">Friends Only</option>
                             <option value="private">Private - Only me</option>
                           </select>
@@ -736,11 +941,23 @@ export function EnhancedProfileForm() {
                             </p>
                           </div>
                           <Button
-                            variant={profileData.preferences.notifications ? "default" : "outline"}
+                            variant={
+                              profileData.preferences.notifications
+                                ? "default"
+                                : "outline"
+                            }
                             size="sm"
-                            onClick={() => updateProfileData('preferences', 'notifications', !profileData.preferences.notifications)}
+                            onClick={() =>
+                              updateProfileData(
+                                "preferences",
+                                "notifications",
+                                !profileData.preferences.notifications,
+                              )
+                            }
                           >
-                            {profileData.preferences.notifications ? "On" : "Off"}
+                            {profileData.preferences.notifications
+                              ? "On"
+                              : "Off"}
                           </Button>
                         </div>
 
@@ -752,9 +969,19 @@ export function EnhancedProfileForm() {
                             </p>
                           </div>
                           <Button
-                            variant={profileData.preferences.sharing ? "default" : "outline"}
+                            variant={
+                              profileData.preferences.sharing
+                                ? "default"
+                                : "outline"
+                            }
                             size="sm"
-                            onClick={() => updateProfileData('preferences', 'sharing', !profileData.preferences.sharing)}
+                            onClick={() =>
+                              updateProfileData(
+                                "preferences",
+                                "sharing",
+                                !profileData.preferences.sharing,
+                              )
+                            }
                           >
                             {profileData.preferences.sharing ? "On" : "Off"}
                           </Button>
@@ -779,19 +1006,56 @@ export function EnhancedProfileForm() {
                     <CardContent className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                         <div>
-                          <h4 className="font-medium mb-2">Personal Information</h4>
-                          <p><strong>Name:</strong> {profileData.personalInfo.firstName} {profileData.personalInfo.lastName}</p>
-                          <p><strong>Email:</strong> {profileData.personalInfo.email}</p>
-                          {profileData.personalInfo.phone && <p><strong>Phone:</strong> {profileData.personalInfo.phone}</p>}
-                          {profileData.personalInfo.location && <p><strong>Location:</strong> {profileData.personalInfo.location}</p>}
+                          <h4 className="font-medium mb-2">
+                            Personal Information
+                          </h4>
+                          <p>
+                            <strong>Name:</strong>{" "}
+                            {profileData.personalInfo.firstName}{" "}
+                            {profileData.personalInfo.lastName}
+                          </p>
+                          <p>
+                            <strong>Email:</strong>{" "}
+                            {profileData.personalInfo.email}
+                          </p>
+                          {profileData.personalInfo.phone && (
+                            <p>
+                              <strong>Phone:</strong>{" "}
+                              {profileData.personalInfo.phone}
+                            </p>
+                          )}
+                          {profileData.personalInfo.location && (
+                            <p>
+                              <strong>Location:</strong>{" "}
+                              {profileData.personalInfo.location}
+                            </p>
+                          )}
                         </div>
-                        
+
                         <div>
                           <h4 className="font-medium mb-2">Fitness Profile</h4>
-                          {profileData.fitnessInfo.height && <p><strong>Height:</strong> {profileData.fitnessInfo.height} {unitSystem === 'metric' ? 'cm' : 'ft/in'}</p>}
-                          {profileData.fitnessInfo.weight && <p><strong>Weight:</strong> {profileData.fitnessInfo.weight} {unitSystem === 'metric' ? 'kg' : 'lbs'}</p>}
-                          <p><strong>Weekly Target:</strong> {profileData.fitnessInfo.weeklyTarget} workouts</p>
-                          <p><strong>Goals:</strong> {profileData.fitnessInfo.goals.length} selected</p>
+                          {profileData.fitnessInfo.height && (
+                            <p>
+                              <strong>Height:</strong>{" "}
+                              {profileData.fitnessInfo.height}{" "}
+                              {unitSystem === "metric" ? "cm" : "ft/in"}
+                            </p>
+                          )}
+                          {profileData.fitnessInfo.weight && (
+                            <p>
+                              <strong>Weight:</strong>{" "}
+                              {profileData.fitnessInfo.weight}{" "}
+                              {unitSystem === "metric" ? "kg" : "lbs"}
+                            </p>
+                          )}
+                          <p>
+                            <strong>Weekly Target:</strong>{" "}
+                            {profileData.fitnessInfo.weeklyTarget} workouts
+                          </p>
+                          <p>
+                            <strong>Goals:</strong>{" "}
+                            {profileData.fitnessInfo.goals.length} selected
+                          </p>
                         </div>
                       </div>
                     </CardContent>
@@ -806,8 +1070,10 @@ export function EnhancedProfileForm() {
                             <Award className="h-5 w-5 text-yellow-600" />
                             Profile Completeness Score
                           </span>
-                          <Badge 
-                            variant={getScoreBadge(validationResult.score).variant}
+                          <Badge
+                            variant={
+                              getScoreBadge(validationResult.score).variant
+                            }
                             className="text-lg px-3 py-1"
                           >
                             {validationResult.score}/100
@@ -816,14 +1082,16 @@ export function EnhancedProfileForm() {
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-3">
-                          <Progress value={validationResult.score} className="h-3" />
+                          <Progress
+                            value={validationResult.score}
+                            className="h-3"
+                          />
                           <p className="text-sm text-muted-foreground">
-                            {validationResult.score >= 80 
+                            {validationResult.score >= 80
                               ? "Excellent! Your profile is comprehensive and ready."
                               : validationResult.score >= 60
-                              ? "Good progress! Consider adding more details for better recommendations."
-                              : "Your profile needs more information for optimal experience."
-                            }
+                                ? "Good progress! Consider adding more details for better recommendations."
+                                : "Your profile needs more information for optimal experience."}
                           </p>
                         </div>
                       </CardContent>
@@ -845,9 +1113,11 @@ export function EnhancedProfileForm() {
                   Unsaved changes
                 </div>
               )}
-              <span>Step {currentStep + 1} of {steps.length}</span>
+              <span>
+                Step {currentStep + 1} of {steps.length}
+              </span>
             </div>
-            
+
             <div className="flex gap-2">
               <Button
                 variant="outline"
@@ -856,7 +1126,7 @@ export function EnhancedProfileForm() {
               >
                 Previous
               </Button>
-              
+
               {currentStep === steps.length - 1 ? (
                 <Button
                   onClick={handleSave}

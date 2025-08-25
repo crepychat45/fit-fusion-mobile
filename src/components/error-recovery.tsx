@@ -1,7 +1,7 @@
-import React, { Component, ReactNode } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react';
+import React, { Component, ReactNode } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertTriangle, RefreshCw, Home, Bug } from "lucide-react";
 
 interface ErrorRecoveryState {
   hasError: boolean;
@@ -14,7 +14,10 @@ interface ErrorRecoveryProps {
   fallback?: ReactNode;
 }
 
-export class ErrorRecovery extends Component<ErrorRecoveryProps, ErrorRecoveryState> {
+export class ErrorRecovery extends Component<
+  ErrorRecoveryProps,
+  ErrorRecoveryState
+> {
   constructor(props: ErrorRecoveryProps) {
     super(props);
     this.state = { hasError: false, error: null, errorInfo: null };
@@ -25,27 +28,27 @@ export class ErrorRecovery extends Component<ErrorRecoveryProps, ErrorRecoverySt
   }
 
   componentDidCatch(error: Error, errorInfo: any) {
-    console.error('ErrorRecovery caught an error:', error, errorInfo);
+    console.error("ErrorRecovery caught an error:", error, errorInfo);
     this.setState({
       hasError: true,
       error,
-      errorInfo
+      errorInfo,
     });
 
     // Send error to monitoring service (if available)
-    if (typeof window !== 'undefined' && 'navigator' in window) {
+    if (typeof window !== "undefined" && "navigator" in window) {
       try {
         // Send to analytics or error reporting service
-        console.error('Application Error:', {
+        console.error("Application Error:", {
           error: error.message,
           stack: error.stack,
           componentStack: errorInfo.componentStack,
           timestamp: new Date().toISOString(),
           userAgent: navigator.userAgent,
-          url: window.location.href
+          url: window.location.href,
         });
       } catch (reportingError) {
-        console.error('Failed to report error:', reportingError);
+        console.error("Failed to report error:", reportingError);
       }
     }
   }
@@ -59,7 +62,7 @@ export class ErrorRecovery extends Component<ErrorRecoveryProps, ErrorRecoverySt
   };
 
   handleGoHome = () => {
-    window.location.href = '/';
+    window.location.href = "/";
   };
 
   render() {
@@ -75,16 +78,21 @@ export class ErrorRecovery extends Component<ErrorRecoveryProps, ErrorRecoverySt
               <div className="mx-auto mb-4 w-12 h-12 bg-destructive/10 rounded-full flex items-center justify-center">
                 <AlertTriangle className="h-6 w-6 text-destructive" />
               </div>
-              <CardTitle className="text-destructive">Something went wrong</CardTitle>
+              <CardTitle className="text-destructive">
+                Something went wrong
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground text-center">
-                We encountered an unexpected error. This has been logged and our team will investigate.
+                We encountered an unexpected error. This has been logged and our
+                team will investigate.
               </p>
-              
-              {process.env.NODE_ENV === 'development' && this.state.error && (
+
+              {process.env.NODE_ENV === "development" && this.state.error && (
                 <details className="bg-muted p-3 rounded-lg text-xs">
-                  <summary className="cursor-pointer font-medium">Error Details (Development)</summary>
+                  <summary className="cursor-pointer font-medium">
+                    Error Details (Development)
+                  </summary>
                   <div className="mt-2 space-y-2">
                     <div>
                       <strong>Error:</strong> {this.state.error.message}
@@ -106,13 +114,21 @@ export class ErrorRecovery extends Component<ErrorRecoveryProps, ErrorRecoverySt
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Try Again
                 </Button>
-                
-                <Button onClick={this.handleReload} variant="outline" className="w-full">
+
+                <Button
+                  onClick={this.handleReload}
+                  variant="outline"
+                  className="w-full"
+                >
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Reload Page
                 </Button>
-                
-                <Button onClick={this.handleGoHome} variant="ghost" className="w-full">
+
+                <Button
+                  onClick={this.handleGoHome}
+                  variant="ghost"
+                  className="w-full"
+                >
                   <Home className="h-4 w-4 mr-2" />
                   Go Home
                 </Button>
@@ -135,7 +151,7 @@ export class ErrorRecovery extends Component<ErrorRecoveryProps, ErrorRecoverySt
 // Simple functional error boundary for specific components
 export function withErrorRecovery<P extends object>(
   Component: React.ComponentType<P>,
-  fallback?: ReactNode
+  fallback?: ReactNode,
 ) {
   return function ErrorRecoveryWrapper(props: P) {
     return (
@@ -149,21 +165,21 @@ export function withErrorRecovery<P extends object>(
 // Hook for manual error reporting
 export function useErrorReporting() {
   const reportError = (error: Error, context?: string) => {
-    console.error('Manual error report:', { error, context });
-    
+    console.error("Manual error report:", { error, context });
+
     // Send to monitoring service
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       try {
-        console.error('User Reported Error:', {
+        console.error("User Reported Error:", {
           error: error.message,
           stack: error.stack,
           context,
           timestamp: new Date().toISOString(),
           userAgent: navigator.userAgent,
-          url: window.location.href
+          url: window.location.href,
         });
       } catch (reportingError) {
-        console.error('Failed to report error:', reportingError);
+        console.error("Failed to report error:", reportingError);
       }
     }
   };

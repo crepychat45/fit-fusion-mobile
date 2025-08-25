@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Language, availableLanguages } from "@/components/language-selector";
 
@@ -59,12 +58,14 @@ const LanguageContext = createContext<LanguageContextType>({
 
 export const useLanguage = () => useContext(LanguageContext);
 
-export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [currentLanguage, setCurrentLanguage] = useState<Language>(() => {
     // Try to get saved language from localStorage
     const savedLang = localStorage.getItem("fitfusion-language");
     if (savedLang) {
-      const lang = availableLanguages.find(l => l.code === savedLang);
+      const lang = availableLanguages.find((l) => l.code === savedLang);
       return lang || defaultLanguage;
     }
     return defaultLanguage;
@@ -77,7 +78,9 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Translation function
   const t = (key: string): string => {
-    return translations[currentLanguage.code]?.[key] || translations.en[key] || key;
+    return (
+      translations[currentLanguage.code]?.[key] || translations.en[key] || key
+    );
   };
 
   // Set language function

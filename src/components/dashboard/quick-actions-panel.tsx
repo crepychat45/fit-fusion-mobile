@@ -1,17 +1,16 @@
-
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Play, 
-  Dumbbell, 
-  MessageSquare, 
-  BarChart3, 
-  User, 
+import {
+  Play,
+  Dumbbell,
+  MessageSquare,
+  BarChart3,
+  User,
   Settings,
   Plus,
-  Timer
+  Timer,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -24,7 +23,8 @@ export function QuickActionsPanel() {
   const handleQuickStart = () => {
     toast({
       title: "Quick Workout Started!",
-      description: "Starting a 15-minute HIIT session based on your preferences.",
+      description:
+        "Starting a 15-minute HIIT session based on your preferences.",
     });
     navigate("/workout/1");
   };
@@ -35,29 +35,29 @@ export function QuickActionsPanel() {
       label: "Quick Start",
       description: "15-min HIIT",
       color: "bg-green-500",
-      action: handleQuickStart
+      action: handleQuickStart,
     },
     {
       icon: Dumbbell,
       label: "Workouts",
       description: "Browse all",
       color: "bg-blue-500",
-      action: () => navigate("/workouts")
+      action: () => navigate("/workouts"),
     },
     {
       icon: MessageSquare,
       label: "AI Coach",
       description: "Get advice",
       color: "bg-purple-500",
-      action: () => navigate("/chat")
+      action: () => navigate("/chat"),
     },
     {
       icon: BarChart3,
       label: "Progress",
       description: "View stats",
       color: "bg-orange-500",
-      action: () => navigate("/progress")
-    }
+      action: () => navigate("/progress"),
+    },
   ];
 
   const containerVariants = {
@@ -66,9 +66,9 @@ export function QuickActionsPanel() {
       opacity: 1,
       y: 0,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
 
   const itemVariants = {
@@ -76,8 +76,8 @@ export function QuickActionsPanel() {
     visible: {
       scale: 1,
       opacity: 1,
-      transition: { duration: 0.3 }
-    }
+      transition: { duration: 0.3 },
+    },
   };
 
   return (
@@ -98,7 +98,7 @@ export function QuickActionsPanel() {
       >
         {quickActions.map((action, index) => (
           <motion.div key={index} variants={itemVariants}>
-            <Card 
+            <Card
               className="cursor-pointer hover:shadow-md transition-all duration-200 border border-primary/10"
               onClick={action.action}
             >
@@ -111,7 +111,9 @@ export function QuickActionsPanel() {
                   <action.icon className="h-5 w-5" />
                 </motion.div>
                 <h3 className="text-sm font-medium">{action.label}</h3>
-                <p className="text-xs text-muted-foreground">{action.description}</p>
+                <p className="text-xs text-muted-foreground">
+                  {action.description}
+                </p>
               </CardContent>
             </Card>
           </motion.div>
@@ -130,10 +132,12 @@ export function QuickActionsPanel() {
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="text-sm font-medium">Customize Dashboard</h4>
-                <p className="text-xs text-muted-foreground">Personalize your experience</p>
+                <p className="text-xs text-muted-foreground">
+                  Personalize your experience
+                </p>
               </div>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="sm"
                 onClick={() => navigate("/settings")}
               >

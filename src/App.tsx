@@ -46,7 +46,10 @@ const AppContent: React.FC = () => {
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/workouts" element={<Workouts />} />
         <Route path="/workout-detail/:id" element={<WorkoutDetail />} />
-        <Route path="/exercise/:workoutId/:exerciseId" element={<ExerciseDetail />} />
+        <Route
+          path="/exercise/:workoutId/:exerciseId"
+          element={<ExerciseDetail />}
+        />
         <Route path="/progress" element={<Progress />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/chat" element={<ChatPage />} />

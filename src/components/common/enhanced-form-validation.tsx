@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useForm, FieldError } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,14 +7,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AlertCircle } from "lucide-react";
 
-const formSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const formSchema = z
+  .object({
+    email: z.string().email("Please enter a valid email address"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 type FormData = z.infer<typeof formSchema>;
 
@@ -27,7 +28,7 @@ interface EnhancedFormProps {
 
 function FormFieldError({ error }: { error?: FieldError }) {
   if (!error) return null;
-  
+
   return (
     <div className="flex items-center gap-1 text-sm text-destructive mt-1">
       <AlertCircle className="h-3 w-3" />
@@ -36,7 +37,11 @@ function FormFieldError({ error }: { error?: FieldError }) {
   );
 }
 
-export function EnhancedForm({ onSubmit, isLoading, submitText = "Submit" }: EnhancedFormProps) {
+export function EnhancedForm({
+  onSubmit,
+  isLoading,
+  submitText = "Submit",
+}: EnhancedFormProps) {
   const {
     register,
     handleSubmit,

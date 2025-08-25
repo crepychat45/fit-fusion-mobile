@@ -1,6 +1,12 @@
-
 import React, { useState } from "react";
-import { CreditCard, Shield, Lock, Zap, CheckCircle, AlertTriangle } from "lucide-react";
+import {
+  CreditCard,
+  Shield,
+  Lock,
+  Zap,
+  CheckCircle,
+  AlertTriangle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -23,21 +29,32 @@ const paymentPlans: PaymentPlan[] = [
     id: "basic",
     name: "Basic AI Chat",
     price: 9.99,
-    features: ["Basic AI responses", "Standard security", "Email support"]
+    features: ["Basic AI responses", "Standard security", "Email support"],
   },
   {
     id: "premium",
     name: "Premium AI Chat",
     price: 19.99,
-    features: ["Advanced AI models", "Enhanced security", "Priority support", "Custom AI training"],
-    popular: true
+    features: [
+      "Advanced AI models",
+      "Enhanced security",
+      "Priority support",
+      "Custom AI training",
+    ],
+    popular: true,
   },
   {
     id: "enterprise",
     name: "Enterprise AI Chat",
     price: 49.99,
-    features: ["All AI models", "Military-grade security", "24/7 support", "Custom integrations", "White-label options"]
-  }
+    features: [
+      "All AI models",
+      "Military-grade security",
+      "24/7 support",
+      "Custom integrations",
+      "White-label options",
+    ],
+  },
 ];
 
 interface SecurePaymentGatewayProps {
@@ -46,19 +63,21 @@ interface SecurePaymentGatewayProps {
 
 export function SecurePaymentGateway({ onClose }: SecurePaymentGatewayProps) {
   const [selectedPlan, setSelectedPlan] = useState<string>("premium");
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "crypto" | "bank">("card");
+  const [paymentMethod, setPaymentMethod] = useState<
+    "card" | "crypto" | "bank"
+  >("card");
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentComplete, setPaymentComplete] = useState(false);
   const { toast } = useToast();
 
   const handlePayment = async () => {
     setIsProcessing(true);
-    
+
     // Simulate secure payment processing
     try {
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise((resolve) => setTimeout(resolve, 3000));
       setPaymentComplete(true);
-      
+
       toast({
         title: "Payment Successful!",
         description: "Your FitFusion AI Chat upgrade has been activated.",
@@ -67,7 +86,7 @@ export function SecurePaymentGateway({ onClose }: SecurePaymentGatewayProps) {
       toast({
         title: "Payment Failed",
         description: "Please check your payment details and try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsProcessing(false);
@@ -112,11 +131,17 @@ export function SecurePaymentGateway({ onClose }: SecurePaymentGatewayProps) {
             Military-grade encryption • PCI DSS Compliant • 99.9% Uptime
           </p>
           <div className="flex justify-center gap-2 mt-2">
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            <Badge
+              variant="outline"
+              className="bg-green-50 text-green-700 border-green-200"
+            >
               <Shield className="h-3 w-3 mr-1" />
               SSL Secured
             </Badge>
-            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+            <Badge
+              variant="outline"
+              className="bg-blue-50 text-blue-700 border-blue-200"
+            >
               <Lock className="h-3 w-3 mr-1" />
               End-to-End Encrypted
             </Badge>
@@ -136,9 +161,9 @@ export function SecurePaymentGateway({ onClose }: SecurePaymentGatewayProps) {
                 key={plan.id}
                 className={`p-4 border rounded-lg cursor-pointer transition-all ${
                   selectedPlan === plan.id
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                    : 'border-gray-200 hover:border-gray-300'
-                } ${plan.popular ? 'ring-2 ring-blue-500' : ''}`}
+                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                    : "border-gray-200 hover:border-gray-300"
+                } ${plan.popular ? "ring-2 ring-blue-500" : ""}`}
                 onClick={() => setSelectedPlan(plan.id)}
               >
                 <div className="flex items-center justify-between mb-2">
@@ -176,11 +201,13 @@ export function SecurePaymentGateway({ onClose }: SecurePaymentGatewayProps) {
                 {[
                   { id: "card", label: "Card", icon: CreditCard },
                   { id: "crypto", label: "Crypto", icon: Zap },
-                  { id: "bank", label: "Bank", icon: Shield }
+                  { id: "bank", label: "Bank", icon: Shield },
                 ].map((method) => (
                   <Button
                     key={method.id}
-                    variant={paymentMethod === method.id ? "default" : "outline"}
+                    variant={
+                      paymentMethod === method.id ? "default" : "outline"
+                    }
                     size="sm"
                     onClick={() => setPaymentMethod(method.id as any)}
                     className="flex items-center gap-1"
@@ -208,28 +235,16 @@ export function SecurePaymentGateway({ onClose }: SecurePaymentGatewayProps) {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label htmlFor="expiry">Expiry Date</Label>
-                    <Input
-                      id="expiry"
-                      placeholder="MM/YY"
-                      className="mt-1"
-                    />
+                    <Input id="expiry" placeholder="MM/YY" className="mt-1" />
                   </div>
                   <div>
                     <Label htmlFor="cvv">CVV</Label>
-                    <Input
-                      id="cvv"
-                      placeholder="123"
-                      className="mt-1"
-                    />
+                    <Input id="cvv" placeholder="123" className="mt-1" />
                   </div>
                 </div>
                 <div>
                   <Label htmlFor="name">Cardholder Name</Label>
-                  <Input
-                    id="name"
-                    placeholder="John Doe"
-                    className="mt-1"
-                  />
+                  <Input id="name" placeholder="John Doe" className="mt-1" />
                 </div>
               </div>
             )}
@@ -279,7 +294,11 @@ export function SecurePaymentGateway({ onClose }: SecurePaymentGatewayProps) {
                 <>
                   <motion.div
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
                     className="mr-2"
                   >
                     <Zap className="h-4 w-4" />
@@ -289,7 +308,10 @@ export function SecurePaymentGateway({ onClose }: SecurePaymentGatewayProps) {
               ) : (
                 <>
                   <Lock className="h-4 w-4 mr-2" />
-                  Pay ${paymentPlans.find(p => p.id === selectedPlan)?.price} Securely
+                  Pay ${
+                    paymentPlans.find((p) => p.id === selectedPlan)?.price
+                  }{" "}
+                  Securely
                 </>
               )}
             </Button>

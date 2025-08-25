@@ -1,18 +1,23 @@
-
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Code, 
-  Terminal, 
-  Bug, 
-  Cpu, 
-  Database, 
+import {
+  Code,
+  Terminal,
+  Bug,
+  Cpu,
+  Database,
   Zap,
   AlertTriangle,
   CheckCircle,
@@ -24,7 +29,7 @@ import {
   Activity,
   Shield,
   Smartphone,
-  Globe
+  Globe,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -50,16 +55,24 @@ export function DeveloperOptions() {
     language: navigator.language,
     cookieEnabled: navigator.cookieEnabled,
     onLine: navigator.onLine,
-    memory: (performance as any).memory ? {
-      used: Math.round((performance as any).memory.usedJSHeapSize / 1024 / 1024),
-      total: Math.round((performance as any).memory.totalJSHeapSize / 1024 / 1024),
-      limit: Math.round((performance as any).memory.jsHeapSizeLimit / 1024 / 1024)
-    } : null
+    memory: (performance as any).memory
+      ? {
+          used: Math.round(
+            (performance as any).memory.usedJSHeapSize / 1024 / 1024,
+          ),
+          total: Math.round(
+            (performance as any).memory.totalJSHeapSize / 1024 / 1024,
+          ),
+          limit: Math.round(
+            (performance as any).memory.jsHeapSizeLimit / 1024 / 1024,
+          ),
+        }
+      : null,
   });
 
   const addLog = (message: string) => {
     const timestamp = new Date().toLocaleTimeString();
-    setLogs(prev => [`[${timestamp}] ${message}`, ...prev.slice(0, 99)]);
+    setLogs((prev) => [`[${timestamp}] ${message}`, ...prev.slice(0, 99)]);
   };
 
   const clearLogs = () => {
@@ -71,12 +84,12 @@ export function DeveloperOptions() {
   };
 
   const exportLogs = () => {
-    const logData = logs.join('\n');
-    const blob = new Blob([logData], { type: 'text/plain' });
+    const logData = logs.join("\n");
+    const blob = new Blob([logData], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `fitfusion-logs-${new Date().toISOString().split('T')[0]}.txt`;
+    a.download = `fitfusion-logs-${new Date().toISOString().split("T")[0]}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -95,7 +108,7 @@ export function DeveloperOptions() {
     });
 
     addLog("Starting system diagnostics...");
-    
+
     // Simulate diagnostic checks
     const checks = [
       "Checking JavaScript heap memory",
@@ -103,16 +116,16 @@ export function DeveloperOptions() {
       "Testing API connectivity",
       "Verifying service worker",
       "Checking browser compatibility",
-      "Testing performance metrics"
+      "Testing performance metrics",
     ];
 
     for (const check of checks) {
       addLog(check);
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
 
     addLog("✅ All diagnostics completed successfully");
-    
+
     toast({
       title: "✅ Diagnostics complete",
       description: "System is running optimally.",
@@ -124,7 +137,7 @@ export function DeveloperOptions() {
       toast({
         title: "⚠️ No script provided",
         description: "Please enter a JavaScript command to execute.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -133,7 +146,7 @@ export function DeveloperOptions() {
       addLog(`Executing: ${customScript}`);
       const result = eval(customScript);
       addLog(`Result: ${JSON.stringify(result)}`);
-      
+
       toast({
         title: "✅ Script executed",
         description: "Check the console for results.",
@@ -143,7 +156,7 @@ export function DeveloperOptions() {
       toast({
         title: "❌ Script error",
         description: "Check the console for error details.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -158,7 +171,7 @@ export function DeveloperOptions() {
         toast({
           title: "🐛 Error reported",
           description: "Simulated error has been logged.",
-          variant: "destructive"
+          variant: "destructive",
         });
       }
     }
@@ -169,9 +182,9 @@ export function DeveloperOptions() {
     setApiLogging(true);
     setPerformanceMonitoring(true);
     setDevConsole(true);
-    
+
     addLog("Developer mode enabled - all debugging features activated");
-    
+
     toast({
       title: "🚀 Developer mode enabled",
       description: "All debugging and monitoring features are now active.",
@@ -189,13 +202,13 @@ export function DeveloperOptions() {
       const interval = setInterval(() => {
         if ((performance as any).memory) {
           const memory = (performance as any).memory;
-          setSystemInfo(prev => ({
+          setSystemInfo((prev) => ({
             ...prev,
             memory: {
               used: Math.round(memory.usedJSHeapSize / 1024 / 1024),
               total: Math.round(memory.totalJSHeapSize / 1024 / 1024),
-              limit: Math.round(memory.jsHeapSizeLimit / 1024 / 1024)
-            }
+              limit: Math.round(memory.jsHeapSizeLimit / 1024 / 1024),
+            },
           }));
         }
       }, 5000);
@@ -217,10 +230,11 @@ export function DeveloperOptions() {
           <AlertDescription>
             <strong>Developer Options</strong>
             <br />
-            These advanced settings are intended for developers and may affect app performance or stability.
-            <Button 
-              variant="outline" 
-              size="sm" 
+            These advanced settings are intended for developers and may affect
+            app performance or stability.
+            <Button
+              variant="outline"
+              size="sm"
               className="mt-2 ml-0"
               onClick={enableDeveloperMode}
             >
@@ -268,8 +282,15 @@ export function DeveloperOptions() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {debugMode && <Badge variant="default" className="text-xs">Active</Badge>}
-                    <Switch checked={debugMode} onCheckedChange={setDebugMode} />
+                    {debugMode && (
+                      <Badge variant="default" className="text-xs">
+                        Active
+                      </Badge>
+                    )}
+                    <Switch
+                      checked={debugMode}
+                      onCheckedChange={setDebugMode}
+                    />
                   </div>
                 </div>
 
@@ -283,7 +304,10 @@ export function DeveloperOptions() {
                       </p>
                     </div>
                   </div>
-                  <Switch checked={apiLogging} onCheckedChange={setApiLogging} />
+                  <Switch
+                    checked={apiLogging}
+                    onCheckedChange={setApiLogging}
+                  />
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -297,8 +321,15 @@ export function DeveloperOptions() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {experimentalFeatures && <Badge variant="secondary" className="text-xs">Beta</Badge>}
-                    <Switch checked={experimentalFeatures} onCheckedChange={setExperimentalFeatures} />
+                    {experimentalFeatures && (
+                      <Badge variant="secondary" className="text-xs">
+                        Beta
+                      </Badge>
+                    )}
+                    <Switch
+                      checked={experimentalFeatures}
+                      onCheckedChange={setExperimentalFeatures}
+                    />
                   </div>
                 </div>
 
@@ -312,7 +343,10 @@ export function DeveloperOptions() {
                       </p>
                     </div>
                   </div>
-                  <Switch checked={errorReporting} onCheckedChange={setErrorReporting} />
+                  <Switch
+                    checked={errorReporting}
+                    onCheckedChange={setErrorReporting}
+                  />
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -325,16 +359,27 @@ export function DeveloperOptions() {
                       </p>
                     </div>
                   </div>
-                  <Switch checked={customScripting} onCheckedChange={setCustomScripting} />
+                  <Switch
+                    checked={customScripting}
+                    onCheckedChange={setCustomScripting}
+                  />
                 </div>
 
                 <div className="pt-4 border-t">
                   <div className="flex gap-2">
-                    <Button variant="outline" onClick={runDiagnostics} className="flex-1">
+                    <Button
+                      variant="outline"
+                      onClick={runDiagnostics}
+                      className="flex-1"
+                    >
                       <Activity className="h-4 w-4 mr-2" />
                       Run Diagnostics
                     </Button>
-                    <Button variant="outline" onClick={simulateError} className="flex-1">
+                    <Button
+                      variant="outline"
+                      onClick={simulateError}
+                      className="flex-1"
+                    >
                       <Bug className="h-4 w-4 mr-2" />
                       Simulate Error
                     </Button>
@@ -373,7 +418,10 @@ export function DeveloperOptions() {
                       </p>
                     </div>
                   </div>
-                  <Switch checked={performanceMonitoring} onCheckedChange={setPerformanceMonitoring} />
+                  <Switch
+                    checked={performanceMonitoring}
+                    onCheckedChange={setPerformanceMonitoring}
+                  />
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -386,7 +434,10 @@ export function DeveloperOptions() {
                       </p>
                     </div>
                   </div>
-                  <Switch checked={memoryProfiler} onCheckedChange={setMemoryProfiler} />
+                  <Switch
+                    checked={memoryProfiler}
+                    onCheckedChange={setMemoryProfiler}
+                  />
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -399,7 +450,10 @@ export function DeveloperOptions() {
                       </p>
                     </div>
                   </div>
-                  <Switch checked={networkMonitor} onCheckedChange={setNetworkMonitor} />
+                  <Switch
+                    checked={networkMonitor}
+                    onCheckedChange={setNetworkMonitor}
+                  />
                 </div>
 
                 {systemInfo.memory && performanceMonitoring && (
@@ -410,7 +464,13 @@ export function DeveloperOptions() {
                         <span>Used Memory</span>
                         <span>{systemInfo.memory.used} MB</span>
                       </div>
-                      <Progress value={(systemInfo.memory.used / systemInfo.memory.limit) * 100} className="h-2" />
+                      <Progress
+                        value={
+                          (systemInfo.memory.used / systemInfo.memory.limit) *
+                          100
+                        }
+                        className="h-2"
+                      />
                       <div className="flex justify-between text-xs text-muted-foreground">
                         <span>Total: {systemInfo.memory.total} MB</span>
                         <span>Limit: {systemInfo.memory.limit} MB</span>
@@ -476,7 +536,9 @@ export function DeveloperOptions() {
                   <div className="bg-black text-green-400 p-4 rounded-lg font-mono text-sm h-64 overflow-y-auto">
                     <AnimatePresence>
                       {logs.length === 0 ? (
-                        <div className="text-muted-foreground">No logs available. Enable debug mode to see output.</div>
+                        <div className="text-muted-foreground">
+                          No logs available. Enable debug mode to see output.
+                        </div>
                       ) : (
                         logs.map((log, index) => (
                           <motion.div
@@ -519,21 +581,31 @@ export function DeveloperOptions() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="font-medium mb-1">Platform</p>
-                    <p className="text-muted-foreground">{systemInfo.platform}</p>
+                    <p className="text-muted-foreground">
+                      {systemInfo.platform}
+                    </p>
                   </div>
                   <div>
                     <p className="font-medium mb-1">Language</p>
-                    <p className="text-muted-foreground">{systemInfo.language}</p>
+                    <p className="text-muted-foreground">
+                      {systemInfo.language}
+                    </p>
                   </div>
                   <div>
                     <p className="font-medium mb-1">Cookies Enabled</p>
-                    <p className="text-muted-foreground">{systemInfo.cookieEnabled ? "Yes" : "No"}</p>
+                    <p className="text-muted-foreground">
+                      {systemInfo.cookieEnabled ? "Yes" : "No"}
+                    </p>
                   </div>
                   <div>
                     <p className="font-medium mb-1">Online Status</p>
                     <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${systemInfo.onLine ? 'bg-green-500' : 'bg-red-500'}`} />
-                      <span className="text-muted-foreground">{systemInfo.onLine ? "Online" : "Offline"}</span>
+                      <div
+                        className={`w-2 h-2 rounded-full ${systemInfo.onLine ? "bg-green-500" : "bg-red-500"}`}
+                      />
+                      <span className="text-muted-foreground">
+                        {systemInfo.onLine ? "Online" : "Offline"}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -547,11 +619,21 @@ export function DeveloperOptions() {
 
                 <div className="pt-4 border-t">
                   <div className="flex gap-2">
-                    <Button variant="outline" onClick={() => navigator.clipboard.writeText(JSON.stringify(systemInfo, null, 2))}>
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        navigator.clipboard.writeText(
+                          JSON.stringify(systemInfo, null, 2),
+                        )
+                      }
+                    >
                       <Upload className="h-4 w-4 mr-2" />
                       Copy System Info
                     </Button>
-                    <Button variant="outline" onClick={() => window.location.reload()}>
+                    <Button
+                      variant="outline"
+                      onClick={() => window.location.reload()}
+                    >
                       <RefreshCw className="h-4 w-4 mr-2" />
                       Reload App
                     </Button>

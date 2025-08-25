@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,56 +22,63 @@ interface TodaysWorkoutProps {
 export function TodaysWorkout({ workouts, onReschedule }: TodaysWorkoutProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const handleStartWorkout = (workout: Workout) => {
     try {
       const audio = new Audio("/workout-start.mp3");
       audio.volume = 0.3;
-      audio.play().catch(err => console.log("Audio playback prevented: ", err));
-      
+      audio
+        .play()
+        .catch((err) => console.log("Audio playback prevented: ", err));
+
       toast({
         title: "Workout Started",
         description: `Starting ${workout.name} workout. Let's crush it!`,
       });
-      
+
       navigate(`/workout-detail/${workout.id}`);
     } catch (error) {
       console.error("Error starting workout:", error);
       toast({
         title: "Error",
         description: "Failed to start workout. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
-  
-  const todaysWorkouts = workouts.filter(workout => workout.day === "Today");
-  
+
+  const todaysWorkouts = workouts.filter((workout) => workout.day === "Today");
+
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
     visible: {
       y: 0,
       opacity: 1,
-      transition: { duration: 0.5 }
-    }
+      transition: { duration: 0.5 },
+    },
   };
-  
+
   return (
     <div className="px-4 mt-6">
       <div className="flex items-center justify-between mb-3">
         <h2 className="font-medium">Today's Workout</h2>
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <Button
+          variant="ghost"
+          size="sm"
           className="flex items-center text-xs text-muted-foreground"
           onClick={() => navigate("/workouts")}
         >
           See All <ChevronRight className="h-4 w-4 ml-1" />
         </Button>
       </div>
-      
+
       {todaysWorkouts.map((workout) => (
-        <motion.div key={workout.id} variants={itemVariants} initial="hidden" animate="visible">
+        <motion.div
+          key={workout.id}
+          variants={itemVariants}
+          initial="hidden"
+          animate="visible"
+        >
           <Card className="mb-3 overflow-hidden border border-primary/10 shadow-md">
             <CardContent className="p-0">
               <div className="flex items-center p-4">
@@ -90,17 +96,17 @@ export function TodaysWorkout({ workouts, onReschedule }: TodaysWorkoutProps) {
                   </div>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-2 p-3 bg-muted/30 border-t">
-                <Button 
-                  variant="default" 
+                <Button
+                  variant="default"
                   className="w-full"
                   onClick={() => handleStartWorkout(workout)}
                 >
                   Start Workout
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="w-full"
                   onClick={() => onReschedule(workout)}
                 >

@@ -1,11 +1,17 @@
-
-import React from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Check, CheckCircle2 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { useSettings } from '@/contexts/settings-context';
-import { useToast } from '@/components/ui/use-toast';
+import React from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Check, CheckCircle2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { useSettings } from "@/contexts/settings-context";
+import { useToast } from "@/components/ui/use-toast";
 
 interface SubscriptionPlanCardProps {
   type: "Free" | "Basic" | "Super" | "Advance";
@@ -22,7 +28,7 @@ export function SubscriptionPlanCard({
   currency = "INR",
   features,
   popular,
-  onSelectPlan
+  onSelectPlan,
 }: SubscriptionPlanCardProps) {
   const { subscriptionPlan } = useSettings();
   const { toast } = useToast();
@@ -42,7 +48,7 @@ export function SubscriptionPlanCard({
       });
       return;
     }
-    
+
     onSelectPlan();
   };
 
@@ -53,17 +59,19 @@ export function SubscriptionPlanCard({
           Popular
         </Badge>
       )}
-      
+
       {isCurrentPlan && (
         <div className="absolute top-2 right-2">
           <CheckCircle2 className="h-5 w-5 text-primary" />
         </div>
       )}
-      
+
       <CardHeader>
         <CardTitle className="text-xl">{type}</CardTitle>
         <div className="flex items-baseline text-muted-foreground">
-          <span className="text-3xl font-bold text-foreground">{currency} {price}</span>
+          <span className="text-3xl font-bold text-foreground">
+            {currency} {price}
+          </span>
           {type !== "Free" && <span className="ml-1">/month</span>}
         </div>
         <CardDescription>
@@ -73,7 +81,7 @@ export function SubscriptionPlanCard({
           {type === "Advance" && "Complete premium experience"}
         </CardDescription>
       </CardHeader>
-      
+
       <CardContent>
         <ul className="space-y-2">
           {features.map((feature, index) => (
@@ -84,9 +92,9 @@ export function SubscriptionPlanCard({
           ))}
         </ul>
       </CardContent>
-      
+
       <CardFooter>
-        <Button 
+        <Button
           onClick={handleSelectPlan}
           variant={isCurrentPlan ? "outline" : popular ? "default" : "outline"}
           className="w-full"

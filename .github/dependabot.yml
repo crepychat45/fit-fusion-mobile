@@ -18,7 +18,6 @@ updates:
     commit-message:
       prefix: "fix(deps):"
       include: "scope"
-
 # If you use other ecosystems, add more entries under `updates`.
 # Example for GitHub Actions:
 #  - package-ecosystem: "github-actions"

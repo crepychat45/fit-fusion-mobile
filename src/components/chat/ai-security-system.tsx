@@ -1,6 +1,16 @@
-
 import React, { useState, useEffect } from "react";
-import { Shield, Lock, Eye, EyeOff, AlertTriangle, CheckCircle, Zap, Brain, Fingerprint, Key } from "lucide-react";
+import {
+  Shield,
+  Lock,
+  Eye,
+  EyeOff,
+  AlertTriangle,
+  CheckCircle,
+  Zap,
+  Brain,
+  Fingerprint,
+  Key,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -35,7 +45,7 @@ export function AISecuritySystem() {
       description: "Real-time AI-powered threat analysis and blocking",
       enabled: true,
       level: "military",
-      icon: <Brain className="h-4 w-4" />
+      icon: <Brain className="h-4 w-4" />,
     },
     {
       id: "end-to-end-encryption",
@@ -43,7 +53,7 @@ export function AISecuritySystem() {
       description: "AES-256 encryption for all communications",
       enabled: true,
       level: "military",
-      icon: <Lock className="h-4 w-4" />
+      icon: <Lock className="h-4 w-4" />,
     },
     {
       id: "biometric-auth",
@@ -51,7 +61,7 @@ export function AISecuritySystem() {
       description: "Fingerprint and face recognition security",
       enabled: false,
       level: "advanced",
-      icon: <Fingerprint className="h-4 w-4" />
+      icon: <Fingerprint className="h-4 w-4" />,
     },
     {
       id: "quantum-encryption",
@@ -59,7 +69,7 @@ export function AISecuritySystem() {
       description: "Next-generation quantum-resistant encryption",
       enabled: true,
       level: "military",
-      icon: <Zap className="h-4 w-4" />
+      icon: <Zap className="h-4 w-4" />,
     },
     {
       id: "ai-behavior-analysis",
@@ -67,7 +77,7 @@ export function AISecuritySystem() {
       description: "Analyze user behavior patterns for anomaly detection",
       enabled: true,
       level: "advanced",
-      icon: <Eye className="h-4 w-4" />
+      icon: <Eye className="h-4 w-4" />,
     },
     {
       id: "secure-key-management",
@@ -75,8 +85,8 @@ export function AISecuritySystem() {
       description: "Hardware security module for key storage",
       enabled: true,
       level: "military",
-      icon: <Key className="h-4 w-4" />
-    }
+      icon: <Key className="h-4 w-4" />,
+    },
   ]);
 
   const [recentThreats, setRecentThreats] = useState<SecurityThreat[]>([
@@ -85,22 +95,22 @@ export function AISecuritySystem() {
       type: "Malicious Input Injection",
       severity: "high",
       blocked: true,
-      timestamp: new Date(Date.now() - 5 * 60 * 1000)
+      timestamp: new Date(Date.now() - 5 * 60 * 1000),
     },
     {
       id: "2",
       type: "Unauthorized Access Attempt",
       severity: "critical",
       blocked: true,
-      timestamp: new Date(Date.now() - 12 * 60 * 1000)
+      timestamp: new Date(Date.now() - 12 * 60 * 1000),
     },
     {
       id: "3",
       type: "Data Exfiltration Attempt",
       severity: "medium",
       blocked: true,
-      timestamp: new Date(Date.now() - 25 * 60 * 1000)
-    }
+      timestamp: new Date(Date.now() - 25 * 60 * 1000),
+    },
   ]);
 
   const [securityScore, setSecurityScore] = useState(98);
@@ -108,33 +118,33 @@ export function AISecuritySystem() {
   const { toast } = useToast();
 
   const toggleSecurityFeature = (featureId: string) => {
-    setSecurityFeatures(prev => 
-      prev.map(feature => 
-        feature.id === featureId 
+    setSecurityFeatures((prev) =>
+      prev.map((feature) =>
+        feature.id === featureId
           ? { ...feature, enabled: !feature.enabled }
-          : feature
-      )
+          : feature,
+      ),
     );
-    
-    const feature = securityFeatures.find(f => f.id === featureId);
+
+    const feature = securityFeatures.find((f) => f.id === featureId);
     toast({
-      title: `Security Feature ${feature?.enabled ? 'Disabled' : 'Enabled'}`,
+      title: `Security Feature ${feature?.enabled ? "Disabled" : "Enabled"}`,
       description: feature?.name,
     });
   };
 
   const runSecurityScan = async () => {
     setIsScanning(true);
-    
+
     // Simulate security scan
     for (let i = 0; i <= 100; i += 10) {
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 200));
       setSecurityScore(i);
     }
-    
+
     setSecurityScore(96 + Math.floor(Math.random() * 4));
     setIsScanning(false);
-    
+
     toast({
       title: "Security Scan Complete",
       description: `System security level: ${securityScore}%`,
@@ -143,20 +153,29 @@ export function AISecuritySystem() {
 
   const getLevelColor = (level: string) => {
     switch (level) {
-      case "basic": return "bg-yellow-500";
-      case "advanced": return "bg-blue-500";
-      case "military": return "bg-red-500";
-      default: return "bg-gray-500";
+      case "basic":
+        return "bg-yellow-500";
+      case "advanced":
+        return "bg-blue-500";
+      case "military":
+        return "bg-red-500";
+      default:
+        return "bg-gray-500";
     }
   };
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case "low": return "text-green-500";
-      case "medium": return "text-yellow-500";
-      case "high": return "text-orange-500";
-      case "critical": return "text-red-500";
-      default: return "text-gray-500";
+      case "low":
+        return "text-green-500";
+      case "medium":
+        return "text-yellow-500";
+      case "high":
+        return "text-orange-500";
+      case "critical":
+        return "text-red-500";
+      default:
+        return "text-gray-500";
     }
   };
 
@@ -179,21 +198,33 @@ export function AISecuritySystem() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-500">{securityScore}%</div>
-              <div className="text-sm text-muted-foreground">Security Score</div>
+              <div className="text-2xl font-bold text-green-500">
+                {securityScore}%
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Security Score
+              </div>
               <Progress value={securityScore} className="mt-2" />
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-500">{recentThreats.filter(t => t.blocked).length}</div>
-              <div className="text-sm text-muted-foreground">Threats Blocked</div>
+              <div className="text-2xl font-bold text-blue-500">
+                {recentThreats.filter((t) => t.blocked).length}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Threats Blocked
+              </div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-purple-500">{securityFeatures.filter(f => f.enabled).length}</div>
-              <div className="text-sm text-muted-foreground">Active Features</div>
+              <div className="text-2xl font-bold text-purple-500">
+                {securityFeatures.filter((f) => f.enabled).length}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Active Features
+              </div>
             </div>
           </div>
-          
-          <Button 
+
+          <Button
             onClick={runSecurityScan}
             disabled={isScanning}
             className="w-full mt-4 bg-gradient-to-r from-blue-500 to-purple-500"
@@ -227,15 +258,25 @@ export function AISecuritySystem() {
           </CardHeader>
           <CardContent className="space-y-4">
             {securityFeatures.map((feature) => (
-              <div key={feature.id} className="flex items-center justify-between p-3 border rounded-lg">
+              <div
+                key={feature.id}
+                className="flex items-center justify-between p-3 border rounded-lg"
+              >
                 <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-full ${getLevelColor(feature.level)}`}>
+                  <div
+                    className={`p-2 rounded-full ${getLevelColor(feature.level)}`}
+                  >
                     {feature.icon}
                   </div>
                   <div>
                     <div className="font-medium">{feature.name}</div>
-                    <div className="text-sm text-muted-foreground">{feature.description}</div>
-                    <Badge variant="outline" className={`mt-1 ${getLevelColor(feature.level)} text-white border-0`}>
+                    <div className="text-sm text-muted-foreground">
+                      {feature.description}
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className={`mt-1 ${getLevelColor(feature.level)} text-white border-0`}
+                    >
                       {feature.level.toUpperCase()}
                     </Badge>
                   </div>
@@ -266,7 +307,9 @@ export function AISecuritySystem() {
                     className="flex items-center justify-between p-3 border rounded-lg"
                   >
                     <div className="flex items-center gap-3">
-                      <AlertTriangle className={`h-4 w-4 ${getSeverityColor(threat.severity)}`} />
+                      <AlertTriangle
+                        className={`h-4 w-4 ${getSeverityColor(threat.severity)}`}
+                      />
                       <div>
                         <div className="font-medium">{threat.type}</div>
                         <div className="text-sm text-muted-foreground">
@@ -275,7 +318,13 @@ export function AISecuritySystem() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant={threat.severity === "critical" ? "destructive" : "outline"}>
+                      <Badge
+                        variant={
+                          threat.severity === "critical"
+                            ? "destructive"
+                            : "outline"
+                        }
+                      >
                         {threat.severity.toUpperCase()}
                       </Badge>
                       {threat.blocked && (

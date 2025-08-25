@@ -5,48 +5,56 @@ export class ImageOptimizer {
 
   // Lazy loading for images
   static setupLazyLoading() {
-    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
+    if (typeof window === "undefined" || !("IntersectionObserver" in window)) {
       return;
     }
 
-    this.observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const img = entry.target as HTMLImageElement;
-          const src = img.dataset.src;
-          
-          if (src) {
-            img.src = src;
-            img.removeAttribute('data-src');
-            this.observer?.unobserve(img);
+    this.observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const img = entry.target as HTMLImageElement;
+            const src = img.dataset.src;
+
+            if (src) {
+              img.src = src;
+              img.removeAttribute("data-src");
+              this.observer?.unobserve(img);
+            }
           }
-        }
-      });
-    }, {
-      rootMargin: '50px 0px',
-      threshold: 0.01
-    });
+        });
+      },
+      {
+        rootMargin: "50px 0px",
+        threshold: 0.01,
+      },
+    );
 
     // Observe all images with data-src
-    document.querySelectorAll('img[data-src]').forEach((img) => {
+    document.querySelectorAll("img[data-src]").forEach((img) => {
       this.observer?.observe(img);
     });
   }
 
   // WebP format detection and fallback
   static async supportsWebP(): Promise<boolean> {
-    if (typeof window === 'undefined') return false;
-    
+    if (typeof window === "undefined") return false;
+
     return new Promise((resolve) => {
       const webP = new Image();
       webP.onload = webP.onerror = () => resolve(webP.height === 2);
-      webP.src = 'data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA';
+      webP.src =
+        "data:image/webp;base64,UklGRjoAAABXRUJQVlA4IC4AAACyAgCdASoCAAIALmk0mk0iIiIiIgBoSygABc6WWgAA/veff/0PP8bA//LwYAAA";
     });
   }
 
   // Generate optimized image URL
-  static getOptimizedImageUrl(originalUrl: string, width?: number, height?: number): string {
-    if (!originalUrl || originalUrl.startsWith('/placeholder.svg')) {
+  static getOptimizedImageUrl(
+    originalUrl: string,
+    width?: number,
+    height?: number,
+  ): string {
+    if (!originalUrl || originalUrl.startsWith("/placeholder.svg")) {
       return originalUrl;
     }
 
@@ -59,12 +67,15 @@ export class ImageOptimizer {
     let optimizedUrl = originalUrl;
 
     // For external URLs (like Unsplash), add optimization parameters
-    if (originalUrl.includes('unsplash.com') || originalUrl.includes('randomuser.me')) {
+    if (
+      originalUrl.includes("unsplash.com") ||
+      originalUrl.includes("randomuser.me")
+    ) {
       const url = new URL(originalUrl);
-      if (width) url.searchParams.set('w', width.toString());
-      if (height) url.searchParams.set('h', height.toString());
-      url.searchParams.set('fit', 'crop');
-      url.searchParams.set('auto', 'format,compress');
+      if (width) url.searchParams.set("w", width.toString());
+      if (height) url.searchParams.set("h", height.toString());
+      url.searchParams.set("fit", "crop");
+      url.searchParams.set("auto", "format,compress");
       optimizedUrl = url.toString();
     }
 
@@ -85,29 +96,29 @@ export class ImageOptimizer {
 
   // Create a loading placeholder
   static createPlaceholder(width: number, height: number): string {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
     canvas.width = width;
     canvas.height = height;
-    
+
     if (ctx) {
       // Create gradient background
       const gradient = ctx.createLinearGradient(0, 0, width, height);
-      gradient.addColorStop(0, '#f3f4f6');
-      gradient.addColorStop(1, '#e5e7eb');
-      
+      gradient.addColorStop(0, "#f3f4f6");
+      gradient.addColorStop(1, "#e5e7eb");
+
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, width, height);
-      
+
       // Add loading icon
-      ctx.fillStyle = '#9ca3af';
+      ctx.fillStyle = "#9ca3af";
       ctx.font = `${Math.min(width, height) * 0.1}px sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('Loading...', width / 2, height / 2);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("Loading...", width / 2, height / 2);
     }
-    
+
     return canvas.toDataURL();
   }
 
@@ -123,9 +134,9 @@ export class ImageOptimizer {
 }
 
 // Initialize lazy loading when DOM is ready
-if (typeof window !== 'undefined') {
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
+if (typeof window !== "undefined") {
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
       ImageOptimizer.setupLazyLoading();
     });
   } else {

@@ -1,13 +1,25 @@
-
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Moon, Sun, Monitor, Eye, LayoutGrid, 
-  PanelLeft, Type, Lightbulb
+import {
+  Moon,
+  Sun,
+  Monitor,
+  Eye,
+  LayoutGrid,
+  PanelLeft,
+  Type,
+  Lightbulb,
 } from "lucide-react";
 import {
   Select,
@@ -25,15 +37,15 @@ import { useSettings } from "@/contexts/settings-context";
 export function DisplaySettings() {
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
-  const { 
-    fontSize, 
-    setFontSize, 
-    compactView, 
+  const {
+    fontSize,
+    setFontSize,
+    compactView,
     setCompactView,
     displayOptions,
-    setDisplayOption 
+    setDisplayOption,
   } = useSettings();
-  
+
   const [textSize, setTextSize] = useState(fontSize);
   const [fontFamily, setFontFamily] = useState("Inter");
   const [colorBlindMode, setColorBlindMode] = useState("none");
@@ -47,7 +59,7 @@ export function DisplaySettings() {
       description: `App theme set to ${newTheme}.`,
     });
   };
-  
+
   const handleFontSizeChange = (size: "small" | "medium" | "large") => {
     setTextSize(size);
     setFontSize(size);
@@ -55,10 +67,14 @@ export function DisplaySettings() {
       title: `Font Size Changed`,
       description: `Text size set to ${size}.`,
     });
-    
+
     // Apply the font size to the document root
-    document.documentElement.classList.remove("text-sm", "text-base", "text-lg");
-    
+    document.documentElement.classList.remove(
+      "text-sm",
+      "text-base",
+      "text-lg",
+    );
+
     switch (size) {
       case "small":
         document.documentElement.classList.add("text-sm");
@@ -71,46 +87,49 @@ export function DisplaySettings() {
         break;
     }
   };
-  
+
   const handleCompactViewToggle = (checked: boolean) => {
     setCompactView(checked);
-    
+
     // Simulate applying changes
     setIsApplyingChange(true);
     setTimeout(() => {
       toast({
-        title: `${checked ? 'Compact' : 'Standard'} View Enabled`,
+        title: `${checked ? "Compact" : "Standard"} View Enabled`,
         description: `Layout has been updated.`,
       });
       setIsApplyingChange(false);
     }, 500);
   };
-  
-  const handleDisplayOptionToggle = (option: keyof typeof displayOptions, checked: boolean) => {
+
+  const handleDisplayOptionToggle = (
+    option: keyof typeof displayOptions,
+    checked: boolean,
+  ) => {
     setDisplayOption(option, checked);
     toast({
-      title: `${formatOptionName(option)} ${checked ? 'Enabled' : 'Disabled'}`,
+      title: `${formatOptionName(option)} ${checked ? "Enabled" : "Disabled"}`,
       description: `Display setting updated successfully.`,
     });
   };
-  
+
   const formatOptionName = (option: string) => {
     return option
-      .replace(/([A-Z])/g, ' $1')
+      .replace(/([A-Z])/g, " $1")
       .replace(/^./, (str) => str.toUpperCase());
   };
-  
+
   const handleColorBlindModeChange = (mode: string) => {
     setColorBlindMode(mode);
-    
+
     // Apply color blind mode
     document.documentElement.classList.remove(
-      "color-normal", 
-      "color-protanopia", 
-      "color-deuteranopia", 
-      "color-tritanopia"
+      "color-normal",
+      "color-protanopia",
+      "color-deuteranopia",
+      "color-tritanopia",
     );
-    
+
     switch (mode) {
       case "protanopia":
         document.documentElement.classList.add("color-protanopia");
@@ -124,23 +143,27 @@ export function DisplaySettings() {
       default:
         document.documentElement.classList.add("color-normal");
     }
-    
+
     toast({
       title: "Accessibility Setting Updated",
-      description: mode === "none" 
-        ? "Standard color mode enabled" 
-        : `Color blind mode: ${mode}`,
+      description:
+        mode === "none"
+          ? "Standard color mode enabled"
+          : `Color blind mode: ${mode}`,
     });
   };
-  
+
   const handleContrastChange = (value: number[]) => {
     const level = value[0];
     setContrastLevel(level);
-    
+
     // Apply contrast level
-    document.documentElement.style.setProperty('--contrast-factor', `${level / 50}`);
+    document.documentElement.style.setProperty(
+      "--contrast-factor",
+      `${level / 50}`,
+    );
   };
-  
+
   return (
     <div className="space-y-6">
       <Card>
@@ -178,7 +201,7 @@ export function DisplaySettings() {
               </Button>
             </div>
           </div>
-          
+
           <div>
             <div className="mb-2 text-sm font-medium">Font Size</div>
             <div className="flex flex-wrap gap-2">
@@ -205,14 +228,17 @@ export function DisplaySettings() {
               </Button>
             </div>
           </div>
-          
+
           <div>
             <div className="mb-2 text-sm font-medium">Font Family</div>
             <Select
               value={fontFamily}
               onValueChange={(value) => {
                 setFontFamily(value);
-                document.documentElement.style.setProperty('--font-family', value);
+                document.documentElement.style.setProperty(
+                  "--font-family",
+                  value,
+                );
                 toast({
                   title: "Font Changed",
                   description: `Font family set to ${value}.`,
@@ -231,18 +257,20 @@ export function DisplaySettings() {
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <LayoutGrid className="h-4 w-4 text-muted-foreground" />
               <div>
                 <p className="font-medium">Compact View</p>
-                <p className="text-xs text-muted-foreground">Show more content in less space</p>
+                <p className="text-xs text-muted-foreground">
+                  Show more content in less space
+                </p>
               </div>
             </div>
-            <Switch 
-              checked={compactView} 
-              onCheckedChange={handleCompactViewToggle} 
+            <Switch
+              checked={compactView}
+              onCheckedChange={handleCompactViewToggle}
               disabled={isApplyingChange}
             />
           </div>
@@ -252,7 +280,9 @@ export function DisplaySettings() {
       <Card>
         <CardHeader>
           <CardTitle>Visual Effects</CardTitle>
-          <CardDescription>Control animations and visual elements</CardDescription>
+          <CardDescription>
+            Control animations and visual elements
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
@@ -262,13 +292,15 @@ export function DisplaySettings() {
                 Show animations for UI elements
               </span>
             </div>
-            <Switch 
-              id="animations" 
-              checked={displayOptions.animations} 
-              onCheckedChange={(checked) => handleDisplayOptionToggle("animations", checked)} 
+            <Switch
+              id="animations"
+              checked={displayOptions.animations}
+              onCheckedChange={(checked) =>
+                handleDisplayOptionToggle("animations", checked)
+              }
             />
           </div>
-          
+
           <div className="flex items-center justify-between">
             <div className="flex flex-col space-y-1">
               <Label htmlFor="highContrast">High Contrast</Label>
@@ -276,13 +308,15 @@ export function DisplaySettings() {
                 Increase contrast for better visibility
               </span>
             </div>
-            <Switch 
-              id="highContrast" 
-              checked={displayOptions.highContrast} 
-              onCheckedChange={(checked) => handleDisplayOptionToggle("highContrast", checked)} 
+            <Switch
+              id="highContrast"
+              checked={displayOptions.highContrast}
+              onCheckedChange={(checked) =>
+                handleDisplayOptionToggle("highContrast", checked)
+              }
             />
           </div>
-          
+
           <div className="flex items-center justify-between">
             <div className="flex flex-col space-y-1">
               <Label htmlFor="showTips">Show Tips</Label>
@@ -290,13 +324,15 @@ export function DisplaySettings() {
                 Display helpful tips while using the app
               </span>
             </div>
-            <Switch 
-              id="showTips" 
-              checked={displayOptions.showTips} 
-              onCheckedChange={(checked) => handleDisplayOptionToggle("showTips", checked)} 
+            <Switch
+              id="showTips"
+              checked={displayOptions.showTips}
+              onCheckedChange={(checked) =>
+                handleDisplayOptionToggle("showTips", checked)
+              }
             />
           </div>
-          
+
           <div className="flex items-center justify-between">
             <div className="flex flex-col space-y-1">
               <Label htmlFor="darkModeSchedule">Dark Mode Schedule</Label>
@@ -304,13 +340,15 @@ export function DisplaySettings() {
                 Automatically switch between light and dark mode
               </span>
             </div>
-            <Switch 
-              id="darkModeSchedule" 
-              checked={displayOptions.darkModeSchedule} 
-              onCheckedChange={(checked) => handleDisplayOptionToggle("darkModeSchedule", checked)} 
+            <Switch
+              id="darkModeSchedule"
+              checked={displayOptions.darkModeSchedule}
+              onCheckedChange={(checked) =>
+                handleDisplayOptionToggle("darkModeSchedule", checked)
+              }
             />
           </div>
-          
+
           <div className="flex items-center justify-between">
             <div className="flex flex-col space-y-1">
               <Label htmlFor="customFonts">Custom Fonts</Label>
@@ -318,10 +356,12 @@ export function DisplaySettings() {
                 Allow using custom fonts in the app
               </span>
             </div>
-            <Switch 
-              id="customFonts" 
-              checked={displayOptions.customFonts} 
-              onCheckedChange={(checked) => handleDisplayOptionToggle("customFonts", checked)} 
+            <Switch
+              id="customFonts"
+              checked={displayOptions.customFonts}
+              onCheckedChange={(checked) =>
+                handleDisplayOptionToggle("customFonts", checked)
+              }
             />
           </div>
         </CardContent>
@@ -330,14 +370,18 @@ export function DisplaySettings() {
       <Card>
         <CardHeader>
           <CardTitle>Accessibility</CardTitle>
-          <CardDescription>Settings to improve app accessibility</CardDescription>
+          <CardDescription>
+            Settings to improve app accessibility
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
-            <Label htmlFor="colorBlindMode" className="mb-2 block">Color Blind Mode</Label>
-            <RadioGroup 
-              id="colorBlindMode" 
-              value={colorBlindMode} 
+            <Label htmlFor="colorBlindMode" className="mb-2 block">
+              Color Blind Mode
+            </Label>
+            <RadioGroup
+              id="colorBlindMode"
+              value={colorBlindMode}
               onValueChange={handleColorBlindModeChange}
               className="flex flex-col space-y-2"
             >
@@ -359,13 +403,13 @@ export function DisplaySettings() {
               </div>
             </RadioGroup>
           </div>
-          
+
           <div>
             <div className="flex items-center justify-between mb-2">
               <Label htmlFor="contrast">Contrast Level</Label>
               <span className="text-sm font-medium">{contrastLevel}%</span>
             </div>
-            <Slider 
+            <Slider
               id="contrast"
               min={0}
               max={100}
@@ -385,8 +429,8 @@ export function DisplaySettings() {
             <Eye className="h-4 w-4 mr-1" />
             <span>These settings help make the app more accessible</span>
           </div>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             onClick={() => {
               // Reset to defaults
@@ -394,7 +438,7 @@ export function DisplaySettings() {
               setContrastLevel(50);
               handleColorBlindModeChange("none");
               handleContrastChange([50]);
-              
+
               toast({
                 title: "Accessibility Reset",
                 description: "Settings have been reset to defaults.",

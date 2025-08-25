@@ -4,20 +4,20 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
-import { 
-  Smartphone, 
-  Tablet, 
-  Monitor, 
-  Wifi, 
-  Battery, 
+import {
+  Smartphone,
+  Tablet,
+  Monitor,
+  Wifi,
+  Battery,
   Signal,
   Info,
   Settings,
-  RefreshCw
+  RefreshCw,
 } from "lucide-react";
 
 interface DeviceInfo {
-  type: 'mobile' | 'tablet' | 'desktop';
+  type: "mobile" | "tablet" | "desktop";
   os: string;
   browser: string;
   screen: {
@@ -40,7 +40,9 @@ interface MobileDeviceDetectorProps {
   onDeviceChange?: (device: DeviceInfo) => void;
 }
 
-export function MobileDeviceDetector({ onDeviceChange }: MobileDeviceDetectorProps) {
+export function MobileDeviceDetector({
+  onDeviceChange,
+}: MobileDeviceDetectorProps) {
   const [deviceInfo, setDeviceInfo] = useState<DeviceInfo | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const { toast } = useToast();
@@ -49,38 +51,39 @@ export function MobileDeviceDetector({ onDeviceChange }: MobileDeviceDetectorPro
     const userAgent = navigator.userAgent;
     const width = window.innerWidth;
     const height = window.innerHeight;
-    
+
     // Device type detection
-    let type: 'mobile' | 'tablet' | 'desktop' = 'desktop';
+    let type: "mobile" | "tablet" | "desktop" = "desktop";
     if (width < 768) {
-      type = 'mobile';
+      type = "mobile";
     } else if (width < 1024) {
-      type = 'tablet';
+      type = "tablet";
     }
 
     // OS detection
-    let os = 'Unknown';
-    if (/Android/i.test(userAgent)) os = 'Android';
-    else if (/iPhone|iPad|iPod/i.test(userAgent)) os = 'iOS';
-    else if (/Windows/i.test(userAgent)) os = 'Windows';
-    else if (/Mac/i.test(userAgent)) os = 'macOS';
-    else if (/Linux/i.test(userAgent)) os = 'Linux';
+    let os = "Unknown";
+    if (/Android/i.test(userAgent)) os = "Android";
+    else if (/iPhone|iPad|iPod/i.test(userAgent)) os = "iOS";
+    else if (/Windows/i.test(userAgent)) os = "Windows";
+    else if (/Mac/i.test(userAgent)) os = "macOS";
+    else if (/Linux/i.test(userAgent)) os = "Linux";
 
     // Browser detection
-    let browser = 'Unknown';
-    if (/Chrome/i.test(userAgent)) browser = 'Chrome';
-    else if (/Firefox/i.test(userAgent)) browser = 'Firefox';
-    else if (/Safari/i.test(userAgent)) browser = 'Safari';
-    else if (/Edge/i.test(userAgent)) browser = 'Edge';
+    let browser = "Unknown";
+    if (/Chrome/i.test(userAgent)) browser = "Chrome";
+    else if (/Firefox/i.test(userAgent)) browser = "Firefox";
+    else if (/Safari/i.test(userAgent)) browser = "Safari";
+    else if (/Edge/i.test(userAgent)) browser = "Edge";
 
     // Features detection
-    const touchSupport = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    const orientation = width > height ? 'landscape' : 'portrait';
-    
-    let connection = 'Unknown';
-    if ('connection' in navigator) {
+    const touchSupport =
+      "ontouchstart" in window || navigator.maxTouchPoints > 0;
+    const orientation = width > height ? "landscape" : "portrait";
+
+    let connection = "Unknown";
+    if ("connection" in navigator) {
       const nav = navigator as any;
-      connection = nav.connection?.effectiveType || 'Unknown';
+      connection = nav.connection?.effectiveType || "Unknown";
     }
 
     return {
@@ -90,13 +93,13 @@ export function MobileDeviceDetector({ onDeviceChange }: MobileDeviceDetectorPro
       screen: {
         width,
         height,
-        ratio: Math.round((width / height) * 100) / 100
+        ratio: Math.round((width / height) * 100) / 100,
       },
       features: {
         touchSupport,
         orientation,
-        connection
-      }
+        connection,
+      },
     };
   };
 
@@ -104,7 +107,7 @@ export function MobileDeviceDetector({ onDeviceChange }: MobileDeviceDetectorPro
     const newDeviceInfo = detectDevice();
     setDeviceInfo(newDeviceInfo);
     onDeviceChange?.(newDeviceInfo);
-    
+
     toast({
       title: "📱 Device Detected",
       description: `${newDeviceInfo.type} • ${newDeviceInfo.os} • ${newDeviceInfo.screen.width}x${newDeviceInfo.screen.height}`,
@@ -113,34 +116,40 @@ export function MobileDeviceDetector({ onDeviceChange }: MobileDeviceDetectorPro
 
   useEffect(() => {
     updateDeviceInfo();
-    
+
     const handleResize = () => updateDeviceInfo();
     const handleOrientationChange = () => {
       setTimeout(updateDeviceInfo, 100); // Small delay for orientation change
     };
 
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('orientationchange', handleOrientationChange);
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", handleOrientationChange);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('orientationchange', handleOrientationChange);
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleOrientationChange);
     };
   }, []);
 
   const getDeviceIcon = (type: string) => {
     switch (type) {
-      case 'mobile': return Smartphone;
-      case 'tablet': return Tablet;
-      default: return Monitor;
+      case "mobile":
+        return Smartphone;
+      case "tablet":
+        return Tablet;
+      default:
+        return Monitor;
     }
   };
 
   const getDeviceColor = (type: string) => {
     switch (type) {
-      case 'mobile': return 'bg-blue-100 text-blue-600 border-blue-300';
-      case 'tablet': return 'bg-purple-100 text-purple-600 border-purple-300';
-      default: return 'bg-gray-100 text-gray-600 border-gray-300';
+      case "mobile":
+        return "bg-blue-100 text-blue-600 border-blue-300";
+      case "tablet":
+        return "bg-purple-100 text-purple-600 border-purple-300";
+      default:
+        return "bg-gray-100 text-gray-600 border-gray-300";
     }
   };
 
@@ -171,7 +180,7 @@ export function MobileDeviceDetector({ onDeviceChange }: MobileDeviceDetectorPro
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   {React.createElement(getDeviceIcon(deviceInfo.type), {
-                    className: "h-5 w-5 text-primary"
+                    className: "h-5 w-5 text-primary",
                   })}
                   <h3 className="font-semibold text-sm">Device Info</h3>
                 </div>
@@ -189,7 +198,9 @@ export function MobileDeviceDetector({ onDeviceChange }: MobileDeviceDetectorPro
                 {/* Device Type */}
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Type:</span>
-                  <Badge className={`text-xs ${getDeviceColor(deviceInfo.type)}`}>
+                  <Badge
+                    className={`text-xs ${getDeviceColor(deviceInfo.type)}`}
+                  >
                     {deviceInfo.type}
                   </Badge>
                 </div>
@@ -208,7 +219,9 @@ export function MobileDeviceDetector({ onDeviceChange }: MobileDeviceDetectorPro
 
                 {/* Screen Info */}
                 <div className="p-2 bg-muted/30 rounded-lg">
-                  <div className="text-xs text-muted-foreground mb-1">Screen</div>
+                  <div className="text-xs text-muted-foreground mb-1">
+                    Screen
+                  </div>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>
                       <span className="text-muted-foreground">Size:</span>
@@ -228,7 +241,9 @@ export function MobileDeviceDetector({ onDeviceChange }: MobileDeviceDetectorPro
                   <div className="text-xs text-muted-foreground">Features</div>
                   <div className="flex flex-wrap gap-1">
                     <Badge variant="outline" className="text-xs">
-                      {deviceInfo.features.touchSupport ? '👆 Touch' : '🖱️ Mouse'}
+                      {deviceInfo.features.touchSupport
+                        ? "👆 Touch"
+                        : "🖱️ Mouse"}
                     </Badge>
                     <Badge variant="outline" className="text-xs">
                       📱 {deviceInfo.features.orientation}

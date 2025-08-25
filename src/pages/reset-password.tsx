@@ -13,7 +13,7 @@ export default function ResetPassword() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -22,9 +22,9 @@ export default function ResetPassword() {
 
   useEffect(() => {
     // Check if we have a valid reset token
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
-    
+    const accessToken = searchParams.get("access_token");
+    const refreshToken = searchParams.get("refresh_token");
+
     if (accessToken && refreshToken) {
       setIsValidToken(true);
     } else {
@@ -33,7 +33,7 @@ export default function ResetPassword() {
         description: "This password reset link is invalid or has expired.",
         variant: "destructive",
       });
-      navigate('/');
+      navigate("/");
     }
   }, [searchParams, navigate, toast]);
 
@@ -43,15 +43,15 @@ export default function ResetPassword() {
       { test: /[a-z]/.test(password), message: "One lowercase letter" },
       { test: /[A-Z]/.test(password), message: "One uppercase letter" },
       { test: /\d/.test(password), message: "One number" },
-      { test: /[^a-zA-Z\d]/.test(password), message: "One special character" }
+      { test: /[^a-zA-Z\d]/.test(password), message: "One special character" },
     ];
-    
+
     return requirements;
   };
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (password !== confirmPassword) {
       toast({
         title: "Passwords Don't Match",
@@ -62,8 +62,8 @@ export default function ResetPassword() {
     }
 
     const requirements = validatePassword(password);
-    const unmetRequirements = requirements.filter(req => !req.test);
-    
+    const unmetRequirements = requirements.filter((req) => !req.test);
+
     if (unmetRequirements.length > 0) {
       toast({
         title: "Password Too Weak",
@@ -77,7 +77,7 @@ export default function ResetPassword() {
 
     try {
       const { error } = await supabase.auth.updateUser({
-        password: password
+        password: password,
       });
 
       if (error) throw error;
@@ -88,7 +88,7 @@ export default function ResetPassword() {
       });
 
       // Redirect to sign in
-      navigate('/');
+      navigate("/");
     } catch (error: any) {
       toast({
         title: "Reset Failed",
@@ -123,7 +123,7 @@ export default function ResetPassword() {
             >
               <Shield className="h-8 w-8 text-white" />
             </motion.div>
-            
+
             <div>
               <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 Reset Your Password
@@ -170,16 +170,25 @@ export default function ResetPassword() {
                     animate={{ opacity: 1, height: "auto" }}
                     className="space-y-2 p-3 bg-muted/50 rounded-lg"
                   >
-                    <p className="text-sm font-medium">Password Requirements:</p>
+                    <p className="text-sm font-medium">
+                      Password Requirements:
+                    </p>
                     <div className="grid grid-cols-1 gap-1">
                       {passwordRequirements.map((req, index) => (
-                        <div key={index} className="flex items-center gap-2 text-xs">
+                        <div
+                          key={index}
+                          className="flex items-center gap-2 text-xs"
+                        >
                           {req.test ? (
                             <CheckCircle className="h-3 w-3 text-green-500" />
                           ) : (
                             <XCircle className="h-3 w-3 text-red-500" />
                           )}
-                          <span className={req.test ? "text-green-700" : "text-red-600"}>
+                          <span
+                            className={
+                              req.test ? "text-green-700" : "text-red-600"
+                            }
+                          >
                             {req.message}
                           </span>
                         </div>
@@ -198,18 +207,18 @@ export default function ResetPassword() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className={
-                    confirmPassword && password === confirmPassword 
-                      ? "border-green-500" 
-                      : confirmPassword && password !== confirmPassword 
-                      ? "border-red-500" 
-                      : ""
+                    confirmPassword && password === confirmPassword
+                      ? "border-green-500"
+                      : confirmPassword && password !== confirmPassword
+                        ? "border-red-500"
+                        : ""
                   }
                   required
                 />
               </div>
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                 disabled={loading || password !== confirmPassword || !password}
               >

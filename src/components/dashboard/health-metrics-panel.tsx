@@ -1,16 +1,15 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { 
-  Heart, 
-  Activity, 
-  Droplets, 
-  Moon, 
+import {
+  Heart,
+  Activity,
+  Droplets,
+  Moon,
   ThermometerSun,
   TrendingUp,
-  Shield
+  Shield,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -20,18 +19,18 @@ export function HealthMetricsPanel() {
     hydration: { value: 65, target: 100, status: "Good" },
     sleep: { hours: 7.5, quality: 85, status: "Good" },
     stress: { level: 25, status: "Low" },
-    recovery: { score: 82, status: "Good" }
+    recovery: { score: 82, status: "Good" },
   });
 
   useEffect(() => {
     // Simulate real-time updates
     const interval = setInterval(() => {
-      setMetrics(prev => ({
+      setMetrics((prev) => ({
         ...prev,
         heartRate: {
           ...prev.heartRate,
-          value: Math.floor(Math.random() * 10) + 75
-        }
+          value: Math.floor(Math.random() * 10) + 75,
+        },
       }));
     }, 5000);
 
@@ -40,16 +39,16 @@ export function HealthMetricsPanel() {
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'excellent':
-      case 'good':
-        return 'text-green-600 bg-green-50 border-green-200';
-      case 'normal':
-      case 'moderate':
-        return 'text-blue-600 bg-blue-50 border-blue-200';
-      case 'low':
-        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+      case "excellent":
+      case "good":
+        return "text-green-600 bg-green-50 border-green-200";
+      case "normal":
+      case "moderate":
+        return "text-blue-600 bg-blue-50 border-blue-200";
+      case "low":
+        return "text-yellow-600 bg-yellow-50 border-yellow-200";
       default:
-        return 'text-gray-600 bg-gray-50 border-gray-200';
+        return "text-gray-600 bg-gray-50 border-gray-200";
     }
   };
 
@@ -57,7 +56,10 @@ export function HealthMetricsPanel() {
     <div className="px-4">
       <div className="flex items-center justify-between mb-3">
         <h2 className="font-medium">Health Metrics</h2>
-        <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+        <Badge
+          variant="outline"
+          className="text-xs bg-green-50 text-green-700 border-green-200"
+        >
           <Shield className="h-3 w-3 mr-1" />
           Live
         </Badge>
@@ -88,7 +90,10 @@ export function HealthMetricsPanel() {
                 </div>
               </div>
               <div className="mt-3 flex items-center justify-between">
-                <Badge variant="outline" className={getStatusColor(metrics.heartRate.status)}>
+                <Badge
+                  variant="outline"
+                  className={getStatusColor(metrics.heartRate.status)}
+                >
                   {metrics.heartRate.status}
                 </Badge>
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -116,11 +121,16 @@ export function HealthMetricsPanel() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-xs">
                     <span>{metrics.hydration.value}%</span>
-                    <span className="text-muted-foreground">Goal: {metrics.hydration.target}%</span>
+                    <span className="text-muted-foreground">
+                      Goal: {metrics.hydration.target}%
+                    </span>
                   </div>
                   <Progress value={metrics.hydration.value} className="h-2" />
                 </div>
-                <Badge variant="outline" className={`mt-2 ${getStatusColor(metrics.hydration.status)}`}>
+                <Badge
+                  variant="outline"
+                  className={`mt-2 ${getStatusColor(metrics.hydration.status)}`}
+                >
                   {metrics.hydration.status}
                 </Badge>
               </CardContent>
@@ -140,9 +150,14 @@ export function HealthMetricsPanel() {
                 </div>
                 <div className="space-y-1">
                   <p className="text-lg font-bold">{metrics.sleep.hours}h</p>
-                  <p className="text-xs text-muted-foreground">Quality: {metrics.sleep.quality}%</p>
+                  <p className="text-xs text-muted-foreground">
+                    Quality: {metrics.sleep.quality}%
+                  </p>
                 </div>
-                <Badge variant="outline" className={`mt-2 ${getStatusColor(metrics.sleep.status)}`}>
+                <Badge
+                  variant="outline"
+                  className={`mt-2 ${getStatusColor(metrics.sleep.status)}`}
+                >
                   {metrics.sleep.status}
                 </Badge>
               </CardContent>
@@ -165,11 +180,15 @@ export function HealthMetricsPanel() {
                   </div>
                   <div>
                     <p className="text-sm font-medium">Recovery Score</p>
-                    <p className="text-xs text-muted-foreground">Based on HRV & Sleep</p>
+                    <p className="text-xs text-muted-foreground">
+                      Based on HRV & Sleep
+                    </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-2xl font-bold text-green-600">{metrics.recovery.score}</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {metrics.recovery.score}
+                  </p>
                   <p className="text-xs text-green-700">Excellent</p>
                 </div>
               </div>

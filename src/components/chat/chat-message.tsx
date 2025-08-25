@@ -1,12 +1,27 @@
-
 import React, { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import type { ChatMessage, ChatAttachment } from "@/types/chat";
 import { formatDistanceToNow } from "date-fns";
-import { Download, Eye, Play, Pause, Volume2, FileText, Image as ImageIcon, Video, Music } from "lucide-react";
+import {
+  Download,
+  Eye,
+  Play,
+  Pause,
+  Volume2,
+  FileText,
+  Image as ImageIcon,
+  Video,
+  Music,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
 interface ChatMessageProps {
@@ -16,9 +31,16 @@ interface ChatMessageProps {
   senderName: string;
 }
 
-export function ChatMessage({ message, isCurrentUser, senderAvatar, senderName }: ChatMessageProps) {
+export function ChatMessage({
+  message,
+  isCurrentUser,
+  senderAvatar,
+  senderName,
+}: ChatMessageProps) {
   const [isMediaPreviewOpen, setIsMediaPreviewOpen] = useState(false);
-  const [selectedMedia, setSelectedMedia] = useState<ChatAttachment | null>(null);
+  const [selectedMedia, setSelectedMedia] = useState<ChatAttachment | null>(
+    null,
+  );
   const [isPlaying, setIsPlaying] = useState(false);
   const { toast } = useToast();
 
@@ -30,9 +52,12 @@ export function ChatMessage({ message, isCurrentUser, senderAvatar, senderName }
 
   const handleDownload = async (attachment: ChatAttachment) => {
     try {
-      if (attachment.url.startsWith('blob:') || attachment.url.startsWith('data:')) {
+      if (
+        attachment.url.startsWith("blob:") ||
+        attachment.url.startsWith("data:")
+      ) {
         // Handle blob URLs or data URLs
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = attachment.url;
         link.download = attachment.name;
         document.body.appendChild(link);
@@ -43,7 +68,7 @@ export function ChatMessage({ message, isCurrentUser, senderAvatar, senderName }
         const response = await fetch(attachment.url);
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = url;
         link.download = attachment.name;
         document.body.appendChild(link);
@@ -51,16 +76,16 @@ export function ChatMessage({ message, isCurrentUser, senderAvatar, senderName }
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
       }
-      
+
       toast({
         title: "Download started",
-        description: `${attachment.name} is being downloaded`
+        description: `${attachment.name} is being downloaded`,
       });
     } catch (error) {
       toast({
         title: "Download failed",
         description: "Unable to download file",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -77,17 +102,21 @@ export function ChatMessage({ message, isCurrentUser, senderAvatar, senderName }
 
   const getAttachmentIcon = (type: string) => {
     switch (type) {
-      case 'image': return <ImageIcon className="h-4 w-4" />;
-      case 'video': return <Video className="h-4 w-4" />;
-      case 'audio': return <Music className="h-4 w-4" />;
-      default: return <FileText className="h-4 w-4" />;
+      case "image":
+        return <ImageIcon className="h-4 w-4" />;
+      case "video":
+        return <Video className="h-4 w-4" />;
+      case "audio":
+        return <Music className="h-4 w-4" />;
+      default:
+        return <FileText className="h-4 w-4" />;
     }
   };
 
   const renderAttachment = (attachment: ChatAttachment) => {
-    const isImage = attachment.type === 'image';
-    const isVideo = attachment.type === 'video';
-    const isAudio = attachment.type === 'audio';
+    const isImage = attachment.type === "image";
+    const isVideo = attachment.type === "video";
+    const isAudio = attachment.type === "audio";
 
     return (
       <div key={attachment.id} className="mt-2">
@@ -99,8 +128,8 @@ export function ChatMessage({ message, isCurrentUser, senderAvatar, senderName }
               className="rounded-lg max-h-48 w-auto cursor-pointer hover:opacity-90 transition-opacity"
               onClick={() => handleMediaPreview(attachment)}
               onError={(e) => {
-                console.error('Image failed to load:', attachment.url);
-                e.currentTarget.style.display = 'none';
+                console.error("Image failed to load:", attachment.url);
+                e.currentTarget.style.display = "none";
               }}
             />
             <Button
@@ -122,7 +151,7 @@ export function ChatMessage({ message, isCurrentUser, senderAvatar, senderName }
               onClick={() => handleMediaPreview(attachment)}
               controls={false}
               onError={(e) => {
-                console.error('Video failed to load:', attachment.url);
+                console.error("Video failed to load:", attachment.url);
               }}
             />
             <div className="absolute inset-0 flex items-center justify-center">
@@ -146,7 +175,11 @@ export function ChatMessage({ message, isCurrentUser, senderAvatar, senderName }
               onClick={handlePlayPause}
               className="h-10 w-10 rounded-full"
             >
-              {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+              {isPlaying ? (
+                <Pause className="h-5 w-5" />
+              ) : (
+                <Play className="h-5 w-5" />
+              )}
             </Button>
             <div className="flex-1">
               <p className="text-sm font-medium">{attachment.name}</p>
@@ -171,7 +204,9 @@ export function ChatMessage({ message, isCurrentUser, senderAvatar, senderName }
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{attachment.name}</p>
-              <p className="text-xs text-muted-foreground">{formatFileSize(attachment.size)}</p>
+              <p className="text-xs text-muted-foreground">
+                {formatFileSize(attachment.size)}
+              </p>
             </div>
             <Button
               variant="ghost"
@@ -189,42 +224,48 @@ export function ChatMessage({ message, isCurrentUser, senderAvatar, senderName }
 
   return (
     <>
-      <div className={cn(
-        "flex gap-3 mb-4 animate-fade-in",
-        isCurrentUser ? "flex-row-reverse" : "flex-row"
-      )}>
+      <div
+        className={cn(
+          "flex gap-3 mb-4 animate-fade-in",
+          isCurrentUser ? "flex-row-reverse" : "flex-row",
+        )}
+      >
         {!isCurrentUser && (
           <Avatar className="h-8 w-8 flex-shrink-0">
             <AvatarImage src={senderAvatar} alt={senderName} />
-            <AvatarFallback>{senderName.substring(0, 2).toUpperCase()}</AvatarFallback>
+            <AvatarFallback>
+              {senderName.substring(0, 2).toUpperCase()}
+            </AvatarFallback>
           </Avatar>
         )}
-        
-        <div className={cn(
-          "flex flex-col gap-1 max-w-[70%]",
-          isCurrentUser ? "items-end" : "items-start"
-        )}>
+
+        <div
+          className={cn(
+            "flex flex-col gap-1 max-w-[70%]",
+            isCurrentUser ? "items-end" : "items-start",
+          )}
+        >
           {!isCurrentUser && (
             <span className="text-xs text-muted-foreground font-medium px-1">
               {senderName}
             </span>
           )}
-          
-          <div className={cn(
-            "rounded-2xl px-4 py-2 break-words",
-            isCurrentUser 
-              ? "bg-primary text-primary-foreground" 
-              : "bg-muted"
-          )}>
+
+          <div
+            className={cn(
+              "rounded-2xl px-4 py-2 break-words",
+              isCurrentUser ? "bg-primary text-primary-foreground" : "bg-muted",
+            )}
+          >
             {message.content && (
               <p className="text-sm leading-relaxed whitespace-pre-wrap">
                 {message.content}
               </p>
             )}
-            
+
             {message.attachments && message.attachments.map(renderAttachment)}
           </div>
-          
+
           <span className="text-xs text-muted-foreground px-1">
             {formatDistanceToNow(message.timestamp, { addSuffix: true })}
           </span>
@@ -237,31 +278,37 @@ export function ChatMessage({ message, isCurrentUser, senderAvatar, senderName }
           <DialogHeader>
             <DialogTitle>{selectedMedia?.name}</DialogTitle>
           </DialogHeader>
-          
+
           <div className="flex items-center justify-center p-4">
-            {selectedMedia?.type === 'image' && (
+            {selectedMedia?.type === "image" && (
               <img
                 src={selectedMedia.url}
                 alt={selectedMedia.name}
                 className="max-w-full max-h-[70vh] object-contain rounded-lg"
                 onError={(e) => {
-                  console.error('Preview image failed to load:', selectedMedia.url);
+                  console.error(
+                    "Preview image failed to load:",
+                    selectedMedia.url,
+                  );
                 }}
               />
             )}
-            
-            {selectedMedia?.type === 'video' && (
+
+            {selectedMedia?.type === "video" && (
               <video
                 src={selectedMedia.url}
                 controls
                 className="max-w-full max-h-[70vh] rounded-lg"
                 onError={(e) => {
-                  console.error('Preview video failed to load:', selectedMedia.url);
+                  console.error(
+                    "Preview video failed to load:",
+                    selectedMedia.url,
+                  );
                 }}
               />
             )}
           </div>
-          
+
           <div className="flex justify-between items-center p-4 border-t">
             <div className="text-sm text-muted-foreground">
               {selectedMedia && formatFileSize(selectedMedia.size)}

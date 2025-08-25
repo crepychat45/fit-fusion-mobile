@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { ImageOptimizer } from '@/utils/image-optimizer';
-import { cn } from '@/lib/utils';
+import React, { useState, useRef, useEffect } from "react";
+import { ImageOptimizer } from "@/utils/image-optimizer";
+import { cn } from "@/lib/utils";
 
 interface EnhancedImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -14,17 +14,17 @@ interface EnhancedImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 
 export const EnhancedImage: React.FC<EnhancedImageProps> = ({
   src,
-  fallbackSrc = '/placeholder.svg',
+  fallbackSrc = "/placeholder.svg",
   lazy = true,
   placeholder = true,
   optimized = true,
   width,
   height,
   className,
-  alt = '',
+  alt = "",
   ...props
 }) => {
-  const [imageSrc, setImageSrc] = useState<string>('');
+  const [imageSrc, setImageSrc] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -45,9 +45,9 @@ export const EnhancedImage: React.FC<EnhancedImageProps> = ({
         }
       },
       {
-        rootMargin: '50px 0px',
+        rootMargin: "50px 0px",
         threshold: 0.01,
-      }
+      },
     );
 
     if (imgRef.current) {
@@ -66,23 +66,23 @@ export const EnhancedImage: React.FC<EnhancedImageProps> = ({
 
       try {
         let imageUrl = src;
-        
-        if (optimized && src && !src.startsWith('/placeholder.svg')) {
+
+        if (optimized && src && !src.startsWith("/placeholder.svg")) {
           imageUrl = ImageOptimizer.getOptimizedImageUrl(src, width, height);
         }
 
         // Validate image exists
         const isValid = await ImageOptimizer.validateImageUrl(imageUrl);
-        
+
         if (isValid) {
           setImageSrc(imageUrl);
         } else {
-          throw new Error('Image failed to load');
+          throw new Error("Image failed to load");
         }
-        
+
         setIsLoading(false);
       } catch (error) {
-        console.warn('Image failed to load:', src, error);
+        console.warn("Image failed to load:", src, error);
         setHasError(true);
         setImageSrc(fallbackSrc);
         setIsLoading(false);
@@ -105,21 +105,22 @@ export const EnhancedImage: React.FC<EnhancedImageProps> = ({
   };
 
   // Generate placeholder while loading
-  const placeholderSrc = placeholder && width && height 
-    ? ImageOptimizer.createPlaceholder(width, height)
-    : fallbackSrc;
+  const placeholderSrc =
+    placeholder && width && height
+      ? ImageOptimizer.createPlaceholder(width, height)
+      : fallbackSrc;
 
   return (
     <div className={cn("relative overflow-hidden", className)}>
       {isLoading && placeholder && (
-        <div 
+        <div
           className="absolute inset-0 bg-muted animate-pulse flex items-center justify-center"
           style={{ width, height }}
         >
           <div className="text-muted-foreground text-sm">Loading...</div>
         </div>
       )}
-      
+
       <img
         ref={imgRef}
         src={isInView ? imageSrc : placeholderSrc}
@@ -127,7 +128,7 @@ export const EnhancedImage: React.FC<EnhancedImageProps> = ({
         className={cn(
           "transition-opacity duration-300",
           isLoading ? "opacity-0" : "opacity-100",
-          className
+          className,
         )}
         onLoad={handleLoad}
         onError={handleError}

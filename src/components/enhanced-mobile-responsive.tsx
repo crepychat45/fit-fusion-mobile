@@ -25,52 +25,50 @@ export function ResponsiveContainer({
   className = "",
   mobileClassName = "",
   tabletClassName = "",
-  desktopClassName = ""
+  desktopClassName = "",
 }: ResponsiveContainerProps) {
   const isMobile = useIsMobile();
-  const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
+  const [screenSize, setScreenSize] = useState<"mobile" | "tablet" | "desktop">(
+    "desktop",
+  );
 
   useEffect(() => {
     const checkScreenSize = () => {
       const width = window.innerWidth;
       if (width < 768) {
-        setScreenSize('mobile');
+        setScreenSize("mobile");
       } else if (width < 1024) {
-        setScreenSize('tablet');
+        setScreenSize("tablet");
       } else {
-        setScreenSize('desktop');
+        setScreenSize("desktop");
       }
     };
 
     checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
   const getResponsiveClassName = () => {
     switch (screenSize) {
-      case 'mobile':
+      case "mobile":
         return cn(className, mobileClassName);
-      case 'tablet':
+      case "tablet":
         return cn(className, tabletClassName);
-      case 'desktop':
+      case "desktop":
         return cn(className, desktopClassName);
       default:
         return className;
     }
   };
 
-  return (
-    <div className={getResponsiveClassName()}>
-      {children}
-    </div>
-  );
+  return <div className={getResponsiveClassName()}>{children}</div>;
 }
 
-export function TouchFeedback({ 
-  children, 
-  className = "", 
-  disabled = false 
+export function TouchFeedback({
+  children,
+  className = "",
+  disabled = false,
 }: TouchFeedbackProps) {
   const [isPressed, setIsPressed] = useState(false);
   const isMobile = useIsMobile();
@@ -87,7 +85,7 @@ export function TouchFeedback({
       onTouchCancel={() => setIsPressed(false)}
       animate={{
         scale: isPressed ? 0.95 : 1,
-        opacity: isPressed ? 0.8 : 1
+        opacity: isPressed ? 0.8 : 1,
       }}
       transition={{ duration: 0.1 }}
     >
@@ -96,50 +94,64 @@ export function TouchFeedback({
   );
 }
 
-export function MobileOptimizedGrid({ children }: { children: React.ReactNode }) {
+export function MobileOptimizedGrid({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const isMobile = useIsMobile();
 
   return (
-    <div className={cn(
-      "grid gap-4",
-      isMobile 
-        ? "grid-cols-1 px-4 py-2" 
-        : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 px-6 py-4"
-    )}>
+    <div
+      className={cn(
+        "grid gap-4",
+        isMobile
+          ? "grid-cols-1 px-4 py-2"
+          : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 px-6 py-4",
+      )}
+    >
       {children}
     </div>
   );
 }
 
-export function AdaptiveNavigation({ children }: { children: React.ReactNode }) {
+export function AdaptiveNavigation({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const isMobile = useIsMobile();
 
   return (
-    <nav className={cn(
-      "navigation-container",
-      isMobile 
-        ? "fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t z-50" 
-        : "sticky top-0 bg-background/95 backdrop-blur-sm border-b z-40"
-    )}>
-      <div className={cn(
-        "container mx-auto",
-        isMobile ? "px-4 py-2" : "px-6 py-4"
-      )}>
+    <nav
+      className={cn(
+        "navigation-container",
+        isMobile
+          ? "fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t z-50"
+          : "sticky top-0 bg-background/95 backdrop-blur-sm border-b z-40",
+      )}
+    >
+      <div
+        className={cn(
+          "container mx-auto",
+          isMobile ? "px-4 py-2" : "px-6 py-4",
+        )}
+      >
         {children}
       </div>
     </nav>
   );
 }
 
-export function ResponsiveModal({ 
-  isOpen, 
-  onClose, 
-  children, 
-  title 
-}: { 
-  isOpen: boolean; 
-  onClose: () => void; 
-  children: React.ReactNode; 
+export function ResponsiveModal({
+  isOpen,
+  onClose,
+  children,
+  title,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
   title?: string;
 }) {
   const isMobile = useIsMobile();
@@ -155,26 +167,26 @@ export function ResponsiveModal({
           onClick={onClose}
         >
           <motion.div
-            initial={{ 
-              scale: 0.8, 
+            initial={{
+              scale: 0.8,
               opacity: 0,
-              y: isMobile ? "100%" : 0
+              y: isMobile ? "100%" : 0,
             }}
-            animate={{ 
-              scale: 1, 
+            animate={{
+              scale: 1,
               opacity: 1,
-              y: 0
+              y: 0,
             }}
-            exit={{ 
-              scale: 0.8, 
+            exit={{
+              scale: 0.8,
               opacity: 0,
-              y: isMobile ? "100%" : 0
+              y: isMobile ? "100%" : 0,
             }}
             className={cn(
               "bg-background rounded-lg shadow-lg max-h-[90vh] overflow-auto",
-              isMobile 
-                ? "w-full max-w-none mx-4 rounded-t-lg" 
-                : "w-full max-w-md"
+              isMobile
+                ? "w-full max-w-none mx-4 rounded-t-lg"
+                : "w-full max-w-md",
             )}
             onClick={(e) => e.stopPropagation()}
           >
@@ -183,9 +195,7 @@ export function ResponsiveModal({
                 <h2 className="text-lg font-semibold">{title}</h2>
               </div>
             )}
-            <div className="p-4">
-              {children}
-            </div>
+            <div className="p-4">{children}</div>
           </motion.div>
         </motion.div>
       )}
@@ -194,15 +204,17 @@ export function ResponsiveModal({
 }
 
 export function DevicePreview() {
-  const [currentDevice, setCurrentDevice] = useState<'mobile' | 'tablet' | 'desktop'>('mobile');
+  const [currentDevice, setCurrentDevice] = useState<
+    "mobile" | "tablet" | "desktop"
+  >("mobile");
   const isMobile = useIsMobile();
 
   if (isMobile) return null;
 
   const devices = [
-    { id: 'mobile', icon: Smartphone, label: 'Mobile' },
-    { id: 'tablet', icon: Tablet, label: 'Tablet' },
-    { id: 'desktop', icon: Monitor, label: 'Desktop' }
+    { id: "mobile", icon: Smartphone, label: "Mobile" },
+    { id: "tablet", icon: Tablet, label: "Tablet" },
+    { id: "desktop", icon: Monitor, label: "Desktop" },
   ];
 
   return (
@@ -232,15 +244,16 @@ export function DevicePreview() {
 
 // CSS-in-JS for better mobile typography
 export const mobileTypographyStyles = {
-  heading: "text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight",
+  heading:
+    "text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight",
   subheading: "text-lg sm:text-xl md:text-2xl font-semibold",
   body: "text-sm sm:text-base leading-relaxed",
-  caption: "text-xs sm:text-sm text-muted-foreground"
+  caption: "text-xs sm:text-sm text-muted-foreground",
 };
 
 // Mobile-optimized spacing
 export const mobileSpacing = {
   container: "px-4 sm:px-6 lg:px-8",
   section: "py-4 sm:py-6 lg:py-8",
-  element: "p-3 sm:p-4 lg:p-6"
+  element: "p-3 sm:p-4 lg:p-6",
 };

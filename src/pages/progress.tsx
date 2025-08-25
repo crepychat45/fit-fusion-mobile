@@ -1,6 +1,11 @@
-
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -8,14 +13,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MobileNav } from "@/components/mobile-nav";
 import { useToast } from "@/components/ui/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  TrendingUp, 
-  Calendar, 
-  Target, 
-  Award, 
-  BarChart3, 
-  Activity, 
-  Flame, 
+import {
+  TrendingUp,
+  Calendar,
+  Target,
+  Award,
+  BarChart3,
+  Activity,
+  Flame,
   Clock,
   Zap,
   Trophy,
@@ -28,7 +33,7 @@ import {
   Share2,
   Camera,
   BookOpen,
-  Sparkles
+  Sparkles,
 } from "lucide-react";
 import { ProgressChart } from "@/components/progress-chart";
 
@@ -43,7 +48,7 @@ const ProgressPage = () => {
     averageWorkoutTime: 32,
     personalBests: 8,
     achievements: 24,
-    weeklyProgress: 80
+    weeklyProgress: 80,
   });
 
   const [weeklyData] = useState([
@@ -53,14 +58,14 @@ const ProgressPage = () => {
     { name: "Thu", value: 41 },
     { name: "Fri", value: 67 },
     { name: "Sat", value: 23 },
-    { name: "Sun", value: 39 }
+    { name: "Sun", value: 39 },
   ]);
 
   const [monthlyData] = useState([
     { name: "Week 1", value: 4 },
     { name: "Week 2", value: 6 },
     { name: "Week 3", value: 5 },
-    { name: "Week 4", value: 7 }
+    { name: "Week 4", value: 7 },
   ]);
 
   const [aiInsights] = useState([
@@ -69,57 +74,57 @@ const ProgressPage = () => {
       title: "Strength Gains Detected",
       description: "Your performance has improved by 15% this month",
       icon: TrendingUp,
-      color: "text-green-600"
+      color: "text-green-600",
     },
     {
-      type: "recommendation", 
+      type: "recommendation",
       title: "Recovery Day Suggested",
       description: "Consider a rest day to optimize your progress",
       icon: Heart,
-      color: "text-blue-600"
+      color: "text-blue-600",
     },
     {
       type: "achievement",
       title: "New Personal Best",
       description: "You've reached a new milestone in endurance",
       icon: Trophy,
-      color: "text-yellow-600"
-    }
+      color: "text-yellow-600",
+    },
   ]);
 
   const [recentAchievements] = useState([
-    { 
-      id: 1, 
-      title: "Early Bird", 
-      description: "Complete 10 morning workouts", 
-      icon: "🌅", 
+    {
+      id: 1,
+      title: "Early Bird",
+      description: "Complete 10 morning workouts",
+      icon: "🌅",
       progress: 100,
-      unlockedAt: "2 days ago"
+      unlockedAt: "2 days ago",
     },
-    { 
-      id: 2, 
-      title: "Consistency Champion", 
-      description: "14-day workout streak", 
-      icon: "🏆", 
+    {
+      id: 2,
+      title: "Consistency Champion",
+      description: "14-day workout streak",
+      icon: "🏆",
       progress: 100,
-      unlockedAt: "1 week ago"
+      unlockedAt: "1 week ago",
     },
-    { 
-      id: 3, 
-      title: "Strength Builder", 
-      description: "Complete 50 strength workouts", 
-      icon: "💪", 
+    {
+      id: 3,
+      title: "Strength Builder",
+      description: "Complete 50 strength workouts",
+      icon: "💪",
       progress: 78,
-      unlockedAt: null
+      unlockedAt: null,
     },
-    { 
-      id: 4, 
-      title: "Cardio King", 
-      description: "Burn 10,000 calories", 
-      icon: "🔥", 
+    {
+      id: 4,
+      title: "Cardio King",
+      description: "Burn 10,000 calories",
+      icon: "🔥",
       progress: 45,
-      unlockedAt: null
-    }
+      unlockedAt: null,
+    },
   ]);
 
   const exportProgress = () => {
@@ -128,34 +133,38 @@ const ProgressPage = () => {
       progress: progressData,
       weekly_data: weeklyData,
       monthly_data: monthlyData,
-      achievements: recentAchievements
+      achievements: recentAchievements,
     };
-    
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `fitfusion-progress-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `fitfusion-progress-${new Date().toISOString().split("T")[0]}.json`;
     a.click();
-    
+
     toast({
       title: "📊 Progress Exported",
-      description: "Your fitness data has been downloaded successfully."
+      description: "Your fitness data has been downloaded successfully.",
     });
   };
 
   const shareProgress = () => {
     if (navigator.share) {
       navigator.share({
-        title: 'My FitFusion Progress',
+        title: "My FitFusion Progress",
         text: `I've completed ${progressData.totalWorkouts} workouts and maintained a ${progressData.currentStreak}-day streak!`,
-        url: window.location.href
+        url: window.location.href,
       });
     } else {
-      navigator.clipboard.writeText(`Check out my fitness progress: ${progressData.totalWorkouts} workouts completed with a ${progressData.currentStreak}-day streak! 💪`);
+      navigator.clipboard.writeText(
+        `Check out my fitness progress: ${progressData.totalWorkouts} workouts completed with a ${progressData.currentStreak}-day streak! 💪`,
+      );
       toast({
         title: "📋 Copied to clipboard",
-        description: "Share your progress on social media!"
+        description: "Share your progress on social media!",
       });
     }
   };
@@ -166,7 +175,7 @@ const ProgressPage = () => {
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-green-500 via-teal-500 to-blue-600" />
         <div className="absolute inset-0 bg-black/20" />
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="relative pt-12 pb-8 px-4 text-white"
@@ -174,13 +183,23 @@ const ProgressPage = () => {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold">Progress Analytics</h1>
-              <p className="text-white/80">Track your fitness journey with AI insights</p>
+              <p className="text-white/80">
+                Track your fitness journey with AI insights
+              </p>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+              <Badge
+                variant="secondary"
+                className="bg-white/20 text-white border-white/30"
+              >
                 v5.0.4
               </Badge>
-              <Button variant="ghost" size="sm" onClick={shareProgress} className="text-white">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={shareProgress}
+                className="text-white"
+              >
                 <Share2 className="h-4 w-4" />
               </Button>
             </div>
@@ -188,43 +207,51 @@ const ProgressPage = () => {
 
           {/* Key Metrics Dashboard */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center"
             >
               <Flame className="h-6 w-6 mx-auto mb-2 text-orange-300" />
-              <div className="text-2xl font-bold">{progressData.currentStreak}</div>
+              <div className="text-2xl font-bold">
+                {progressData.currentStreak}
+              </div>
               <div className="text-xs text-white/80">Day Streak</div>
             </motion.div>
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.1 }}
               className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center"
             >
               <Target className="h-6 w-6 mx-auto mb-2 text-green-300" />
-              <div className="text-2xl font-bold">{progressData.totalWorkouts}</div>
+              <div className="text-2xl font-bold">
+                {progressData.totalWorkouts}
+              </div>
               <div className="text-xs text-white/80">Workouts</div>
             </motion.div>
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2 }}
               className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center"
             >
               <Zap className="h-6 w-6 mx-auto mb-2 text-yellow-300" />
-              <div className="text-2xl font-bold">{(progressData.caloriesBurned / 1000).toFixed(1)}k</div>
+              <div className="text-2xl font-bold">
+                {(progressData.caloriesBurned / 1000).toFixed(1)}k
+              </div>
               <div className="text-xs text-white/80">Calories</div>
             </motion.div>
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.3 }}
               className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center"
             >
               <Trophy className="h-6 w-6 mx-auto mb-2 text-purple-300" />
-              <div className="text-2xl font-bold">{progressData.achievements}</div>
+              <div className="text-2xl font-bold">
+                {progressData.achievements}
+              </div>
               <div className="text-xs text-white/80">Achievements</div>
             </motion.div>
           </div>
@@ -234,19 +261,31 @@ const ProgressPage = () => {
       <div className="px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-4 mb-6 bg-muted/50 backdrop-blur-sm">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabsTrigger
+              value="overview"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            >
               <BarChart3 className="h-4 w-4 mr-2" />
               Overview
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabsTrigger
+              value="analytics"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            >
               <LineChart className="h-4 w-4 mr-2" />
               Analytics
             </TabsTrigger>
-            <TabsTrigger value="achievements" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabsTrigger
+              value="achievements"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            >
               <Award className="h-4 w-4 mr-2" />
               Goals
             </TabsTrigger>
-            <TabsTrigger value="insights" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabsTrigger
+              value="insights"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            >
               <Brain className="h-4 w-4 mr-2" />
               AI Insights
             </TabsTrigger>
@@ -271,19 +310,28 @@ const ProgressPage = () => {
                           This Week's Progress
                         </CardTitle>
                         <CardDescription>
-                          {progressData.weeklyProgress}% of weekly goal completed
+                          {progressData.weeklyProgress}% of weekly goal
+                          completed
                         </CardDescription>
                       </div>
                       <Badge variant="outline">
-                        {Math.floor(progressData.weeklyProgress / 20)}/{progressData.weeklyGoal} workouts
+                        {Math.floor(progressData.weeklyProgress / 20)}/
+                        {progressData.weeklyGoal} workouts
                       </Badge>
                     </div>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      <Progress value={progressData.weeklyProgress} className="h-3" />
+                      <Progress
+                        value={progressData.weeklyProgress}
+                        className="h-3"
+                      />
                       <div className="flex justify-between text-sm text-muted-foreground">
-                        <span>Current: {Math.floor(progressData.weeklyProgress / 20)} workouts</span>
+                        <span>
+                          Current:{" "}
+                          {Math.floor(progressData.weeklyProgress / 20)}{" "}
+                          workouts
+                        </span>
                         <span>Goal: {progressData.weeklyGoal} workouts</span>
                       </div>
                     </div>
@@ -292,15 +340,15 @@ const ProgressPage = () => {
 
                 {/* Charts */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <ProgressChart 
-                    title="Weekly Activity" 
-                    data={weeklyData} 
-                    color="#10b981" 
+                  <ProgressChart
+                    title="Weekly Activity"
+                    data={weeklyData}
+                    color="#10b981"
                   />
-                  <ProgressChart 
-                    title="Monthly Summary" 
-                    data={monthlyData} 
-                    color="#6366f1" 
+                  <ProgressChart
+                    title="Monthly Summary"
+                    data={monthlyData}
+                    color="#6366f1"
                   />
                 </div>
 
@@ -313,8 +361,12 @@ const ProgressPage = () => {
                           <Clock className="h-5 w-5 text-blue-600" />
                         </div>
                         <div>
-                          <p className="text-2xl font-bold">{progressData.averageWorkoutTime} min</p>
-                          <p className="text-sm text-muted-foreground">Avg. Workout Time</p>
+                          <p className="text-2xl font-bold">
+                            {progressData.averageWorkoutTime} min
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Avg. Workout Time
+                          </p>
                         </div>
                       </div>
                     </CardContent>
@@ -327,8 +379,12 @@ const ProgressPage = () => {
                           <Star className="h-5 w-5 text-purple-600" />
                         </div>
                         <div>
-                          <p className="text-2xl font-bold">{progressData.personalBests}</p>
-                          <p className="text-sm text-muted-foreground">Personal Bests</p>
+                          <p className="text-2xl font-bold">
+                            {progressData.personalBests}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Personal Bests
+                          </p>
                         </div>
                       </div>
                     </CardContent>
@@ -377,11 +433,19 @@ const ProgressPage = () => {
                 </Card>
 
                 <div className="flex gap-3">
-                  <Button onClick={exportProgress} variant="outline" className="flex-1">
+                  <Button
+                    onClick={exportProgress}
+                    variant="outline"
+                    className="flex-1"
+                  >
                     <Download className="h-4 w-4 mr-2" />
                     Export Data
                   </Button>
-                  <Button onClick={shareProgress} variant="outline" className="flex-1">
+                  <Button
+                    onClick={shareProgress}
+                    variant="outline"
+                    className="flex-1"
+                  >
                     <Share2 className="h-4 w-4 mr-2" />
                     Share Progress
                   </Button>
@@ -409,15 +473,21 @@ const ProgressPage = () => {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
                     >
-                      <Card className={`transition-all duration-300 ${achievement.progress === 100 ? 'border-green-200 bg-green-50/50 dark:bg-green-950/10' : 'hover:shadow-lg'}`}>
+                      <Card
+                        className={`transition-all duration-300 ${achievement.progress === 100 ? "border-green-200 bg-green-50/50 dark:bg-green-950/10" : "hover:shadow-lg"}`}
+                      >
                         <CardContent className="pt-6">
                           <div className="flex items-start gap-4">
-                            <div className={`text-3xl ${achievement.progress === 100 ? 'animate-bounce' : ''}`}>
+                            <div
+                              className={`text-3xl ${achievement.progress === 100 ? "animate-bounce" : ""}`}
+                            >
                               {achievement.icon}
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
-                                <h3 className="font-medium">{achievement.title}</h3>
+                                <h3 className="font-medium">
+                                  {achievement.title}
+                                </h3>
                                 {achievement.progress === 100 && (
                                   <Badge className="bg-green-100 text-green-800">
                                     ✓ Unlocked
@@ -427,10 +497,13 @@ const ProgressPage = () => {
                               <p className="text-sm text-muted-foreground mb-3">
                                 {achievement.description}
                               </p>
-                              
+
                               {achievement.progress < 100 ? (
                                 <div className="space-y-2">
-                                  <Progress value={achievement.progress} className="h-2" />
+                                  <Progress
+                                    value={achievement.progress}
+                                    className="h-2"
+                                  />
                                   <p className="text-xs text-muted-foreground">
                                     {achievement.progress}% complete
                                   </p>
@@ -473,20 +546,26 @@ const ProgressPage = () => {
                       <Card className="overflow-hidden hover:shadow-lg transition-all duration-300">
                         <CardContent className="pt-6">
                           <div className="flex items-start gap-4">
-                            <div className={`p-2 rounded-lg bg-muted ${insight.color}`}>
+                            <div
+                              className={`p-2 rounded-lg bg-muted ${insight.color}`}
+                            >
                               <insight.icon className="h-5 w-5" />
                             </div>
                             <div>
-                              <h3 className="font-medium mb-1">{insight.title}</h3>
+                              <h3 className="font-medium mb-1">
+                                {insight.title}
+                              </h3>
                               <p className="text-sm text-muted-foreground">
                                 {insight.description}
                               </p>
                             </div>
                             <div className="flex-1 text-right">
                               <Badge variant="outline">
-                                {insight.type === "improvement" ? "Trend" : 
-                                 insight.type === "recommendation" ? "Suggestion" : 
-                                 "Achievement"}
+                                {insight.type === "improvement"
+                                  ? "Trend"
+                                  : insight.type === "recommendation"
+                                    ? "Suggestion"
+                                    : "Achievement"}
                               </Badge>
                             </div>
                           </div>
@@ -502,16 +581,21 @@ const ProgressPage = () => {
                           <Sparkles className="h-6 w-6 text-primary" />
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-medium mb-1">Personalized Insight</h3>
+                          <h3 className="font-medium mb-1">
+                            Personalized Insight
+                          </h3>
                           <p className="text-sm text-muted-foreground">
-                            Based on your workout patterns, we recommend focusing on upper body strength training this week.
+                            Based on your workout patterns, we recommend
+                            focusing on upper body strength training this week.
                           </p>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-2 mt-4">
                         <Button size="sm">Apply Recommendation</Button>
-                        <Button size="sm" variant="outline">View Details</Button>
+                        <Button size="sm" variant="outline">
+                          View Details
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -521,7 +605,7 @@ const ProgressPage = () => {
           </AnimatePresence>
         </Tabs>
       </div>
-      
+
       <MobileNav />
     </div>
   );

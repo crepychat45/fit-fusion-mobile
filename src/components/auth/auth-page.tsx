@@ -12,12 +12,12 @@ export default function AuthPage() {
   useEffect(() => {
     // Redirect authenticated users to home
     if (user && !loading) {
-      navigate('/');
+      navigate("/");
     }
   }, [user, loading, navigate]);
 
   const handleAuthSuccess = () => {
-    navigate('/');
+    navigate("/");
   };
 
   if (loading) {

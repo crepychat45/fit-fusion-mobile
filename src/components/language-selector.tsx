@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,9 +30,14 @@ interface LanguageSelectorProps {
   currentLanguage: string;
 }
 
-export function LanguageSelector({ onLanguageChange, currentLanguage }: LanguageSelectorProps) {
-  const currentLang = availableLanguages.find(lang => lang.code === currentLanguage) || availableLanguages[0];
-  
+export function LanguageSelector({
+  onLanguageChange,
+  currentLanguage,
+}: LanguageSelectorProps) {
+  const currentLang =
+    availableLanguages.find((lang) => lang.code === currentLanguage) ||
+    availableLanguages[0];
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

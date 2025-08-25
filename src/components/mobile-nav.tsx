@@ -1,12 +1,11 @@
-
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Home, 
-  Dumbbell, 
-  BarChart3, 
-  User, 
+import {
+  Home,
+  Dumbbell,
+  BarChart3,
+  User,
   MessageCircle,
   Plus,
   Settings,
@@ -17,7 +16,7 @@ import {
   Zap,
   Bell,
   Camera,
-  Mic
+  Mic,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -31,32 +30,32 @@ const navItems = [
     href: "/",
     icon: Home,
     label: "Home",
-    color: "text-blue-500"
+    color: "text-blue-500",
   },
   {
     href: "/workouts",
     icon: Dumbbell,
     label: "Workouts",
-    color: "text-purple-500"
+    color: "text-purple-500",
   },
   {
     href: "/progress",
     icon: BarChart3,
     label: "Progress",
-    color: "text-green-500"
+    color: "text-green-500",
   },
   {
     href: "/chat",
     icon: MessageCircle,
     label: "Chat",
-    color: "text-orange-500"
+    color: "text-orange-500",
   },
   {
     href: "/profile",
     icon: User,
     label: "Profile",
-    color: "text-pink-500"
-  }
+    color: "text-pink-500",
+  },
 ];
 
 export function MobileNav() {
@@ -68,8 +67,18 @@ export function MobileNav() {
   const isMobile = useIsMobile();
 
   const additionalItems = [
-    { href: "/settings", icon: Settings, label: "Settings", color: "text-gray-500" },
-    { href: "/subscription", icon: Trophy, label: "Premium", color: "text-yellow-500" },
+    {
+      href: "/settings",
+      icon: Settings,
+      label: "Settings",
+      color: "text-gray-500",
+    },
+    {
+      href: "/subscription",
+      icon: Trophy,
+      label: "Premium",
+      color: "text-yellow-500",
+    },
   ];
 
   const quickActions = [
@@ -79,7 +88,7 @@ export function MobileNav() {
       label: "AI Coach",
       color: "text-blue-500",
       action: () => setShowAIAssistant(true),
-      badge: "NEW"
+      badge: "NEW",
     },
     {
       id: "security",
@@ -87,7 +96,7 @@ export function MobileNav() {
       label: "Security",
       color: "text-green-500",
       action: () => setShowSecurity(true),
-      badge: null
+      badge: null,
     },
     {
       id: "voice",
@@ -96,26 +105,26 @@ export function MobileNav() {
       color: "text-purple-500",
       action: () => {
         // Voice command functionality
-        if ('webkitSpeechRecognition' in window) {
+        if ("webkitSpeechRecognition" in window) {
           setShowAIAssistant(true);
         }
       },
-      badge: null
+      badge: null,
     },
     {
       id: "notifications",
       icon: Bell,
       label: "Alerts",
       color: "text-orange-500",
-      action: () => window.location.href = "/notifications",
-      badge: notifications > 0 ? notifications.toString() : null
-    }
+      action: () => (window.location.href = "/notifications"),
+      badge: notifications > 0 ? notifications.toString() : null,
+    },
   ];
 
   return (
     <>
       {/* Main Navigation */}
-      <motion.nav 
+      <motion.nav
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.3 }}
@@ -125,7 +134,7 @@ export function MobileNav() {
           {navItems.map((item, index) => {
             const isActive = location.pathname === item.href;
             const Icon = item.icon;
-            
+
             return (
               <motion.div
                 key={item.href}
@@ -139,22 +148,28 @@ export function MobileNav() {
                     whileTap={{ scale: 0.95 }}
                     className={cn(
                       "flex flex-col items-center space-y-1 p-1.5 rounded-xl transition-all duration-200 touch-target xs:p-2",
-                      isActive 
-                        ? "bg-primary/10 text-primary" 
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                      isActive
+                        ? "bg-primary/10 text-primary"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
                     )}
                   >
-                    <div className={cn(
-                      "p-1.5 rounded-lg transition-all duration-200 xs:p-2",
-                      isActive && "bg-primary/20"
-                    )}>
-                      <Icon className={cn(
-                        "h-4 w-4 transition-colors duration-200 xs:h-5 xs:w-5",
-                        isActive ? "text-primary" : item.color
-                      )} />
+                    <div
+                      className={cn(
+                        "p-1.5 rounded-lg transition-all duration-200 xs:p-2",
+                        isActive && "bg-primary/20",
+                      )}
+                    >
+                      <Icon
+                        className={cn(
+                          "h-4 w-4 transition-colors duration-200 xs:h-5 xs:w-5",
+                          isActive ? "text-primary" : item.color,
+                        )}
+                      />
                     </div>
-                    <span className="text-xs font-medium responsive-text">{item.label}</span>
-                    
+                    <span className="text-xs font-medium responsive-text">
+                      {item.label}
+                    </span>
+
                     {isActive && (
                       <motion.div
                         layoutId="activeIndicator"
@@ -169,7 +184,7 @@ export function MobileNav() {
               </motion.div>
             );
           })}
-          
+
           {/* More Button */}
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
@@ -210,9 +225,11 @@ export function MobileNav() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-6" />
-              
-              <h3 className="text-lg font-semibold mb-4 text-center">More Options</h3>
-              
+
+              <h3 className="text-lg font-semibold mb-4 text-center">
+                More Options
+              </h3>
+
               {/* Quick Actions */}
               <div className="grid grid-cols-2 gap-3 mb-4">
                 {quickActions.map((action, index) => (
@@ -229,17 +246,24 @@ export function MobileNav() {
                       className="w-full flex flex-col items-center p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 transition-all duration-200 relative"
                     >
                       {action.badge && (
-                        <Badge 
-                          variant="secondary" 
+                        <Badge
+                          variant="secondary"
                           className="absolute -top-1 -right-1 text-xs px-1 py-0 h-5 min-w-[20px] bg-primary text-primary-foreground"
                         >
                           {action.badge}
                         </Badge>
                       )}
-                      <div className={cn("p-3 rounded-xl bg-white/80 shadow-sm mb-2", action.color)}>
+                      <div
+                        className={cn(
+                          "p-3 rounded-xl bg-white/80 shadow-sm mb-2",
+                          action.color,
+                        )}
+                      >
                         <action.icon className="h-5 w-5" />
                       </div>
-                      <span className="text-sm font-medium">{action.label}</span>
+                      <span className="text-sm font-medium">
+                        {action.label}
+                      </span>
                     </motion.button>
                   </motion.div>
                 ))}
@@ -254,29 +278,36 @@ export function MobileNav() {
                       key={item.href}
                       initial={{ scale: 0, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
-                      transition={{ delay: (quickActions.length + index) * 0.1, duration: 0.3 }}
+                      transition={{
+                        delay: (quickActions.length + index) * 0.1,
+                        duration: 0.3,
+                      }}
                     >
-                      <Link 
-                        to={item.href}
-                        onClick={() => setShowMore(false)}
-                      >
+                      <Link to={item.href} onClick={() => setShowMore(false)}>
                         <motion.div
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           className="flex flex-col items-center p-4 rounded-2xl bg-gradient-to-br from-muted/50 to-muted/30 hover:from-muted/70 hover:to-muted/50 transition-all duration-200"
                         >
-                          <div className={cn("p-3 rounded-xl bg-white shadow-sm mb-2", item.color)}>
+                          <div
+                            className={cn(
+                              "p-3 rounded-xl bg-white shadow-sm mb-2",
+                              item.color,
+                            )}
+                          >
                             <Icon className="h-6 w-6" />
                           </div>
-                          <span className="text-sm font-medium">{item.label}</span>
+                          <span className="text-sm font-medium">
+                            {item.label}
+                          </span>
                         </motion.div>
                       </Link>
                     </motion.div>
                   );
                 })}
               </div>
-              
-              <Button 
+
+              <Button
                 onClick={() => setShowMore(false)}
                 className="w-full bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90"
               >
@@ -288,15 +319,15 @@ export function MobileNav() {
       </AnimatePresence>
 
       {/* Mobile AI Assistant */}
-      <MobileAIAssistant 
-        isOpen={showAIAssistant} 
-        onClose={() => setShowAIAssistant(false)} 
+      <MobileAIAssistant
+        isOpen={showAIAssistant}
+        onClose={() => setShowAIAssistant(false)}
       />
 
       {/* Mobile Security Center */}
-      <MobileSecurityCenter 
-        isOpen={showSecurity} 
-        onClose={() => setShowSecurity(false)} 
+      <MobileSecurityCenter
+        isOpen={showSecurity}
+        onClose={() => setShowSecurity(false)}
       />
     </>
   );

@@ -16,7 +16,9 @@ export function LazyLoader<T extends Record<string, any>>({
   fallback?: React.ReactNode;
   error?: React.ComponentType<{ error: Error; retry: () => void }>;
 } & T) {
-  const [Component, setComponent] = useState<React.ComponentType<T> | null>(null);
+  const [Component, setComponent] = useState<React.ComponentType<T> | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -66,7 +68,7 @@ export const OptimizedImage = memo(function OptimizedImage({
   loading = "lazy",
   onLoad,
   onError,
-  fallback
+  fallback,
 }: {
   src: string;
   alt: string;
@@ -128,7 +130,9 @@ export const OptimizedImage = memo(function OptimizedImage({
         />
       ) : (
         <div className="w-full h-full bg-muted flex items-center justify-center">
-          <span className="text-muted-foreground text-sm">Image failed to load</span>
+          <span className="text-muted-foreground text-sm">
+            Image failed to load
+          </span>
         </div>
       )}
     </div>
@@ -141,45 +145,53 @@ export function PerformanceMonitor() {
     loadTime: 0,
     renderTime: 0,
     memoryUsage: 0,
-    networkRequests: 0
+    networkRequests: 0,
   });
 
   useEffect(() => {
     // Monitor page load performance
-    const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+    const navigation = performance.getEntriesByType(
+      "navigation",
+    )[0] as PerformanceNavigationTiming;
     if (navigation) {
-      setMetrics(prev => ({
+      setMetrics((prev) => ({
         ...prev,
-        loadTime: navigation.loadEventEnd - navigation.fetchStart
+        loadTime: navigation.loadEventEnd - navigation.fetchStart,
       }));
     }
 
     // Monitor memory usage (if available)
-    if ('memory' in performance) {
+    if ("memory" in performance) {
       const memInfo = (performance as any).memory;
-      setMetrics(prev => ({
+      setMetrics((prev) => ({
         ...prev,
-        memoryUsage: memInfo.usedJSHeapSize / memInfo.jsHeapSizeLimit * 100
+        memoryUsage: (memInfo.usedJSHeapSize / memInfo.jsHeapSizeLimit) * 100,
       }));
     }
 
     // Monitor network requests
     const observer = new PerformanceObserver((list) => {
       const entries = list.getEntries();
-      setMetrics(prev => ({
+      setMetrics((prev) => ({
         ...prev,
-        networkRequests: prev.networkRequests + entries.length
+        networkRequests: prev.networkRequests + entries.length,
       }));
     });
 
-    observer.observe({ entryTypes: ['resource'] });
+    observer.observe({ entryTypes: ["resource"] });
 
     return () => observer.disconnect();
   }, []);
 
   const getPerformanceScore = () => {
-    const loadScore = metrics.loadTime < 3000 ? 100 : Math.max(0, 100 - (metrics.loadTime - 3000) / 100);
-    const memoryScore = metrics.memoryUsage < 50 ? 100 : Math.max(0, 100 - (metrics.memoryUsage - 50) * 2);
+    const loadScore =
+      metrics.loadTime < 3000
+        ? 100
+        : Math.max(0, 100 - (metrics.loadTime - 3000) / 100);
+    const memoryScore =
+      metrics.memoryUsage < 50
+        ? 100
+        : Math.max(0, 100 - (metrics.memoryUsage - 50) * 2);
     return Math.round((loadScore + memoryScore) / 2);
   };
 
@@ -196,17 +208,24 @@ export function PerformanceMonitor() {
       <CardContent className="space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-xs">Overall Score</span>
-          <Badge variant={score > 80 ? "default" : score > 60 ? "secondary" : "destructive"}>
+          <Badge
+            variant={
+              score > 80 ? "default" : score > 60 ? "secondary" : "destructive"
+            }
+          >
             {score}
           </Badge>
         </div>
-        
+
         <div className="space-y-2">
           <div className="flex justify-between text-xs">
             <span>Load Time</span>
             <span>{(metrics.loadTime / 1000).toFixed(2)}s</span>
           </div>
-          <Progress value={Math.min(100, (3000 - metrics.loadTime) / 30)} className="h-1" />
+          <Progress
+            value={Math.min(100, (3000 - metrics.loadTime) / 30)}
+            className="h-1"
+          />
         </div>
 
         <div className="space-y-2">
@@ -214,7 +233,10 @@ export function PerformanceMonitor() {
             <span>Memory Usage</span>
             <span>{metrics.memoryUsage.toFixed(1)}%</span>
           </div>
-          <Progress value={Math.min(100, metrics.memoryUsage)} className="h-1" />
+          <Progress
+            value={Math.min(100, metrics.memoryUsage)}
+            className="h-1"
+          />
         </div>
 
         <div className="flex justify-between text-xs">
@@ -232,7 +254,7 @@ export function VirtualizedList<T>({
   renderItem,
   itemHeight = 60,
   containerHeight = 400,
-  className = ""
+  className = "",
 }: {
   items: T[];
   renderItem: (item: T, index: number) => React.ReactNode;
@@ -245,12 +267,12 @@ export function VirtualizedList<T>({
   const visibleStartIndex = Math.floor(scrollTop / itemHeight);
   const visibleEndIndex = Math.min(
     visibleStartIndex + Math.ceil(containerHeight / itemHeight) + 1,
-    items.length - 1
+    items.length - 1,
   );
 
   const visibleItems = useMemo(
     () => items.slice(visibleStartIndex, visibleEndIndex + 1),
-    [items, visibleStartIndex, visibleEndIndex]
+    [items, visibleStartIndex, visibleEndIndex],
   );
 
   const totalHeight = items.length * itemHeight;
@@ -262,7 +284,7 @@ export function VirtualizedList<T>({
       style={{ height: containerHeight }}
       onScroll={(e) => setScrollTop(e.currentTarget.scrollTop)}
     >
-      <div style={{ height: totalHeight, position: 'relative' }}>
+      <div style={{ height: totalHeight, position: "relative" }}>
         <div style={{ transform: `translateY(${offsetY}px)` }}>
           {visibleItems.map((item, index) => (
             <div key={visibleStartIndex + index} style={{ height: itemHeight }}>
@@ -276,17 +298,17 @@ export function VirtualizedList<T>({
 }
 
 // Loading spinner component
-export const LoadingSpinner = memo(function LoadingSpinner({ 
+export const LoadingSpinner = memo(function LoadingSpinner({
   size = "default",
-  className = "" 
-}: { 
+  className = "",
+}: {
   size?: "sm" | "default" | "lg";
   className?: string;
 }) {
   const sizeClasses = {
     sm: "h-4 w-4",
     default: "h-6 w-6",
-    lg: "h-8 w-8"
+    lg: "h-8 w-8",
   };
 
   return (
@@ -299,7 +321,7 @@ export const LoadingSpinner = memo(function LoadingSpinner({
 // Error fallback component
 export const ErrorFallback = memo(function ErrorFallback({
   error,
-  retry
+  retry,
 }: {
   error: Error;
   retry: () => void;
@@ -341,7 +363,7 @@ export function useDebouncedValue<T>(value: T, delay: number): T {
 // Intersection Observer hook for lazy loading
 export function useIntersectionObserver(
   ref: React.RefObject<Element>,
-  options: IntersectionObserverInit = {}
+  options: IntersectionObserverInit = {},
 ) {
   const [isIntersecting, setIsIntersecting] = useState(false);
 

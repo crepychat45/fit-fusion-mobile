@@ -1,19 +1,37 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle, Download, Calendar, Zap, Bug, Shield, RefreshCw, AlertTriangle, Smartphone, Star, Gift } from "lucide-react";
+import {
+  CheckCircle,
+  Download,
+  Calendar,
+  Zap,
+  Bug,
+  Shield,
+  RefreshCw,
+  AlertTriangle,
+  Smartphone,
+  Star,
+  Gift,
+} from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ChangelogEntry {
   version: string;
   date: string;
-  type: 'major' | 'minor' | 'patch';
+  type: "major" | "minor" | "patch";
   changes: {
     features?: string[];
     fixes?: string[];
@@ -36,16 +54,16 @@ const mockChangelog: ChangelogEntry[] = [
         "📜 Fixed chat settings scroll issues for better mobile experience",
         "🤖 Improved AI Coach knowledge base with more accurate responses",
         "🔒 Enhanced security and privacy features with better encryption",
-        "⚙️ Better settings persistence across app restarts"
+        "⚙️ Better settings persistence across app restarts",
       ],
       improvements: [
         "🔧 Fixed smartwatch settings not saving properly",
         "🖼️ Profile photo now shows correctly in all components",
         "📱 Improved mobile chat interface responsiveness",
         "🎯 Better AI response accuracy and context understanding",
-        "⚡ Enhanced app performance and loading speeds"
-      ]
-    }
+        "⚡ Enhanced app performance and loading speeds",
+      ],
+    },
   },
   {
     version: "5.1.0",
@@ -58,7 +76,7 @@ const mockChangelog: ChangelogEntry[] = [
         "👤 Profile photo display on home page with enhanced visual design and status indicators",
         "🎨 New watch customization features including 50+ watch faces and personalized wallpapers",
         "💬 Upgraded chat interface with voice-to-text conversion and real-time AI responses",
-        "🔧 Comprehensive settings persistence system - all toggles and preferences now save properly"
+        "🔧 Comprehensive settings persistence system - all toggles and preferences now save properly",
       ],
       fixes: [
         "Fixed mobile AI coach voice recording not working properly across all devices",
@@ -66,23 +84,23 @@ const mockChangelog: ChangelogEntry[] = [
         "Fixed profile name not showing custom names - proper profile display throughout app",
         "Corrected smartwatch settings not saving between sessions",
         "Fixed chat voice features not converting speech to text accurately",
-        "Resolved profile photo not displaying properly on home page"
+        "Resolved profile photo not displaying properly on home page",
       ],
       security: [
         "Enhanced voice data processing with improved on-device speech recognition",
         "Strengthened profile data encryption and secure storage mechanisms",
         "Improved smartwatch communication security protocols",
         "Enhanced data privacy controls for voice and chat features",
-        "Updated development team security credentials and access controls"
+        "Updated development team security credentials and access controls",
       ],
       improvements: [
         "Dramatically improved mobile experience with better touch interactions",
         "Enhanced UI/UX design with modern visual elements and animations",
         "Better smartwatch integration with real-time sync and status updates",
         "Optimized performance for voice processing and AI responses",
-        "Improved accessibility and user experience across all features"
-      ]
-    }
+        "Improved accessibility and user experience across all features",
+      ],
+    },
   },
   {
     version: "4.8.0",
@@ -92,10 +110,10 @@ const mockChangelog: ChangelogEntry[] = [
       features: [
         "🎤 Advanced voice AI coach with natural language processing and real-time speech recognition",
         "👤 Custom profile name editor with persistent storage and real-time sync across app",
-        "⚙️ Enhanced settings system with automatic persistence and backup/restore functionality", 
+        "⚙️ Enhanced settings system with automatic persistence and backup/restore functionality",
         "⌚ Improved smartwatch hub with toggle controls and real-time device management",
         "🤖 Contextual AI responses with smartwatch integration and mobile optimization",
-        "📱 Mobile-first design improvements with better touch interactions and gestures"
+        "📱 Mobile-first design improvements with better touch interactions and gestures",
       ],
       fixes: [
         "Fixed voice recording functionality not working properly on mobile devices",
@@ -103,23 +121,23 @@ const mockChangelog: ChangelogEntry[] = [
         "Fixed profile name displaying 'User' instead of custom display name throughout app",
         "Corrected smartwatch settings not persisting between sessions",
         "Fixed AI coach providing generic responses instead of contextual fitness advice",
-        "Resolved profile display inconsistencies across different components"
+        "Resolved profile display inconsistencies across different components",
       ],
       security: [
         "Enhanced voice data processing with on-device speech recognition",
         "Improved profile data encryption and secure local storage",
         "Strengthened settings validation to prevent data corruption",
         "Improved data privacy controls with granular permissions",
-        "Security audit compliance with industry standards"
+        "Security audit compliance with industry standards",
       ],
       improvements: [
         "Dramatically improved app performance with 40% faster loading times",
         "Enhanced user interface with modern design patterns",
         "Better accessibility features for users with disabilities",
         "Optimized battery usage for mobile devices",
-        "Improved offline functionality and data synchronization"
-      ]
-    }
+        "Improved offline functionality and data synchronization",
+      ],
+    },
   },
   {
     version: "4.7.0",
@@ -129,83 +147,86 @@ const mockChangelog: ChangelogEntry[] = [
       features: [
         "New integration framework for third-party services",
         "Enhanced chat authentication system",
-        "Advanced settings validation and error handling"
+        "Advanced settings validation and error handling",
       ],
       fixes: [
         "Fixed version update installation issues",
         "Resolved chat authentication errors",
-        "Fixed settings tab validation problems"
+        "Fixed settings tab validation problems",
       ],
       security: [
         "Enhanced biometric authentication",
-        "Improved session management"
+        "Improved session management",
       ],
       improvements: [
         "Better loading states across all components",
-        "Optimized performance monitoring"
-      ]
-    }
-  }
+        "Optimized performance monitoring",
+      ],
+    },
+  },
 ];
 
 export function EnhancedVersionManager() {
   const { toast } = useToast();
-  
+
   // Get current version from localStorage or default
   const [currentVersion, setCurrentVersion] = useState<string>(() => {
-    const stored = localStorage.getItem('fitfusion-app-version');
+    const stored = localStorage.getItem("fitfusion-app-version");
     return stored || "5.1.0";
   });
-  
-  const [latestVersionAvailable, setLatestVersionAvailable] = useState<string>("5.1.0");
+
+  const [latestVersionAvailable, setLatestVersionAvailable] =
+    useState<string>("5.1.0");
   const [updateAvailable, setUpdateAvailable] = useState(() => {
-    const stored = localStorage.getItem('fitfusion-app-version');
+    const stored = localStorage.getItem("fitfusion-app-version");
     const current = stored || "4.8.0";
     return current !== "5.1.0";
   });
-  
+
   const [updateProgress, setUpdateProgress] = useState<number>(0);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
   const [lastChecked, setLastChecked] = useState<Date | null>(() => {
-    const stored = localStorage.getItem('fitfusion-last-update-check');
+    const stored = localStorage.getItem("fitfusion-last-update-check");
     return stored ? new Date(stored) : null;
   });
   const [updateError, setUpdateError] = useState<string | null>(null);
   const [forceUpdate, setForceUpdate] = useState(false);
-  
+
   useEffect(() => {
     // Auto-check for updates on component mount
     checkForUpdates();
-    
+
     // Set up periodic update checking (every 30 minutes)
     const interval = setInterval(checkForUpdates, 30 * 60 * 1000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
   // Sync version across app
   useEffect(() => {
-    localStorage.setItem('fitfusion-app-version', currentVersion);
+    localStorage.setItem("fitfusion-app-version", currentVersion);
     // Trigger a custom event to notify other components
-    window.dispatchEvent(new CustomEvent('versionUpdated', { detail: currentVersion }));
+    window.dispatchEvent(
+      new CustomEvent("versionUpdated", { detail: currentVersion }),
+    );
   }, [currentVersion]);
-  
+
   const checkForUpdates = async () => {
     setIsCheckingUpdates(true);
     setUpdateError(null);
-    
+
     try {
       // Simulate API call to check for updates
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       const now = new Date();
       setLastChecked(now);
-      localStorage.setItem('fitfusion-last-update-check', now.toISOString());
-      
+      localStorage.setItem("fitfusion-last-update-check", now.toISOString());
+
       const hasUpdate = latestVersionAvailable !== currentVersion;
       setUpdateAvailable(hasUpdate);
-      
+
       if (hasUpdate) {
         toast({
           title: "🎉 Major Update Available!",
@@ -221,19 +242,20 @@ export function EnhancedVersionManager() {
       setUpdateError("Failed to check for updates. Please try again.");
       toast({
         title: "❌ Update Check Failed",
-        description: "Unable to check for updates. Please check your connection.",
+        description:
+          "Unable to check for updates. Please check your connection.",
         variant: "destructive",
       });
     } finally {
       setIsCheckingUpdates(false);
     }
   };
-  
+
   const updateVersion = async () => {
     setIsUpdating(true);
     setUpdateProgress(0);
     setUpdateError(null);
-    
+
     try {
       // Simulate download and installation with realistic progress
       const steps = [
@@ -242,63 +264,70 @@ export function EnhancedVersionManager() {
         { message: "🔐 Verifying digital signature...", duration: 1000 },
         { message: "⚙️ Installing new features...", duration: 1500 },
         { message: "🔧 Updating configuration...", duration: 1000 },
-        { message: "✨ Finalizing installation...", duration: 700 }
+        { message: "✨ Finalizing installation...", duration: 700 },
       ];
-      
+
       for (let i = 0; i < steps.length; i++) {
         const step = steps[i];
         setUpdateProgress((i / steps.length) * 100);
-        
+
         toast({
           title: step.message,
           description: `Progress: ${Math.round((i / steps.length) * 100)}%`,
         });
-        
-        await new Promise(resolve => setTimeout(resolve, step.duration));
+
+        await new Promise((resolve) => setTimeout(resolve, step.duration));
       }
-      
+
       // Complete the update
       setCurrentVersion(latestVersionAvailable);
       setUpdateAvailable(false);
       setUpdateProgress(100);
-      
+
       // Store new version and update timestamp
-      localStorage.setItem('fitfusion-app-version', latestVersionAvailable);
-      localStorage.setItem('fitfusion-last-update', new Date().toISOString());
-      
+      localStorage.setItem("fitfusion-app-version", latestVersionAvailable);
+      localStorage.setItem("fitfusion-last-update", new Date().toISOString());
+
       toast({
         title: "🎉 Update Complete!",
         description: `Successfully updated to version ${latestVersionAvailable}. Enjoy the new features!`,
       });
-      
+
       // Trigger version update event
-      window.dispatchEvent(new CustomEvent('versionUpdated', { detail: latestVersionAvailable }));
-      
+      window.dispatchEvent(
+        new CustomEvent("versionUpdated", { detail: latestVersionAvailable }),
+      );
     } catch (error) {
       setUpdateError("Update installation failed. Please try again.");
       toast({
         title: "❌ Update Failed",
-        description: "Failed to install update. Please try again or contact support.",
+        description:
+          "Failed to install update. Please try again or contact support.",
         variant: "destructive",
       });
     } finally {
       setIsUpdating(false);
     }
   };
-  
+
   const forceUpdateCheck = async () => {
     setForceUpdate(true);
     await checkForUpdates();
     setForceUpdate(false);
   };
-  
+
   const getChangeIcon = (type: string) => {
     switch (type) {
-      case 'features': return <Zap className="h-4 w-4 text-green-500" />;
-      case 'fixes': return <Bug className="h-4 w-4 text-blue-500" />;
-      case 'security': return <Shield className="h-4 w-4 text-red-500" />;
-      case 'improvements': return <CheckCircle className="h-4 w-4 text-orange-500" />;
-      default: return <CheckCircle className="h-4 w-4" />;
+      case "features":
+        return <Zap className="h-4 w-4 text-green-500" />;
+      case "fixes":
+        return <Bug className="h-4 w-4 text-blue-500" />;
+      case "security":
+        return <Shield className="h-4 w-4 text-red-500" />;
+      case "improvements":
+        return <CheckCircle className="h-4 w-4 text-orange-500" />;
+      default:
+        return <CheckCircle className="h-4 w-4" />;
     }
   };
 
@@ -306,13 +335,13 @@ export function EnhancedVersionManager() {
     if (updateAvailable) return "destructive";
     return "default";
   };
-  
+
   return (
     <Card className="relative overflow-hidden">
       {updateAvailable && (
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-pulse" />
       )}
-      
+
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
           <span className="flex items-center gap-2">
@@ -324,7 +353,10 @@ export function EnhancedVersionManager() {
               v{currentVersion}
             </Badge>
             {updateAvailable && (
-              <Badge variant={getVersionBadgeVariant()} className="animate-pulse">
+              <Badge
+                variant={getVersionBadgeVariant()}
+                className="animate-pulse"
+              >
                 <Gift className="h-3 w-3 mr-1" />
                 Update Available
               </Badge>
@@ -332,10 +364,11 @@ export function EnhancedVersionManager() {
           </div>
         </CardTitle>
         <CardDescription>
-          Manage application version, updates, and changelog with advanced features
+          Manage application version, updates, and changelog with advanced
+          features
         </CardDescription>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         {updateError && (
           <Alert variant="destructive">
@@ -343,7 +376,7 @@ export function EnhancedVersionManager() {
             <AlertDescription>{updateError}</AlertDescription>
           </Alert>
         )}
-        
+
         <Tabs defaultValue="updates" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="updates" className="relative">
@@ -355,7 +388,7 @@ export function EnhancedVersionManager() {
             <TabsTrigger value="changelog">What's New</TabsTrigger>
             <TabsTrigger value="system">System Info</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="updates" className="space-y-4">
             {isUpdating ? (
               <div className="space-y-4 p-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 rounded-lg border">
@@ -376,7 +409,10 @@ export function EnhancedVersionManager() {
                       🎉 Major Update Available!
                     </span>
                     <div className="flex items-center gap-2 mt-1">
-                      <Badge variant="default" className="text-lg px-3 py-1 font-mono">
+                      <Badge
+                        variant="default"
+                        className="text-lg px-3 py-1 font-mono"
+                      >
                         v{latestVersionAvailable}
                       </Badge>
                       <Badge variant="outline" className="text-xs">
@@ -387,8 +423,9 @@ export function EnhancedVersionManager() {
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  This major update includes revolutionary AI features, enhanced security, 
-                  performance improvements, and exciting new functionality.
+                  This major update includes revolutionary AI features, enhanced
+                  security, performance improvements, and exciting new
+                  functionality.
                 </p>
                 <div className="grid grid-cols-2 gap-4 text-xs">
                   <div className="flex items-center gap-2">
@@ -418,13 +455,14 @@ export function EnhancedVersionManager() {
                       ✅ Your application is up to date
                     </p>
                     <p className="text-xs text-green-600 dark:text-green-300 mt-1">
-                      Version {currentVersion} • Latest release with all features
+                      Version {currentVersion} • Latest release with all
+                      features
                     </p>
                   </div>
                 </div>
               </div>
             )}
-            
+
             <div className="flex justify-between items-center text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
               <span>
                 {lastChecked ? (
@@ -433,25 +471,37 @@ export function EnhancedVersionManager() {
                   "🔍 Never checked for updates"
                 )}
               </span>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="sm"
                 onClick={forceUpdateCheck}
                 disabled={isCheckingUpdates || forceUpdate}
               >
-                <RefreshCw className={`h-3 w-3 mr-1 ${(isCheckingUpdates || forceUpdate) ? 'animate-spin' : ''}`} />
+                <RefreshCw
+                  className={`h-3 w-3 mr-1 ${isCheckingUpdates || forceUpdate ? "animate-spin" : ""}`}
+                />
                 {isCheckingUpdates || forceUpdate ? "Checking..." : "Check Now"}
               </Button>
             </div>
           </TabsContent>
-          
+
           <TabsContent value="changelog" className="space-y-4">
             <div className="max-h-96 overflow-y-auto space-y-4">
               {mockChangelog.map((entry, index) => (
-                <div key={entry.version} className="border rounded-lg p-4 hover:shadow-sm transition-shadow">
+                <div
+                  key={entry.version}
+                  className="border rounded-lg p-4 hover:shadow-sm transition-shadow"
+                >
                   <div className="flex justify-between items-center mb-3">
                     <div className="flex items-center gap-2">
-                      <Badge variant={entry.version === latestVersionAvailable ? "default" : "outline"} className="font-mono">
+                      <Badge
+                        variant={
+                          entry.version === latestVersionAvailable
+                            ? "default"
+                            : "outline"
+                        }
+                        className="font-mono"
+                      >
                         v{entry.version}
                       </Badge>
                       <span className="text-xs text-muted-foreground flex items-center gap-1">
@@ -464,45 +514,58 @@ export function EnhancedVersionManager() {
                           Current
                         </Badge>
                       )}
-                      {entry.version === latestVersionAvailable && entry.version !== currentVersion && (
-                        <Badge variant="destructive" className="text-xs animate-pulse">
-                          <Star className="h-3 w-3 mr-1" />
-                          New
-                        </Badge>
-                      )}
+                      {entry.version === latestVersionAvailable &&
+                        entry.version !== currentVersion && (
+                          <Badge
+                            variant="destructive"
+                            className="text-xs animate-pulse"
+                          >
+                            <Star className="h-3 w-3 mr-1" />
+                            New
+                          </Badge>
+                        )}
                     </div>
                   </div>
-                  
+
                   <div className="space-y-3">
-                    {Object.entries(entry.changes).map(([type, items]) => (
-                      items && items.length > 0 && (
-                        <div key={type}>
-                          <div className="flex items-center gap-2 mb-2">
-                            {getChangeIcon(type)}
-                            <span className="text-sm font-medium capitalize">{type}</span>
-                            <Badge variant="outline" className="text-xs">
-                              {items.length}
-                            </Badge>
+                    {Object.entries(entry.changes).map(
+                      ([type, items]) =>
+                        items &&
+                        items.length > 0 && (
+                          <div key={type}>
+                            <div className="flex items-center gap-2 mb-2">
+                              {getChangeIcon(type)}
+                              <span className="text-sm font-medium capitalize">
+                                {type}
+                              </span>
+                              <Badge variant="outline" className="text-xs">
+                                {items.length}
+                              </Badge>
+                            </div>
+                            <ul className="text-xs text-muted-foreground ml-6 space-y-1">
+                              {items.map((item, itemIndex) => (
+                                <li
+                                  key={itemIndex}
+                                  className="flex items-start gap-2"
+                                >
+                                  <span className="text-primary">•</span>
+                                  <span>{item}</span>
+                                </li>
+                              ))}
+                            </ul>
                           </div>
-                          <ul className="text-xs text-muted-foreground ml-6 space-y-1">
-                            {items.map((item, itemIndex) => (
-                              <li key={itemIndex} className="flex items-start gap-2">
-                                <span className="text-primary">•</span>
-                                <span>{item}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )
-                    ))}
+                        ),
+                    )}
                   </div>
-                  
-                  {index < mockChangelog.length - 1 && <Separator className="mt-4" />}
+
+                  {index < mockChangelog.length - 1 && (
+                    <Separator className="mt-4" />
+                  )}
                 </div>
               ))}
             </div>
           </TabsContent>
-          
+
           <TabsContent value="system" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div className="space-y-2 p-4 border rounded-lg">
@@ -510,14 +573,18 @@ export function EnhancedVersionManager() {
                   <CheckCircle className="h-4 w-4 text-green-500" />
                   Current Version
                 </p>
-                <p className="text-muted-foreground font-mono">{currentVersion}</p>
+                <p className="text-muted-foreground font-mono">
+                  {currentVersion}
+                </p>
               </div>
               <div className="space-y-2 p-4 border rounded-lg">
                 <p className="font-medium flex items-center gap-2">
                   <Download className="h-4 w-4 text-blue-500" />
                   Latest Available
                 </p>
-                <p className="text-muted-foreground font-mono">{latestVersionAvailable}</p>
+                <p className="text-muted-foreground font-mono">
+                  {latestVersionAvailable}
+                </p>
               </div>
               <div className="space-y-2 p-4 border rounded-lg">
                 <p className="font-medium flex items-center gap-2">
@@ -534,36 +601,47 @@ export function EnhancedVersionManager() {
                 <p className="text-muted-foreground">Enabled & Monitored</p>
               </div>
             </div>
-            
+
             <div className="bg-muted/50 p-4 rounded-lg">
               <h4 className="font-medium mb-2">System Status</h4>
               <div className="grid grid-cols-2 gap-4 text-xs">
                 <div>Platform: Web Application</div>
                 <div>Build: Production</div>
-                <div>Last Update: {localStorage.getItem('fitfusion-last-update') ? new Date(localStorage.getItem('fitfusion-last-update')!).toLocaleDateString() : 'Never'}</div>
-                <div>Status: {updateAvailable ? 'Update Available' : 'Up to Date'}</div>
+                <div>
+                  Last Update:{" "}
+                  {localStorage.getItem("fitfusion-last-update")
+                    ? new Date(
+                        localStorage.getItem("fitfusion-last-update")!,
+                      ).toLocaleDateString()
+                    : "Never"}
+                </div>
+                <div>
+                  Status: {updateAvailable ? "Update Available" : "Up to Date"}
+                </div>
               </div>
             </div>
           </TabsContent>
         </Tabs>
       </CardContent>
-      
+
       {updateAvailable && !isUpdating && (
         <CardFooter className="flex gap-2 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20">
-          <Button 
-            className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700" 
+          <Button
+            className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
             onClick={updateVersion}
             disabled={isUpdating}
           >
             <Download className="h-4 w-4 mr-2" />
             Install v{latestVersionAvailable} Now
           </Button>
-          <Button 
+          <Button
             variant="outline"
             onClick={checkForUpdates}
             disabled={isCheckingUpdates}
           >
-            <RefreshCw className={`h-4 w-4 ${isCheckingUpdates ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`h-4 w-4 ${isCheckingUpdates ? "animate-spin" : ""}`}
+            />
           </Button>
         </CardFooter>
       )}

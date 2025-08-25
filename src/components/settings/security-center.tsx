@@ -1,6 +1,11 @@
-
 import React, { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -9,14 +14,14 @@ import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  Shield, 
-  Lock, 
-  Key, 
-  Eye, 
-  EyeOff, 
-  Fingerprint, 
-  Smartphone, 
+import {
+  Shield,
+  Lock,
+  Key,
+  Eye,
+  EyeOff,
+  Fingerprint,
+  Smartphone,
   AlertTriangle,
   CheckCircle,
   RefreshCw,
@@ -27,7 +32,7 @@ import {
   QrCode,
   Scan,
   UserCheck,
-  ShieldCheck
+  ShieldCheck,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -49,15 +54,15 @@ export function SecurityCenter() {
 
   const runSecurityScan = async () => {
     setLastSecurityScan(new Date());
-    
+
     toast({
       title: "🔍 Security scan started",
-      description: "Analyzing your security configuration..."
+      description: "Analyzing your security configuration...",
     });
 
     // Simulate comprehensive security scan
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
     let score = 50;
     if (encryptionEnabled) score += 20;
     if (twoFactorEnabled) score += 15;
@@ -65,14 +70,14 @@ export function SecurityCenter() {
     if (autoLockEnabled) score += 5;
     if (passwordlessLogin) score += 10;
     if (deviceTrust) score += 5;
-    
+
     setSecurityScore(Math.min(score, 100));
 
     const issues = [];
     if (!twoFactorEnabled) issues.push("Two-factor authentication disabled");
     if (!biometricEnabled) issues.push("Biometric authentication not set up");
     if (!passwordlessLogin) issues.push("Passwordless login not configured");
-    
+
     if (issues.length === 0) {
       toast({
         title: "✅ Security scan complete",
@@ -82,7 +87,7 @@ export function SecurityCenter() {
       toast({
         title: "⚠️ Security issues found",
         description: `Found ${issues.length} issue(s) that need attention.`,
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -90,12 +95,12 @@ export function SecurityCenter() {
   const enableTwoFactor = async () => {
     toast({
       title: "🔐 Enabling 2FA",
-      description: "Setting up two-factor authentication..."
+      description: "Setting up two-factor authentication...",
     });
-    
+
     setShowQRCode(true);
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
     setTwoFactorEnabled(true);
     toast({
       title: "✅ 2FA Enabled",
@@ -107,22 +112,24 @@ export function SecurityCenter() {
     try {
       toast({
         title: "🔐 Setting up biometric authentication",
-        description: "Please follow the prompts on your device..."
+        description: "Please follow the prompts on your device...",
       });
-      
+
       // Simulate biometric setup
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       setBiometricEnabled(true);
       toast({
         title: "✅ Biometric authentication enabled",
-        description: "You can now use fingerprint or face recognition to sign in.",
+        description:
+          "You can now use fingerprint or face recognition to sign in.",
       });
     } catch (error) {
       toast({
         title: "❌ Biometric setup failed",
-        description: "Unable to set up biometric authentication. Please try again.",
-        variant: "destructive"
+        description:
+          "Unable to set up biometric authentication. Please try again.",
+        variant: "destructive",
       });
     }
   };
@@ -130,11 +137,11 @@ export function SecurityCenter() {
   const enablePasswordlessLogin = async () => {
     toast({
       title: "🚀 Enabling passwordless login",
-      description: "Setting up secure passwordless authentication..."
+      description: "Setting up secure passwordless authentication...",
     });
-    
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
+
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
     setPasswordlessLogin(true);
     toast({
       title: "✅ Passwordless login enabled",
@@ -143,10 +150,33 @@ export function SecurityCenter() {
   };
 
   const getSecurityLevel = () => {
-    if (securityScore >= 90) return { level: "Maximum", color: "text-green-600", bgColor: "bg-green-100", icon: CheckCircle };
-    if (securityScore >= 75) return { level: "High", color: "text-blue-600", bgColor: "bg-blue-100", icon: Shield };
-    if (securityScore >= 50) return { level: "Medium", color: "text-yellow-600", bgColor: "bg-yellow-100", icon: AlertTriangle };
-    return { level: "Low", color: "text-red-600", bgColor: "bg-red-100", icon: AlertTriangle };
+    if (securityScore >= 90)
+      return {
+        level: "Maximum",
+        color: "text-green-600",
+        bgColor: "bg-green-100",
+        icon: CheckCircle,
+      };
+    if (securityScore >= 75)
+      return {
+        level: "High",
+        color: "text-blue-600",
+        bgColor: "bg-blue-100",
+        icon: Shield,
+      };
+    if (securityScore >= 50)
+      return {
+        level: "Medium",
+        color: "text-yellow-600",
+        bgColor: "bg-yellow-100",
+        icon: AlertTriangle,
+      };
+    return {
+      level: "Low",
+      color: "text-red-600",
+      bgColor: "bg-red-100",
+      icon: AlertTriangle,
+    };
   };
 
   const currentSecurityLevel = getSecurityLevel();
@@ -174,30 +204,39 @@ export function SecurityCenter() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <SecurityIcon className={`h-5 w-5 ${currentSecurityLevel.color}`} />
-                  <span className="font-medium">Security Score: {securityScore}/100</span>
+                  <SecurityIcon
+                    className={`h-5 w-5 ${currentSecurityLevel.color}`}
+                  />
+                  <span className="font-medium">
+                    Security Score: {securityScore}/100
+                  </span>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Your security level is <span className={currentSecurityLevel.color}>{currentSecurityLevel.level}</span>
+                  Your security level is{" "}
+                  <span className={currentSecurityLevel.color}>
+                    {currentSecurityLevel.level}
+                  </span>
                 </p>
               </div>
-              <div className={`px-3 py-1 rounded-full ${currentSecurityLevel.bgColor}`}>
-                <span className={`text-sm font-medium ${currentSecurityLevel.color}`}>
+              <div
+                className={`px-3 py-1 rounded-full ${currentSecurityLevel.bgColor}`}
+              >
+                <span
+                  className={`text-sm font-medium ${currentSecurityLevel.color}`}
+                >
                   {currentSecurityLevel.level}
                 </span>
               </div>
             </div>
-            
+
             <Progress value={securityScore} className="h-3" />
-            
+
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Clock className="h-4 w-4" />
-                {lastSecurityScan ? (
-                  `Last scan: ${lastSecurityScan.toLocaleString()}`
-                ) : (
-                  "Never scanned"
-                )}
+                {lastSecurityScan
+                  ? `Last scan: ${lastSecurityScan.toLocaleString()}`
+                  : "Never scanned"}
               </div>
               <Button variant="outline" size="sm" onClick={runSecurityScan}>
                 <RefreshCw className="h-4 w-4 mr-1" />
@@ -240,7 +279,7 @@ export function SecurityCenter() {
                   <CheckCircle className="h-3 w-3 mr-1" />
                   Active
                 </Badge>
-                <Switch 
+                <Switch
                   checked={encryptionEnabled}
                   onCheckedChange={setEncryptionEnabled}
                 />
@@ -257,10 +296,7 @@ export function SecurityCenter() {
                   </p>
                 </div>
               </div>
-              <Switch 
-                checked={secureMode}
-                onCheckedChange={setSecureMode}
-              />
+              <Switch checked={secureMode} onCheckedChange={setSecureMode} />
             </div>
 
             <div className="flex items-center justify-between">
@@ -273,10 +309,7 @@ export function SecurityCenter() {
                   </p>
                 </div>
               </div>
-              <Switch 
-                checked={vpnRequired}
-                onCheckedChange={setVpnRequired}
-              />
+              <Switch checked={vpnRequired} onCheckedChange={setVpnRequired} />
             </div>
           </CardContent>
         </Card>
@@ -318,9 +351,11 @@ export function SecurityCenter() {
                       Active
                     </Badge>
                   )}
-                  <Switch 
+                  <Switch
                     checked={twoFactorEnabled}
-                    onCheckedChange={twoFactorEnabled ? setTwoFactorEnabled : enableTwoFactor}
+                    onCheckedChange={
+                      twoFactorEnabled ? setTwoFactorEnabled : enableTwoFactor
+                    }
                   />
                 </div>
               </div>
@@ -340,7 +375,9 @@ export function SecurityCenter() {
                       Scan this QR code with your authenticator app
                     </p>
                     <div className="space-y-2">
-                      <Label htmlFor="verification-code">Verification Code</Label>
+                      <Label htmlFor="verification-code">
+                        Verification Code
+                      </Label>
                       <Input
                         id="verification-code"
                         placeholder="Enter 6-digit code"
@@ -372,9 +409,11 @@ export function SecurityCenter() {
                     Enabled
                   </Badge>
                 )}
-                <Switch 
+                <Switch
                   checked={biometricEnabled}
-                  onCheckedChange={biometricEnabled ? setBiometricEnabled : enableBiometric}
+                  onCheckedChange={
+                    biometricEnabled ? setBiometricEnabled : enableBiometric
+                  }
                 />
               </div>
             </div>
@@ -397,9 +436,13 @@ export function SecurityCenter() {
                     Active
                   </Badge>
                 )}
-                <Switch 
+                <Switch
                   checked={passwordlessLogin}
-                  onCheckedChange={passwordlessLogin ? setPasswordlessLogin : enablePasswordlessLogin}
+                  onCheckedChange={
+                    passwordlessLogin
+                      ? setPasswordlessLogin
+                      : enablePasswordlessLogin
+                  }
                 />
               </div>
             </div>
@@ -415,10 +458,7 @@ export function SecurityCenter() {
                   </p>
                 </div>
               </div>
-              <Switch 
-                checked={deviceTrust}
-                onCheckedChange={setDeviceTrust}
-              />
+              <Switch checked={deviceTrust} onCheckedChange={setDeviceTrust} />
             </div>
 
             {/* Auto-Lock */}
@@ -432,7 +472,7 @@ export function SecurityCenter() {
                   </p>
                 </div>
               </div>
-              <Switch 
+              <Switch
                 checked={autoLockEnabled}
                 onCheckedChange={setAutoLockEnabled}
               />
@@ -470,12 +510,13 @@ export function SecurityCenter() {
                     <AlertDescription>
                       <strong>Enable Two-Factor Authentication</strong>
                       <br />
-                      Add an extra layer of security to prevent unauthorized access.
+                      Add an extra layer of security to prevent unauthorized
+                      access.
                     </AlertDescription>
                   </Alert>
                 </motion.div>
               )}
-              
+
               {!biometricEnabled && (
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
@@ -487,12 +528,13 @@ export function SecurityCenter() {
                     <AlertDescription>
                       <strong>Set up Biometric Authentication</strong>
                       <br />
-                      Use your fingerprint or face for quick and secure sign-ins.
+                      Use your fingerprint or face for quick and secure
+                      sign-ins.
                     </AlertDescription>
                   </Alert>
                 </motion.div>
               )}
-              
+
               {!passwordlessLogin && (
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
@@ -504,7 +546,8 @@ export function SecurityCenter() {
                     <AlertDescription>
                       <strong>Enable Passwordless Login</strong>
                       <br />
-                      Experience the future of authentication with magic links and WebAuthn.
+                      Experience the future of authentication with magic links
+                      and WebAuthn.
                     </AlertDescription>
                   </Alert>
                 </motion.div>

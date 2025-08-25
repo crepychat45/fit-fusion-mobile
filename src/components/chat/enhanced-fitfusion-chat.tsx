@@ -1,40 +1,40 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  MessageSquare, 
-  Users, 
-  Bot, 
-  Settings, 
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  MessageSquare,
+  Users,
+  Bot,
+  Settings,
   Maximize2,
   Minimize2,
   X,
   Video,
-  Phone
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ResizableChatWindow } from './resizable-chat-window';
-import { UserChatList } from './user-chat-list';
-import { EnhancedChatInterface } from './enhanced-chat-interface';
-import { MobileChatInterface } from './mobile-chat-interface';
-import { EnhancedChatSettings } from './enhanced-chat-settings';
-import { useToast } from '@/hooks/use-toast';
-import { useIsMobile } from '@/hooks/use-mobile';
+  Phone,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ResizableChatWindow } from "./resizable-chat-window";
+import { UserChatList } from "./user-chat-list";
+import { EnhancedChatInterface } from "./enhanced-chat-interface";
+import { MobileChatInterface } from "./mobile-chat-interface";
+import { EnhancedChatSettings } from "./enhanced-chat-settings";
+import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface User {
   id: string;
   name: string;
   username: string;
   avatar?: string;
-  status: 'online' | 'offline' | 'away' | 'busy';
+  status: "online" | "offline" | "away" | "busy";
 }
 
 export function EnhancedFitfusionChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [activeTab, setActiveTab] = useState('chats');
+  const [activeTab, setActiveTab] = useState("chats");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [onlineUsers] = useState(147);
@@ -44,17 +44,17 @@ export function EnhancedFitfusionChat() {
 
   const handleUserSelect = (user: User) => {
     setSelectedUser(user);
-    setActiveTab('chat');
+    setActiveTab("chat");
     toast({
       title: "Chat started",
-      description: `Now chatting with ${user.name}`
+      description: `Now chatting with ${user.name}`,
     });
   };
 
   const handleGroupChatCreate = () => {
     toast({
       title: "Group chat",
-      description: "Group chat feature coming soon!"
+      description: "Group chat feature coming soon!",
     });
   };
 
@@ -62,7 +62,7 @@ export function EnhancedFitfusionChat() {
     if (selectedUser) {
       toast({
         title: "Video call",
-        description: `Starting video call with ${selectedUser.name}...`
+        description: `Starting video call with ${selectedUser.name}...`,
       });
     }
   };
@@ -71,7 +71,7 @@ export function EnhancedFitfusionChat() {
     if (selectedUser) {
       toast({
         title: "Voice call",
-        description: `Starting voice call with ${selectedUser.name}...`
+        description: `Starting voice call with ${selectedUser.name}...`,
       });
     }
   };
@@ -90,9 +90,7 @@ export function EnhancedFitfusionChat() {
         >
           <MessageSquare className="h-6 w-6" />
         </Button>
-        <Badge 
-          className="absolute -top-2 -right-2 bg-red-500 text-white animate-pulse"
-        >
+        <Badge className="absolute -top-2 -right-2 bg-red-500 text-white animate-pulse">
           {activeChats}
         </Badge>
       </motion.div>
@@ -121,7 +119,7 @@ export function EnhancedFitfusionChat() {
               </Button>
             </div>
           </div>
-          
+
           <div className="flex-1">
             <MobileChatInterface />
           </div>
@@ -155,7 +153,9 @@ export function EnhancedFitfusionChat() {
                     <>
                       <div className="h-4 w-px bg-border" />
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium">{selectedUser.name}</span>
+                        <span className="text-sm font-medium">
+                          {selectedUser.name}
+                        </span>
                         <div className="flex gap-1">
                           <Button
                             size="icon"
@@ -178,7 +178,7 @@ export function EnhancedFitfusionChat() {
                     </>
                   )}
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="text-xs">
                     <Users className="h-3 w-3 mr-1" />
@@ -199,10 +199,16 @@ export function EnhancedFitfusionChat() {
               <div className="flex-1 overflow-hidden">
                 {showSettings ? (
                   <div className="p-4 h-full overflow-y-auto">
-                    <EnhancedChatSettings onClose={() => setShowSettings(false)} />
+                    <EnhancedChatSettings
+                      onClose={() => setShowSettings(false)}
+                    />
                   </div>
                 ) : (
-                  <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+                  <Tabs
+                    value={activeTab}
+                    onValueChange={setActiveTab}
+                    className="h-full flex flex-col"
+                  >
                     <TabsList className="grid w-full grid-cols-3 mx-4 mt-2">
                       <TabsTrigger value="users" className="text-xs">
                         <Users className="h-3 w-3 mr-1" />
@@ -220,12 +226,12 @@ export function EnhancedFitfusionChat() {
 
                     <div className="flex-1 overflow-hidden">
                       <TabsContent value="users" className="h-full m-0">
-                        <UserChatList 
+                        <UserChatList
                           onUserSelect={handleUserSelect}
                           onGroupChatCreate={handleGroupChatCreate}
                         />
                       </TabsContent>
-                      
+
                       <TabsContent value="chats" className="h-full m-0">
                         {selectedUser ? (
                           <div className="h-full flex flex-col">
@@ -252,13 +258,18 @@ export function EnhancedFitfusionChat() {
                           </div>
                         )}
                       </TabsContent>
-                      
+
                       <TabsContent value="ai" className="h-full m-0">
                         <div className="h-full p-4 flex items-center justify-center">
                           <div className="text-center">
                             <Bot className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                            <h3 className="text-lg font-semibold mb-2">AI Fitness Assistant</h3>
-                            <p className="text-muted-foreground mb-4">Get personalized fitness advice and workout recommendations</p>
+                            <h3 className="text-lg font-semibold mb-2">
+                              AI Fitness Assistant
+                            </h3>
+                            <p className="text-muted-foreground mb-4">
+                              Get personalized fitness advice and workout
+                              recommendations
+                            </p>
                             <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
                               Start AI Chat
                             </Button>

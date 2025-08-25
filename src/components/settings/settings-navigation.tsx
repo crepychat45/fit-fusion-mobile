@@ -1,13 +1,12 @@
-
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  User, 
-  Shield, 
-  Bell, 
-  Palette, 
-  MessageSquare, 
+import {
+  User,
+  Shield,
+  Bell,
+  Palette,
+  MessageSquare,
   Smartphone,
   CreditCard,
   HelpCircle,
@@ -23,7 +22,7 @@ import {
   Zap,
   Database,
   Code,
-  Heart
+  Heart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
@@ -44,7 +43,7 @@ const settingsCategories = [
     icon: User,
     color: "text-blue-500",
     bgColor: "bg-blue-50",
-    description: "Manage your profile and personal information"
+    description: "Manage your profile and personal information",
   },
   {
     id: "security",
@@ -52,7 +51,7 @@ const settingsCategories = [
     icon: Shield,
     color: "text-green-500",
     bgColor: "bg-green-50",
-    description: "Privacy settings and security options"
+    description: "Privacy settings and security options",
   },
   {
     id: "display",
@@ -60,7 +59,7 @@ const settingsCategories = [
     icon: Palette,
     color: "text-purple-500",
     bgColor: "bg-purple-50",
-    description: "Theme, colors, and visual preferences"
+    description: "Theme, colors, and visual preferences",
   },
   {
     id: "privacy",
@@ -68,7 +67,7 @@ const settingsCategories = [
     icon: Lock,
     color: "text-red-500",
     bgColor: "bg-red-50",
-    description: "Control your data and privacy settings"
+    description: "Control your data and privacy settings",
   },
   {
     id: "chat",
@@ -76,7 +75,7 @@ const settingsCategories = [
     icon: MessageSquare,
     color: "text-orange-500",
     bgColor: "bg-orange-50",
-    description: "Configure chat preferences and notifications"
+    description: "Configure chat preferences and notifications",
   },
   {
     id: "updates",
@@ -84,7 +83,7 @@ const settingsCategories = [
     icon: Download,
     color: "text-indigo-500",
     bgColor: "bg-indigo-50",
-    description: "App updates and version management"
+    description: "App updates and version management",
   },
   {
     id: "enhanced",
@@ -92,7 +91,7 @@ const settingsCategories = [
     icon: Heart,
     color: "text-pink-500",
     bgColor: "bg-pink-50",
-    description: "Advanced settings validation"
+    description: "Advanced settings validation",
   },
   {
     id: "developer",
@@ -100,7 +99,7 @@ const settingsCategories = [
     icon: Code,
     color: "text-gray-500",
     bgColor: "bg-gray-50",
-    description: "Developer tools and debugging options"
+    description: "Developer tools and debugging options",
   },
   {
     id: "data",
@@ -108,7 +107,7 @@ const settingsCategories = [
     icon: Database,
     color: "text-cyan-500",
     bgColor: "bg-cyan-50",
-    description: "Manage your data and logout options"
+    description: "Manage your data and logout options",
   },
   {
     id: "about",
@@ -116,11 +115,16 @@ const settingsCategories = [
     icon: Info,
     color: "text-yellow-500",
     bgColor: "bg-yellow-50",
-    description: "App information and version details"
-  }
+    description: "App information and version details",
+  },
 ];
 
-export function SettingsNavigation({ activeTab, onTabChange, showMobileMenu, onMobileMenuToggle }: SettingsNavigationProps) {
+export function SettingsNavigation({
+  activeTab,
+  onTabChange,
+  showMobileMenu,
+  onMobileMenuToggle,
+}: SettingsNavigationProps) {
   const location = useLocation();
 
   const containerVariants = {
@@ -128,9 +132,9 @@ export function SettingsNavigation({ activeTab, onTabChange, showMobileMenu, onM
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.05
-      }
-    }
+        staggerChildren: 0.05,
+      },
+    },
   };
 
   const itemVariants = {
@@ -138,8 +142,8 @@ export function SettingsNavigation({ activeTab, onTabChange, showMobileMenu, onM
     visible: {
       y: 0,
       opacity: 1,
-      transition: { duration: 0.3 }
-    }
+      transition: { duration: 0.3 },
+    },
   };
 
   // Mobile Menu Overlay
@@ -168,8 +172,8 @@ export function SettingsNavigation({ activeTab, onTabChange, showMobileMenu, onM
                   ✕
                 </Button>
               </div>
-              
-              <motion.div 
+
+              <motion.div
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
@@ -178,7 +182,7 @@ export function SettingsNavigation({ activeTab, onTabChange, showMobileMenu, onM
                 {settingsCategories.map((category) => {
                   const isActive = activeTab === category.id;
                   const CategoryIcon = category.icon;
-                  
+
                   return (
                     <motion.div key={category.id} variants={itemVariants}>
                       <motion.button
@@ -190,16 +194,20 @@ export function SettingsNavigation({ activeTab, onTabChange, showMobileMenu, onM
                         }}
                         className={cn(
                           "w-full flex items-center gap-3 p-4 rounded-lg transition-all duration-200 text-left",
-                          isActive 
-                            ? "bg-primary/10 text-primary border border-primary/20" 
-                            : "hover:bg-muted/50 text-muted-foreground hover:text-foreground"
+                          isActive
+                            ? "bg-primary/10 text-primary border border-primary/20"
+                            : "hover:bg-muted/50 text-muted-foreground hover:text-foreground",
                         )}
                       >
                         <div className={cn("p-2 rounded-lg", category.bgColor)}>
-                          <CategoryIcon className={cn("h-5 w-5", category.color)} />
+                          <CategoryIcon
+                            className={cn("h-5 w-5", category.color)}
+                          />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm">{category.title}</div>
+                          <div className="font-medium text-sm">
+                            {category.title}
+                          </div>
                           <div className="text-xs text-muted-foreground truncate">
                             {category.description}
                           </div>
@@ -226,7 +234,7 @@ export function SettingsNavigation({ activeTab, onTabChange, showMobileMenu, onM
   // Desktop/Tablet Navigation
   const DesktopMenu = () => (
     <div className="hidden md:block">
-      <motion.div 
+      <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -235,13 +243,15 @@ export function SettingsNavigation({ activeTab, onTabChange, showMobileMenu, onM
         {settingsCategories.map((category) => {
           const isActive = activeTab === category.id;
           const CategoryIcon = category.icon;
-          
+
           return (
             <motion.div key={category.id} variants={itemVariants}>
-              <Card className={cn(
-                "overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-lg",
-                isActive && "ring-2 ring-primary shadow-lg"
-              )}>
+              <Card
+                className={cn(
+                  "overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-lg",
+                  isActive && "ring-2 ring-primary shadow-lg",
+                )}
+              >
                 <motion.div
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -249,31 +259,35 @@ export function SettingsNavigation({ activeTab, onTabChange, showMobileMenu, onM
                 >
                   <CardContent className="p-4">
                     <div className="flex flex-col items-center text-center space-y-3">
-                      <motion.div 
+                      <motion.div
                         className={cn(
                           "p-3 rounded-xl transition-all duration-200",
-                          isActive ? "bg-primary/20" : category.bgColor
+                          isActive ? "bg-primary/20" : category.bgColor,
                         )}
                         whileHover={{ rotate: 5 }}
                         transition={{ duration: 0.2 }}
                       >
-                        <CategoryIcon className={cn(
-                          "h-6 w-6",
-                          isActive ? "text-primary" : category.color
-                        )} />
+                        <CategoryIcon
+                          className={cn(
+                            "h-6 w-6",
+                            isActive ? "text-primary" : category.color,
+                          )}
+                        />
                       </motion.div>
                       <div>
-                        <h3 className={cn(
-                          "font-semibold text-sm",
-                          isActive ? "text-primary" : "text-foreground"
-                        )}>
+                        <h3
+                          className={cn(
+                            "font-semibold text-sm",
+                            isActive ? "text-primary" : "text-foreground",
+                          )}
+                        >
                           {category.title}
                         </h3>
                         <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                           {category.description}
                         </p>
                       </div>
-                      
+
                       {isActive && (
                         <motion.div
                           layoutId="activeIndicator"

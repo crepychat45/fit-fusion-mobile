@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -14,8 +13,14 @@ html {
 
 /* Optimize font loading */
 @font-face {
-  font-family: 'system-ui';
-  src: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: "system-ui";
+  src:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
   font-display: swap;
 }
 
@@ -71,7 +76,7 @@ img.lazy.loaded {
     --ring: 0 0% 20%;
   }
 }
- 
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -79,108 +84,132 @@ img.lazy.loaded {
 
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
- 
+
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
- 
+
     --primary: 255 91% 67%;
     --primary-foreground: 210 40% 98%;
     --primary-glow: 255 91% 80%;
     --primary-dark: 255 91% 55%;
- 
+
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
- 
+
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
- 
+
     --accent: 280 100% 80%;
     --accent-foreground: 222.2 47.4% 11.2%;
     --accent-glow: 280 100% 90%;
- 
+
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 255 91% 67%;
-    
+
     /* AI & Security themed colors */
     --ai-primary: 240 100% 70%;
     --ai-secondary: 280 100% 75%;
     --ai-accent: 200 100% 65%;
     --security-primary: 120 100% 40%;
     --security-secondary: 120 60% 30%;
-    --premium-gradient: linear-gradient(135deg, hsl(255, 91%, 67%), hsl(280, 100%, 75%));
-    --ai-gradient: linear-gradient(135deg, hsl(240, 100%, 70%), hsl(280, 100%, 80%));
-    --security-gradient: linear-gradient(135deg, hsl(120, 100%, 40%), hsl(170, 100%, 45%));
-    
-/* Enhanced shadows */
+    --premium-gradient: linear-gradient(
+      135deg,
+      hsl(255, 91%, 67%),
+      hsl(280, 100%, 75%)
+    );
+    --ai-gradient: linear-gradient(
+      135deg,
+      hsl(240, 100%, 70%),
+      hsl(280, 100%, 80%)
+    );
+    --security-gradient: linear-gradient(
+      135deg,
+      hsl(120, 100%, 40%),
+      hsl(170, 100%, 45%)
+    );
+
+    /* Enhanced shadows */
     --shadow-primary: 0 10px 30px -10px hsl(255 91% 67% / 0.3);
     --shadow-ai: 0 10px 30px -10px hsl(240 100% 70% / 0.4);
     --shadow-security: 0 10px 30px -10px hsl(120 100% 40% / 0.3);
     --shadow-glow: 0 0 40px hsl(255 91% 80% / 0.4);
     --shadow-elegant: 0 10px 30px -10px hsl(var(--primary) / 0.3);
-    
+
     /* Performance optimizations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-fast: all 0.15s ease-out;
-    
+
     /* Glassmorphism */
     --glass-bg: rgba(255, 255, 255, 0.1);
     --glass-border: rgba(255, 255, 255, 0.2);
- 
+
     --radius: 0.5rem;
   }
- 
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
- 
+
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
- 
+
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
- 
+
     --primary: 255 91% 67%;
     --primary-foreground: 210 40% 98%;
     --primary-glow: 255 91% 80%;
     --primary-dark: 255 91% 55%;
- 
+
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
- 
+
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
- 
+
     --accent: 280 100% 75%;
     --accent-foreground: 210 40% 98%;
     --accent-glow: 280 100% 85%;
- 
+
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
- 
+
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 255 91% 67%;
-    
+
     /* Dark mode AI & Security colors */
     --ai-primary: 240 100% 80%;
     --ai-secondary: 280 100% 85%;
     --ai-accent: 200 100% 75%;
     --security-primary: 120 100% 50%;
     --security-secondary: 120 60% 40%;
-    --premium-gradient: linear-gradient(135deg, hsl(255, 91%, 67%), hsl(280, 100%, 75%));
-    --ai-gradient: linear-gradient(135deg, hsl(240, 100%, 80%), hsl(280, 100%, 85%));
-    --security-gradient: linear-gradient(135deg, hsl(120, 100%, 50%), hsl(170, 100%, 55%));
-    
+    --premium-gradient: linear-gradient(
+      135deg,
+      hsl(255, 91%, 67%),
+      hsl(280, 100%, 75%)
+    );
+    --ai-gradient: linear-gradient(
+      135deg,
+      hsl(240, 100%, 80%),
+      hsl(280, 100%, 85%)
+    );
+    --security-gradient: linear-gradient(
+      135deg,
+      hsl(120, 100%, 50%),
+      hsl(170, 100%, 55%)
+    );
+
     /* Dark mode glassmorphism */
     --glass-bg: rgba(0, 0, 0, 0.2);
     --glass-border: rgba(255, 255, 255, 0.1);
   }
 }
- 
+
 @layer base {
   * {
     @apply border-border;
@@ -191,13 +220,22 @@ img.lazy.loaded {
 }
 
 .fitness-gradient {
-  background: linear-gradient(135deg, hsl(261, 80%, 50%), hsl(261, 80%, 65%), hsl(280, 70%, 60%));
+  background: linear-gradient(
+    135deg,
+    hsl(261, 80%, 50%),
+    hsl(261, 80%, 65%),
+    hsl(280, 70%, 60%)
+  );
 }
 
 /* Enhanced Animations */
 @keyframes progress {
-  0% { width: 0%; }
-  100% { width: 100%; }
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
 }
 
 @keyframes fadeInUp {
@@ -280,7 +318,8 @@ img.lazy.loaded {
 }
 
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
   50% {
@@ -289,7 +328,8 @@ img.lazy.loaded {
 }
 
 @keyframes glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
   }
   50% {
@@ -346,7 +386,9 @@ img.lazy.loaded {
 
 /* Advanced hover effects */
 .hover-lift {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .hover-lift:hover {
@@ -412,11 +454,11 @@ img.lazy.loaded {
     font-size: 0.75rem;
     line-height: 1rem;
   }
-  
+
   .mobile-xs-padding {
     padding: 0.75rem;
   }
-  
+
   .mobile-xs-button {
     min-height: 44px;
     min-width: 44px;
@@ -428,37 +470,42 @@ img.lazy.loaded {
   .chat-container {
     height: 500px;
   }
-  
+
   /* Enhanced mobile touch targets */
   .mobile-touch-target {
     min-height: 44px;
     min-width: 44px;
   }
-  
+
   /* Mobile-first typography */
   .mobile-heading {
     font-size: 1.25rem;
     line-height: 1.75rem;
     font-weight: 600;
   }
-  
+
   .mobile-body {
     font-size: 0.875rem;
     line-height: 1.5rem;
   }
-  
+
   /* Improved mobile scrolling */
   .mobile-scroll {
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
   }
-  
+
   /* Mobile gesture indicators */
   .mobile-swipe-indicator {
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.5),
+      transparent
+    );
     animation: swipe-hint 2s ease-in-out infinite;
   }
-  
+
   /* Mobile-optimized cards */
   .mobile-card {
     margin: 0.5rem;
@@ -466,7 +513,7 @@ img.lazy.loaded {
     padding: 1rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
-  
+
   /* Enhanced mobile buttons */
   .mobile-button {
     padding: 0.75rem 1.5rem;
@@ -475,7 +522,7 @@ img.lazy.loaded {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
     transition: all 0.2s ease;
   }
-  
+
   .mobile-button:active {
     transform: scale(0.98);
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
@@ -483,8 +530,13 @@ img.lazy.loaded {
 }
 
 @keyframes swipe-hint {
-  0%, 100% { transform: translateX(-100%); }
-  50% { transform: translateX(100%); }
+  0%,
+  100% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(100%);
+  }
 }
 
 /* Custom scrollbars */
@@ -539,13 +591,18 @@ img.lazy.loaded {
 }
 
 .interactive-button::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
   transition: left 0.5s;
 }
 
@@ -563,7 +620,8 @@ img.lazy.loaded {
 }
 
 @keyframes neural-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.6;
     transform: scale(1);
   }
@@ -578,7 +636,7 @@ img.lazy.loaded {
 }
 
 .security-indicator::after {
-  content: '';
+  content: "";
   position: absolute;
   top: -2px;
   right: -2px;
@@ -590,8 +648,13 @@ img.lazy.loaded {
 }
 
 @keyframes security-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
 }
 
 /* Enhanced loading states */
@@ -602,12 +665,17 @@ img.lazy.loaded {
 }
 
 .ai-thinking {
-  background: linear-gradient(45deg, hsl(var(--ai-primary) / 0.1), hsl(var(--ai-secondary) / 0.1));
+  background: linear-gradient(
+    45deg,
+    hsl(var(--ai-primary) / 0.1),
+    hsl(var(--ai-secondary) / 0.1)
+  );
   animation: ai-thinking 1.5s ease-in-out infinite;
 }
 
 @keyframes ai-thinking {
-  0%, 100% {
+  0%,
+  100% {
     background-position: 0% 50%;
   }
   50% {
@@ -641,7 +709,8 @@ img.lazy.loaded {
 }
 
 @keyframes mobile-security-pulse {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
   }
   70% {
@@ -662,9 +731,15 @@ img.lazy.loaded {
 }
 
 @keyframes mobile-ai-gradient {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* Mobile voice recording animation */
@@ -673,7 +748,8 @@ img.lazy.loaded {
 }
 
 @keyframes mobile-voice-pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
   }
@@ -683,14 +759,14 @@ img.lazy.loaded {
   }
 }
 
-  /* Mobile optimized glassmorphism */
+/* Mobile optimized glassmorphism */
 @media (max-width: 768px) {
   .glass-mobile {
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.3);
   }
-  
+
   .dark .glass-mobile {
     background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(20px);
@@ -705,7 +781,7 @@ img.lazy.loaded {
     padding: 0.5rem;
     font-size: 0.75rem;
   }
-  
+
   .mobile-compact .mobile-button {
     padding: 0.5rem 1rem;
     font-size: 0.75rem;

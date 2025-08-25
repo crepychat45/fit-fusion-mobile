@@ -8,36 +8,40 @@ export function AccessibilityManager({ children }: AccessibilityManagerProps) {
   useEffect(() => {
     // Ensure all images have alt tags
     const addMissingAltTags = () => {
-      const images = document.querySelectorAll('img:not([alt])');
+      const images = document.querySelectorAll("img:not([alt])");
       images.forEach((img, index) => {
-        img.setAttribute('alt', `Image ${index + 1}`);
+        img.setAttribute("alt", `Image ${index + 1}`);
       });
     };
 
     // Add keyboard navigation support
     const addKeyboardNavigation = () => {
-      const interactiveElements = document.querySelectorAll('button, a, input, select, textarea');
+      const interactiveElements = document.querySelectorAll(
+        "button, a, input, select, textarea",
+      );
       interactiveElements.forEach((element, index) => {
-        if (!element.getAttribute('tabindex')) {
-          element.setAttribute('tabindex', '0');
+        if (!element.getAttribute("tabindex")) {
+          element.setAttribute("tabindex", "0");
         }
       });
     };
 
     // Add ARIA labels where missing
     const addAriaLabels = () => {
-      const buttons = document.querySelectorAll('button:not([aria-label]):not([aria-labelledby])');
+      const buttons = document.querySelectorAll(
+        "button:not([aria-label]):not([aria-labelledby])",
+      );
       buttons.forEach((button) => {
         const text = button.textContent?.trim();
         if (text) {
-          button.setAttribute('aria-label', text);
+          button.setAttribute("aria-label", text);
         }
       });
     };
 
     // Add focus indicators
     const addFocusIndicators = () => {
-      const style = document.createElement('style');
+      const style = document.createElement("style");
       style.textContent = `
         *:focus {
           outline: 2px solid hsl(var(--primary)) !important;

@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Shield, Lock, Eye, Fingerprint, Key, Zap, AlertTriangle, CheckCircle, Wifi, Smartphone } from "lucide-react";
+import {
+  Shield,
+  Lock,
+  Eye,
+  Fingerprint,
+  Key,
+  Zap,
+  AlertTriangle,
+  CheckCircle,
+  Wifi,
+  Smartphone,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,7 +47,7 @@ export function EnhancedSecurityCenter() {
       enabled: true,
       level: "quantum",
       icon: <Eye className="h-4 w-4" />,
-      status: "monitoring"
+      status: "monitoring",
     },
     {
       id: "biometric-auth",
@@ -45,7 +56,7 @@ export function EnhancedSecurityCenter() {
       enabled: true,
       level: "military",
       icon: <Fingerprint className="h-4 w-4" />,
-      status: "active"
+      status: "active",
     },
     {
       id: "quantum-encryption",
@@ -54,7 +65,7 @@ export function EnhancedSecurityCenter() {
       enabled: true,
       level: "quantum",
       icon: <Zap className="h-4 w-4" />,
-      status: "protected"
+      status: "protected",
     },
     {
       id: "neural-firewall",
@@ -63,7 +74,7 @@ export function EnhancedSecurityCenter() {
       enabled: true,
       level: "military",
       icon: <Shield className="h-4 w-4" />,
-      status: "scanning"
+      status: "scanning",
     },
     {
       id: "secure-vault",
@@ -72,7 +83,7 @@ export function EnhancedSecurityCenter() {
       enabled: true,
       level: "military",
       icon: <Lock className="h-4 w-4" />,
-      status: "protected"
+      status: "protected",
     },
     {
       id: "device-trust",
@@ -81,8 +92,8 @@ export function EnhancedSecurityCenter() {
       enabled: false,
       level: "advanced",
       icon: <Smartphone className="h-4 w-4" />,
-      status: "monitoring"
-    }
+      status: "monitoring",
+    },
   ]);
 
   const [threatEvents, setThreatEvents] = useState<ThreatEvent[]>([
@@ -92,7 +103,7 @@ export function EnhancedSecurityCenter() {
       severity: "critical",
       blocked: true,
       timestamp: new Date(Date.now() - 2 * 60 * 1000),
-      source: "External API"
+      source: "External API",
     },
     {
       id: "2",
@@ -100,7 +111,7 @@ export function EnhancedSecurityCenter() {
       severity: "high",
       blocked: true,
       timestamp: new Date(Date.now() - 8 * 60 * 1000),
-      source: "Web Interface"
+      source: "Web Interface",
     },
     {
       id: "3",
@@ -108,7 +119,7 @@ export function EnhancedSecurityCenter() {
       severity: "medium",
       blocked: true,
       timestamp: new Date(Date.now() - 15 * 60 * 1000),
-      source: "Mobile App"
+      source: "Mobile App",
     },
     {
       id: "4",
@@ -116,8 +127,8 @@ export function EnhancedSecurityCenter() {
       severity: "low",
       blocked: true,
       timestamp: new Date(Date.now() - 23 * 60 * 1000),
-      source: "User Session"
-    }
+      source: "User Session",
+    },
   ]);
 
   const [securityScore, setSecurityScore] = useState(96);
@@ -130,20 +141,31 @@ export function EnhancedSecurityCenter() {
       if (Math.random() < 0.1) {
         const newThreat: ThreatEvent = {
           id: Date.now().toString(),
-          type: ["Malware Scan", "Suspicious Activity", "Unauthorized Access", "Data Leak Attempt"][Math.floor(Math.random() * 4)],
-          severity: ["low", "medium", "high"][Math.floor(Math.random() * 3)] as any,
+          type: [
+            "Malware Scan",
+            "Suspicious Activity",
+            "Unauthorized Access",
+            "Data Leak Attempt",
+          ][Math.floor(Math.random() * 4)],
+          severity: ["low", "medium", "high"][
+            Math.floor(Math.random() * 3)
+          ] as any,
           blocked: true,
           timestamp: new Date(),
-          source: ["External", "Internal", "API", "Mobile"][Math.floor(Math.random() * 4)]
+          source: ["External", "Internal", "API", "Mobile"][
+            Math.floor(Math.random() * 4)
+          ],
         };
-        
-        setThreatEvents(prev => [newThreat, ...prev.slice(0, 9)]);
-        setRealTimeThreats(prev => prev + 1);
+
+        setThreatEvents((prev) => [newThreat, ...prev.slice(0, 9)]);
+        setRealTimeThreats((prev) => prev + 1);
       }
-      
+
       // Update security score
-      setSecurityScore(prev => {
-        const enabledFeatures = securityFeatures.filter(f => f.enabled).length;
+      setSecurityScore((prev) => {
+        const enabledFeatures = securityFeatures.filter(
+          (f) => f.enabled,
+        ).length;
         const baseScore = (enabledFeatures / securityFeatures.length) * 100;
         return Math.min(99, Math.max(85, baseScore + Math.random() * 5 - 2.5));
       });
@@ -153,49 +175,71 @@ export function EnhancedSecurityCenter() {
   }, [securityFeatures]);
 
   const toggleSecurityFeature = (featureId: string) => {
-    setSecurityFeatures(prev => 
-      prev.map(feature => 
-        feature.id === featureId 
+    setSecurityFeatures((prev) =>
+      prev.map((feature) =>
+        feature.id === featureId
           ? { ...feature, enabled: !feature.enabled }
-          : feature
-      )
+          : feature,
+      ),
     );
-    
-    const feature = securityFeatures.find(f => f.id === featureId);
+
+    const feature = securityFeatures.find((f) => f.id === featureId);
     toast({
-      title: `Security Feature ${feature?.enabled ? 'Disabled' : 'Enabled'}`,
+      title: `Security Feature ${feature?.enabled ? "Disabled" : "Enabled"}`,
       description: feature?.name,
-      variant: feature?.enabled ? "destructive" : "default"
+      variant: feature?.enabled ? "destructive" : "default",
     });
   };
 
   const getLevelColor = (level: string) => {
     switch (level) {
-      case "basic": return "bg-yellow-500";
-      case "advanced": return "bg-blue-500";
-      case "military": return "bg-red-500";
-      case "quantum": return "bg-purple-500";
-      default: return "bg-gray-500";
+      case "basic":
+        return "bg-yellow-500";
+      case "advanced":
+        return "bg-blue-500";
+      case "military":
+        return "bg-red-500";
+      case "quantum":
+        return "bg-purple-500";
+      default:
+        return "bg-gray-500";
     }
   };
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case "low": return "text-green-500";
-      case "medium": return "text-yellow-500";
-      case "high": return "text-orange-500";
-      case "critical": return "text-red-500";
-      default: return "text-gray-500";
+      case "low":
+        return "text-green-500";
+      case "medium":
+        return "text-yellow-500";
+      case "high":
+        return "text-orange-500";
+      case "critical":
+        return "text-red-500";
+      default:
+        return "text-gray-500";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "active": return <CheckCircle className="h-3 w-3 text-green-500" />;
-      case "monitoring": return <Eye className="h-3 w-3 text-blue-500" />;
-      case "scanning": return <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity }}><Shield className="h-3 w-3 text-purple-500" /></motion.div>;
-      case "protected": return <Lock className="h-3 w-3 text-green-500" />;
-      default: return <Shield className="h-3 w-3" />;
+      case "active":
+        return <CheckCircle className="h-3 w-3 text-green-500" />;
+      case "monitoring":
+        return <Eye className="h-3 w-3 text-blue-500" />;
+      case "scanning":
+        return (
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <Shield className="h-3 w-3 text-purple-500" />
+          </motion.div>
+        );
+      case "protected":
+        return <Lock className="h-3 w-3 text-green-500" />;
+      default:
+        return <Shield className="h-3 w-3" />;
     }
   };
 
@@ -204,7 +248,7 @@ export function EnhancedSecurityCenter() {
       title: "Full System Scan Initiated",
       description: "Comprehensive security analysis in progress...",
     });
-    
+
     // Simulate scan completion
     setTimeout(() => {
       setSecurityScore(98);
@@ -225,12 +269,12 @@ export function EnhancedSecurityCenter() {
       >
         <Card className="security-card text-white overflow-hidden relative">
           <motion.div
-            animate={{ 
+            animate={{
               background: [
                 "linear-gradient(45deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.1))",
                 "linear-gradient(45deg, rgba(16, 185, 129, 0.1), rgba(6, 182, 212, 0.1))",
-                "linear-gradient(45deg, rgba(6, 182, 212, 0.1), rgba(34, 197, 94, 0.1))"
-              ]
+                "linear-gradient(45deg, rgba(6, 182, 212, 0.1), rgba(34, 197, 94, 0.1))",
+              ],
             }}
             transition={{ duration: 4, repeat: Infinity }}
             className="absolute inset-0"
@@ -239,9 +283,9 @@ export function EnhancedSecurityCenter() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <motion.div
-                  animate={{ 
+                  animate={{
                     scale: [1, 1.1, 1],
-                    rotate: [0, 5, -5, 0]
+                    rotate: [0, 5, -5, 0],
                   }}
                   transition={{ duration: 3, repeat: Infinity }}
                   className="p-3 bg-white/20 rounded-full security-indicator"
@@ -249,8 +293,12 @@ export function EnhancedSecurityCenter() {
                   <Shield className="h-8 w-8" />
                 </motion.div>
                 <div>
-                  <CardTitle className="text-2xl">FitFusion Security Center</CardTitle>
-                  <p className="text-white/90">Military-grade protection active</p>
+                  <CardTitle className="text-2xl">
+                    FitFusion Security Center
+                  </CardTitle>
+                  <p className="text-white/90">
+                    Military-grade protection active
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -268,15 +316,21 @@ export function EnhancedSecurityCenter() {
           <CardContent className="relative z-10">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-400">{securityFeatures.filter(f => f.enabled).length}</div>
+                <div className="text-3xl font-bold text-green-400">
+                  {securityFeatures.filter((f) => f.enabled).length}
+                </div>
                 <div className="text-white/80 text-sm">Active Shields</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-red-400">{threatEvents.length}</div>
+                <div className="text-3xl font-bold text-red-400">
+                  {threatEvents.length}
+                </div>
                 <div className="text-white/80 text-sm">Threats Blocked</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-blue-400">{realTimeThreats}</div>
+                <div className="text-3xl font-bold text-blue-400">
+                  {realTimeThreats}
+                </div>
                 <div className="text-white/80 text-sm">Real-time Blocks</div>
               </div>
               <div className="text-center">
@@ -287,11 +341,13 @@ export function EnhancedSecurityCenter() {
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm">Security Level</span>
-                <span className="text-sm font-medium">{Math.round(securityScore)}%</span>
+                <span className="text-sm font-medium">
+                  {Math.round(securityScore)}%
+                </span>
               </div>
               <Progress value={securityScore} className="h-3" />
             </div>
-            <Button 
+            <Button
               onClick={runFullSystemScan}
               className="w-full interactive-button bg-white/20 hover:bg-white/30 text-white border-white/30"
             >
@@ -322,7 +378,9 @@ export function EnhancedSecurityCenter() {
                   className="flex items-center justify-between p-3 border rounded-lg glass-card"
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-full ${getLevelColor(feature.level)}`}>
+                    <div
+                      className={`p-2 rounded-full ${getLevelColor(feature.level)}`}
+                    >
                       {feature.icon}
                     </div>
                     <div className="flex-1">
@@ -330,10 +388,12 @@ export function EnhancedSecurityCenter() {
                         {feature.name}
                         {getStatusIcon(feature.status)}
                       </div>
-                      <div className="text-sm text-muted-foreground">{feature.description}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {feature.description}
+                      </div>
                       <div className="flex items-center gap-2 mt-1">
-                        <Badge 
-                          variant="outline" 
+                        <Badge
+                          variant="outline"
                           className={`text-xs ${getLevelColor(feature.level)} text-white border-0`}
                         >
                           {feature.level.toUpperCase()}
@@ -377,17 +437,24 @@ export function EnhancedSecurityCenter() {
                     className="flex items-center justify-between p-3 border rounded-lg glass-card"
                   >
                     <div className="flex items-center gap-3">
-                      <AlertTriangle className={`h-4 w-4 ${getSeverityColor(threat.severity)}`} />
+                      <AlertTriangle
+                        className={`h-4 w-4 ${getSeverityColor(threat.severity)}`}
+                      />
                       <div>
                         <div className="font-medium text-sm">{threat.type}</div>
                         <div className="text-xs text-muted-foreground">
-                          {threat.source} • {threat.timestamp.toLocaleTimeString()}
+                          {threat.source} •{" "}
+                          {threat.timestamp.toLocaleTimeString()}
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge 
-                        variant={threat.severity === "critical" ? "destructive" : "outline"}
+                      <Badge
+                        variant={
+                          threat.severity === "critical"
+                            ? "destructive"
+                            : "outline"
+                        }
                         className="text-xs"
                       >
                         {threat.severity.toUpperCase()}

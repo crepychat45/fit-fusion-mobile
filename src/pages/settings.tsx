@@ -1,4 +1,3 @@
-
 import React from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { ChevronLeft } from "lucide-react";
@@ -12,8 +11,8 @@ const Settings = () => {
     <div className="min-h-screen bg-background pb-16">
       <header className="fitness-gradient pt-12 pb-6 px-4">
         <div className="flex items-center">
-          <button 
-            onClick={() => navigate(-1)} 
+          <button
+            onClick={() => navigate(-1)}
             className="text-white p-2 rounded-full hover:bg-white/10"
           >
             <ChevronLeft className="h-5 w-5" />
@@ -25,7 +24,7 @@ const Settings = () => {
       <div className="pb-24">
         <SettingsContainer />
       </div>
-      
+
       <MobileNav />
     </div>
   );

@@ -1,27 +1,32 @@
-
 import React, { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
-  Shield, 
-  Lock, 
-  Key, 
-  Eye, 
-  EyeOff, 
-  Fingerprint, 
-  Smartphone, 
+import {
+  Shield,
+  Lock,
+  Key,
+  Eye,
+  EyeOff,
+  Fingerprint,
+  Smartphone,
   AlertTriangle,
   CheckCircle,
   RefreshCw,
   Clock,
   Globe,
   Database,
-  Zap
+  Zap,
 } from "lucide-react";
 
 interface ChatSecurityProps {
@@ -30,7 +35,11 @@ interface ChatSecurityProps {
   onClose: () => void;
 }
 
-export function ChatSecurity({ securityLevel, onSecurityLevelChange, onClose }: ChatSecurityProps) {
+export function ChatSecurity({
+  securityLevel,
+  onSecurityLevelChange,
+  onClose,
+}: ChatSecurityProps) {
   const { toast } = useToast();
   const [encryptionEnabled, setEncryptionEnabled] = useState(true);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
@@ -43,27 +52,27 @@ export function ChatSecurity({ securityLevel, onSecurityLevelChange, onClose }: 
 
   const runSecurityScan = async () => {
     setLastSecurityScan(new Date());
-    
+
     toast({
       title: "Security scan started",
-      description: "Analyzing your security configuration..."
+      description: "Analyzing your security configuration...",
     });
 
     // Simulate security scan
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
     let score = 50;
     if (encryptionEnabled) score += 20;
     if (twoFactorEnabled) score += 15;
     if (biometricEnabled) score += 10;
     if (autoLockEnabled) score += 5;
-    
+
     setSecurityScore(Math.min(score, 100));
 
     const issues = [];
     if (!twoFactorEnabled) issues.push("Two-factor authentication disabled");
     if (!biometricEnabled) issues.push("Biometric authentication not set up");
-    
+
     if (issues.length === 0) {
       toast({
         title: "Security scan complete",
@@ -73,7 +82,7 @@ export function ChatSecurity({ securityLevel, onSecurityLevelChange, onClose }: 
       toast({
         title: "Security issues found",
         description: `Found ${issues.length} issue(s) that need attention.`,
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -81,11 +90,11 @@ export function ChatSecurity({ securityLevel, onSecurityLevelChange, onClose }: 
   const enableTwoFactor = async () => {
     toast({
       title: "Enabling 2FA",
-      description: "Setting up two-factor authentication..."
+      description: "Setting up two-factor authentication...",
     });
-    
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
+
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
     setTwoFactorEnabled(true);
     toast({
       title: "2FA Enabled",
@@ -97,30 +106,55 @@ export function ChatSecurity({ securityLevel, onSecurityLevelChange, onClose }: 
     try {
       toast({
         title: "Setting up biometric authentication",
-        description: "Please follow the prompts on your device..."
+        description: "Please follow the prompts on your device...",
       });
-      
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       setBiometricEnabled(true);
       toast({
         title: "Biometric authentication enabled",
-        description: "You can now use fingerprint or face recognition to sign in.",
+        description:
+          "You can now use fingerprint or face recognition to sign in.",
       });
     } catch (error) {
       toast({
         title: "Biometric setup failed",
-        description: "Unable to set up biometric authentication. Please try again.",
-        variant: "destructive"
+        description:
+          "Unable to set up biometric authentication. Please try again.",
+        variant: "destructive",
       });
     }
   };
 
   const getSecurityLevel = () => {
-    if (securityScore >= 90) return { level: "Maximum", color: "text-green-600", bgColor: "bg-green-100", icon: CheckCircle };
-    if (securityScore >= 75) return { level: "High", color: "text-blue-600", bgColor: "bg-blue-100", icon: Shield };
-    if (securityScore >= 50) return { level: "Medium", color: "text-yellow-600", bgColor: "bg-yellow-100", icon: AlertTriangle };
-    return { level: "Low", color: "text-red-600", bgColor: "bg-red-100", icon: AlertTriangle };
+    if (securityScore >= 90)
+      return {
+        level: "Maximum",
+        color: "text-green-600",
+        bgColor: "bg-green-100",
+        icon: CheckCircle,
+      };
+    if (securityScore >= 75)
+      return {
+        level: "High",
+        color: "text-blue-600",
+        bgColor: "bg-blue-100",
+        icon: Shield,
+      };
+    if (securityScore >= 50)
+      return {
+        level: "Medium",
+        color: "text-yellow-600",
+        bgColor: "bg-yellow-100",
+        icon: AlertTriangle,
+      };
+    return {
+      level: "Low",
+      color: "text-red-600",
+      bgColor: "bg-red-100",
+      icon: AlertTriangle,
+    };
   };
 
   const currentSecurityLevel = getSecurityLevel();
@@ -143,30 +177,39 @@ export function ChatSecurity({ securityLevel, onSecurityLevelChange, onClose }: 
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <SecurityIcon className={`h-5 w-5 ${currentSecurityLevel.color}`} />
-                <span className="font-medium">Security Score: {securityScore}/100</span>
+                <SecurityIcon
+                  className={`h-5 w-5 ${currentSecurityLevel.color}`}
+                />
+                <span className="font-medium">
+                  Security Score: {securityScore}/100
+                </span>
               </div>
               <p className="text-sm text-muted-foreground">
-                Your security level is <span className={currentSecurityLevel.color}>{currentSecurityLevel.level}</span>
+                Your security level is{" "}
+                <span className={currentSecurityLevel.color}>
+                  {currentSecurityLevel.level}
+                </span>
               </p>
             </div>
-            <div className={`px-3 py-1 rounded-full ${currentSecurityLevel.bgColor}`}>
-              <span className={`text-sm font-medium ${currentSecurityLevel.color}`}>
+            <div
+              className={`px-3 py-1 rounded-full ${currentSecurityLevel.bgColor}`}
+            >
+              <span
+                className={`text-sm font-medium ${currentSecurityLevel.color}`}
+              >
                 {currentSecurityLevel.level}
               </span>
             </div>
           </div>
-          
+
           <Progress value={securityScore} className="h-3" />
-          
+
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2 text-muted-foreground">
               <Clock className="h-4 w-4" />
-              {lastSecurityScan ? (
-                `Last scan: ${lastSecurityScan.toLocaleString()}`
-              ) : (
-                "Never scanned"
-              )}
+              {lastSecurityScan
+                ? `Last scan: ${lastSecurityScan.toLocaleString()}`
+                : "Never scanned"}
             </div>
             <Button variant="outline" size="sm" onClick={runSecurityScan}>
               <RefreshCw className="h-4 w-4 mr-1" />
@@ -203,7 +246,7 @@ export function ChatSecurity({ securityLevel, onSecurityLevelChange, onClose }: 
                 <CheckCircle className="h-3 w-3 mr-1" />
                 Always On
               </Badge>
-              <Switch 
+              <Switch
                 checked={encryptionEnabled}
                 onCheckedChange={setEncryptionEnabled}
               />
@@ -220,10 +263,7 @@ export function ChatSecurity({ securityLevel, onSecurityLevelChange, onClose }: 
                 </p>
               </div>
             </div>
-            <Switch 
-              checked={secureMode}
-              onCheckedChange={setSecureMode}
-            />
+            <Switch checked={secureMode} onCheckedChange={setSecureMode} />
           </div>
 
           <div className="flex items-center justify-between">
@@ -236,10 +276,7 @@ export function ChatSecurity({ securityLevel, onSecurityLevelChange, onClose }: 
                 </p>
               </div>
             </div>
-            <Switch 
-              checked={vpnRequired}
-              onCheckedChange={setVpnRequired}
-            />
+            <Switch checked={vpnRequired} onCheckedChange={setVpnRequired} />
           </div>
         </CardContent>
       </Card>
@@ -273,9 +310,11 @@ export function ChatSecurity({ securityLevel, onSecurityLevelChange, onClose }: 
                   Active
                 </Badge>
               )}
-              <Switch 
+              <Switch
                 checked={twoFactorEnabled}
-                onCheckedChange={twoFactorEnabled ? setTwoFactorEnabled : enableTwoFactor}
+                onCheckedChange={
+                  twoFactorEnabled ? setTwoFactorEnabled : enableTwoFactor
+                }
               />
             </div>
           </div>
@@ -297,9 +336,11 @@ export function ChatSecurity({ securityLevel, onSecurityLevelChange, onClose }: 
                   Enabled
                 </Badge>
               )}
-              <Switch 
+              <Switch
                 checked={biometricEnabled}
-                onCheckedChange={biometricEnabled ? setBiometricEnabled : enableBiometric}
+                onCheckedChange={
+                  biometricEnabled ? setBiometricEnabled : enableBiometric
+                }
               />
             </div>
           </div>
@@ -314,7 +355,7 @@ export function ChatSecurity({ securityLevel, onSecurityLevelChange, onClose }: 
                 </p>
               </div>
             </div>
-            <Switch 
+            <Switch
               checked={autoLockEnabled}
               onCheckedChange={setAutoLockEnabled}
             />
@@ -344,7 +385,7 @@ export function ChatSecurity({ securityLevel, onSecurityLevelChange, onClose }: 
               </AlertDescription>
             </Alert>
           )}
-          
+
           {!biometricEnabled && (
             <Alert>
               <Fingerprint className="h-4 w-4" />
@@ -355,7 +396,7 @@ export function ChatSecurity({ securityLevel, onSecurityLevelChange, onClose }: 
               </AlertDescription>
             </Alert>
           )}
-          
+
           {!secureMode && (
             <Alert>
               <Zap className="h-4 w-4" />

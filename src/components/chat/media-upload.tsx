@@ -1,24 +1,23 @@
-
-import React, { useState, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
-import { 
-  Upload, 
-  X, 
-  Image, 
-  Video, 
-  FileText, 
+import React, { useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Upload,
+  X,
+  Image,
+  Video,
+  FileText,
   Music,
   File,
-  Camera
-} from 'lucide-react';
+  Camera,
+} from "lucide-react";
 
 interface MediaFile {
   id: string;
   file: File;
-  type: 'image' | 'video' | 'audio' | 'document';
+  type: "image" | "video" | "audio" | "document";
   preview?: string;
   size: string;
 }
@@ -29,32 +28,43 @@ interface MediaUploadProps {
   maxFileSize?: number; // in MB
 }
 
-export function MediaUpload({ onFilesSelected, maxFiles = 5, maxFileSize = 10 }: MediaUploadProps) {
+export function MediaUpload({
+  onFilesSelected,
+  maxFiles = 5,
+  maxFileSize = 10,
+}: MediaUploadProps) {
   const [selectedFiles, setSelectedFiles] = useState<MediaFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const allowedTypes = {
-    image: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
-    video: ['video/mp4', 'video/webm', 'video/mov'],
-    audio: ['audio/mp3', 'audio/wav', 'audio/ogg', 'audio/m4a'],
-    document: ['application/pdf', 'text/plain', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+    image: ["image/jpeg", "image/png", "image/gif", "image/webp"],
+    video: ["video/mp4", "video/webm", "video/mov"],
+    audio: ["audio/mp3", "audio/wav", "audio/ogg", "audio/m4a"],
+    document: [
+      "application/pdf",
+      "text/plain",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ],
   };
 
-  const getFileType = (mimeType: string): 'image' | 'video' | 'audio' | 'document' => {
-    if (allowedTypes.image.includes(mimeType)) return 'image';
-    if (allowedTypes.video.includes(mimeType)) return 'video';
-    if (allowedTypes.audio.includes(mimeType)) return 'audio';
-    return 'document';
+  const getFileType = (
+    mimeType: string,
+  ): "image" | "video" | "audio" | "document" => {
+    if (allowedTypes.image.includes(mimeType)) return "image";
+    if (allowedTypes.video.includes(mimeType)) return "video";
+    if (allowedTypes.audio.includes(mimeType)) return "audio";
+    return "document";
   };
 
   const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   const validateFile = (file: File): boolean => {
@@ -63,7 +73,7 @@ export function MediaUpload({ onFilesSelected, maxFiles = 5, maxFileSize = 10 }:
       toast({
         title: "File too large",
         description: `File "${file.name}" exceeds ${maxFileSize}MB limit`,
-        variant: "destructive"
+        variant: "destructive",
       });
       return false;
     }
@@ -74,7 +84,7 @@ export function MediaUpload({ onFilesSelected, maxFiles = 5, maxFileSize = 10 }:
       toast({
         title: "Invalid file type",
         description: `File "${file.name}" is not a supported format`,
-        variant: "destructive"
+        variant: "destructive",
       });
       return false;
     }
@@ -87,12 +97,12 @@ export function MediaUpload({ onFilesSelected, maxFiles = 5, maxFileSize = 10 }:
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      
+
       if (selectedFiles.length + validFiles.length >= maxFiles) {
         toast({
           title: "Too many files",
           description: `Maximum ${maxFiles} files allowed`,
-          variant: "destructive"
+          variant: "destructive",
         });
         break;
       }
@@ -103,24 +113,24 @@ export function MediaUpload({ onFilesSelected, maxFiles = 5, maxFileSize = 10 }:
         id: `${Date.now()}-${i}`,
         file,
         type: getFileType(file.type),
-        size: formatFileSize(file.size)
+        size: formatFileSize(file.size),
       };
 
       // Create preview for images
-      if (mediaFile.type === 'image') {
+      if (mediaFile.type === "image") {
         mediaFile.preview = URL.createObjectURL(file);
       }
 
       validFiles.push(mediaFile);
     }
 
-    setSelectedFiles(prev => [...prev, ...validFiles]);
+    setSelectedFiles((prev) => [...prev, ...validFiles]);
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    
+
     const files = e.dataTransfer.files;
     if (files.length > 0) {
       processFiles(files);
@@ -135,26 +145,30 @@ export function MediaUpload({ onFilesSelected, maxFiles = 5, maxFileSize = 10 }:
   };
 
   const removeFile = (id: string) => {
-    setSelectedFiles(prev => prev.filter(file => file.id !== id));
+    setSelectedFiles((prev) => prev.filter((file) => file.id !== id));
   };
 
   const handleSend = () => {
     if (selectedFiles.length === 0) return;
-    
+
     onFilesSelected(selectedFiles);
     setSelectedFiles([]);
-    
+
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
   const getFileIcon = (type: string) => {
     switch (type) {
-      case 'image': return <Image className="h-4 w-4" />;
-      case 'video': return <Video className="h-4 w-4" />;
-      case 'audio': return <Music className="h-4 w-4" />;
-      default: return <FileText className="h-4 w-4" />;
+      case "image":
+        return <Image className="h-4 w-4" />;
+      case "video":
+        return <Video className="h-4 w-4" />;
+      case "audio":
+        return <Music className="h-4 w-4" />;
+      default:
+        return <FileText className="h-4 w-4" />;
     }
   };
 
@@ -163,9 +177,9 @@ export function MediaUpload({ onFilesSelected, maxFiles = 5, maxFileSize = 10 }:
       {/* Upload Area */}
       <div
         className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-          isDragging 
-            ? 'border-primary bg-primary/10' 
-            : 'border-muted-foreground/25 hover:border-primary/50'
+          isDragging
+            ? "border-primary bg-primary/10"
+            : "border-muted-foreground/25 hover:border-primary/50"
         }`}
         onDrop={handleDrop}
         onDragOver={(e) => e.preventDefault()}
@@ -185,7 +199,8 @@ export function MediaUpload({ onFilesSelected, maxFiles = 5, maxFileSize = 10 }:
           Choose Files
         </Button>
         <p className="text-xs text-muted-foreground">
-          Supports images, videos, audio, and documents (max {maxFileSize}MB each)
+          Supports images, videos, audio, and documents (max {maxFileSize}MB
+          each)
         </p>
       </div>
 
@@ -202,19 +217,21 @@ export function MediaUpload({ onFilesSelected, maxFiles = 5, maxFileSize = 10 }:
       {selectedFiles.length > 0 && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <h4 className="text-sm font-medium">Selected Files ({selectedFiles.length})</h4>
+            <h4 className="text-sm font-medium">
+              Selected Files ({selectedFiles.length})
+            </h4>
             <Button variant="outline" size="sm" onClick={handleSend}>
               Send Files
             </Button>
           </div>
-          
+
           <div className="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto">
             {selectedFiles.map((file) => (
               <Card key={file.id} className="p-3">
                 <div className="flex items-center gap-3">
                   {file.preview ? (
-                    <img 
-                      src={file.preview} 
+                    <img
+                      src={file.preview}
                       alt={file.file.name}
                       className="h-10 w-10 object-cover rounded"
                     />
@@ -223,17 +240,21 @@ export function MediaUpload({ onFilesSelected, maxFiles = 5, maxFileSize = 10 }:
                       {getFileIcon(file.type)}
                     </div>
                   )}
-                  
+
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{file.file.name}</p>
+                    <p className="text-sm font-medium truncate">
+                      {file.file.name}
+                    </p>
                     <div className="flex items-center gap-2">
                       <Badge variant="secondary" className="text-xs">
                         {file.type}
                       </Badge>
-                      <span className="text-xs text-muted-foreground">{file.size}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {file.size}
+                      </span>
                     </div>
                   </div>
-                  
+
                   <Button
                     variant="ghost"
                     size="icon"

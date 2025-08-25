@@ -1,9 +1,21 @@
-
 import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { ChatAttachment } from "@/types/chat";
-import { Paperclip, Send, X, FileText, FileVideo, FileAudio, Image as ImageIcon, Camera, Mic, Plus, Smile, StopCircle } from "lucide-react";
+import {
+  Paperclip,
+  Send,
+  X,
+  FileText,
+  FileVideo,
+  FileAudio,
+  Image as ImageIcon,
+  Camera,
+  Mic,
+  Plus,
+  Smile,
+  StopCircle,
+} from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -23,7 +35,9 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
   const [attachments, setAttachments] = useState<File[]>([]);
   const [isRecording, setIsRecording] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
+    null,
+  );
   const [recordingTime, setRecordingTime] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -45,7 +59,7 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
       toast({
         title: "Cannot send empty message",
         description: "Please type a message or attach a file.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -56,13 +70,16 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
       setAttachments([]);
       toast({
         title: "Message sent",
-        description: attachments.length > 0 ? `Message sent with ${attachments.length} attachment(s)` : "Message sent successfully"
+        description:
+          attachments.length > 0
+            ? `Message sent with ${attachments.length} attachment(s)`
+            : "Message sent successfully",
       });
     } catch (error) {
       toast({
         title: "Failed to send message",
         description: "Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -71,26 +88,52 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
     const maxSize = 50 * 1024 * 1024; // 50MB
     const allowedTypes = [
       // Images
-      'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml', 'image/bmp', 'image/tiff',
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+      "image/svg+xml",
+      "image/bmp",
+      "image/tiff",
       // Videos
-      'video/mp4', 'video/webm', 'video/mov', 'video/avi', 'video/quicktime', 'video/mkv', 'video/wmv', 'video/flv',
+      "video/mp4",
+      "video/webm",
+      "video/mov",
+      "video/avi",
+      "video/quicktime",
+      "video/mkv",
+      "video/wmv",
+      "video/flv",
       // Audio
-      'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/m4a', 'audio/mpeg', 'audio/aac', 'audio/flac', 'audio/wma',
+      "audio/mp3",
+      "audio/wav",
+      "audio/ogg",
+      "audio/m4a",
+      "audio/mpeg",
+      "audio/aac",
+      "audio/flac",
+      "audio/wma",
       // Documents
-      'application/pdf', 'text/plain', 'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'application/vnd.ms-powerpoint',
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-      'application/rtf', 'text/csv', 'application/json', 'application/xml'
+      "application/pdf",
+      "text/plain",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.ms-powerpoint",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "application/rtf",
+      "text/csv",
+      "application/json",
+      "application/xml",
     ];
 
     if (file.size > maxSize) {
       toast({
         title: "File too large",
         description: `${file.name} exceeds 50MB limit`,
-        variant: "destructive"
+        variant: "destructive",
       });
       return false;
     }
@@ -99,7 +142,7 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
       toast({
         title: "Invalid file type",
         description: `${file.name} is not a supported format`,
-        variant: "destructive"
+        variant: "destructive",
       });
       return false;
     }
@@ -111,17 +154,17 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
     if (e.target.files) {
       const filesArray = Array.from(e.target.files);
       const validFiles = filesArray.filter(validateFile);
-      
+
       if (validFiles.length > 0) {
-        setAttachments(prev => [...prev, ...validFiles]);
+        setAttachments((prev) => [...prev, ...validFiles]);
         toast({
           title: "Files added",
-          description: `${validFiles.length} file(s) ready to send`
+          description: `${validFiles.length} file(s) ready to send`,
         });
       }
-      
+
       // Reset input
-      e.target.value = '';
+      e.target.value = "";
     }
   };
 
@@ -164,16 +207,16 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
       toast({
         title: "Error",
         description: "Failed to open file picker",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
 
   const removeAttachment = (index: number) => {
-    setAttachments(prev => prev.filter((_, i) => i !== index));
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
     toast({
       title: "File removed",
-      description: "Attachment removed successfully"
+      description: "Attachment removed successfully",
     });
   };
 
@@ -184,9 +227,12 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
   };
 
   const getFileIcon = (file: File) => {
-    if (file.type.startsWith("image/")) return <ImageIcon className="h-4 w-4" />;
-    if (file.type.startsWith("video/")) return <FileVideo className="h-4 w-4" />;
-    if (file.type.startsWith("audio/")) return <FileAudio className="h-4 w-4" />;
+    if (file.type.startsWith("image/"))
+      return <ImageIcon className="h-4 w-4" />;
+    if (file.type.startsWith("video/"))
+      return <FileVideo className="h-4 w-4" />;
+    if (file.type.startsWith("audio/"))
+      return <FileAudio className="h-4 w-4" />;
     return <FileText className="h-4 w-4" />;
   };
 
@@ -196,72 +242,77 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
         toast({
           title: "Not supported",
           description: "Voice recording not supported on this device",
-          variant: "destructive"
+          variant: "destructive",
         });
         return;
       }
 
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: { 
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
           echoCancellation: true,
           noiseSuppression: true,
-          sampleRate: 44100
-        } 
+          sampleRate: 44100,
+        },
       });
-      
+
       const recorder = new MediaRecorder(stream, {
-        mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4'
+        mimeType: MediaRecorder.isTypeSupported("audio/webm")
+          ? "audio/webm"
+          : "audio/mp4",
       });
-      
+
       const chunks: Blob[] = [];
-      
+
       recorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           chunks.push(event.data);
         }
       };
-      
+
       recorder.onstop = () => {
         const blob = new Blob(chunks, { type: recorder.mimeType });
-        const file = new File([blob], `voice-recording-${Date.now()}.${recorder.mimeType.includes('webm') ? 'webm' : 'mp4'}`, {
-          type: recorder.mimeType
-        });
-        
+        const file = new File(
+          [blob],
+          `voice-recording-${Date.now()}.${recorder.mimeType.includes("webm") ? "webm" : "mp4"}`,
+          {
+            type: recorder.mimeType,
+          },
+        );
+
         if (validateFile(file)) {
-          setAttachments(prev => [...prev, file]);
+          setAttachments((prev) => [...prev, file]);
           toast({
             title: "Voice recording complete",
-            description: "Voice message added to attachments"
+            description: "Voice message added to attachments",
           });
         }
-        
-        stream.getTracks().forEach(track => track.stop());
+
+        stream.getTracks().forEach((track) => track.stop());
         setRecordingTime(0);
         if (recordingIntervalRef.current) {
           clearInterval(recordingIntervalRef.current);
         }
       };
-      
+
       setMediaRecorder(recorder);
       setIsRecording(true);
       setRecordingTime(0);
-      
+
       recordingIntervalRef.current = setInterval(() => {
-        setRecordingTime(prev => prev + 1);
+        setRecordingTime((prev) => prev + 1);
       }, 1000);
-      
+
       recorder.start();
-      
+
       toast({
         title: "Recording started",
-        description: "Tap the microphone again to stop recording"
+        description: "Tap the microphone again to stop recording",
       });
-      
     } catch (error) {
       toast({
         title: "Recording failed",
         description: "Unable to access microphone",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -275,14 +326,14 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
   };
 
   const handleEmojiSelect = (emoji: string) => {
-    setMessage(prev => prev + emoji);
+    setMessage((prev) => prev + emoji);
     setShowEmojiPicker(false);
   };
 
   const formatRecordingTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   return (
@@ -325,22 +376,29 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
         onChange={handleFileChange}
         accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.csv,.json,.xml"
       />
-      
+
       {/* Attachments preview */}
       {attachments.length > 0 && (
         <div className="mb-3 flex flex-wrap gap-2 max-h-32 overflow-y-auto">
           {attachments.map((file, index) => (
-            <div 
+            <div
               key={index}
               className="flex items-center bg-muted rounded-md p-2 pr-8 relative animate-fade-in min-w-0"
             >
               {getFileIcon(file)}
               <div className="ml-2 min-w-0 flex-1">
-                <p className="text-xs font-medium truncate max-w-[120px]" title={file.name}>{file.name}</p>
-                <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>
+                <p
+                  className="text-xs font-medium truncate max-w-[120px]"
+                  title={file.name}
+                >
+                  {file.name}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {formatFileSize(file.size)}
+                </p>
               </div>
               <Button
-                variant="ghost" 
+                variant="ghost"
                 size="icon"
                 className="h-6 w-6 p-0 absolute right-1 top-1 hover:bg-destructive/10"
                 onClick={() => removeAttachment(index)}
@@ -351,14 +409,14 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
           ))}
         </div>
       )}
-      
+
       <div className="flex items-center gap-2">
         {/* Attachment menu */}
         <Popover>
           <PopoverTrigger asChild>
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               className="rounded-full flex-shrink-0 hover:bg-primary/10"
               disabled={isLoading}
             >
@@ -429,7 +487,7 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" side="top">
-            <EmojiPicker 
+            <EmojiPicker
               onEmojiSelect={handleEmojiSelect}
               onClose={() => setShowEmojiPicker(false)}
             />
@@ -442,18 +500,28 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
           size="icon"
           className={cn(
             "rounded-full flex-shrink-0",
-            isRecording ? "bg-red-100 text-red-600 animate-pulse" : "hover:bg-primary/10"
+            isRecording
+              ? "bg-red-100 text-red-600 animate-pulse"
+              : "hover:bg-primary/10",
           )}
           onClick={isRecording ? stopVoiceRecording : startVoiceRecording}
           disabled={isLoading}
         >
-          {isRecording ? <StopCircle className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+          {isRecording ? (
+            <StopCircle className="h-4 w-4" />
+          ) : (
+            <Mic className="h-4 w-4" />
+          )}
         </Button>
-        
+
         {/* Message input */}
         <div className="relative flex-1">
           <textarea
-            placeholder={isRecording ? `Recording... ${formatRecordingTime(recordingTime)}` : "Type a message..."}
+            placeholder={
+              isRecording
+                ? `Recording... ${formatRecordingTime(recordingTime)}`
+                : "Type a message..."
+            }
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={(e) => {
@@ -466,9 +534,12 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
             disabled={isLoading || isRecording}
             maxLength={2000}
             rows={1}
-            style={{ 
-              minHeight: '40px',
-              height: Math.min(120, Math.max(40, message.split('\n').length * 20))
+            style={{
+              minHeight: "40px",
+              height: Math.min(
+                120,
+                Math.max(40, message.split("\n").length * 20),
+              ),
             }}
           />
           <div className="absolute right-2 bottom-2 text-xs text-muted-foreground">
@@ -482,7 +553,11 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
           size="icon"
           className="rounded-full flex-shrink-0"
           onClick={handleSendMessage}
-          disabled={isLoading || isRecording || (!message.trim() && attachments.length === 0)}
+          disabled={
+            isLoading ||
+            isRecording ||
+            (!message.trim() && attachments.length === 0)
+          }
         >
           <Send className="h-4 w-4" />
         </Button>
@@ -492,8 +567,12 @@ export function ChatInput({ onSendMessage, isLoading }: ChatInputProps) {
       {isRecording && (
         <div className="mt-2 flex items-center gap-2 text-red-600 animate-fade-in">
           <div className="w-3 h-3 bg-red-600 rounded-full animate-pulse"></div>
-          <span className="text-sm font-medium">Recording... {formatRecordingTime(recordingTime)}</span>
-          <span className="text-xs text-muted-foreground ml-2">Tap stop when finished</span>
+          <span className="text-sm font-medium">
+            Recording... {formatRecordingTime(recordingTime)}
+          </span>
+          <span className="text-xs text-muted-foreground ml-2">
+            Tap stop when finished
+          </span>
         </div>
       )}
     </div>

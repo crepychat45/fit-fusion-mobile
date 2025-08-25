@@ -5,11 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
-import { 
-  User, 
-  Crown, 
-  Trophy, 
-  Star, 
+import {
+  User,
+  Crown,
+  Trophy,
+  Star,
   Calendar,
   TrendingUp,
   Target,
@@ -19,7 +19,7 @@ import {
   Zap,
   Heart,
   Activity,
-  MapPin
+  MapPin,
 } from "lucide-react";
 import { userProfile } from "@/data/user";
 import { useNavigate } from "react-router-dom";
@@ -30,7 +30,7 @@ interface Achievement {
   description: string;
   icon: string;
   unlockedAt: string;
-  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  rarity: "common" | "rare" | "epic" | "legendary";
 }
 
 const recentAchievements: Achievement[] = [
@@ -40,15 +40,15 @@ const recentAchievements: Achievement[] = [
     description: "Completed 7 workouts in a week",
     icon: "🏆",
     unlockedAt: "2 days ago",
-    rarity: 'rare'
+    rarity: "rare",
   },
   {
-    id: "2", 
+    id: "2",
     title: "Calorie Crusher",
     description: "Burned 1000+ calories in a single workout",
     icon: "🔥",
     unlockedAt: "1 week ago",
-    rarity: 'epic'
+    rarity: "epic",
   },
   {
     id: "3",
@@ -56,8 +56,8 @@ const recentAchievements: Achievement[] = [
     description: "Completed 5 morning workouts",
     icon: "🌅",
     unlockedAt: "2 weeks ago",
-    rarity: 'common'
-  }
+    rarity: "common",
+  },
 ];
 
 interface ProfileDisplayProps {
@@ -65,7 +65,10 @@ interface ProfileDisplayProps {
   showFullProfile?: boolean;
 }
 
-export function EnhancedProfileDisplay({ userName, showFullProfile = false }: ProfileDisplayProps) {
+export function EnhancedProfileDisplay({
+  userName,
+  showFullProfile = false,
+}: ProfileDisplayProps) {
   const [currentProfile, setCurrentProfile] = useState(userProfile);
   const [displayName, setDisplayName] = useState(userName || userProfile.name);
   const [streakMotivation, setStreakMotivation] = useState("");
@@ -75,16 +78,16 @@ export function EnhancedProfileDisplay({ userName, showFullProfile = false }: Pr
   useEffect(() => {
     const loadUserProfile = () => {
       try {
-        const savedProfile = localStorage.getItem('fitfusion-user-profile');
+        const savedProfile = localStorage.getItem("fitfusion-user-profile");
         if (savedProfile) {
           const parsed = JSON.parse(savedProfile);
           if (parsed.name && parsed.name !== "John Smith") {
             setDisplayName(parsed.name);
-            setCurrentProfile(prev => ({ ...prev, name: parsed.name }));
+            setCurrentProfile((prev) => ({ ...prev, name: parsed.name }));
           }
         }
       } catch (error) {
-        console.error('Error loading user profile:', error);
+        console.error("Error loading user profile:", error);
       }
 
       // Set motivational message based on streak
@@ -99,7 +102,7 @@ export function EnhancedProfileDisplay({ userName, showFullProfile = false }: Pr
   }, [userName, currentProfile.stats.streakDays]);
 
   const getInitials = () => {
-    const names = displayName.split(' ');
+    const names = displayName.split(" ");
     if (names.length >= 2) {
       return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
     }
@@ -108,26 +111,31 @@ export function EnhancedProfileDisplay({ userName, showFullProfile = false }: Pr
 
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
-      case 'legendary': return 'from-yellow-400 to-orange-500';
-      case 'epic': return 'from-purple-400 to-pink-500';
-      case 'rare': return 'from-blue-400 to-cyan-500';
-      default: return 'from-gray-400 to-gray-500';
+      case "legendary":
+        return "from-yellow-400 to-orange-500";
+      case "epic":
+        return "from-purple-400 to-pink-500";
+      case "rare":
+        return "from-blue-400 to-cyan-500";
+      default:
+        return "from-gray-400 to-gray-500";
     }
   };
 
   const getLevelProgress = () => {
-    const baseExp = currentProfile.stats.workoutsCompleted * 10 + 
-                   currentProfile.stats.caloriesBurned / 10 + 
-                   currentProfile.stats.streakDays * 20;
-    
+    const baseExp =
+      currentProfile.stats.workoutsCompleted * 10 +
+      currentProfile.stats.caloriesBurned / 10 +
+      currentProfile.stats.streakDays * 20;
+
     const currentLevelExp = Math.floor(baseExp / 100) * 100;
     const nextLevelExp = currentLevelExp + 100;
     const progress = ((baseExp - currentLevelExp) / 100) * 100;
-    
+
     return {
       currentLevel: Math.floor(baseExp / 100) + 1,
       progress: Math.round(progress),
-      expToNext: nextLevelExp - baseExp
+      expToNext: nextLevelExp - baseExp,
     };
   };
 
@@ -137,7 +145,7 @@ export function EnhancedProfileDisplay({ userName, showFullProfile = false }: Pr
     return (
       <Card className="w-full overflow-hidden relative">
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
-        
+
         <CardContent className="p-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -146,10 +154,7 @@ export function EnhancedProfileDisplay({ userName, showFullProfile = false }: Pr
           >
             {/* Profile Header */}
             <div className="flex items-start gap-6">
-              <motion.div 
-                whileHover={{ scale: 1.05 }}
-                className="relative"
-              >
+              <motion.div whileHover={{ scale: 1.05 }} className="relative">
                 <Avatar className="w-24 h-24 border-4 border-white shadow-xl">
                   <AvatarImage src={currentProfile.avatar} alt="Profile" />
                   <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold text-2xl">
@@ -171,7 +176,7 @@ export function EnhancedProfileDisplay({ userName, showFullProfile = false }: Pr
                     Pro Member
                   </Badge>
                 </div>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Target className="w-4 h-4" />
@@ -194,8 +199,12 @@ export function EnhancedProfileDisplay({ userName, showFullProfile = false }: Pr
                 {/* Level Progress */}
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">Level {levelData.currentLevel}</span>
-                    <span className="text-xs text-muted-foreground">{levelData.expToNext} XP to next level</span>
+                    <span className="text-sm font-medium">
+                      Level {levelData.currentLevel}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {levelData.expToNext} XP to next level
+                    </span>
                   </div>
                   <Progress value={levelData.progress} className="h-3" />
                 </div>
@@ -205,8 +214,8 @@ export function EnhancedProfileDisplay({ userName, showFullProfile = false }: Pr
                 </div>
 
                 <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => navigate("/profile")}
                     className="bg-white/50 backdrop-blur-sm"
@@ -214,8 +223,8 @@ export function EnhancedProfileDisplay({ userName, showFullProfile = false }: Pr
                     <Edit3 className="w-4 h-4 mr-1" />
                     Edit Profile
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => navigate("/settings")}
                     className="bg-white/50 backdrop-blur-sm"
@@ -229,47 +238,55 @@ export function EnhancedProfileDisplay({ userName, showFullProfile = false }: Pr
 
             {/* Quick Stats Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <motion.div 
+              <motion.div
                 whileHover={{ scale: 1.05 }}
                 className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/20 dark:to-blue-900/20 rounded-xl text-center border border-blue-200/50"
               >
                 <div className="flex items-center justify-center mb-2">
                   <Trophy className="w-5 h-5 text-blue-600" />
                 </div>
-                <div className="font-bold text-xl text-blue-600">{currentProfile.stats.workoutsCompleted}</div>
+                <div className="font-bold text-xl text-blue-600">
+                  {currentProfile.stats.workoutsCompleted}
+                </div>
                 <div className="text-xs text-muted-foreground">Workouts</div>
               </motion.div>
 
-              <motion.div 
+              <motion.div
                 whileHover={{ scale: 1.05 }}
                 className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950/20 dark:to-orange-900/20 rounded-xl text-center border border-orange-200/50"
               >
                 <div className="flex items-center justify-center mb-2">
                   <Zap className="w-5 h-5 text-orange-600" />
                 </div>
-                <div className="font-bold text-xl text-orange-600">{currentProfile.stats.streakDays}</div>
+                <div className="font-bold text-xl text-orange-600">
+                  {currentProfile.stats.streakDays}
+                </div>
                 <div className="text-xs text-muted-foreground">Day Streak</div>
               </motion.div>
 
-              <motion.div 
+              <motion.div
                 whileHover={{ scale: 1.05 }}
                 className="p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/20 dark:to-green-900/20 rounded-xl text-center border border-green-200/50"
               >
                 <div className="flex items-center justify-center mb-2">
                   <Zap className="w-5 h-5 text-green-600" />
                 </div>
-                <div className="font-bold text-xl text-green-600">{currentProfile.stats.caloriesBurned.toLocaleString()}</div>
+                <div className="font-bold text-xl text-green-600">
+                  {currentProfile.stats.caloriesBurned.toLocaleString()}
+                </div>
                 <div className="text-xs text-muted-foreground">Calories</div>
               </motion.div>
 
-              <motion.div 
+              <motion.div
                 whileHover={{ scale: 1.05 }}
                 className="p-4 bg-gradient-to-br from-red-50 to-red-100 dark:from-red-950/20 dark:to-red-900/20 rounded-xl text-center border border-red-200/50"
               >
                 <div className="flex items-center justify-center mb-2">
                   <Heart className="w-5 h-5 text-red-600" />
                 </div>
-                <div className="font-bold text-xl text-red-600">{currentProfile.stats.avgHeartRate}</div>
+                <div className="font-bold text-xl text-red-600">
+                  {currentProfile.stats.avgHeartRate}
+                </div>
                 <div className="text-xs text-muted-foreground">Avg BPM</div>
               </motion.div>
             </div>
@@ -291,9 +308,15 @@ export function EnhancedProfileDisplay({ userName, showFullProfile = false }: Pr
                   >
                     <div className="relative z-10">
                       <div className="text-2xl mb-1">{achievement.icon}</div>
-                      <div className="font-semibold text-sm">{achievement.title}</div>
-                      <div className="text-xs opacity-90">{achievement.description}</div>
-                      <div className="text-xs opacity-75 mt-1">{achievement.unlockedAt}</div>
+                      <div className="font-semibold text-sm">
+                        {achievement.title}
+                      </div>
+                      <div className="text-xs opacity-90">
+                        {achievement.description}
+                      </div>
+                      <div className="text-xs opacity-75 mt-1">
+                        {achievement.unlockedAt}
+                      </div>
                     </div>
                     <div className="absolute top-0 right-0 w-8 h-8 bg-white/20 rounded-bl-full" />
                   </motion.div>
@@ -315,7 +338,7 @@ export function EnhancedProfileDisplay({ userName, showFullProfile = false }: Pr
           {getInitials()}
         </AvatarFallback>
       </Avatar>
-      
+
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <h3 className="font-semibold text-white truncate">{displayName}</h3>
@@ -325,12 +348,13 @@ export function EnhancedProfileDisplay({ userName, showFullProfile = false }: Pr
           </Badge>
         </div>
         <div className="text-white/80 text-xs">
-          Level {levelData.currentLevel} • {currentProfile.stats.streakDays} day streak
+          Level {levelData.currentLevel} • {currentProfile.stats.streakDays} day
+          streak
         </div>
       </div>
-      
-      <Button 
-        variant="ghost" 
+
+      <Button
+        variant="ghost"
         size="sm"
         onClick={() => navigate("/profile")}
         className="text-white hover:bg-white/20"

@@ -1,9 +1,22 @@
-
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Play, Pause, X, Volume2, VolumeX, Maximize, Minimize } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Play,
+  Pause,
+  X,
+  Volume2,
+  VolumeX,
+  Maximize,
+  Minimize,
+} from "lucide-react";
 
 interface WorkoutVideoProps {
   title: string;
@@ -12,13 +25,18 @@ interface WorkoutVideoProps {
   duration: string;
 }
 
-export function WorkoutVideo({ title, thumbnailUrl, videoUrl, duration }: WorkoutVideoProps) {
+export function WorkoutVideo({
+  title,
+  thumbnailUrl,
+  videoUrl,
+  duration,
+}: WorkoutVideoProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const videoRef = React.useRef<HTMLVideoElement>(null);
-  
+
   const handlePlayPause = () => {
     if (videoRef.current) {
       if (isPlaying) {
@@ -29,19 +47,21 @@ export function WorkoutVideo({ title, thumbnailUrl, videoUrl, duration }: Workou
       setIsPlaying(!isPlaying);
     }
   };
-  
+
   const handleMuteToggle = () => {
     if (videoRef.current) {
       videoRef.current.muted = !isMuted;
       setIsMuted(!isMuted);
     }
   };
-  
+
   const handleFullscreenToggle = () => {
     if (videoRef.current) {
       if (!document.fullscreenElement) {
-        videoRef.current.requestFullscreen().catch(err => {
-          console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+        videoRef.current.requestFullscreen().catch((err) => {
+          console.error(
+            `Error attempting to enable full-screen mode: ${err.message}`,
+          );
         });
       } else {
         document.exitFullscreen();
@@ -49,7 +69,7 @@ export function WorkoutVideo({ title, thumbnailUrl, videoUrl, duration }: Workou
       setIsFullscreen(!isFullscreen);
     }
   };
-  
+
   const hideControlsTimeout = () => {
     setTimeout(() => {
       if (isPlaying) {
@@ -57,15 +77,15 @@ export function WorkoutVideo({ title, thumbnailUrl, videoUrl, duration }: Workou
       }
     }, 3000);
   };
-  
+
   return (
     <Dialog>
       <DialogTrigger asChild>
         <Card className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow">
           <div className="relative">
-            <img 
-              src={thumbnailUrl || "/placeholder.svg"} 
-              alt={title} 
+            <img
+              src={thumbnailUrl || "/placeholder.svg"}
+              alt={title}
               className="w-full aspect-video object-cover"
             />
             <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
@@ -82,9 +102,9 @@ export function WorkoutVideo({ title, thumbnailUrl, videoUrl, duration }: Workou
           </CardContent>
         </Card>
       </DialogTrigger>
-      
+
       <DialogContent className="sm:max-w-[600px] p-0">
-        <div 
+        <div
           className="relative"
           onMouseEnter={() => setShowControls(true)}
           onMouseLeave={() => isPlaying && hideControlsTimeout()}
@@ -95,7 +115,10 @@ export function WorkoutVideo({ title, thumbnailUrl, videoUrl, duration }: Workou
         >
           <video
             ref={videoRef}
-            src={videoUrl || "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"}
+            src={
+              videoUrl ||
+              "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+            }
             poster={thumbnailUrl || "/placeholder.svg"}
             className="w-full aspect-video"
             onEnded={() => setIsPlaying(false)}
@@ -103,20 +126,22 @@ export function WorkoutVideo({ title, thumbnailUrl, videoUrl, duration }: Workou
             onPause={() => setIsPlaying(false)}
             controls
             preload="metadata"
-            style={{ maxHeight: '70vh' }}
+            style={{ maxHeight: "70vh" }}
           />
-          
+
           {/* Video overlay controls */}
-          <div 
+          <div
             className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent transition-opacity duration-300 ${
-              showControls ? 'opacity-100' : 'opacity-0'
+              showControls ? "opacity-100" : "opacity-0"
             }`}
           >
             <DialogHeader className="absolute top-0 left-0 right-0 p-4">
               <div className="flex items-center justify-between">
-                <DialogTitle className="text-white text-shadow">{title}</DialogTitle>
-                <Button 
-                  variant="ghost" 
+                <DialogTitle className="text-white text-shadow">
+                  {title}
+                </DialogTitle>
+                <Button
+                  variant="ghost"
                   size="icon"
                   className="text-white hover:bg-black/20"
                   onClick={() => {
@@ -129,7 +154,7 @@ export function WorkoutVideo({ title, thumbnailUrl, videoUrl, duration }: Workou
                 </Button>
               </div>
             </DialogHeader>
-            
+
             <div className="absolute bottom-0 left-0 right-0 p-4">
               <div className="flex items-center justify-between">
                 <Button
@@ -144,7 +169,7 @@ export function WorkoutVideo({ title, thumbnailUrl, videoUrl, duration }: Workou
                     <Play className="h-6 w-6" fill="white" />
                   )}
                 </Button>
-                
+
                 <div className="flex items-center gap-2">
                   <Button
                     variant="ghost"
@@ -158,7 +183,7 @@ export function WorkoutVideo({ title, thumbnailUrl, videoUrl, duration }: Workou
                       <Volume2 className="h-5 w-5" />
                     )}
                   </Button>
-                  
+
                   <Button
                     variant="ghost"
                     size="icon"
