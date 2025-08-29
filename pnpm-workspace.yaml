@@ -1,0 +1,6 @@
+onlyBuiltDependencies:
+  - '@swc/core'
+  - ejs
+  - esbuild
+  - highlight.js
+  - postinstall-postinstall
