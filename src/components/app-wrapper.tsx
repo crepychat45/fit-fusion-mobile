@@ -10,6 +10,7 @@ import { SettingsProvider } from "@/contexts/settings-context";
 import { ErrorRecovery } from "@/components/error-recovery";
 import { SecurityManager } from "@/components/security-manager";
 import { AccessibilityManager } from "@/components/accessibility-manager";
+import { SmartNotifications } from "@/components/ai/smart-notifications";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,6 +39,7 @@ export function AppWrapper({ children }: AppWrapperProps) {
                   <TooltipProvider>
                     <Toaster />
                     <Sonner />
+                    <SmartNotifications />
                     <BrowserRouter>{children}</BrowserRouter>
                   </TooltipProvider>
                 </AccessibilityManager>

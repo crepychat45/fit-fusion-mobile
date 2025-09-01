@@ -55,6 +55,8 @@ export class ErrorRecovery extends Component<
 
   handleRetry = () => {
     this.setState({ hasError: false, error: null, errorInfo: null });
+    // Force a clean reload by clearing any cached state
+    window.location.reload();
   };
 
   handleReload = () => {

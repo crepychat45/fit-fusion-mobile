@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { SEOManager } from "./components/seo-manager";
 import { PerformanceUtils } from "./utils/performance-utils";
 import { AppWrapper } from "./components/app-wrapper";
@@ -73,9 +73,7 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => (
   <AppWrapper>
-    <Router>
-      <AppContent />
-    </Router>
+    <AppContent />
   </AppWrapper>
 );
 
