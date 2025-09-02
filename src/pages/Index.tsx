@@ -26,6 +26,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { LiquidGlassCard, LiquidGlass } from "@/components/enhanced-liquid-glass";
 import {
   Sparkles,
   TrendingUp,
@@ -37,6 +38,7 @@ import {
   Activity,
 } from "lucide-react";
 import { ErrorFixManager } from "@/components/error-fix-manager";
+import { EnhancedHomeFeatures } from "@/components/enhanced-home-features";
 
 const scheduledWorkouts = [
   {
@@ -134,25 +136,35 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 pb-16 relative overflow-hidden">
-      {/* Background animations */}
+      {/* Enhanced liquid background animations */}
       <div className="fixed inset-0 pointer-events-none">
         <motion.div
           animate={{
-            scale: [1, 1.1, 1],
+            scale: [1, 1.2, 1],
             rotate: [0, 180, 360],
-            opacity: [0.1, 0.2, 0.1],
+            opacity: [0.05, 0.15, 0.05],
           }}
-          transition={{ duration: 20, repeat: Infinity }}
-          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full blur-3xl"
+          transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-500/10 to-purple-600/10 rounded-full blur-3xl liquid-float"
         />
         <motion.div
           animate={{
-            scale: [1.1, 1, 1.1],
+            scale: [1.2, 1, 1.2],
             rotate: [360, 180, 0],
-            opacity: [0.15, 0.05, 0.15],
+            opacity: [0.1, 0.03, 0.1],
           }}
-          transition={{ duration: 25, repeat: Infinity }}
-          className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-pink-400/20 to-orange-600/20 rounded-full blur-3xl"
+          transition={{ duration: 35, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -bottom-40 -left-40 w-[28rem] h-[28rem] bg-gradient-to-tr from-pink-500/10 to-orange-600/10 rounded-full blur-3xl liquid-float"
+        />
+        <motion.div
+          animate={{
+            scale: [1, 1.1, 1],
+            x: [0, 100, 0],
+            y: [0, -50, 0],
+            opacity: [0.08, 0.12, 0.08],
+          }}
+          transition={{ duration: 40, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/2 left-1/2 w-80 h-80 bg-gradient-to-br from-green-500/8 to-blue-500/8 rounded-full blur-2xl"
         />
       </div>
 
@@ -164,17 +176,18 @@ const Index = () => {
         animate="visible"
         className="space-y-6 relative z-10"
       >
-        {/* Enhanced Activity Summary with better animations */}
+        {/* Enhanced Activity Summary with liquid glass */}
         <motion.div
           variants={itemVariants}
           className="px-4 -mt-6 relative z-10"
           whileHover={{ scale: 1.01 }}
         >
-          <motion.div
-            initial={{ y: 50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ type: "spring", duration: 0.8 }}
-            className="hover-lift"
+          <LiquidGlass
+            variant="strong"
+            ripple
+            float
+            animated
+            className="rounded-xl overflow-hidden"
           >
             <ActivitySummary
               workoutsCompleted={userProfile.stats.workoutsCompleted}
@@ -182,7 +195,7 @@ const Index = () => {
               caloriesBurned={userProfile.stats.caloriesBurned}
               avgHeartRate={userProfile.stats.avgHeartRate}
             />
-          </motion.div>
+          </LiquidGlass>
         </motion.div>
 
         {/* Enhanced AI-Powered Features Banner */}
@@ -195,23 +208,25 @@ const Index = () => {
               transition={{ type: "spring", duration: 0.8, bounce: 0.4 }}
               className="px-4"
             >
-              <motion.div
-                whileHover={{ scale: 1.02, rotate: [0, 1, 0] }}
-                className="hover-glow"
+              <LiquidGlass
+                variant="strong"
+                ripple
+                bubble
+                animated
+                className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 border-0 overflow-hidden relative rounded-xl"
               >
-                <Card className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 border-0 overflow-hidden relative">
-                  <motion.div
-                    animate={{
-                      background: [
-                        "linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1))",
-                        "linear-gradient(45deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1))",
-                        "linear-gradient(45deg, rgba(236, 72, 153, 0.1), rgba(59, 130, 246, 0.1))",
-                      ],
-                    }}
-                    transition={{ duration: 5, repeat: Infinity }}
-                    className="absolute inset-0"
-                  />
-                  <CardContent className="p-4 text-white relative z-10">
+                <motion.div
+                  animate={{
+                    background: [
+                      "linear-gradient(45deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15))",
+                      "linear-gradient(45deg, rgba(139, 92, 246, 0.15), rgba(236, 72, 153, 0.15))",
+                      "linear-gradient(45deg, rgba(236, 72, 153, 0.15), rgba(59, 130, 246, 0.15))",
+                    ],
+                  }}
+                  transition={{ duration: 5, repeat: Infinity }}
+                  className="absolute inset-0"
+                />
+                <div className="p-4 text-white relative z-10">
                     <div className="relative">
                       <div className="flex items-center gap-2 mb-2">
                         <motion.div
@@ -260,9 +275,8 @@ const Index = () => {
                         ))}
                       </motion.div>
                     </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
+                </div>
+              </LiquidGlass>
             </motion.div>
           )}
         </AnimatePresence>
@@ -375,6 +389,11 @@ const Index = () => {
           >
             <FitfusionChatSection />
           </motion.div>
+        </motion.div>
+
+        {/* Enhanced Home Features - AI Insights */}
+        <motion.div variants={itemVariants} className="px-4">
+          <EnhancedHomeFeatures />
         </motion.div>
 
         {/* Enhanced Recent Activity */}

@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/contexts/theme-context";
 import { LanguageProvider } from "@/contexts/language-context";
 import { SettingsProvider } from "@/contexts/settings-context";
 import { ErrorRecovery } from "@/components/error-recovery";
+import { EnhancedErrorRecovery } from "@/components/enhanced-error-recovery";
 import { SecurityManager } from "@/components/security-manager";
 import { AccessibilityManager } from "@/components/accessibility-manager";
 import { SmartNotifications } from "@/components/ai/smart-notifications";
@@ -29,7 +30,7 @@ interface AppWrapperProps {
 
 export function AppWrapper({ children }: AppWrapperProps) {
   return (
-    <ErrorRecovery>
+    <EnhancedErrorRecovery>
       <QueryClientProvider client={queryClient}>
         <SecurityManager>
           <ThemeProvider>
@@ -48,6 +49,6 @@ export function AppWrapper({ children }: AppWrapperProps) {
           </ThemeProvider>
         </SecurityManager>
       </QueryClientProvider>
-    </ErrorRecovery>
+    </EnhancedErrorRecovery>
   );
 }

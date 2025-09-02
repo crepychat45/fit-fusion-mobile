@@ -13,6 +13,9 @@ import { VersionManager } from "./version-manager";
 import { EnhancedVersionManager } from "./enhanced-version-manager";
 import { ProfileNameEditor } from "@/components/profile-name-editor";
 import { SettingsNavigation } from "./settings-navigation";
+import { AdvancedAISecurity } from "@/components/ai/advanced-ai-security";
+import { ChangelogManager } from "@/components/changelog-manager";
+import { LiquidGlassCard, LiquidGlass } from "@/components/enhanced-liquid-glass";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -350,7 +353,10 @@ export function SettingsContainer() {
             </TabsContent>
 
             <TabsContent value="security" className="mt-0">
-              <SecurityCenter />
+              <div className="space-y-6">
+                <SecurityCenter />
+                <AdvancedAISecurity />
+              </div>
             </TabsContent>
 
             <TabsContent value="display" className="mt-0">
@@ -369,6 +375,7 @@ export function SettingsContainer() {
               <div className="space-y-6">
                 <EnhancedVersionManager />
                 <AppUpdateManager />
+                <ChangelogManager />
               </div>
             </TabsContent>
 
