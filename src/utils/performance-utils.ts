@@ -30,83 +30,116 @@ export class PerformanceUtils {
 
   // Lazy load images
   static lazyLoadImages() {
-    const images = document.querySelectorAll("img[data-src]");
-    const imageObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const img = entry.target as HTMLImageElement;
-          img.src = img.dataset.src!;
-          img.classList.remove("lazy");
-          imageObserver.unobserve(img);
-        }
+    if (typeof window === "undefined" || !("IntersectionObserver" in window)) return;
+    
+    try {
+      const images = document.querySelectorAll("img[data-src]");
+      const imageObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const img = entry.target as HTMLImageElement;
+            if (img.dataset.src) {
+              img.src = img.dataset.src;
+              img.classList.remove("lazy");
+              imageObserver.unobserve(img);
+            }
+          }
+        });
       });
-    });
 
-    images.forEach((img) => imageObserver.observe(img));
+      images.forEach((img) => imageObserver.observe(img));
+    } catch (error) {
+      console.warn("Failed to set up lazy loading:", error);
+    }
   }
 
   // Preload critical resources
   static preloadResource(href: string, as: string) {
-    const link = document.createElement("link");
-    link.rel = "preload";
-    link.href = href;
-    link.as = as;
-    document.head.appendChild(link);
+    if (typeof window === "undefined") return;
+    
+    try {
+      const link = document.createElement("link");
+      link.rel = "preload";
+      link.href = href;
+      link.as = as;
+      document.head.appendChild(link);
+    } catch (error) {
+      console.warn("Failed to preload resource:", error);
+    }
   }
 
   // Monitor Core Web Vitals
   static measurePerformance() {
-    // First Contentful Paint
-    const observer = new PerformanceObserver((list) => {
-      for (const entry of list.getEntries()) {
-        if (
-          entry.entryType === "paint" &&
-          entry.name === "first-contentful-paint"
-        ) {
-          console.log("FCP:", entry.startTime);
+    if (typeof window === "undefined" || !("PerformanceObserver" in window)) return;
+    
+    try {
+      // First Contentful Paint
+      const observer = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          if (
+            entry.entryType === "paint" &&
+            entry.name === "first-contentful-paint"
+          ) {
+            console.log("FCP:", entry.startTime);
+          }
         }
-      }
-    });
-    observer.observe({ entryTypes: ["paint"] });
+      });
+      observer.observe({ entryTypes: ["paint"] });
 
-    // Largest Contentful Paint
-    const lcpObserver = new PerformanceObserver((list) => {
-      const entries = list.getEntries();
-      const lastEntry = entries[entries.length - 1];
-      console.log("LCP:", lastEntry.startTime);
-    });
-    lcpObserver.observe({ entryTypes: ["largest-contentful-paint"] });
+      // Largest Contentful Paint
+      const lcpObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        const lastEntry = entries[entries.length - 1];
+        console.log("LCP:", lastEntry.startTime);
+      });
+      lcpObserver.observe({ entryTypes: ["largest-contentful-paint"] });
 
-    // First Input Delay
-    const fidObserver = new PerformanceObserver((list) => {
-      for (const entry of list.getEntries()) {
-        console.log("FID:", (entry as any).processingStart - entry.startTime);
-      }
-    });
-    fidObserver.observe({ entryTypes: ["first-input"] });
+      // First Input Delay
+      const fidObserver = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          console.log("FID:", (entry as any).processingStart - entry.startTime);
+        }
+      });
+      fidObserver.observe({ entryTypes: ["first-input"] });
+    } catch (error) {
+      console.warn("Failed to set up performance monitoring:", error);
+    }
   }
 
   // Cache API responses
   static cacheResponse(key: string, data: any, ttl: number = 300000) {
-    const item = {
-      data,
-      timestamp: Date.now(),
-      ttl,
-    };
-    localStorage.setItem(`cache_${key}`, JSON.stringify(item));
+    if (typeof window === "undefined") return;
+    
+    try {
+      const item = {
+        data,
+        timestamp: Date.now(),
+        ttl,
+      };
+      localStorage.setItem(`cache_${key}`, JSON.stringify(item));
+    } catch (error) {
+      console.warn("Failed to cache response:", error);
+    }
   }
 
   static getCachedResponse(key: string) {
-    const cached = localStorage.getItem(`cache_${key}`);
-    if (!cached) return null;
+    if (typeof window === "undefined") return null;
+    
+    try {
+      const cached = localStorage.getItem(`cache_${key}`);
+      if (!cached) return null;
 
-    const item = JSON.parse(cached);
-    if (Date.now() - item.timestamp > item.ttl) {
-      localStorage.removeItem(`cache_${key}`);
+      const item = JSON.parse(cached);
+      if (Date.now() - item.timestamp > item.ttl) {
+        localStorage.removeItem(`cache_${key}`);
+        return null;
+      }
+
+      return item.data;
+    } catch (error) {
+      console.warn("Failed to get cached response:", error);
       return null;
     }
-
-    return item.data;
   }
 
   // Bundle size analyzer (development only)
@@ -136,7 +169,9 @@ export class PerformanceUtils {
 
 // Service Worker registration for PWA
 export function registerServiceWorker() {
-  if ("serviceWorker" in navigator) {
+  if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
+  
+  try {
     window.addEventListener("load", () => {
       navigator.serviceWorker
         .register("/sw.js")
@@ -147,5 +182,7 @@ export function registerServiceWorker() {
           console.log("SW registration failed: ", registrationError);
         });
     });
+  } catch (error) {
+    console.warn("Failed to register service worker:", error);
   }
 }

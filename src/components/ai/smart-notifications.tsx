@@ -155,13 +155,20 @@ export function SmartNotifications() {
 
   // Auto-hide notifications
   useEffect(() => {
+    const timeouts: NodeJS.Timeout[] = [];
+    
     notifications.forEach(notification => {
       if (notification.autoHide) {
-        setTimeout(() => {
+        const timeout = setTimeout(() => {
           dismissNotification(notification.id);
         }, 10000); // Auto-hide after 10 seconds
+        timeouts.push(timeout);
       }
     });
+    
+    return () => {
+      timeouts.forEach(timeout => clearTimeout(timeout));
+    };
   }, [notifications]);
 
   const dismissNotification = (id: string) => {

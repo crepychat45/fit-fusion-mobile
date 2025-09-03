@@ -62,18 +62,30 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [currentLanguage, setCurrentLanguage] = useState<Language>(() => {
-    // Try to get saved language from localStorage
-    const savedLang = localStorage.getItem("fitfusion-language");
-    if (savedLang) {
-      const lang = availableLanguages.find((l) => l.code === savedLang);
-      return lang || defaultLanguage;
+    // Check if we're in browser environment before accessing localStorage
+    if (typeof window !== "undefined") {
+      try {
+        const savedLang = localStorage.getItem("fitfusion-language");
+        if (savedLang) {
+          const lang = availableLanguages.find((l) => l.code === savedLang);
+          return lang || defaultLanguage;
+        }
+      } catch (error) {
+        console.warn("Failed to read language from localStorage:", error);
+      }
     }
     return defaultLanguage;
   });
 
   // Update localStorage when language changes
   useEffect(() => {
-    localStorage.setItem("fitfusion-language", currentLanguage.code);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("fitfusion-language", currentLanguage.code);
+      } catch (error) {
+        console.warn("Failed to save language to localStorage:", error);
+      }
+    }
   }, [currentLanguage]);
 
   // Translation function
