@@ -60,12 +60,13 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { VersionChangelog } from "@/components/version-changelog";
 
 const Profile = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
-  const [currentVersion, setCurrentVersion] = useState("5.0.4"); // Updated to latest version
+  const [currentVersion, setCurrentVersion] = useState("5.0.4"); // Updated to latest version with changelog
   const [profileData, setProfileData] = useState(userProfile);
   const [lastSyncTime, setLastSyncTime] = useState<Date>(new Date());
   const [isSubscriptionActive, setIsSubscriptionActive] = useState(false);
@@ -131,7 +132,7 @@ const Profile = () => {
 
       toast({
         title: "✅ Up to Date",
-        description: `You're running the latest version ${latestVersion}`,
+        description: `You're running the latest version ${latestVersion} with new features and fixes!`,
       });
     }, 2000);
   };
@@ -281,6 +282,7 @@ const Profile = () => {
                 >
                   <RefreshCw className="h-4 w-4" />
                 </Button>
+                <VersionChangelog currentVersion={currentVersion} />
               </div>
               <p className="text-xs text-white/70">
                 Last sync: {lastSyncTime.toLocaleTimeString()}

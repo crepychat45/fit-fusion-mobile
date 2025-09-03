@@ -145,11 +145,11 @@ export function MobileDeviceDetector({
   const getDeviceColor = (type: string) => {
     switch (type) {
       case "mobile":
-        return "bg-blue-100 text-blue-600 border-blue-300";
+        return "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-950 dark:text-blue-200 dark:border-blue-800";
       case "tablet":
-        return "bg-purple-100 text-purple-600 border-purple-300";
+        return "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-950 dark:text-purple-200 dark:border-purple-800";
       default:
-        return "bg-gray-100 text-gray-600 border-gray-300";
+        return "bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-600";
     }
   };
 
@@ -162,9 +162,9 @@ export function MobileDeviceDetector({
         variant="outline"
         size="sm"
         onClick={() => setIsVisible(!isVisible)}
-        className="fixed top-4 right-4 z-50 rounded-full p-2 bg-white/90 backdrop-blur-sm border-2"
+        className="fixed top-4 right-4 z-50 rounded-full p-2 bg-background/90 backdrop-blur-sm border-2 shadow-lg hover:bg-background/95"
       >
-        <Info className="h-4 w-4" />
+        <Info className="h-4 w-4 text-foreground" />
       </Button>
 
       {/* Device Info Panel */}
@@ -182,7 +182,7 @@ export function MobileDeviceDetector({
                   {React.createElement(getDeviceIcon(deviceInfo.type), {
                     className: "h-5 w-5 text-primary",
                   })}
-                  <h3 className="font-semibold text-sm">Device Info</h3>
+                  <h3 className="font-semibold text-sm text-foreground">Device Info</h3>
                 </div>
                 <Button
                   variant="ghost"
@@ -209,11 +209,11 @@ export function MobileDeviceDetector({
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
                     <span className="text-muted-foreground">OS:</span>
-                    <p className="font-medium">{deviceInfo.os}</p>
+                    <p className="font-medium text-foreground">{deviceInfo.os}</p>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Browser:</span>
-                    <p className="font-medium">{deviceInfo.browser}</p>
+                    <p className="font-medium text-foreground">{deviceInfo.browser}</p>
                   </div>
                 </div>
 
@@ -225,13 +225,13 @@ export function MobileDeviceDetector({
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>
                       <span className="text-muted-foreground">Size:</span>
-                      <p className="font-medium">
+                      <p className="font-medium text-foreground">
                         {deviceInfo.screen.width} × {deviceInfo.screen.height}
                       </p>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Ratio:</span>
-                      <p className="font-medium">{deviceInfo.screen.ratio}:1</p>
+                      <p className="font-medium text-foreground">{deviceInfo.screen.ratio}:1</p>
                     </div>
                   </div>
                 </div>

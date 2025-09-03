@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/card";
 import { ProfilePhotoUpload } from "@/components/profile-photo-upload";
 import { Loader2, Save, CheckCircle, AlertCircle } from "lucide-react";
-import { useSettings } from "@/contexts/settings-context";
+import { useSettings } from "@/contexts/safe-settings-context";
 import { useToast } from "@/components/ui/use-toast";
 import { userProfile } from "@/data/user";
 import { Badge } from "@/components/ui/badge";
