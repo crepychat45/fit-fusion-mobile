@@ -16,13 +16,18 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-    dedupe: ["react", "react-dom"],
   },
   define: {
     global: "globalThis",
   },
   optimizeDeps: {
-    exclude: ["react", "react-dom"],
-    include: ["@radix-ui/react-dialog", "@radix-ui/react-slot"],
+    include: [
+      "react", 
+      "react-dom", 
+      "react-router-dom",
+      "@radix-ui/react-dialog", 
+      "@radix-ui/react-slot",
+      "framer-motion"
+    ],
   },
 }));
