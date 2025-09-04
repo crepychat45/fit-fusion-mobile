@@ -26,6 +26,7 @@ import {
 import { AdvancedChatInterface } from "@/components/chat/advanced-chat-interface";
 import { MobileChatInterface } from "@/components/chat/mobile-chat-interface";
 import { EnhancedFitfusionChat } from "@/components/chat/enhanced-fitfusion-chat";
+import { EnhancedMobileChat } from "../enhanced-mobile-chat";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";

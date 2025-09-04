@@ -41,17 +41,29 @@ export function ChatSettingsPanel() {
     },
   });
 
-  // Load saved settings from localStorage on component mount
+  // Load saved settings from localStorage with browser safety checks
   React.useEffect(() => {
-    const savedSettings = localStorage.getItem("chat-settings");
-    if (savedSettings) {
-      setSettings(JSON.parse(savedSettings));
+    if (typeof window !== "undefined" && window.localStorage) {
+      try {
+        const savedSettings = localStorage.getItem("chat-settings");
+        if (savedSettings) {
+          setSettings(JSON.parse(savedSettings));
+        }
+      } catch (error) {
+        console.error("Failed to load chat settings:", error);
+      }
     }
   }, []);
 
-  // Save settings to localStorage when they change
+  // Save settings to localStorage when they change with browser safety checks
   React.useEffect(() => {
-    localStorage.setItem("chat-settings", JSON.stringify(settings));
+    if (typeof window !== "undefined" && window.localStorage) {
+      try {
+        localStorage.setItem("chat-settings", JSON.stringify(settings));
+      } catch (error) {
+        console.error("Failed to save chat settings:", error);
+      }
+    }
   }, [settings]);
 
   const handleToggle = (key: keyof ChatSettings) => {
@@ -367,7 +379,7 @@ export function ChatSettingsPanel() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="version">
+        <TabsContent value="version" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Version Information</CardTitle>

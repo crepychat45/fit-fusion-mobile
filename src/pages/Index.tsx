@@ -391,7 +391,7 @@ const Index = () => {
           </motion.div>
         </motion.div>
 
-        {/* Enhanced Home Features - AI Insights */}
+        {/* Enhanced Home Features - Replace popup notifications */}
         <motion.div variants={itemVariants} className="px-4">
           <EnhancedHomeFeatures />
         </motion.div>

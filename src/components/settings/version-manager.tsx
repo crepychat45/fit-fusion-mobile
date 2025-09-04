@@ -32,7 +32,7 @@ import {
   Wifi,
   HardDrive,
 } from "lucide-react";
-import { useSettings } from "@/contexts/settings-context";
+import { useSettings } from "@/contexts/safe-settings-context";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 

@@ -11,6 +11,7 @@ import { AppUpdateManager } from "./app-update-manager";
 import { SecurityCenter } from "./security-center";
 import { VersionManager } from "./version-manager";
 import { EnhancedVersionManager } from "./enhanced-version-manager";
+import { EnhancedUpdateSystem } from "../enhanced-update-system";
 import { ProfileNameEditor } from "@/components/profile-name-editor";
 import { SettingsNavigation } from "./settings-navigation";
 import { AdvancedAISecurity } from "@/components/ai/advanced-ai-security";
@@ -373,7 +374,7 @@ export function SettingsContainer() {
 
             <TabsContent value="updates" className="mt-0">
               <div className="space-y-6">
-                <EnhancedVersionManager />
+                <EnhancedUpdateSystem />
                 <AppUpdateManager />
                 <ChangelogManager />
               </div>
