@@ -1,0 +1,43 @@
+**Project Details**
+- Project Name: fit-fusion-mobile
+- Repository: https://github.com/crepychat45/fit-fusion-mobile
+
+**Errors/Issues**
+
+1. **Esbuild Vulnerability**
+   - Severity: High
+   - Description: Esbuild version has a vulnerability
+   - Solution: Update Esbuild version
+
+2. **Incorrect Esbuild Name/Version in package.json**
+   - Severity: Medium
+   - Description: package.json file has incorrect Esbuild name/version
+   - Solution: Check and correct Esbuild name/version in package.json
+
+3. **Vulnerabilities in Dependencies**
+   - Severity: High
+   - Description: Dependencies have vulnerabilities
+   - Solution: Update Dependencies
+
+4. **Outdated Vite Version**
+   - Severity: Medium
+   - Description: Vite version is outdated
+   - Solution: Update Vite version
+
+5. **Supabase Auth State Change Callback Issue**
+   - Severity: Low
+   - Description: Supabase auth state change callback has issue
+
+6. **Settings Update Auto-Update Feature Issues**
+   - Severity: Medium
+   - Description: Fix in setting update not properly work auto update on/off feature not available and install after re again Install new update problem fix it realtime
+   - Solution: Implement proper auto-update toggle functionality and fix update installation process
+
+7. **General Component and Feature Issues**
+   - Severity: Medium
+   - Description: Added new features, Function, options not work fix it and added new features in all components and overall apps suggest you, And fix chat assistance Model note proper ask question answers fix it, All Components and Pages Updated new version with actually work better user experience
+   - Solution: Review and fix all components, implement new features properly, improve chat assistance AI model responses, and enhance overall user experience
+
+**Status:** Issues documented for resolution
+**Date:** $(date)
+**Priority:** High - Multiple security vulnerabilities and functionality issues need immediate attention
