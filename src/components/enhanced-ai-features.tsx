@@ -1,357 +1,374 @@
 import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/components/ui/use-toast";
 import {
   Brain,
   Zap,
-  Shield,
-  Eye,
-  Star,
-  Sparkles,
-  Lock,
-  Heart,
-  TrendingUp,
   Target,
+  TrendingUp,
+  Activity,
+  Clock,
+  Award,
+  Sparkles,
+  BarChart3,
+  MessageSquare,
+  Settings,
+  RefreshCw,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { motion, AnimatePresence } from "framer-motion";
-import { useToast } from "@/hooks/use-toast";
 
 interface AIFeature {
   id: string;
   name: string;
   description: string;
-  icon: React.ReactNode;
-  status: "active" | "learning" | "analyzing" | "optimizing";
-  progress: number;
-  impact: "high" | "medium" | "low";
+  status: "active" | "learning" | "disabled";
+  accuracy: number;
+  usage: number;
 }
 
 export function EnhancedAIFeatures() {
-  const [aiFeatures, setAiFeatures] = useState<AIFeature[]>([
+  const { toast } = useToast();
+  const [aiFeatures, setAIFeatures] = useState<AIFeature[]>([
     {
-      id: "neural-coach",
-      name: "Neural Fitness Coach",
-      description:
-        "AI-powered personalized coaching with real-time form analysis",
-      icon: <Brain className="h-5 w-5" />,
+      id: "workout-optimizer",
+      name: "Workout Optimizer",
+      description: "AI-powered workout plan optimization based on your progress",
       status: "active",
-      progress: 95,
-      impact: "high",
+      accuracy: 94,
+      usage: 87,
     },
     {
-      id: "predictive-analytics",
-      name: "Predictive Health Analytics",
-      description:
-        "Forecasts your fitness journey and prevents potential injuries",
-      icon: <TrendingUp className="h-5 w-5" />,
-      status: "analyzing",
-      progress: 78,
-      impact: "high",
-    },
-    {
-      id: "biometric-sync",
-      name: "Advanced Biometric Sync",
-      description: "Real-time integration with wearables and health sensors",
-      icon: <Heart className="h-5 w-5" />,
+      id: "form-analyzer",
+      name: "Form Analyzer",
+      description: "Real-time exercise form analysis and correction suggestions",
       status: "learning",
-      progress: 67,
-      impact: "medium",
+      accuracy: 78,
+      usage: 45,
     },
     {
-      id: "nutrition-ai",
-      name: "Smart Nutrition AI",
-      description:
-        "Personalized meal planning based on your goals and preferences",
-      icon: <Target className="h-5 w-5" />,
-      status: "optimizing",
-      progress: 85,
-      impact: "high",
-    },
-    {
-      id: "mood-analysis",
-      name: "Mood & Recovery Analysis",
-      description:
-        "AI-driven insights into your mental state and recovery needs",
-      icon: <Sparkles className="h-5 w-5" />,
+      id: "nutrition-advisor",
+      name: "Nutrition Advisor",
+      description: "Personalized nutrition recommendations and meal planning",
       status: "active",
-      progress: 92,
-      impact: "medium",
+      accuracy: 91,
+      usage: 72,
     },
     {
-      id: "form-checker",
-      name: "Real-time Form Checker",
-      description:
-        "Computer vision analysis of your workout form and technique",
-      icon: <Eye className="h-5 w-5" />,
+      id: "recovery-predictor",
+      name: "Recovery Predictor",
+      description: "Predicts optimal rest periods based on workout intensity",
+      status: "active",
+      accuracy: 89,
+      usage: 63,
+    },
+    {
+      id: "injury-prevention",
+      name: "Injury Prevention",
+      description: "Identifies potential injury risks and suggests preventive measures",
       status: "learning",
-      progress: 71,
-      impact: "high",
+      accuracy: 82,
+      usage: 54,
+    },
+    {
+      id: "motivation-coach",
+      name: "AI Motivation Coach",
+      description: "Personalized motivation and coaching based on your behavior",
+      status: "active",
+      accuracy: 96,
+      usage: 89,
     },
   ]);
 
-  const [overallAIScore, setOverallAIScore] = useState(82);
-  const { toast } = useToast();
+  const [isTraining, setIsTraining] = useState(false);
+  const [trainingProgress, setTrainingProgress] = useState(0);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setAiFeatures((prev) =>
-        prev.map((feature) => ({
-          ...feature,
-          progress: Math.min(100, feature.progress + Math.random() * 2),
-        })),
-      );
+  const improveAI = async (featureId: string) => {
+    setIsTraining(true);
+    setTrainingProgress(0);
 
-      setOverallAIScore((prev) => Math.min(100, prev + Math.random() * 0.5));
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "active":
-        return "bg-green-500";
-      case "learning":
-        return "bg-blue-500";
-      case "analyzing":
-        return "bg-purple-500";
-      case "optimizing":
-        return "bg-orange-500";
-      default:
-        return "bg-gray-500";
+    // Simulate training progress
+    for (let i = 0; i <= 100; i += 10) {
+      setTrainingProgress(i);
+      await new Promise((resolve) => setTimeout(resolve, 200));
     }
+
+    // Update the feature
+    setAIFeatures((prev) =>
+      prev.map((feature) =>
+        feature.id === featureId
+          ? {
+              ...feature,
+              accuracy: Math.min(feature.accuracy + Math.random() * 5, 99),
+              status: "active" as const,
+            }
+          : feature,
+      ),
+    );
+
+    setIsTraining(false);
+    setTrainingProgress(0);
+
+    toast({
+      title: "🧠 AI Training Complete",
+      description: "The AI feature has been improved with your data.",
+    });
   };
 
-  const getImpactColor = (impact: string) => {
-    switch (impact) {
-      case "high":
-        return "text-red-500";
-      case "medium":
-        return "text-yellow-500";
-      case "low":
-        return "text-green-500";
-      default:
-        return "text-gray-500";
-    }
-  };
-
-  const activateAllAI = () => {
-    setAiFeatures((prev) =>
-      prev.map((feature) => ({
-        ...feature,
-        status: "active",
-        progress: Math.min(100, feature.progress + 10),
-      })),
+  const toggleFeature = (featureId: string) => {
+    setAIFeatures((prev) =>
+      prev.map((feature) =>
+        feature.id === featureId
+          ? {
+              ...feature,
+              status:
+                feature.status === "disabled"
+                  ? "active"
+                  : feature.status === "active"
+                    ? "disabled"
+                    : feature.status,
+            }
+          : feature,
+      ),
     );
 
     toast({
-      title: "AI Systems Activated",
-      description: "All AI features are now running at full capacity",
+      title: "AI Feature Updated",
+      description: "Feature status has been changed.",
     });
   };
 
   return (
     <div className="space-y-6">
-      {/* AI Overview */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <Card className="ai-card text-white overflow-hidden relative">
-          <motion.div
-            animate={{
-              background: [
-                "linear-gradient(45deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1))",
-                "linear-gradient(45deg, rgba(139, 92, 246, 0.1), rgba(168, 85, 247, 0.1))",
-                "linear-gradient(45deg, rgba(168, 85, 247, 0.1), rgba(59, 130, 246, 0.1))",
-              ],
-            }}
-            transition={{ duration: 5, repeat: Infinity }}
-            className="absolute inset-0"
-          />
-          <CardHeader className="relative z-10">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <motion.div
-                  animate={{ rotate: [0, 360] }}
-                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                  className="p-3 bg-white/20 rounded-full"
-                >
-                  <Brain className="h-8 w-8" />
-                </motion.div>
-                <div>
-                  <CardTitle className="text-2xl">
-                    FitFusion AI Engine
-                  </CardTitle>
-                  <p className="text-white/90">
-                    Next-generation artificial intelligence
-                  </p>
-                </div>
-              </div>
-              <Badge className="bg-white/20 text-white border-white/30 neural-animation">
-                <Zap className="h-3 w-3 mr-1" />
-                AI Score: {Math.round(overallAIScore)}%
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="relative z-10">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              <div className="text-center">
-                <div className="text-3xl font-bold">
-                  {aiFeatures.filter((f) => f.status === "active").length}
-                </div>
-                <div className="text-white/80 text-sm">Active Systems</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold">
-                  {Math.round(
-                    aiFeatures.reduce((acc, f) => acc + f.progress, 0) /
-                      aiFeatures.length,
-                  )}
-                  %
-                </div>
-                <div className="text-white/80 text-sm">Avg Performance</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold">
-                  {aiFeatures.filter((f) => f.impact === "high").length}
-                </div>
-                <div className="text-white/80 text-sm">
-                  High Impact Features
-                </div>
-              </div>
-            </div>
-            <Progress value={overallAIScore} className="mb-4" />
-            <Button
-              onClick={activateAllAI}
-              className="w-full interactive-button bg-white/20 hover:bg-white/30 text-white border-white/30"
-            >
-              <Sparkles className="h-4 w-4 mr-2" />
-              Optimize All AI Systems
-            </Button>
-          </CardContent>
-        </Card>
-      </motion.div>
-
-      {/* AI Features Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <AnimatePresence>
-          {aiFeatures.map((feature, index) => (
-            <motion.div
-              key={feature.id}
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.1, duration: 0.5 }}
-              whileHover={{ scale: 1.02, y: -5 }}
-              className="gpu-accelerated"
-            >
-              <Card className="glass-card h-full hover-lift">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <div
-                      className={`p-2 rounded-full ${getStatusColor(feature.status)}`}
-                    >
-                      {feature.icon}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Badge
-                        variant="outline"
-                        className={`text-xs ${getStatusColor(feature.status)} text-white border-0`}
-                      >
-                        {feature.status.toUpperCase()}
-                      </Badge>
-                      <div className="security-indicator">
-                        <Shield className="h-3 w-3 text-green-500" />
-                      </div>
-                    </div>
-                  </div>
-                  <CardTitle className="text-base">{feature.name}</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    {feature.description}
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between text-xs">
-                      <span>Performance</span>
-                      <span className="font-medium">
-                        {Math.round(feature.progress)}%
-                      </span>
-                    </div>
-                    <Progress value={feature.progress} className="h-2" />
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1">
-                        <Star
-                          className={`h-3 w-3 ${getImpactColor(feature.impact)}`}
-                        />
-                        <span className="text-xs capitalize">
-                          {feature.impact} Impact
-                        </span>
-                      </div>
-                      {feature.status === "active" && (
-                        <motion.div
-                          animate={{ opacity: [0.5, 1, 0.5] }}
-                          transition={{ duration: 2, repeat: Infinity }}
-                          className="text-xs text-green-500 font-medium"
-                        >
-                          ● LIVE
-                        </motion.div>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </AnimatePresence>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <Brain className="h-6 w-6 text-primary" />
+            Enhanced AI Features
+          </h2>
+          <p className="text-muted-foreground">
+            Advanced AI-powered features to enhance your fitness journey
+          </p>
+        </div>
+        <Badge variant="secondary" className="text-primary">
+          <Sparkles className="h-3 w-3 mr-1" />
+          6 Active Features
+        </Badge>
       </div>
 
-      {/* AI Insights */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8, duration: 0.5 }}
-      >
-        <Card className="premium-card text-white">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5" />
-              AI-Powered Insights
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <h4 className="font-semibold">Today's AI Recommendations</h4>
-                <ul className="space-y-1 text-sm text-white/90">
-                  <li>• Increase protein intake by 15g for optimal recovery</li>
-                  <li>
-                    • Your heart rate variability suggests active recovery today
-                  </li>
-                  <li>
-                    • Sleep quality improved 23% - maintain current schedule
-                  </li>
-                  <li>
-                    • Form analysis shows 92% efficiency in squat movement
-                  </li>
-                </ul>
+      <Tabs defaultValue="features" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="features">AI Features</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="settings">AI Settings</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="features" className="space-y-4">
+          <div className="grid gap-4">
+            {aiFeatures.map((feature) => (
+              <motion.div
+                key={feature.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Card className="relative overflow-hidden">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-primary/10">
+                          {feature.id === "workout-optimizer" && (
+                            <Target className="h-5 w-5 text-primary" />
+                          )}
+                          {feature.id === "form-analyzer" && (
+                            <Activity className="h-5 w-5 text-primary" />
+                          )}
+                          {feature.id === "nutrition-advisor" && (
+                            <Zap className="h-5 w-5 text-primary" />
+                          )}
+                          {feature.id === "recovery-predictor" && (
+                            <Clock className="h-5 w-5 text-primary" />
+                          )}
+                          {feature.id === "injury-prevention" && (
+                            <Award className="h-5 w-5 text-primary" />
+                          )}
+                          {feature.id === "motivation-coach" && (
+                            <MessageSquare className="h-5 w-5 text-primary" />
+                          )}
+                        </div>
+                        <div>
+                          <CardTitle className="text-lg">{feature.name}</CardTitle>
+                          <p className="text-sm text-muted-foreground">
+                            {feature.description}
+                          </p>
+                        </div>
+                      </div>
+                      <Badge
+                        variant={
+                          feature.status === "active"
+                            ? "default"
+                            : feature.status === "learning"
+                              ? "secondary"
+                              : "outline"
+                        }
+                      >
+                        {feature.status === "active" && "Active"}
+                        {feature.status === "learning" && "Learning"}
+                        {feature.status === "disabled" && "Disabled"}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="space-y-4">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between text-sm">
+                        <span>Accuracy</span>
+                        <span className="font-medium">{feature.accuracy}%</span>
+                      </div>
+                      <Progress value={feature.accuracy} className="h-2" />
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between text-sm">
+                        <span>Usage</span>
+                        <span className="font-medium">{feature.usage}%</span>
+                      </div>
+                      <Progress value={feature.usage} className="h-2" />
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => toggleFeature(feature.id)}
+                      >
+                        {feature.status === "disabled" ? "Enable" : "Disable"}
+                      </Button>
+                      {feature.status === "learning" && (
+                        <Button
+                          size="sm"
+                          onClick={() => improveAI(feature.id)}
+                          disabled={isTraining}
+                        >
+                          {isTraining ? (
+                            <>
+                              <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                              Training...
+                            </>
+                          ) : (
+                            <>
+                              <TrendingUp className="h-3 w-3 mr-1" />
+                              Improve AI
+                            </>
+                          )}
+                        </Button>
+                      )}
+                    </div>
+
+                    {isTraining && (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span>Training Progress</span>
+                          <span>{trainingProgress}%</span>
+                        </div>
+                        <Progress value={trainingProgress} className="h-2" />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="analytics" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                AI Performance Analytics
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">94.2%</div>
+                  <div className="text-sm text-muted-foreground">
+                    Average Accuracy
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">68.5%</div>
+                  <div className="text-sm text-muted-foreground">
+                    Average Usage
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">1,247</div>
+                  <div className="text-sm text-muted-foreground">
+                    AI Predictions
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">98.1%</div>
+                  <div className="text-sm text-muted-foreground">
+                    User Satisfaction
+                  </div>
+                </div>
               </div>
-              <div className="space-y-2">
-                <h4 className="font-semibold">Predictive Alerts</h4>
-                <ul className="space-y-1 text-sm text-white/90">
-                  <li>• 98% chance of achieving weekly goal</li>
-                  <li>• Injury risk: Low (2%) - excellent form consistency</li>
-                  <li>• Plateau prevention: Adjust routine in 3 days</li>
-                  <li>• Optimal workout time: 6:30 AM based on biorhythms</li>
-                </ul>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="settings" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                AI Configuration
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium">Auto-Learning</div>
+                  <div className="text-sm text-muted-foreground">
+                    Automatically improve AI based on your usage
+                  </div>
+                </div>
+                <Button variant="outline" size="sm">
+                  Enabled
+                </Button>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium">Privacy Mode</div>
+                  <div className="text-sm text-muted-foreground">
+                    Keep your data local and private
+                  </div>
+                </div>
+                <Button variant="outline" size="sm">
+                  Configure
+                </Button>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium">AI Insights</div>
+                  <div className="text-sm text-muted-foreground">
+                    Receive personalized AI insights
+                  </div>
+                </div>
+                <Button variant="outline" size="sm">
+                  Enabled
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

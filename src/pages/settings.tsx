@@ -3,6 +3,8 @@ import { MobileNav } from "@/components/mobile-nav";
 import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { SettingsContainer } from "@/components/settings/settings-container";
+import { EnhancedAIFeatures } from "@/components/enhanced-ai-features";
+import { EnhancedSecurityCenter } from "@/components/enhanced-security-center";
 
 const Settings = () => {
   const navigate = useNavigate();

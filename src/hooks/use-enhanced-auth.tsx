@@ -37,17 +37,20 @@ export function useEnhancedAuth(): AuthState & AuthActions {
     // IMPORTANT: Set up auth state listener first before checking for existing session
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session?.user?.id);
-      setAuthState((prev) => ({
-        ...prev,
-        session,
-        user: session?.user ?? null,
-        loading: false,
-        error: null,
-      }));
+      
+      // Enhanced auth state handling with better error recovery
+      try {
+        setAuthState((prev) => ({
+          ...prev,
+          session,
+          user: session?.user ?? null,
+          loading: false,
+          error: null,
+        }));
 
-      // Handle auth events
+        // Handle auth events
       if (event === "SIGNED_IN") {
         toast({
           title: "Welcome back!",
@@ -80,6 +83,14 @@ export function useEnhancedAuth(): AuthState & AuthActions {
           title: "Signed out",
           description: "You have been signed out successfully.",
         });
+      }
+      } catch (authError) {
+        console.error("Auth state change error:", authError);
+        setAuthState((prev) => ({
+          ...prev,
+          loading: false,
+          error: "Authentication error occurred",
+        }));
       }
     });
 

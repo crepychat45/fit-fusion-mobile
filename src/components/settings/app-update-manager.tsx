@@ -73,6 +73,8 @@ export function AppUpdateManager() {
     const saved = localStorage.getItem("fitfusion-auto-update");
     return saved !== null ? saved === "true" : true;
   });
+  const [updateScheduled, setUpdateScheduled] = useState(false);
+  const [lastUpdateCheck, setLastUpdateCheck] = useState<Date | null>(null);
   const [updateInstalled, setUpdateInstalled] = useState(false);
 
   useEffect(() => {
@@ -90,7 +92,16 @@ export function AppUpdateManager() {
 
   useEffect(() => {
     localStorage.setItem("fitfusion-auto-update", autoUpdate.toString());
-  }, [autoUpdate]);
+    
+    // Auto-check for updates every 30 minutes if enabled
+    if (autoUpdate && isOnline) {
+      const interval = setInterval(() => {
+        checkForUpdates();
+      }, 30 * 60 * 1000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [autoUpdate, isOnline]);
 
   useEffect(() => {
     // Check for updates on mount if auto-update is enabled
@@ -186,6 +197,14 @@ export function AppUpdateManager() {
         updateAvailable: hasUpdate,
         lastChecked: now,
       }));
+      setLastUpdateCheck(now);
+
+      // Auto-install if enabled and update is available
+      if (hasUpdate && autoUpdate && !updateInfo.mandatory) {
+        setTimeout(() => {
+          downloadUpdate();
+        }, 5000); // Wait 5 seconds before auto-installing
+      }
 
       if (hasUpdate) {
         toast({
