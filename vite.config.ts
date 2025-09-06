@@ -27,7 +27,21 @@ export default defineConfig(({ mode }) => ({
       "react-router-dom",
       "@radix-ui/react-dialog", 
       "@radix-ui/react-slot",
-      "framer-motion"
+      "framer-motion",
+      "lucide-react",
+      "@tanstack/react-query"
     ],
+  },
+  build: {
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          ui: ['@radix-ui/react-dialog', '@radix-ui/react-slot', 'lucide-react'],
+          router: ['react-router-dom']
+        }
+      }
+    }
   },
 }));

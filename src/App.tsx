@@ -3,7 +3,6 @@ import { Routes, Route } from "react-router-dom";
 import { SEOManager } from "./components/seo-manager";
 import { PerformanceUtils } from "./utils/performance-utils";
 import { AppWrapper } from "./components/app-wrapper";
-import { EnhancedErrorRecovery } from "./components/enhanced-error-recovery";
 import Index from "./pages/Index";
 import Workouts from "./pages/workouts";
 import WorkoutDetail from "./pages/workout-detail";
@@ -73,11 +72,9 @@ const AppContent: React.FC = () => {
 };
 
 const App: React.FC = () => (
-  <EnhancedErrorRecovery>
-    <AppWrapper>
-      <AppContent />
-    </AppWrapper>
-  </EnhancedErrorRecovery>
+  <AppWrapper>
+    <AppContent />
+  </AppWrapper>
 );
 
 export default App;

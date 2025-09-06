@@ -7,7 +7,6 @@ import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/theme-context";
 import { LanguageProvider } from "@/contexts/language-context";
 import { SettingsProvider } from "@/contexts/safe-settings-context";
-import { ErrorRecovery } from "@/components/error-recovery";
 import { EnhancedErrorRecovery } from "@/components/enhanced-error-recovery";
 import { SecurityManager } from "@/components/security-manager";
 import { AccessibilityManager } from "@/components/accessibility-manager";

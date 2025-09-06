@@ -31,33 +31,33 @@ interface SmartNotification {
 const NOTIFICATION_TYPES = {
   workout: {
     icon: <Target className="h-4 w-4" />,
-    color: "bg-blue-500",
-    bgColor: "bg-blue-50",
-    borderColor: "border-blue-200"
+    color: "bg-primary text-primary-foreground",
+    bgColor: "bg-background",
+    borderColor: "border-primary"
   },
   nutrition: {
     icon: <Heart className="h-4 w-4" />,
-    color: "bg-green-500",
-    bgColor: "bg-green-50",
-    borderColor: "border-green-200"
+    color: "bg-accent text-accent-foreground",
+    bgColor: "bg-background",
+    borderColor: "border-accent"
   },
   progress: {
     icon: <TrendingUp className="h-4 w-4" />,
-    color: "bg-purple-500",
-    bgColor: "bg-purple-50",
-    borderColor: "border-purple-200"
+    color: "bg-secondary text-secondary-foreground",
+    bgColor: "bg-background",
+    borderColor: "border-secondary"
   },
   motivation: {
     icon: <Zap className="h-4 w-4" />,
-    color: "bg-orange-500",
-    bgColor: "bg-orange-50",
-    borderColor: "border-orange-200"
+    color: "bg-primary text-primary-foreground",
+    bgColor: "bg-background",
+    borderColor: "border-primary"
   },
   achievement: {
     icon: <Trophy className="h-4 w-4" />,
-    color: "bg-yellow-500",
-    bgColor: "bg-yellow-50",
-    borderColor: "border-yellow-200"
+    color: "bg-accent text-accent-foreground",
+    bgColor: "bg-background",
+    borderColor: "border-accent"
   }
 };
 
