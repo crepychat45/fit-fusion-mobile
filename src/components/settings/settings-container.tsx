@@ -6,17 +6,10 @@ import { PrivacySettings } from "./privacy-settings";
 import { DeveloperOptions } from "./developer-options";
 import { ChatSettingsPanel } from "./chat-settings";
 import { AboutPage } from "./about-page";
-import { EnhancedSettingsValidation } from "./enhanced-settings-validation";
 import { AppUpdateManager } from "./app-update-manager";
 import { SecurityCenter } from "./security-center";
 import { VersionManager } from "./version-manager";
-import { EnhancedVersionManager } from "./enhanced-version-manager";
-import { EnhancedUpdateSystem } from "../enhanced-update-system";
-import { ProfileNameEditor } from "@/components/profile-name-editor";
 import { SettingsNavigation } from "./settings-navigation";
-import { AdvancedAISecurity } from "@/components/ai/advanced-ai-security";
-import { ChangelogManager } from "@/components/changelog-manager";
-import { LiquidGlassCard, LiquidGlass } from "@/components/enhanced-liquid-glass";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -354,10 +347,7 @@ export function SettingsContainer() {
             </TabsContent>
 
             <TabsContent value="security" className="mt-0">
-              <div className="space-y-6">
-                <SecurityCenter />
-                <AdvancedAISecurity />
-              </div>
+              <SecurityCenter />
             </TabsContent>
 
             <TabsContent value="display" className="mt-0">
@@ -374,14 +364,28 @@ export function SettingsContainer() {
 
             <TabsContent value="updates" className="mt-0">
               <div className="space-y-6">
-                <EnhancedUpdateSystem />
                 <AppUpdateManager />
-                <ChangelogManager />
+                <VersionManager />
               </div>
             </TabsContent>
 
             <TabsContent value="enhanced" className="mt-0">
-              <EnhancedSettingsValidation />
+              <div className="space-y-6">
+                <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 p-6 rounded-lg border">
+                  <h3 className="text-lg font-semibold mb-4">Enhanced Settings</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Advanced configuration options for power users
+                  </p>
+                  <Button onClick={validateAllSettings} disabled={isValidating}>
+                    {isValidating ? "Validating..." : "Validate Settings"}
+                  </Button>
+                  {isValidating && (
+                    <div className="mt-4">
+                      <Progress value={validationProgress} className="h-2" />
+                    </div>
+                  )}
+                </div>
+              </div>
             </TabsContent>
 
             <TabsContent value="developer" className="mt-0">

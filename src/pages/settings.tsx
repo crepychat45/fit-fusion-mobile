@@ -2,9 +2,8 @@ import React from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { SafeSettingsWrapper } from "@/components/safe-settings-wrapper";
 import { SettingsContainer } from "@/components/settings/settings-container";
-import { EnhancedAIFeatures } from "@/components/enhanced-ai-features";
-import { EnhancedSecurityCenter } from "@/components/enhanced-security-center";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -24,7 +23,9 @@ const Settings = () => {
       </header>
 
       <div className="pb-24">
-        <SettingsContainer />
+        <SafeSettingsWrapper>
+          <SettingsContainer />
+        </SafeSettingsWrapper>
       </div>
 
       <MobileNav />
