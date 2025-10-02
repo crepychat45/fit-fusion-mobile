@@ -26,6 +26,7 @@ export function resourceHintsPlugin(): Plugin {
           
           // Sort by size (largest first) to preload most critical chunks
           jsFiles.sort((a, b) => {
+            if (!ctx.bundle) return 0;
             const sizeA = ctx.bundle[a]?.type === 'chunk' ? (ctx.bundle[a] as any).code?.length || 0 : 0;
             const sizeB = ctx.bundle[b]?.type === 'chunk' ? (ctx.bundle[b] as any).code?.length || 0 : 0;
             return sizeB - sizeA;

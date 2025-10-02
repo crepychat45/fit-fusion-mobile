@@ -57,7 +57,7 @@ export default defineConfig(({ mode }) => ({
             return 'vendor-router';
           }
           
-          // Radix UI components - split by component
+          // Radix UI components - split by component for better caching
           if (id.includes('@radix-ui/')) {
             const match = id.match(/@radix-ui\/react-([^/]+)/);
             if (match) {
@@ -66,27 +66,27 @@ export default defineConfig(({ mode }) => ({
             return 'ui-radix';
           }
           
-          // Animation libraries
+          // Animation libraries - defer loading
           if (id.includes('framer-motion')) {
             return 'vendor-motion';
           }
           
-          // Icons
+          // Icons - split separately
           if (id.includes('lucide-react')) {
             return 'vendor-icons';
           }
           
-          // Supabase
+          // Supabase - split into separate chunk
           if (id.includes('@supabase/')) {
             return 'vendor-supabase';
           }
           
-          // React Query
+          // React Query - split into separate chunk
           if (id.includes('@tanstack/react-query')) {
             return 'vendor-query';
           }
           
-          // Chart libraries
+          // Chart libraries - defer loading (heavy dependency)
           if (id.includes('recharts')) {
             return 'vendor-charts';
           }
@@ -99,6 +99,28 @@ export default defineConfig(({ mode }) => ({
           // Date libraries
           if (id.includes('date-fns')) {
             return 'vendor-dates';
+          }
+          
+          // Split pages into separate chunks for route-based code splitting
+          if (id.includes('src/pages/')) {
+            const match = id.match(/pages\/([^/]+)/);
+            if (match) {
+              return `page-${match[1].replace('.tsx', '').replace('.ts', '')}`;
+            }
+          }
+          
+          // Split large component groups
+          if (id.includes('src/components/chat/')) {
+            return 'features-chat';
+          }
+          if (id.includes('src/components/dashboard/')) {
+            return 'features-dashboard';
+          }
+          if (id.includes('src/components/settings/')) {
+            return 'features-settings';
+          }
+          if (id.includes('src/components/ai/') || id.includes('src/components/mobile/')) {
+            return 'features-advanced';
           }
           
           // Other node_modules
