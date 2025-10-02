@@ -1,37 +1,47 @@
-# Cache static assets - Aggressive caching for immutable assets
-/assets/*
+# Cache static assets for performance
+# JavaScript and CSS bundles - 1 year (immutable)
+/assets/*.js
   Cache-Control: public, max-age=31536000, immutable
   
-/manifest.json
-  Cache-Control: public, max-age=86400
-  
-/favicon.ico
-  Cache-Control: public, max-age=604800
-  
-/placeholder.svg
-  Cache-Control: public, max-age=604800
-  
-/images/*
-  Cache-Control: public, max-age=604800
-  
-/*.jpg
-  Cache-Control: public, max-age=604800
-  
-/*.png
-  Cache-Control: public, max-age=604800
-  
-/*.svg
-  Cache-Control: public, max-age=604800
-  
-/*.css
-  Cache-Control: public, max-age=31536000, immutable
-  
-/*.js
+/assets/*.css
   Cache-Control: public, max-age=31536000, immutable
 
-# HTML - No cache to ensure updates are immediate
+# Images - 7 days
+/images/*
+  Cache-Control: public, max-age=604800, s-maxage=604800
+
+/images/*.jpg
+  Cache-Control: public, max-age=604800, s-maxage=604800
+  
+/images/*.png
+  Cache-Control: public, max-age=604800, s-maxage=604800
+
+# Root level images
+/*.jpg
+  Cache-Control: public, max-age=604800, s-maxage=604800
+  
+/*.png
+  Cache-Control: public, max-age=604800, s-maxage=604800
+  
+/*.svg
+  Cache-Control: public, max-age=604800, s-maxage=604800
+
+# Favicon and manifest
+/favicon.ico
+  Cache-Control: public, max-age=604800, s-maxage=604800
+  
+/placeholder.svg
+  Cache-Control: public, max-age=604800, s-maxage=604800
+  
+/manifest.json
+  Cache-Control: public, max-age=86400, s-maxage=86400
+
+# HTML - No cache for immediate updates
 /*.html
-  Cache-Control: no-cache, must-revalidate
+  Cache-Control: public, max-age=0, must-revalidate
+  
+/
+  Cache-Control: public, max-age=0, must-revalidate
 
 # Security headers
 /*
