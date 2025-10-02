@@ -4,6 +4,7 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { resourceHintsPlugin } from "./vite-plugin-resource-hints";
 import { criticalCSSPlugin } from "./vite-plugin-critical-css";
+import { asyncCSSPlugin } from "./vite-plugin-async-css";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -14,6 +15,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(), 
     mode === "development" && componentTagger(),
+    mode === "production" && asyncCSSPlugin(), // Must be first to catch CSS links
     mode === "production" && resourceHintsPlugin(),
     mode === "production" && criticalCSSPlugin(),
   ].filter(Boolean),

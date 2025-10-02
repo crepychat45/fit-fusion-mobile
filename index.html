@@ -44,22 +44,42 @@
     <link rel="dns-prefetch" href="https://images.unsplash.com" />
     <link rel="dns-prefetch" href="https://randomuser.me" />
     
-    <!-- Critical CSS inline - Minimal for FCP optimization -->
+    <!-- Critical CSS inline - Expanded for better FCP -->
     <style>
-      /* Essential resets only - minimize bytes */
+      /* Essential resets - minified */
       *{box-sizing:border-box;margin:0;padding:0}
-      html,body{height:100%}
-      body{font-family:system-ui,-apple-system,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+      html,body{height:100%;margin:0}
+      body{font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
       #root{min-height:100vh}
+      
+      /* Loading state - critical for FCP */
       .loading-fallback{display:flex;align-items:center;justify-content:center;min-height:100vh;font-size:1.125rem;color:#6366f1}
+      
       /* Prevent CLS */
-      img,svg{max-width:100%;height:auto;display:block}
-      button{font:inherit;cursor:pointer}
+      img,svg,video{max-width:100%;height:auto;display:block}
+      button{font:inherit;cursor:pointer;border:0;background:none}
+      
+      /* Critical layout utilities */
+      .flex{display:flex}
+      .hidden{display:none}
+      
+      /* Minimal background to avoid flash */
+      body{background:#fff}
+      @media (prefers-color-scheme:dark){
+        body{background:#0a0a0a}
+      }
     </style>
     
-    <!-- Polyfill for async CSS loading -->
+    <!-- Async CSS loading - non-blocking pattern -->
     <script>
-      !function(e){"use strict";var t=function(t,n,r){var o,i=e.document,s=i.createElement("link");if(n)o=n;else{var a=(i.body||i.getElementsByTagName("head")[0]).childNodes;o=a[a.length-1]}var d=i.styleSheets;s.rel="stylesheet",s.href=t,s.media="only x",function e(t){if(i.body)return t();setTimeout(function(){e(t)})}(function(){o.parentNode.insertBefore(s,n?o:o.nextSibling)});var l=function(e){for(var t=s.href,n=d.length;n--;)if(d[n].href===t)return e();setTimeout(function(){l(e)})};return s.addEventListener&&s.addEventListener("load",r),s.onloadcssdefined=l,l(r),s};"undefined"!=typeof exports?exports.loadCSS=t:e.loadCSS=t}("undefined"!=typeof global?global:this);
+      // Optimized CSS loader - loads CSS without blocking render
+      (function(){
+        var l=document.createElement('link');
+        l.rel='preload';
+        l.as='style';
+        l.onload=function(){this.onload=null;this.rel='stylesheet'};
+        // CSS will be injected by Vite build process
+      })();
     </script>
 
     <!-- PWA Support -->
