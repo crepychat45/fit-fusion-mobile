@@ -11,6 +11,9 @@ import { EnhancedErrorRecovery } from "@/components/enhanced-error-recovery";
 import { SecurityManager } from "@/components/security-manager";
 import { AccessibilityManager } from "@/components/accessibility-manager";
 import { SmartNotifications } from "@/components/ai/smart-notifications";
+import { ProgressiveEnhancement } from "@/components/enhanced-progressive-enhancement";
+import { PerformanceMonitor } from "@/components/performance-monitor";
+import { MobileCompatibility } from "@/components/mobile-compatibility";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,25 +32,29 @@ interface AppWrapperProps {
 
 export function AppWrapper({ children }: AppWrapperProps) {
   return (
-    <EnhancedErrorRecovery>
-      <QueryClientProvider client={queryClient}>
-        <SecurityManager>
-          <ThemeProvider>
-            <LanguageProvider>
-              <SettingsProvider>
-                <AccessibilityManager>
-                  <TooltipProvider>
-                    <Toaster />
-                    <Sonner />
-                    <SmartNotifications />
-                    <BrowserRouter>{children}</BrowserRouter>
-                  </TooltipProvider>
-                </AccessibilityManager>
-              </SettingsProvider>
-            </LanguageProvider>
-          </ThemeProvider>
-        </SecurityManager>
-      </QueryClientProvider>
-    </EnhancedErrorRecovery>
+    <ProgressiveEnhancement>
+      <EnhancedErrorRecovery>
+        <QueryClientProvider client={queryClient}>
+          <SecurityManager>
+            <ThemeProvider>
+              <LanguageProvider>
+                <SettingsProvider>
+                  <AccessibilityManager>
+                    <TooltipProvider>
+                      <Toaster />
+                      <Sonner />
+                      <SmartNotifications />
+                      <PerformanceMonitor enableAnalytics enableCaching />
+                      <MobileCompatibility />
+                      <BrowserRouter>{children}</BrowserRouter>
+                    </TooltipProvider>
+                  </AccessibilityManager>
+                </SettingsProvider>
+              </LanguageProvider>
+            </ThemeProvider>
+          </SecurityManager>
+        </QueryClientProvider>
+      </EnhancedErrorRecovery>
+    </ProgressiveEnhancement>
   );
 }

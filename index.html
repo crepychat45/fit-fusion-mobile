@@ -43,6 +43,17 @@
     />
     <link rel="dns-prefetch" href="https://images.unsplash.com" />
     <link rel="dns-prefetch" href="https://randomuser.me" />
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" as="style" href="/assets/index.css" />
+    <link rel="preload" as="script" href="/assets/index.js" />
+    
+    <!-- Critical CSS inline -->
+    <style>
+      body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
+      #root { min-height: 100vh; }
+      .loading-fallback { display: flex; align-items: center; justify-content: center; min-height: 100vh; font-size: 1.125rem; color: #6366f1; }
+    </style>
 
     <!-- PWA Support -->
     <meta name="theme-color" content="#6366f1" />
@@ -91,7 +102,18 @@
   </head>
 
   <body>
-    <div id="root"></div>
+    <noscript>
+      <div style="padding: 2rem; text-align: center; font-family: system-ui, sans-serif;">
+        <h1>JavaScript Required</h1>
+        <p>FitFusion requires JavaScript to function properly. Please enable JavaScript in your browser settings.</p>
+        <p>For the best experience, we recommend using the latest version of Chrome, Firefox, Safari, or Edge.</p>
+      </div>
+    </noscript>
+    <div id="root">
+      <div class="loading-fallback">
+        <div>Loading FitFusion...</div>
+      </div>
+    </div>
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>

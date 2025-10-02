@@ -97,3 +97,10 @@ export function preventMobileZoom() {
     };
   }, []);
 }
+
+// Component that applies mobile compatibility features
+export function MobileCompatibility() {
+  applySafeAreaStyles();
+  preventMobileZoom();
+  return null;
+}

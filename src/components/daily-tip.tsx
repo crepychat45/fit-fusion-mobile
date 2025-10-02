@@ -93,9 +93,13 @@ export function DailyTip({ day }: DailyTipProps) {
                 tip.image ||
                 fallbackImages[currentDay as keyof typeof fallbackImages]
               }
-              alt={tip.title}
+              alt={`Fitness tip illustration: ${tip.title}`}
               className="w-full h-32 object-cover rounded-md"
               onError={handleImageError}
+              loading="lazy"
+              width="300"
+              height="128"
+              style={{ aspectRatio: '300 / 128' }}
             />
           </div>
           <div className="w-full md:w-2/3">
