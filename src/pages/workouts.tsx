@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,6 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MobileNav } from "@/components/mobile-nav";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import { WindowedList } from "@/components/virtual-list-renderer";
 import {
   Search,
   Filter,
@@ -344,102 +345,98 @@ const Workouts = () => {
               transition={{ duration: 0.2 }}
             >
               <TabsContent value="all" className="space-y-4 mt-0">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {filteredWorkouts.map((workout, index) => (
-                    <motion.div
-                      key={workout.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 border-0 shadow-md">
-                        <CardHeader className="pb-3">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <CardTitle className="text-lg mb-1">
-                                {workout.title}
-                              </CardTitle>
-                              <CardDescription className="text-sm">
-                                {workout.description}
-                              </CardDescription>
-                            </div>
-                            <div className="flex items-center gap-2">
+                <WindowedList
+                  items={filteredWorkouts}
+                  windowSize={12}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                  renderItem={(workout) => (
+                    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 border-0 shadow-md">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <CardTitle className="text-lg mb-1">
+                              {workout.title}
+                            </CardTitle>
+                            <CardDescription className="text-sm">
+                              {workout.description}
+                            </CardDescription>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => toggleFavorite(workout.id)}
+                              className="p-2"
+                            >
+                              <Heart
+                                className={`h-4 w-4 ${favoriteWorkouts.includes(workout.id) ? "fill-red-500 text-red-500" : ""}`}
+                              />
+                            </Button>
+                            <Button variant="ghost" size="sm" className="p-2">
+                              <Share2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-4 mt-3">
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">
+                              {workout.duration}
+                            </span>
+                          </div>
+                          <Badge variant="outline">{workout.level}</Badge>
+                          <Badge variant="secondary">
+                            {workout.category}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+
+                      <CardContent className="pt-0">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span className="flex items-center gap-1">
+                              <Flame className="h-4 w-4" />
+                              {workout.exercises?.length || 8} exercises
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Zap className="h-4 w-4" />
+                              ~250 cal
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            {completedWorkouts.includes(workout.id) ? (
+                              <Badge className="bg-green-100 text-green-800">
+                                ✓ Completed
+                              </Badge>
+                            ) : (
                               <Button
-                                variant="ghost"
                                 size="sm"
-                                onClick={() => toggleFavorite(workout.id)}
-                                className="p-2"
+                                onClick={() => {
+                                  try {
+                                    navigate(`/workout-detail/${workout.id}`);
+                                  } catch (error) {
+                                    toast({
+                                      title: "Navigation Error",
+                                      description:
+                                        "Failed to open workout. Please try again.",
+                                      variant: "destructive",
+                                    });
+                                  }
+                                }}
+                                className="flex items-center gap-1"
                               >
-                                <Heart
-                                  className={`h-4 w-4 ${favoriteWorkouts.includes(workout.id) ? "fill-red-500 text-red-500" : ""}`}
-                                />
+                                <PlayCircle className="h-3 w-3" />
+                                Start
                               </Button>
-                              <Button variant="ghost" size="sm" className="p-2">
-                                <Share2 className="h-4 w-4" />
-                              </Button>
-                            </div>
+                            )}
                           </div>
-
-                          <div className="flex items-center gap-4 mt-3">
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-sm">
-                                {workout.duration}
-                              </span>
-                            </div>
-                            <Badge variant="outline">{workout.level}</Badge>
-                            <Badge variant="secondary">
-                              {workout.category}
-                            </Badge>
-                          </div>
-                        </CardHeader>
-
-                        <CardContent className="pt-0">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                              <span className="flex items-center gap-1">
-                                <Flame className="h-4 w-4" />
-                                {workout.exercises?.length || 8} exercises
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Zap className="h-4 w-4" />
-                                ~250 cal
-                              </span>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                              {completedWorkouts.includes(workout.id) ? (
-                                <Badge className="bg-green-100 text-green-800">
-                                  ✓ Completed
-                                </Badge>
-                              ) : (
-                                <Button
-                                  size="sm"
-                                  onClick={() => {
-                                    try {
-                                      navigate(`/workout-detail/${workout.id}`);
-                                    } catch (error) {
-                                      toast({
-                                        title: "Navigation Error",
-                                        description:
-                                          "Failed to open workout. Please try again.",
-                                        variant: "destructive",
-                                      });
-                                    }
-                                  }}
-                                  className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600"
-                                >
-                                  <PlayCircle className="h-4 w-4 mr-1" />
-                                  Start
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                />
               </TabsContent>
 
               <TabsContent value="ai" className="space-y-4 mt-0">
