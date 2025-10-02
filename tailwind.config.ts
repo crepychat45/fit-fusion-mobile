@@ -14,6 +14,9 @@ export default {
     // Only safelist absolutely necessary dynamic classes
     'animate-pulse',
     'animate-spin',
+    'transition-all',
+    'duration-200',
+    'ease-in-out',
   ],
   theme: {
     container: {

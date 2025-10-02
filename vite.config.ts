@@ -140,6 +140,11 @@ export default defineConfig(({ mode }) => ({
         },
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js'
+      },
+      treeshake: {
+        moduleSideEffects: false,
+        propertyReadSideEffects: false,
+        tryCatchDeoptimization: false,
       }
     },
     minify: 'terser',
@@ -148,7 +153,9 @@ export default defineConfig(({ mode }) => ({
         drop_console: true,
         drop_debugger: true,
         pure_funcs: ['console.log'],
-        passes: 2
+        passes: 2,
+        unsafe_arrows: true,
+        unsafe_methods: true,
       },
       format: {
         comments: false
