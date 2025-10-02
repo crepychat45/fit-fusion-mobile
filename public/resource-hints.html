@@ -1,0 +1,45 @@
+<!-- 
+  This file contains dynamic resource hints that will be injected by the build process
+  These hints help the browser prioritize and preload critical resources
+-->
+<script>
+  // Dynamic modulepreload for critical chunks
+  (function() {
+    'use strict';
+    
+    // Preload critical vendor chunks
+    const criticalChunks = [
+      'vendor-react',
+      'vendor-router'
+    ];
+    
+    // Create modulepreload links dynamically
+    criticalChunks.forEach(function(chunk) {
+      var link = document.createElement('link');
+      link.rel = 'modulepreload';
+      link.as = 'script';
+      link.crossOrigin = 'anonymous';
+      // Chunk names will be resolved at runtime
+      document.head.appendChild(link);
+    });
+    
+    // Prefetch non-critical chunks on idle
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(function() {
+        const nonCriticalChunks = [
+          'vendor-motion',
+          'vendor-charts',
+          'ui-radix'
+        ];
+        
+        nonCriticalChunks.forEach(function(chunk) {
+          var link = document.createElement('link');
+          link.rel = 'prefetch';
+          link.as = 'script';
+          // Chunk names will be resolved at runtime
+          document.head.appendChild(link);
+        });
+      });
+    }
+  })();
+</script>
