@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { resourceHintsPlugin } from "./vite-plugin-resource-hints";
+import { criticalCSSPlugin } from "./vite-plugin-critical-css";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -13,7 +14,8 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(), 
     mode === "development" && componentTagger(),
-    mode === "production" && resourceHintsPlugin()
+    mode === "production" && resourceHintsPlugin(),
+    mode === "production" && criticalCSSPlugin(),
   ].filter(Boolean),
   resolve: {
     alias: {
@@ -37,7 +39,8 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     sourcemap: false,
-    cssCodeSplit: true,
+    cssCodeSplit: true, // Enable CSS code splitting per route
+    cssMinify: 'lightningcss', // Use lightningcss for better CSS minification
     assetsInlineLimit: 4096,
     rollupOptions: {
       output: {

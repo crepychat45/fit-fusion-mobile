@@ -71,6 +71,9 @@ export function SEOManager({ children }: SEOManagerProps) {
 
     // Add structured data for fitness app
     addStructuredData();
+    
+    // Optimize CSS loading for current route
+    optimizeCSSLoading();
   }, [location.pathname]);
 
   const updateMetaTag = (
@@ -135,6 +138,24 @@ export function SEOManager({ children }: SEOManagerProps) {
     script.type = "application/ld+json";
     script.textContent = JSON.stringify(structuredData);
     document.head.appendChild(script);
+  };
+
+  const optimizeCSSLoading = () => {
+    // Remove unused CSS link hints from previous routes
+    const existingPrefetch = document.querySelectorAll('link[rel="prefetch"][as="style"]');
+    existingPrefetch.forEach(link => link.remove());
+    
+    // Ensure main CSS is loaded efficiently
+    requestIdleCallback(() => {
+      // Check if CSS is already loaded
+      const mainCSS = document.querySelector('link[href*="index"][href*=".css"]');
+      if (!mainCSS) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = '/assets/index.css'; // Will be replaced by build hash
+        document.head.appendChild(link);
+      }
+    });
   };
 
   return <>{children}</>;
