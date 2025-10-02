@@ -58,6 +58,16 @@ export default defineConfig(({ mode }) => ({
         entryFileNames: 'assets/[name]-[hash].js'
       }
     },
-    minify: 'terser'
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+        pure_funcs: ['console.log']
+      },
+      format: {
+        comments: false
+      }
+    }
   },
 }));

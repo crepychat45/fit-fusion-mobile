@@ -44,12 +44,35 @@
     <link rel="dns-prefetch" href="https://images.unsplash.com" />
     <link rel="dns-prefetch" href="https://randomuser.me" />
     
-    <!-- Critical CSS inline -->
+    <!-- Critical CSS inline - Expanded for above-the-fold content -->
     <style>
-      body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
+      /* Base styles */
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.5; -webkit-font-smoothing: antialiased; }
       #root { min-height: 100vh; }
+      
+      /* Loading state */
       .loading-fallback { display: flex; align-items: center; justify-content: center; min-height: 100vh; font-size: 1.125rem; color: #6366f1; }
+      
+      /* Critical layout styles */
+      .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+      
+      /* Above-the-fold button/interactive elements */
+      button { font-family: inherit; cursor: pointer; }
+      
+      /* Prevent layout shift */
+      img, video, svg { max-width: 100%; height: auto; display: block; }
+      
+      /* Critical responsive utilities */
+      @media (max-width: 768px) {
+        .container { padding: 0 0.75rem; }
+      }
     </style>
+    
+    <!-- Polyfill for async CSS loading -->
+    <script>
+      !function(e){"use strict";var t=function(t,n,r){var o,i=e.document,s=i.createElement("link");if(n)o=n;else{var a=(i.body||i.getElementsByTagName("head")[0]).childNodes;o=a[a.length-1]}var d=i.styleSheets;s.rel="stylesheet",s.href=t,s.media="only x",function e(t){if(i.body)return t();setTimeout(function(){e(t)})}(function(){o.parentNode.insertBefore(s,n?o:o.nextSibling)});var l=function(e){for(var t=s.href,n=d.length;n--;)if(d[n].href===t)return e();setTimeout(function(){l(e)})};return s.addEventListener&&s.addEventListener("load",r),s.onloadcssdefined=l,l(r),s};"undefined"!=typeof exports?exports.loadCSS=t:e.loadCSS=t}("undefined"!=typeof global?global:this);
+    </script>
 
     <!-- PWA Support -->
     <meta name="theme-color" content="#6366f1" />
