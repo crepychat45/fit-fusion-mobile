@@ -139,7 +139,7 @@ export const OptimizedImage = memo(function OptimizedImage({
   );
 });
 
-// Performance monitor component
+// Performance monitor component - optimized to prevent forced reflows
 export function PerformanceMonitor() {
   const [metrics, setMetrics] = useState({
     loadTime: 0,
@@ -149,38 +149,48 @@ export function PerformanceMonitor() {
   });
 
   useEffect(() => {
-    // Monitor page load performance
-    const navigation = performance.getEntriesByType(
-      "navigation",
-    )[0] as PerformanceNavigationTiming;
-    if (navigation) {
-      setMetrics((prev) => ({
-        ...prev,
-        loadTime: navigation.loadEventEnd - navigation.fetchStart,
-      }));
-    }
+    // Use requestIdleCallback to batch performance measurements
+    const idleCallback = requestIdleCallback(() => {
+      // Monitor page load performance
+      const navigation = performance.getEntriesByType(
+        "navigation",
+      )[0] as PerformanceNavigationTiming;
+      if (navigation) {
+        setMetrics((prev) => ({
+          ...prev,
+          loadTime: navigation.loadEventEnd - navigation.fetchStart,
+        }));
+      }
 
-    // Monitor memory usage (if available)
-    if ("memory" in performance) {
-      const memInfo = (performance as any).memory;
-      setMetrics((prev) => ({
-        ...prev,
-        memoryUsage: (memInfo.usedJSHeapSize / memInfo.jsHeapSizeLimit) * 100,
-      }));
-    }
+      // Monitor memory usage (if available) - scheduled in idle time
+      if ("memory" in performance) {
+        requestAnimationFrame(() => {
+          const memInfo = (performance as any).memory;
+          setMetrics((prev) => ({
+            ...prev,
+            memoryUsage: (memInfo.usedJSHeapSize / memInfo.jsHeapSizeLimit) * 100,
+          }));
+        });
+      }
+    });
 
-    // Monitor network requests
+    // Monitor network requests - batched to prevent forced reflows
     const observer = new PerformanceObserver((list) => {
-      const entries = list.getEntries();
-      setMetrics((prev) => ({
-        ...prev,
-        networkRequests: prev.networkRequests + entries.length,
-      }));
+      requestAnimationFrame(() => {
+        const entries = list.getEntries();
+        setMetrics((prev) => ({
+          ...prev,
+          networkRequests: prev.networkRequests + entries.length,
+        }));
+      });
     });
 
     observer.observe({ entryTypes: ["resource"] });
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      cancelIdleCallback(idleCallback);
+    };
   }, []);
 
   const getPerformanceScore = () => {
@@ -248,7 +258,7 @@ export function PerformanceMonitor() {
   );
 }
 
-// Virtual scrolling for large lists
+// Virtual scrolling for large lists - optimized scroll handler
 export function VirtualizedList<T>({
   items,
   renderItem,
@@ -278,11 +288,18 @@ export function VirtualizedList<T>({
   const totalHeight = items.length * itemHeight;
   const offsetY = visibleStartIndex * itemHeight;
 
+  // Optimized scroll handler using requestAnimationFrame
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    requestAnimationFrame(() => {
+      setScrollTop(e.currentTarget.scrollTop);
+    });
+  }, []);
+
   return (
     <div
       className={`overflow-auto ${className}`}
       style={{ height: containerHeight }}
-      onScroll={(e) => setScrollTop(e.currentTarget.scrollTop)}
+      onScroll={handleScroll}
     >
       <div style={{ height: totalHeight, position: "relative" }}>
         <div style={{ transform: `translateY(${offsetY}px)` }}>
@@ -360,7 +377,7 @@ export function useDebouncedValue<T>(value: T, delay: number): T {
   return debouncedValue;
 }
 
-// Intersection Observer hook for lazy loading
+// Intersection Observer hook for lazy loading - optimized
 export function useIntersectionObserver(
   ref: React.RefObject<Element>,
   options: IntersectionObserverInit = {},
@@ -372,8 +389,14 @@ export function useIntersectionObserver(
     if (!element) return;
 
     const observer = new IntersectionObserver(([entry]) => {
-      setIsIntersecting(entry.isIntersecting);
-    }, options);
+      // Use requestAnimationFrame to batch state updates
+      requestAnimationFrame(() => {
+        setIsIntersecting(entry.isIntersecting);
+      });
+    }, {
+      ...options,
+      rootMargin: options.rootMargin || '50px', // Preload before visible
+    });
 
     observer.observe(element);
 

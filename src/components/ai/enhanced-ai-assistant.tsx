@@ -115,7 +115,9 @@ export function EnhancedAIAssistant({ isOpen, onClose }: EnhancedAIAssistantProp
   }, [isOpen, messages.length]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    });
   }, [messages]);
 
   const generateAIResponse = async (userMessage: string): Promise<string> => {

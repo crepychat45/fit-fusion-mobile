@@ -28,24 +28,32 @@ export class PerformanceUtils {
     };
   }
 
-  // Lazy load images
+  // Lazy load images - optimized to prevent forced reflows
   static lazyLoadImages() {
     if (typeof window === "undefined" || !("IntersectionObserver" in window)) return;
     
     try {
       const images = document.querySelectorAll("img[data-src]");
-      const imageObserver = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const img = entry.target as HTMLImageElement;
-            if (img.dataset.src) {
-              img.src = img.dataset.src;
-              img.classList.remove("lazy");
-              imageObserver.unobserve(img);
-            }
-          }
-        });
-      });
+      const imageObserver = new IntersectionObserver(
+        (entries) => {
+          // Batch DOM writes to prevent forced reflows
+          requestAnimationFrame(() => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                const img = entry.target as HTMLImageElement;
+                if (img.dataset.src) {
+                  img.src = img.dataset.src;
+                  img.classList.remove("lazy");
+                  imageObserver.unobserve(img);
+                }
+              }
+            });
+          });
+        },
+        {
+          rootMargin: '50px', // Load images slightly before they enter viewport
+        }
+      );
 
       images.forEach((img) => imageObserver.observe(img));
     } catch (error) {
@@ -68,39 +76,48 @@ export class PerformanceUtils {
     }
   }
 
-  // Monitor Core Web Vitals
+  // Monitor Core Web Vitals - optimized to prevent forced reflows
   static measurePerformance() {
     if (typeof window === "undefined" || !("PerformanceObserver" in window)) return;
     
     try {
-      // First Contentful Paint
-      const observer = new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) {
-          if (
-            entry.entryType === "paint" &&
-            entry.name === "first-contentful-paint"
-          ) {
-            console.log("FCP:", entry.startTime);
-          }
-        }
-      });
-      observer.observe({ entryTypes: ["paint"] });
+      // Batch performance measurements to avoid forced reflows
+      requestIdleCallback(() => {
+        // First Contentful Paint
+        const observer = new PerformanceObserver((list) => {
+          requestAnimationFrame(() => {
+            for (const entry of list.getEntries()) {
+              if (
+                entry.entryType === "paint" &&
+                entry.name === "first-contentful-paint"
+              ) {
+                console.log("FCP:", entry.startTime);
+              }
+            }
+          });
+        });
+        observer.observe({ entryTypes: ["paint"] });
 
-      // Largest Contentful Paint
-      const lcpObserver = new PerformanceObserver((list) => {
-        const entries = list.getEntries();
-        const lastEntry = entries[entries.length - 1];
-        console.log("LCP:", lastEntry.startTime);
-      });
-      lcpObserver.observe({ entryTypes: ["largest-contentful-paint"] });
+        // Largest Contentful Paint
+        const lcpObserver = new PerformanceObserver((list) => {
+          requestAnimationFrame(() => {
+            const entries = list.getEntries();
+            const lastEntry = entries[entries.length - 1];
+            console.log("LCP:", lastEntry.startTime);
+          });
+        });
+        lcpObserver.observe({ entryTypes: ["largest-contentful-paint"] });
 
-      // First Input Delay
-      const fidObserver = new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) {
-          console.log("FID:", (entry as any).processingStart - entry.startTime);
-        }
+        // First Input Delay
+        const fidObserver = new PerformanceObserver((list) => {
+          requestAnimationFrame(() => {
+            for (const entry of list.getEntries()) {
+              console.log("FID:", (entry as any).processingStart - entry.startTime);
+            }
+          });
+        });
+        fidObserver.observe({ entryTypes: ["first-input"] });
       });
-      fidObserver.observe({ entryTypes: ["first-input"] });
     } catch (error) {
       console.warn("Failed to set up performance monitoring:", error);
     }

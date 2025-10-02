@@ -87,7 +87,9 @@ export function AdvancedChatInterface({
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (activeConversation) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      requestAnimationFrame(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      });
     }
   }, [messages, activeConversation]);
 
