@@ -1,5 +1,5 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface LiquidGlassProps {
@@ -24,6 +24,7 @@ export function LiquidGlass({
   onClick
 }: LiquidGlassProps) {
   const baseClasses = "relative overflow-hidden";
+  const shouldReduceMotion = useReducedMotion();
   
   const variantClasses = {
     subtle: "liquid-glass-subtle",
@@ -41,32 +42,33 @@ export function LiquidGlass({
     className
   );
 
-  if (animated) {
+  // If reduced motion or not animated, render static div
+  if (!animated || shouldReduceMotion) {
     return (
-      <motion.div
-        className={effectClasses}
-        onClick={onClick}
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        whileHover={{ 
-          scale: 1.02,
-          transition: { duration: 0.3, ease: [0.4, 0.0, 0.2, 1] }
-        }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ 
-          duration: 0.5, 
-          ease: [0.25, 0.46, 0.45, 0.94] 
-        }}
-      >
+      <div className={effectClasses} onClick={onClick}>
         {children}
-      </motion.div>
+      </div>
     );
   }
 
   return (
-    <div className={effectClasses} onClick={onClick}>
+    <motion.div
+      className={effectClasses}
+      onClick={onClick}
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ 
+        duration: 0.4, 
+        ease: [0.25, 0.46, 0.45, 0.94] 
+      }}
+      layout={false}
+      style={{
+        willChange: 'transform, opacity',
+        transform: 'translateZ(0)',
+      }}
+    >
       {children}
-    </div>
+    </motion.div>
   );
 }
 

@@ -14,10 +14,11 @@ import { TodaysWorkout } from "@/components/dashboard/todays-workout";
 import { RescheduleDialog } from "@/components/dashboard/reschedule-dialog";
 import { QuickActionsPanel } from "@/components/dashboard/quick-actions-panel";
 import { LazySection, PlaceholderSection } from "@/components/lazy-section";
-import { SimpleFade, SimpleSlide } from "@/components/optimized-motion";
+import { SimpleFade } from "@/components/optimized-motion";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { LiquidGlassCard, LiquidGlass } from "@/components/enhanced-liquid-glass";
+import { motionCSS } from "@/config/motion";
 import {
   Brain,
   Heart,
@@ -133,18 +134,23 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 pb-16 relative overflow-hidden">
-      {/* Simplified background - single animated element instead of 3 */}
-      <motion.div
+      {/* Simplified background - GPU accelerated */}
+      <div
         className="fixed inset-0 pointer-events-none"
-        animate={{
-          background: [
-            'radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%)',
-            'radial-gradient(circle at 80% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%)',
-            'radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%)',
-          ],
-        }}
-        transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-      />
+        style={motionCSS}
+      >
+        <motion.div
+          animate={{
+            background: [
+              'radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%)',
+              'radial-gradient(circle at 80% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%)',
+              'radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%)',
+            ],
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+          style={{ ...motionCSS, position: 'absolute', inset: 0 }}
+        />
+      </div>
 
       <WelcomeHeader userName={userProfile.name} showCompactProfile={true} />
 
