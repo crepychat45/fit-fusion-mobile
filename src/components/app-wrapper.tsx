@@ -32,9 +32,9 @@ interface AppWrapperProps {
 
 export function AppWrapper({ children }: AppWrapperProps) {
   return (
-    <ProgressiveEnhancement>
-      <EnhancedErrorRecovery>
-        <QueryClientProvider client={queryClient}>
+    <EnhancedErrorRecovery>
+      <QueryClientProvider client={queryClient}>
+        <ProgressiveEnhancement>
           <SecurityManager>
             <ThemeProvider>
               <LanguageProvider>
@@ -53,8 +53,8 @@ export function AppWrapper({ children }: AppWrapperProps) {
               </LanguageProvider>
             </ThemeProvider>
           </SecurityManager>
-        </QueryClientProvider>
-      </EnhancedErrorRecovery>
-    </ProgressiveEnhancement>
+        </ProgressiveEnhancement>
+      </QueryClientProvider>
+    </EnhancedErrorRecovery>
   );
 }
