@@ -1,5 +1,4 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
-import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -123,12 +122,7 @@ export class EnhancedErrorRecovery extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-950/20 dark:to-orange-950/20 flex items-center justify-center p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="w-full max-w-2xl"
-          >
+          <div className="w-full max-w-2xl animate-in fade-in duration-500">
             <LiquidGlassCard variant="strong">
               <CardHeader className="text-center">
                 <div className="mx-auto h-16 w-16 rounded-full bg-red-100 dark:bg-red-950/30 flex items-center justify-center mb-4">
@@ -155,18 +149,14 @@ export class EnhancedErrorRecovery extends Component<Props, State> {
               <CardContent className="space-y-6">
                 {/* Error Details */}
                 {this.state.error && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    className="bg-red-50 dark:bg-red-950/20 p-4 rounded-lg border border-red-200 dark:border-red-800"
-                  >
+                  <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-lg border border-red-200 dark:border-red-800 animate-in fade-in duration-300">
                     <h4 className="font-semibold text-red-700 dark:text-red-300 mb-2">
                       Error Details:
                     </h4>
                     <p className="text-sm text-red-600 dark:text-red-400 font-mono break-all">
                       {this.state.error.message}
                     </p>
-                  </motion.div>
+                  </div>
                 )}
 
                 {/* Quick Actions */}
@@ -208,12 +198,7 @@ export class EnhancedErrorRecovery extends Component<Props, State> {
                 </div>
 
                 {/* Additional Help */}
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                  className="text-center p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800"
-                >
+                <div className="text-center p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800 animate-in fade-in duration-500">
                   <Shield className="h-6 w-6 mx-auto mb-2 text-blue-500" />
                   <h4 className="font-semibold text-blue-700 dark:text-blue-300 mb-2">
                     Need Help?
@@ -230,16 +215,11 @@ export class EnhancedErrorRecovery extends Component<Props, State> {
                     <Mail className="h-4 w-4 mr-2" />
                     Contact Support
                   </Button>
-                </motion.div>
+                </div>
 
                 {/* Development Info */}
                 {process.env.NODE_ENV === "development" && this.state.error && (
-                  <motion.details
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.7 }}
-                    className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg border"
-                  >
+                  <details className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg border animate-in fade-in duration-700">
                     <summary className="cursor-pointer font-semibold text-gray-700 dark:text-gray-300 mb-2">
                       Developer Information
                     </summary>
@@ -259,11 +239,11 @@ export class EnhancedErrorRecovery extends Component<Props, State> {
                         </div>
                       )}
                     </div>
-                  </motion.details>
+                  </details>
                 )}
               </CardContent>
             </LiquidGlassCard>
-          </motion.div>
+          </div>
         </div>
       );
     }
