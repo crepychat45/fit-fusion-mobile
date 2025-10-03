@@ -203,13 +203,11 @@ export function FitfusionChat({ onLogout }: FitfusionChatProps) {
     document.documentElement.style.overflow = "";
   };
 
-  // Scroll to bottom when new messages arrive - optimized to prevent forced reflows
+  // Scroll to bottom when new messages arrive
   useEffect(() => {
     if (autoScrollEnabled && messagesEndRef.current) {
-      requestAnimationFrame(() => {
-        messagesEndRef.current?.scrollIntoView({
-          behavior: "smooth",
-        });
+      messagesEndRef.current.scrollIntoView({
+        behavior: "smooth",
       });
     }
   }, [messages, autoScrollEnabled]);
@@ -301,13 +299,13 @@ export function FitfusionChat({ onLogout }: FitfusionChatProps) {
         setMessages(mockMessages);
 
         // Ensure scroll to bottom after messages load
-        requestAnimationFrame(() => {
+        setTimeout(() => {
           if (messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({
               behavior: "smooth",
             });
           }
-        });
+        }, 100);
       }
     } else {
       setMessages([]);
@@ -389,13 +387,13 @@ export function FitfusionChat({ onLogout }: FitfusionChatProps) {
         setIsSending(false);
 
         // Ensure scroll to bottom after sending
-        requestAnimationFrame(() => {
+        setTimeout(() => {
           if (messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({
               behavior: "smooth",
             });
           }
-        });
+        }, 100);
 
         // Simulate reply after 1-3 seconds
         setTimeout(
@@ -429,13 +427,13 @@ export function FitfusionChat({ onLogout }: FitfusionChatProps) {
             );
 
             // Ensure scroll to bottom after reply
-            requestAnimationFrame(() => {
+            setTimeout(() => {
               if (messagesEndRef.current) {
                 messagesEndRef.current.scrollIntoView({
                   behavior: "smooth",
                 });
               }
-            });
+            }, 100);
           },
           Math.random() * 2000 + 1000,
         );

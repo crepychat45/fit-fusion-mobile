@@ -2,16 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Performance optimizations - Prevent forced reflows */
+/* Performance optimizations */
 * {
   box-sizing: border-box;
-}
-
-/* GPU acceleration for animations */
-[data-motion-component] {
-  will-change: transform, opacity;
-  transform: translateZ(0);
-  backface-visibility: hidden;
 }
 
 html {

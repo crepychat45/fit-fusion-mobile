@@ -1,36 +1,29 @@
-import React, { useEffect, Suspense, lazy } from "react";
+import React, { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { SEOManager } from "./components/seo-manager";
 import { PerformanceUtils } from "./utils/performance-utils";
 import { AppWrapper } from "./components/app-wrapper";
-import { LoadingSpinner } from "./components/common/loading-spinner";
-
-// Critical routes - loaded immediately
 import Index from "./pages/Index";
+import Workouts from "./pages/workouts";
+import WorkoutDetail from "./pages/workout-detail";
+import ExerciseDetail from "./pages/exercise-detail";
+import Progress from "./pages/progress";
+import Profile from "./pages/profile";
+import NotFound from "./pages/NotFound";
+import Settings from "./pages/settings";
+import NotificationsPage from "./pages/notifications";
+import Privacy from "./pages/privacy";
+import Help from "./pages/help";
+import Wearables from "./pages/wearables";
+import ExportData from "./pages/export-data";
+import Subscription from "./pages/subscription";
+import ChatPage from "./pages/chat";
 import AuthPage from "./components/auth/auth-page";
-
-// Lazy load all non-critical routes
-const Workouts = lazy(() => import("./pages/workouts"));
-const WorkoutDetail = lazy(() => import("./pages/workout-detail"));
-const ExerciseDetail = lazy(() => import("./pages/exercise-detail"));
-const Progress = lazy(() => import("./pages/progress"));
-const Profile = lazy(() => import("./pages/profile"));
-const Settings = lazy(() => import("./pages/settings"));
-const ChatPage = lazy(() => import("./pages/chat"));
-const Wearables = lazy(() => import("./pages/wearables"));
-const Subscription = lazy(() => import("./pages/subscription"));
-const NotificationsPage = lazy(() => import("./pages/notifications"));
-const Help = lazy(() => import("./pages/help"));
-const ExportData = lazy(() => import("./pages/export-data"));
-const Privacy = lazy(() => import("./pages/privacy"));
-const PrivacyPolicy = lazy(() => import("./pages/privacy-policy"));
-const TermsOfService = lazy(() => import("./pages/terms-of-service"));
-const ResetPassword = lazy(() => import("./pages/reset-password"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-
-// Lazy load non-critical components
-const FitAssistant = lazy(() => import("./components/fit-assistant").then(m => ({ default: m.FitAssistant })));
-const PerformanceMonitor = lazy(() => import("./components/performance-monitor").then(m => ({ default: m.PerformanceMonitor })));
+import ResetPassword from "./pages/reset-password";
+import TermsOfService from "./pages/terms-of-service";
+import PrivacyPolicy from "./pages/privacy-policy";
+import { FitAssistant } from "./components/fit-assistant";
+import { PerformanceMonitor } from "./components/performance-monitor";
 
 const AppContent: React.FC = () => {
   useEffect(() => {
@@ -48,34 +41,32 @@ const AppContent: React.FC = () => {
 
   return (
     <SEOManager>
-      <Suspense fallback={<LoadingSpinner />}>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<AuthPage />} />
-          <Route path="/workouts" element={<Workouts />} />
-          <Route path="/workout-detail/:id" element={<WorkoutDetail />} />
-          <Route
-            path="/exercise/:workoutId/:exerciseId"
-            element={<ExerciseDetail />}
-          />
-          <Route path="/progress" element={<Progress />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/chat" element={<ChatPage />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/notifications" element={<NotificationsPage />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/help" element={<Help />} />
-          <Route path="/wearables" element={<Wearables />} />
-          <Route path="/export-data" element={<ExportData />} />
-          <Route path="/subscription" element={<Subscription />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/terms-of-service" element={<TermsOfService />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <FitAssistant />
-        <PerformanceMonitor />
-      </Suspense>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/auth" element={<AuthPage />} />
+        <Route path="/workouts" element={<Workouts />} />
+        <Route path="/workout-detail/:id" element={<WorkoutDetail />} />
+        <Route
+          path="/exercise/:workoutId/:exerciseId"
+          element={<ExerciseDetail />}
+        />
+        <Route path="/progress" element={<Progress />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/chat" element={<ChatPage />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/help" element={<Help />} />
+        <Route path="/wearables" element={<Wearables />} />
+        <Route path="/export-data" element={<ExportData />} />
+        <Route path="/subscription" element={<Subscription />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/terms-of-service" element={<TermsOfService />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      <FitAssistant />
+      <PerformanceMonitor />
     </SEOManager>
   );
 };

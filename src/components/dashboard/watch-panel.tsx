@@ -180,11 +180,9 @@ export function WatchPanel() {
             size="sm"
             onClick={handleRefresh}
             disabled={isRefreshing}
-            aria-label="Sync all connected devices"
           >
             <RefreshCw
               className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
-              aria-hidden="true"
             />
             Sync
           </Button>
@@ -219,14 +217,13 @@ export function WatchPanel() {
 
                   {/* Watch Info */}
                   <div className="flex-1 min-w-0">
-                     <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center justify-between mb-1">
                       <h3 className="font-semibold text-sm truncate">
                         {watch.name}
                       </h3>
                       <Badge
                         variant={watch.connected ? "default" : "secondary"}
                         className="text-xs"
-                        aria-label={`Device status: ${watch.status}`}
                       >
                         {watch.status}
                       </Badge>
@@ -237,17 +234,15 @@ export function WatchPanel() {
 
                     {/* Stats Grid */}
                     <div className="grid grid-cols-2 gap-2 text-xs">
-                       {/* Battery */}
+                      {/* Battery */}
                       <div className="flex items-center gap-1">
                         <Battery
                           className={`h-3 w-3 ${getBatteryColor(watch.batteryLevel)}`}
-                          aria-hidden="true"
                         />
                         <span>{watch.batteryLevel}%</span>
                         <Progress
                           value={watch.batteryLevel}
                           className="h-1 w-8"
-                          aria-label={`Battery level: ${watch.batteryLevel} percent`}
                         />
                       </div>
 
@@ -288,7 +283,6 @@ export function WatchPanel() {
                           size="sm"
                           onClick={() => handleDisconnect(watch.id)}
                           className="h-7 text-xs"
-                          aria-label={`Disconnect ${watch.name}`}
                         >
                           Disconnect
                         </Button>
@@ -296,9 +290,8 @@ export function WatchPanel() {
                           variant="ghost"
                           size="sm"
                           className="h-7 text-xs"
-                          aria-label={`Open settings for ${watch.name}`}
                         >
-                          <Settings className="h-3 w-3" aria-hidden="true" />
+                          <Settings className="h-3 w-3" />
                         </Button>
                       </>
                     ) : (
@@ -308,16 +301,15 @@ export function WatchPanel() {
                         onClick={() => handleConnect(watch.id)}
                         disabled={watch.status === "syncing"}
                         className="h-7 text-xs bg-gradient-to-r from-blue-500 to-purple-600"
-                        aria-label={`Connect ${watch.name}`}
                       >
                         {watch.status === "syncing" ? (
                           <>
-                            <RefreshCw className="h-3 w-3 mr-1 animate-spin" aria-hidden="true" />
+                            <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
                             Connecting...
                           </>
                         ) : (
                           <>
-                            <Bluetooth className="h-3 w-3 mr-1" aria-hidden="true" />
+                            <Bluetooth className="h-3 w-3 mr-1" />
                             Connect
                           </>
                         )}

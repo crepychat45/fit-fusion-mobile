@@ -3,6 +3,9 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 
+// Ensure React is globally available
+(window as any).React = React;
+
 // Performance monitoring
 if (typeof window !== "undefined") {
   // Log performance metrics

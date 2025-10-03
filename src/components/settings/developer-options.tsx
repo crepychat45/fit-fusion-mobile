@@ -143,15 +143,13 @@ export function DeveloperOptions() {
     }
 
     try {
-      addLog(`Script input: ${customScript}`);
-      // Note: Direct script execution is disabled for security reasons
-      // In production, use a safe sandbox or server-side execution
-      console.log('Custom script:', customScript);
-      addLog(`Script logged to console (execution disabled for security)`);
+      addLog(`Executing: ${customScript}`);
+      const result = eval(customScript);
+      addLog(`Result: ${JSON.stringify(result)}`);
 
       toast({
-        title: "✅ Script logged",
-        description: "Script execution is disabled for security. Check console.",
+        title: "✅ Script executed",
+        description: "Check the console for results.",
       });
     } catch (error) {
       addLog(`Error: ${error}`);

@@ -10,9 +10,7 @@ import { SettingsProvider } from "@/contexts/safe-settings-context";
 import { EnhancedErrorRecovery } from "@/components/enhanced-error-recovery";
 import { SecurityManager } from "@/components/security-manager";
 import { AccessibilityManager } from "@/components/accessibility-manager";
-import { ProgressiveEnhancement } from "@/components/enhanced-progressive-enhancement";
-import { PerformanceMonitor } from "@/components/performance-monitor";
-import { MobileCompatibility } from "@/components/mobile-compatibility";
+import { SmartNotifications } from "@/components/ai/smart-notifications";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,25 +31,22 @@ export function AppWrapper({ children }: AppWrapperProps) {
   return (
     <EnhancedErrorRecovery>
       <QueryClientProvider client={queryClient}>
-        <ProgressiveEnhancement>
-          <SecurityManager>
-            <ThemeProvider>
-              <LanguageProvider>
-                <SettingsProvider>
-                  <AccessibilityManager>
-                    <TooltipProvider>
-                      <Toaster />
-                      <Sonner />
-                      <PerformanceMonitor enableAnalytics enableCaching />
-                      <MobileCompatibility />
-                      <BrowserRouter>{children}</BrowserRouter>
-                    </TooltipProvider>
-                  </AccessibilityManager>
-                </SettingsProvider>
-              </LanguageProvider>
-            </ThemeProvider>
-          </SecurityManager>
-        </ProgressiveEnhancement>
+        <SecurityManager>
+          <ThemeProvider>
+            <LanguageProvider>
+              <SettingsProvider>
+                <AccessibilityManager>
+                  <TooltipProvider>
+                    <Toaster />
+                    <Sonner />
+                    <SmartNotifications />
+                    <BrowserRouter>{children}</BrowserRouter>
+                  </TooltipProvider>
+                </AccessibilityManager>
+              </SettingsProvider>
+            </LanguageProvider>
+          </ThemeProvider>
+        </SecurityManager>
       </QueryClientProvider>
     </EnhancedErrorRecovery>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense } from "react";
+import React, { useState, useEffect } from "react";
 import { MobileNav } from "@/components/mobile-nav";
 import { MobileFloatingActions } from "@/components/mobile/mobile-floating-actions";
 import { MobileAIAssistant } from "@/components/mobile/mobile-ai-assistant";
@@ -11,32 +11,34 @@ import { DailyTip } from "@/components/daily-tip";
 import { WelcomeHeader } from "@/components/dashboard/welcome-header";
 import { EnhancedSmartwatchHub } from "@/components/dashboard/enhanced-smartwatch-hub";
 import { TodaysWorkout } from "@/components/dashboard/todays-workout";
+import { UpcomingWorkouts } from "@/components/dashboard/upcoming-workouts";
+import { RecentActivitySection } from "@/components/dashboard/recent-activity-section";
+import { FitfusionChatSection } from "@/components/dashboard/fitfusion-chat-section";
 import { RescheduleDialog } from "@/components/dashboard/reschedule-dialog";
 import { QuickActionsPanel } from "@/components/dashboard/quick-actions-panel";
-import { LazySection, PlaceholderSection } from "@/components/lazy-section";
-import { SimpleFade } from "@/components/optimized-motion";
+import { HealthMetricsPanel } from "@/components/dashboard/health-metrics-panel";
+import { AchievementNotifications } from "@/components/dashboard/achievement-notifications";
+import { WeatherWidget } from "@/components/dashboard/weather-widget";
+import { MotivationalQuotes } from "@/components/dashboard/motivational-quotes";
+import { WatchPanel } from "@/components/dashboard/watch-panel";
+import { EnhancedNotifications } from "@/components/dashboard/enhanced-notifications";
 import { motion, AnimatePresence } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { LiquidGlassCard, LiquidGlass } from "@/components/enhanced-liquid-glass";
-import { motionCSS } from "@/config/motion";
 import {
-  Brain,
-  Heart,
+  Sparkles,
   TrendingUp,
   Shield,
+  Zap,
+  Target,
+  Brain,
+  Heart,
+  Activity,
 } from "lucide-react";
-
-// Lazy load heavy components that aren't immediately visible
-const UpcomingWorkouts = lazy(() => import("@/components/dashboard/upcoming-workouts").then(m => ({ default: m.UpcomingWorkouts })));
-const RecentActivitySection = lazy(() => import("@/components/dashboard/recent-activity-section").then(m => ({ default: m.RecentActivitySection })));
-const FitfusionChatSection = lazy(() => import("@/components/dashboard/fitfusion-chat-section").then(m => ({ default: m.FitfusionChatSection })));
-const HealthMetricsPanel = lazy(() => import("@/components/dashboard/health-metrics-panel").then(m => ({ default: m.HealthMetricsPanel })));
-const WeatherWidget = lazy(() => import("@/components/dashboard/weather-widget").then(m => ({ default: m.WeatherWidget })));
-const AchievementNotifications = lazy(() => import("@/components/dashboard/achievement-notifications").then(m => ({ default: m.AchievementNotifications })));
-const MotivationalQuotes = lazy(() => import("@/components/dashboard/motivational-quotes").then(m => ({ default: m.MotivationalQuotes })));
-const EnhancedNotifications = lazy(() => import("@/components/dashboard/enhanced-notifications").then(m => ({ default: m.EnhancedNotifications })));
-const EnhancedHomeFeatures = lazy(() => import("@/components/enhanced-home-features").then(m => ({ default: m.EnhancedHomeFeatures })));
-const ErrorFixManager = lazy(() => import("@/components/error-fix-manager").then(m => ({ default: m.ErrorFixManager })));
+import { ErrorFixManager } from "@/components/error-fix-manager";
+import { EnhancedHomeFeatures } from "@/components/enhanced-home-features";
 
 const scheduledWorkouts = [
   {
@@ -134,30 +136,59 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 pb-16 relative overflow-hidden">
-      {/* Simplified background - GPU accelerated */}
-      <div
-        className="fixed inset-0 pointer-events-none"
-        style={motionCSS}
-      >
+      {/* Enhanced liquid background animations */}
+      <div className="fixed inset-0 pointer-events-none">
         <motion.div
           animate={{
-            background: [
-              'radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%)',
-              'radial-gradient(circle at 80% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%)',
-              'radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%)',
-            ],
+            scale: [1, 1.2, 1],
+            rotate: [0, 180, 360],
+            opacity: [0.05, 0.15, 0.05],
           }}
-          transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-          style={{ ...motionCSS, position: 'absolute', inset: 0 }}
+          transition={{ duration: 30, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-500/10 to-purple-600/10 rounded-full blur-3xl liquid-float"
+        />
+        <motion.div
+          animate={{
+            scale: [1.2, 1, 1.2],
+            rotate: [360, 180, 0],
+            opacity: [0.1, 0.03, 0.1],
+          }}
+          transition={{ duration: 35, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -bottom-40 -left-40 w-[28rem] h-[28rem] bg-gradient-to-tr from-pink-500/10 to-orange-600/10 rounded-full blur-3xl liquid-float"
+        />
+        <motion.div
+          animate={{
+            scale: [1, 1.1, 1],
+            x: [0, 100, 0],
+            y: [0, -50, 0],
+            opacity: [0.08, 0.12, 0.08],
+          }}
+          transition={{ duration: 40, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/2 left-1/2 w-80 h-80 bg-gradient-to-br from-green-500/8 to-blue-500/8 rounded-full blur-2xl"
         />
       </div>
 
       <WelcomeHeader userName={userProfile.name} showCompactProfile={true} />
 
-      <div className="space-y-6 relative z-10">
-        {/* Activity Summary - Always visible, no animation wrapper */}
-        <div className="px-4 -mt-6 relative z-10">
-          <LiquidGlass variant="strong" ripple animated className="rounded-xl overflow-hidden">
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="space-y-6 relative z-10"
+      >
+        {/* Enhanced Activity Summary with liquid glass */}
+        <motion.div
+          variants={itemVariants}
+          className="px-4 -mt-6 relative z-10"
+          whileHover={{ scale: 1.01 }}
+        >
+          <LiquidGlass
+            variant="strong"
+            ripple
+            float
+            animated
+            className="rounded-xl overflow-hidden"
+          >
             <ActivitySummary
               workoutsCompleted={userProfile.stats.workoutsCompleted}
               streakDays={userProfile.stats.streakDays}
@@ -165,105 +196,223 @@ const Index = () => {
               avgHeartRate={userProfile.stats.avgHeartRate}
             />
           </LiquidGlass>
-        </div>
+        </motion.div>
 
-        {/* AI Banner - Conditional render with simplified animation */}
+        {/* Enhanced AI-Powered Features Banner */}
         <AnimatePresence>
           {showAdvancedFeatures && (
-            <SimpleFade className="px-4">
-              <LiquidGlass variant="strong" ripple animated className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 border-0 overflow-hidden relative rounded-xl">
+            <motion.div
+              variants={itemVariants}
+              initial={{ opacity: 0, scale: 0.8, y: 50 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ type: "spring", duration: 0.8, bounce: 0.4 }}
+              className="px-4"
+            >
+              <LiquidGlass
+                variant="strong"
+                ripple
+                bubble
+                animated
+                className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 border-0 overflow-hidden relative rounded-xl"
+              >
+                <motion.div
+                  animate={{
+                    background: [
+                      "linear-gradient(45deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.15))",
+                      "linear-gradient(45deg, rgba(139, 92, 246, 0.15), rgba(236, 72, 153, 0.15))",
+                      "linear-gradient(45deg, rgba(236, 72, 153, 0.15), rgba(59, 130, 246, 0.15))",
+                    ],
+                  }}
+                  transition={{ duration: 5, repeat: Infinity }}
+                  className="absolute inset-0"
+                />
                 <div className="p-4 text-white relative z-10">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Brain className="h-5 w-5" />
-                    <Badge className="bg-white/20 text-white border-white/30">AI POWERED</Badge>
-                  </div>
-                  <h3 className="text-lg font-bold mb-1">Next-Gen Fitness Experience</h3>
-                  <p className="text-white/90 text-sm mb-3">
-                    Advanced AI coaching, real-time biometrics, and personalized nutrition
-                  </p>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    {[
-                      { icon: Brain, label: "AI Coach" },
-                      { icon: Heart, label: "Biometric Sync" },
-                      { icon: TrendingUp, label: "Predictive Analytics" },
-                      { icon: Shield, label: "Privacy First" },
-                    ].map((item) => (
-                      <div key={item.label} className="flex items-center gap-1">
-                        <item.icon className="h-3 w-3" />
-                        <span>{item.label}</span>
+                    <div className="relative">
+                      <div className="flex items-center gap-2 mb-2">
+                        <motion.div
+                          animate={{ rotate: [0, 360] }}
+                          transition={{
+                            duration: 3,
+                            repeat: Infinity,
+                            ease: "linear",
+                          }}
+                        >
+                          <Brain className="h-5 w-5" />
+                        </motion.div>
+                        <Badge className="bg-white/20 text-white border-white/30 animate-pulse">
+                          AI POWERED
+                        </Badge>
                       </div>
-                    ))}
-                  </div>
+                      <h3 className="text-lg font-bold mb-1">
+                        Next-Gen Fitness Experience
+                      </h3>
+                      <p className="text-white/90 text-sm mb-3">
+                        Advanced AI coaching, real-time biometrics, and
+                        personalized nutrition
+                      </p>
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.5, staggerChildren: 0.1 }}
+                        className="grid grid-cols-2 gap-2 text-xs"
+                      >
+                        {[
+                          { icon: Brain, label: "AI Coach" },
+                          { icon: Heart, label: "Biometric Sync" },
+                          { icon: TrendingUp, label: "Predictive Analytics" },
+                          { icon: Shield, label: "Privacy First" },
+                        ].map((item, index) => (
+                          <motion.div
+                            key={item.label}
+                            initial={{ x: -20, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            transition={{ delay: 0.7 + index * 0.1 }}
+                            className="flex items-center gap-1"
+                          >
+                            <item.icon className="h-3 w-3" />
+                            <span>{item.label}</span>
+                          </motion.div>
+                        ))}
+                      </motion.div>
+                    </div>
                 </div>
               </LiquidGlass>
-            </SimpleFade>
+            </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Smartwatch Hub - Above fold */}
-        <div className="px-4">
-          <EnhancedSmartwatchHub />
-        </div>
+        {/* Enhanced Smartwatch Hub */}
+        <motion.div
+          variants={itemVariants}
+          className="px-4"
+          whileHover={{ y: -2 }}
+        >
+          <motion.div
+            animate={{ y: [0, -3, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            className="hover-lift"
+          >
+            <EnhancedSmartwatchHub />
+          </motion.div>
+        </motion.div>
 
-        {/* Quick Actions - Above fold */}
-        <QuickActionsPanel />
+        {/* Enhanced Quick Actions Panel */}
+        <motion.div variants={itemVariants} whileHover={{ scale: 1.01 }}>
+          <QuickActionsPanel />
+        </motion.div>
 
-        {/* Today's Workout - Above fold */}
-        <TodaysWorkout workouts={scheduledWorkouts} onReschedule={openRescheduleDialog} />
+        {/* Enhanced Today's Workout */}
+        <motion.div variants={itemVariants} className="hover-lift">
+          <TodaysWorkout
+            workouts={scheduledWorkouts}
+            onReschedule={openRescheduleDialog}
+          />
+        </motion.div>
 
-        {/* Lazy load below-the-fold content */}
-        <LazySection fallback={<PlaceholderSection height="300px" />} className="px-4">
-          <Suspense fallback={<PlaceholderSection height="300px" />}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Health Metrics & Weather Side by Side with staggered animation */}
+        <motion.div variants={itemVariants} className="px-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ staggerChildren: 0.2 }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          >
+            <motion.div
+              initial={{ x: -50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.1 }}
+              className="hover-lift"
+            >
               <HealthMetricsPanel />
+            </motion.div>
+            <motion.div
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="hover-lift"
+            >
               <WeatherWidget />
-            </div>
-          </Suspense>
-        </LazySection>
+            </motion.div>
+          </motion.div>
+        </motion.div>
 
-        <LazySection fallback={<PlaceholderSection height="150px" />} className="px-4">
-          <Suspense fallback={<PlaceholderSection height="150px" />}>
+        {/* Enhanced Notifications with glow effect */}
+        <motion.div variants={itemVariants} className="px-4">
+          <motion.div whileHover={{ scale: 1.01 }} className="hover-glow">
             <EnhancedNotifications />
-          </Suspense>
-        </LazySection>
+          </motion.div>
+        </motion.div>
 
-        <LazySection fallback={<PlaceholderSection height="200px" />} className="px-4">
-          <Suspense fallback={<PlaceholderSection height="200px" />}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Achievement & Motivation Combined with bounce animation */}
+        <motion.div variants={itemVariants} className="px-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ staggerChildren: 0.15 }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", bounce: 0.4 }}
+              className="hover-scale"
+            >
               <AchievementNotifications />
+            </motion.div>
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", bounce: 0.4, delay: 0.1 }}
+              className="hover-scale"
+            >
               <MotivationalQuotes />
-            </div>
-          </Suspense>
-        </LazySection>
+            </motion.div>
+          </motion.div>
+        </motion.div>
 
-        <LazySection fallback={<PlaceholderSection height="250px" />}>
-          <Suspense fallback={<PlaceholderSection height="250px" />}>
-            <UpcomingWorkouts workouts={scheduledWorkouts} />
-          </Suspense>
-        </LazySection>
+        {/* Enhanced Upcoming Workouts */}
+        <motion.div variants={itemVariants} className="hover-lift">
+          <UpcomingWorkouts workouts={scheduledWorkouts} />
+        </motion.div>
 
-        <LazySection fallback={<PlaceholderSection height="300px" />}>
-          <Suspense fallback={<PlaceholderSection height="300px" />}>
+        {/* Enhanced Chat Section with special effects */}
+        <motion.div variants={itemVariants} whileHover={{ scale: 1.005 }}>
+          <motion.div
+            animate={{
+              boxShadow: [
+                "0 0 20px rgba(139, 92, 246, 0.1)",
+                "0 0 30px rgba(139, 92, 246, 0.2)",
+                "0 0 20px rgba(139, 92, 246, 0.1)",
+              ],
+            }}
+            transition={{ duration: 3, repeat: Infinity }}
+          >
             <FitfusionChatSection />
-          </Suspense>
-        </LazySection>
+          </motion.div>
+        </motion.div>
 
-        <LazySection fallback={<PlaceholderSection height="200px" />} className="px-4">
-          <Suspense fallback={<PlaceholderSection height="200px" />}>
-            <EnhancedHomeFeatures />
-          </Suspense>
-        </LazySection>
+        {/* Enhanced Home Features - Replace popup notifications */}
+        <motion.div variants={itemVariants} className="px-4">
+          <EnhancedHomeFeatures />
+        </motion.div>
 
-        <LazySection fallback={<PlaceholderSection height="250px" />}>
-          <Suspense fallback={<PlaceholderSection height="250px" />}>
-            <RecentActivitySection />
-          </Suspense>
-        </LazySection>
+        {/* Enhanced Recent Activity */}
+        <motion.div variants={itemVariants} className="hover-lift">
+          <RecentActivitySection />
+        </motion.div>
 
-        <LazySection fallback={<PlaceholderSection height="150px" />} className="px-4 mt-6 mb-20">
-          <DailyTip />
-        </LazySection>
-      </div>
+        {/* Enhanced Daily Tip with floating animation */}
+        <motion.div variants={itemVariants} className="px-4 mt-6 mb-20">
+          <motion.div
+            animate={{ y: [0, -3, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            whileHover={{ scale: 1.02 }}
+            className="hover-glow"
+          >
+            <DailyTip />
+          </motion.div>
+        </motion.div>
+      </motion.div>
 
       <RescheduleDialog
         isOpen={showReschedule}
@@ -301,11 +450,7 @@ const Index = () => {
       )}
 
       {/* Error Fix Manager for debugging */}
-      {process.env.NODE_ENV === "development" && (
-        <Suspense fallback={null}>
-          <ErrorFixManager />
-        </Suspense>
-      )}
+      {process.env.NODE_ENV === "development" && <ErrorFixManager />}
 
       <MobileNav />
     </div>

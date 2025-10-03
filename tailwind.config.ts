@@ -7,17 +7,8 @@ export default {
     "./components/**/*.{ts,tsx}",
     "./app/**/*.{ts,tsx}",
     "./src/**/*.{ts,tsx}",
-    "./index.html",
   ],
   prefix: "",
-  safelist: [
-    // Only safelist absolutely necessary dynamic classes
-    'animate-pulse',
-    'animate-spin',
-    'transition-all',
-    'duration-200',
-    'ease-in-out',
-  ],
   theme: {
     container: {
       center: true,

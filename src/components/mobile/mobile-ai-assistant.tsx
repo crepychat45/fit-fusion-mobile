@@ -78,9 +78,7 @@ export function MobileAIAssistant({ isOpen, onClose }: MobileAIAssistantProps) {
 
   // Auto-scroll to bottom
   useEffect(() => {
-    requestAnimationFrame(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   // Mobile-optimized AI responses

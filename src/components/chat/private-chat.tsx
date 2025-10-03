@@ -97,9 +97,7 @@ export function PrivateChat() {
 
   // Auto-scroll to bottom
   useEffect(() => {
-    requestAnimationFrame(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const loadMessagesForUser = (userId: string) => {
