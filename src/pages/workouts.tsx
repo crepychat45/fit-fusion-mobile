@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { MainLayout } from "@/components/layout/main-layout";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -40,7 +42,6 @@ import {
   Brain,
 } from "lucide-react";
 import { workouts } from "@/data/workouts";
-import { useNavigate } from "react-router-dom";
 
 const Workouts = () => {
   const { toast } = useToast();
@@ -175,7 +176,8 @@ const Workouts = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <MainLayout>
+      <div className="min-h-screen bg-background pb-20">
       {/* Enhanced Header */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-red-500 to-pink-600" />
@@ -671,6 +673,7 @@ const Workouts = () => {
 
       <MobileNav />
     </div>
+    </MainLayout>
   );
 };
 

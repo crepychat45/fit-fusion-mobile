@@ -22,6 +22,7 @@ import AuthPage from "./components/auth/auth-page";
 import ResetPassword from "./pages/reset-password";
 import TermsOfService from "./pages/terms-of-service";
 import PrivacyPolicy from "./pages/privacy-policy";
+import Onboarding from "./pages/onboarding";
 import { FitAssistant } from "./components/fit-assistant";
 import { PerformanceMonitor } from "./components/performance-monitor";
 
@@ -44,6 +45,7 @@ const AppContent: React.FC = () => {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/workouts" element={<Workouts />} />
         <Route path="/workout-detail/:id" element={<WorkoutDetail />} />
         <Route

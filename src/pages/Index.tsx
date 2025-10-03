@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { MainLayout } from "@/components/layout/main-layout";
 import { MobileNav } from "@/components/mobile-nav";
 import { MobileFloatingActions } from "@/components/mobile/mobile-floating-actions";
 import { MobileAIAssistant } from "@/components/mobile/mobile-ai-assistant";
@@ -62,6 +64,7 @@ const scheduledWorkouts = [
 ];
 
 const Index = () => {
+  const navigate = useNavigate();
   const [showReschedule, setShowReschedule] = useState(false);
   const [selectedWorkout, setSelectedWorkout] = useState<any>(null);
   const [scheduledDate, setScheduledDate] = useState<Date | undefined>(
@@ -75,6 +78,13 @@ const Index = () => {
   const isMobile = useIsMobile();
 
   useEffect(() => {
+    // Check if user has completed onboarding
+    const onboardingComplete = localStorage.getItem("onboardingComplete");
+    if (!onboardingComplete) {
+      navigate("/onboarding");
+      return;
+    }
+
     const timer = setTimeout(() => {
       setIsLoading(false);
       setShowAdvancedFeatures(true);
@@ -135,7 +145,8 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 pb-16 relative overflow-hidden">
+    <MainLayout showFooter={false}>
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 pb-16 relative overflow-hidden">
       {/* Enhanced liquid background animations */}
       <div className="fixed inset-0 pointer-events-none">
         <motion.div
@@ -453,7 +464,8 @@ const Index = () => {
       {process.env.NODE_ENV === "development" && <ErrorFixManager />}
 
       <MobileNav />
-    </div>
+      </div>
+    </MainLayout>
   );
 };
 
