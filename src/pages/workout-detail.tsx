@@ -199,7 +199,7 @@ const WorkoutDetail = () => {
             <Button
               className="flex-1"
               size="lg"
-              onClick={handleStartWorkout}
+              onClick={() => navigate(`/workout-session/${workout.id}`)}
               disabled={isStarting}
             >
               <Play
@@ -218,15 +218,23 @@ const WorkoutDetail = () => {
             </Button>
           </div>
 
-          <Button
-            variant="outline"
-            size="lg"
-            onClick={() => setShowTimer(!showTimer)}
-            className="w-full"
-          >
-            <Clock className="h-4 w-4 mr-2" />
-            Workout Timer
-          </Button>
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => setShowTimer(!showTimer)}
+            >
+              <Clock className="h-4 w-4 mr-2" />
+              Timer
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => navigate("/workout-plans")}
+            >
+              View Plans
+            </Button>
+          </div>
         </div>
 
         {showTimer && (
