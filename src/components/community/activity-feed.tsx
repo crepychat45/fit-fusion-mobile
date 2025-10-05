@@ -4,6 +4,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Heart, MessageCircle, Share2, Trophy, Flame } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { CommentSection } from "./comment-section";
+import { toast } from "sonner";
 
 interface Activity {
   id: string;
@@ -66,6 +68,7 @@ const SAMPLE_ACTIVITIES: Activity[] = [
 export function ActivityFeed() {
   const [activities] = React.useState<Activity[]>(SAMPLE_ACTIVITIES);
   const [likedActivities, setLikedActivities] = React.useState<Set<string>>(new Set());
+  const [showComments, setShowComments] = React.useState<Set<string>>(new Set());
 
   const handleLike = (id: string) => {
     setLikedActivities((prev) => {
@@ -77,6 +80,22 @@ export function ActivityFeed() {
       }
       return newSet;
     });
+  };
+
+  const toggleComments = (id: string) => {
+    setShowComments((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  const handleShare = () => {
+    toast.success("Post shared successfully!");
   };
 
   const getActivityIcon = (type: Activity["type"]) => {
@@ -147,15 +166,22 @@ export function ActivityFeed() {
                   />
                   {activity.likes + (likedActivities.has(activity.id) ? 1 : 0)}
                 </Button>
-                <Button variant="ghost" size="sm">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => toggleComments(activity.id)}
+                >
                   <MessageCircle className="h-4 w-4 mr-1" />
                   {activity.comments}
                 </Button>
               </div>
-              <Button variant="ghost" size="sm">
+              <Button variant="ghost" size="sm" onClick={handleShare}>
                 <Share2 className="h-4 w-4" />
               </Button>
             </div>
+            {showComments.has(activity.id) && (
+              <CommentSection activityId={activity.id} />
+            )}
           </CardContent>
         </Card>
       ))}

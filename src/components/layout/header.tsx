@@ -10,18 +10,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Bell, Dumbbell, User, Settings, LogOut } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Dumbbell, User, Settings, LogOut } from "lucide-react";
+import { NotificationCenter } from "@/components/community/notification-center";
 
 export function Header() {
   const location = useLocation();
-  const [notificationCount] = React.useState(3);
 
   const navigation = [
     { name: "Dashboard", href: "/" },
     { name: "Workouts", href: "/workouts" },
     { name: "Progress", href: "/progress" },
-    { name: "Community", href: "/chat" },
+    { name: "Community", href: "/community" },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -55,22 +54,7 @@ export function Header() {
 
         {/* User Menu */}
         <div className="flex items-center space-x-2">
-          {/* Notifications */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative"
-            asChild
-          >
-            <Link to="/notifications">
-              <Bell className="h-5 w-5" />
-              {notificationCount > 0 && (
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
-                  {notificationCount}
-                </Badge>
-              )}
-            </Link>
-          </Button>
+          <NotificationCenter />
 
           {/* User Dropdown */}
           <DropdownMenu>

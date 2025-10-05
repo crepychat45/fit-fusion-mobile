@@ -8,6 +8,7 @@ import Workouts from "./pages/workouts";
 import WorkoutDetail from "./pages/workout-detail";
 import WorkoutPlans from "./pages/workout-plans";
 import WorkoutSession from "./pages/workout-session";
+import Community from "./pages/community";
 import ExerciseDetail from "./pages/exercise-detail";
 import Progress from "./pages/progress";
 import Profile from "./pages/profile";
@@ -52,6 +53,7 @@ const AppContent: React.FC = () => {
         <Route path="/workout-plans" element={<WorkoutPlans />} />
         <Route path="/workout-detail/:id" element={<WorkoutDetail />} />
         <Route path="/workout-session/:id" element={<WorkoutSession />} />
+        <Route path="/community" element={<Community />} />
         <Route
           path="/exercise/:workoutId/:exerciseId"
           element={<ExerciseDetail />}
