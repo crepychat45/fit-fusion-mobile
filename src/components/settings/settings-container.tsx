@@ -10,6 +10,8 @@ import { AppUpdateManager } from "./app-update-manager";
 import { SecurityCenter } from "./security-center";
 import { VersionManager } from "./version-manager";
 import { SettingsNavigation } from "./settings-navigation";
+import { NotificationSettings } from "./notification-settings";
+import { UnitPreferences } from "./unit-preferences";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -356,6 +358,14 @@ export function SettingsContainer() {
 
             <TabsContent value="privacy" className="mt-0">
               <PrivacySettings />
+            </TabsContent>
+
+            <TabsContent value="notifications" className="mt-0">
+              <NotificationSettings />
+            </TabsContent>
+
+            <TabsContent value="units" className="mt-0">
+              <UnitPreferences />
             </TabsContent>
 
             <TabsContent value="chat" className="mt-0">

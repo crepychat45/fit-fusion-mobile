@@ -70,6 +70,22 @@ const settingsCategories = [
     description: "Control your data and privacy settings",
   },
   {
+    id: "notifications",
+    title: "Notifications",
+    icon: Bell,
+    color: "text-amber-500",
+    bgColor: "bg-amber-50",
+    description: "Manage notification preferences and timing",
+  },
+  {
+    id: "units",
+    title: "Units & Format",
+    icon: Globe,
+    color: "text-teal-500",
+    bgColor: "bg-teal-50",
+    description: "Set measurement units and regional formats",
+  },
+  {
     id: "chat",
     title: "Chat Settings",
     icon: MessageSquare,
