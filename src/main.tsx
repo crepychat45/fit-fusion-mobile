@@ -4,10 +4,26 @@ import App from "./App.tsx";
 import "./index.css";
 
 // Ensure React is globally available
-(window as any).React = React;
-
-// Performance monitoring
 if (typeof window !== "undefined") {
+  (window as any).React = React;
+  
+  // Clear old service worker caches
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      registrations.forEach((registration) => {
+        registration.unregister();
+      });
+    });
+    
+    caches.keys().then((names) => {
+      names.forEach((name) => {
+        if (name !== 'fitfusion-v2') {
+          caches.delete(name);
+        }
+      });
+    });
+  }
+  
   // Log performance metrics
   window.addEventListener("load", () => {
     console.info("App loaded successfully");
