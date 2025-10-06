@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { validateInput, nameSchema, bioSchema } from "@/utils/validation";
 import {
   Select,
   SelectContent,
@@ -147,6 +148,31 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
 
   // Mark as having unsaved changes when any field changes
   const handleFieldChange = (field: string, value: string) => {
+    // Validate critical fields in real-time
+    if (field === "name") {
+      const validation = validateInput(nameSchema, value);
+      if (!validation.success && value.length > 0) {
+        toast({
+          title: "Invalid name",
+          description: validation.error,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    if (field === "bio") {
+      const validation = validateInput(bioSchema, value);
+      if (!validation.success && value.length > 0) {
+        toast({
+          title: "Invalid bio",
+          description: validation.error,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     setHasUnsavedChanges(true);
     setSaveStatus(null);
 

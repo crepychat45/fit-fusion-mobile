@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send } from "lucide-react";
+import { Send, AlertCircle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { validateInput, commentSchema, containsMaliciousContent } from "@/utils/validation";
+import { toast } from "sonner";
 
 interface Comment {
   id: string;
@@ -39,19 +41,48 @@ const SAMPLE_COMMENTS: Comment[] = [
 export function CommentSection({ activityId, comments = SAMPLE_COMMENTS }: CommentSectionProps) {
   const [newComment, setNewComment] = useState("");
   const [displayComments, setDisplayComments] = useState(comments);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  const handleCommentChange = (value: string) => {
+    setNewComment(value);
+    setValidationError(null);
+
+    // Real-time validation
+    if (containsMaliciousContent(value)) {
+      setValidationError("Comment contains unsafe characters");
+    }
+  };
 
   const handleSubmitComment = () => {
-    if (!newComment.trim()) return;
+    // Validate comment
+    const validation = validateInput(commentSchema, newComment);
+    
+    if (!validation.success) {
+      toast.error(validation.error || "Invalid comment");
+      setValidationError(validation.error || null);
+      return;
+    }
+
+    // Additional security check
+    if (containsMaliciousContent(newComment)) {
+      toast.error("Comment contains unsafe content");
+      setValidationError("Comment contains unsafe characters");
+      return;
+    }
+
+    // Use sanitized data
+    const sanitizedComment = validation.data;
 
     const comment: Comment = {
       id: `c${Date.now()}`,
       user: { name: "You", initials: "Y" },
-      content: newComment,
+      content: sanitizedComment,
       timestamp: new Date(),
     };
 
     setDisplayComments([...displayComments, comment]);
     setNewComment("");
+    setValidationError(null);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -85,28 +116,40 @@ export function CommentSection({ activityId, comments = SAMPLE_COMMENTS }: Comme
         ))}
       </div>
 
-      <div className="flex gap-2">
-        <Avatar className="h-8 w-8">
-          <AvatarImage src="" />
-          <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white text-xs">
-            Y
-          </AvatarFallback>
-        </Avatar>
-        <div className="flex-1 flex gap-2">
-          <Input
-            placeholder="Write a comment..."
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            onKeyPress={handleKeyPress}
-          />
-          <Button
-            size="sm"
-            onClick={handleSubmitComment}
-            disabled={!newComment.trim()}
-          >
-            <Send className="h-4 w-4" />
-          </Button>
+      <div className="flex gap-2 flex-col">
+        <div className="flex gap-2">
+          <Avatar className="h-8 w-8">
+            <AvatarImage src="" />
+            <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white text-xs">
+              Y
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 flex gap-2">
+            <div className="flex-1">
+              <Input
+                placeholder="Write a comment..."
+                value={newComment}
+                onChange={(e) => handleCommentChange(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className={validationError ? "border-red-500" : ""}
+                maxLength={1000}
+              />
+            </div>
+            <Button
+              size="sm"
+              onClick={handleSubmitComment}
+              disabled={!newComment.trim() || !!validationError}
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
+        {validationError && (
+          <div className="flex items-center gap-2 ml-10 text-sm text-red-600">
+            <AlertCircle className="h-4 w-4" />
+            <span>{validationError}</span>
+          </div>
+        )}
       </div>
     </div>
   );

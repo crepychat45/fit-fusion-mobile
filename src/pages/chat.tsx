@@ -155,7 +155,6 @@ const ChatPage = () => {
         }
 
         if (session) {
-          console.log("User authenticated:", session.user?.email);
           setSession(session);
           setUser(session.user);
           setIsAuthenticated(true);
