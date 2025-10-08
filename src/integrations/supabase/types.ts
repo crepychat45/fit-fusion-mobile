@@ -14,6 +14,74 @@ export type Database = {
   }
   public: {
     Tables: {
+      challenge_participants: {
+        Row: {
+          challenge_id: string
+          current_value: number | null
+          id: string
+          joined_at: string
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          current_value?: number | null
+          id?: string
+          joined_at?: string
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          current_value?: number | null
+          id?: string
+          joined_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_participants_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenges: {
+        Row: {
+          challenge_type: string
+          created_at: string
+          description: string | null
+          end_date: string
+          id: string
+          is_active: boolean | null
+          name: string
+          start_date: string
+          target_value: number | null
+        }
+        Insert: {
+          challenge_type: string
+          created_at?: string
+          description?: string | null
+          end_date: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          start_date: string
+          target_value?: number | null
+        }
+        Update: {
+          challenge_type?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          start_date?: string
+          target_value?: number | null
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           conversation_id: string
@@ -133,6 +201,96 @@ export type Database = {
         }
         Relationships: []
       }
+      exercise_logs: {
+        Row: {
+          created_at: string
+          exercise_id: string
+          id: string
+          notes: string | null
+          reps_completed: number[] | null
+          sets_completed: number | null
+          weight_used: number | null
+          workout_session_id: string
+        }
+        Insert: {
+          created_at?: string
+          exercise_id: string
+          id?: string
+          notes?: string | null
+          reps_completed?: number[] | null
+          sets_completed?: number | null
+          weight_used?: number | null
+          workout_session_id: string
+        }
+        Update: {
+          created_at?: string
+          exercise_id?: string
+          id?: string
+          notes?: string | null
+          reps_completed?: number[] | null
+          sets_completed?: number | null
+          weight_used?: number | null
+          workout_session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_logs_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exercise_logs_workout_session_id_fkey"
+            columns: ["workout_session_id"]
+            isOneToOne: false
+            referencedRelation: "workout_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exercises: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          difficulty: string | null
+          equipment: string[] | null
+          id: string
+          image_url: string | null
+          instructions: string[] | null
+          muscle_groups: string[] | null
+          name: string
+          video_url: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          difficulty?: string | null
+          equipment?: string[] | null
+          id?: string
+          image_url?: string | null
+          instructions?: string[] | null
+          muscle_groups?: string[] | null
+          name: string
+          video_url?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          difficulty?: string | null
+          equipment?: string[] | null
+          id?: string
+          image_url?: string | null
+          instructions?: string[] | null
+          muscle_groups?: string[] | null
+          name?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       Fitfusion: {
         Row: {
           created_at: string
@@ -180,6 +338,114 @@ export type Database = {
           value?: number
         }
         Relationships: []
+      }
+      post_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          post_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          post_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_likes: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          comments_count: number | null
+          content: string
+          created_at: string
+          id: string
+          image_url: string | null
+          likes_count: number | null
+          updated_at: string
+          user_id: string
+          workout_session_id: string | null
+        }
+        Insert: {
+          comments_count?: number | null
+          content: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          likes_count?: number | null
+          updated_at?: string
+          user_id: string
+          workout_session_id?: string | null
+        }
+        Update: {
+          comments_count?: number | null
+          content?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          likes_count?: number | null
+          updated_at?: string
+          user_id?: string
+          workout_session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_workout_session_id_fkey"
+            columns: ["workout_session_id"]
+            isOneToOne: false
+            referencedRelation: "workout_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -466,6 +732,137 @@ export type Database = {
         }
         Relationships: []
       }
+      workout_plan_exercises: {
+        Row: {
+          duration_seconds: number | null
+          exercise_id: string
+          id: string
+          order_index: number
+          reps: number | null
+          rest_seconds: number | null
+          sets: number
+          workout_plan_id: string
+        }
+        Insert: {
+          duration_seconds?: number | null
+          exercise_id: string
+          id?: string
+          order_index: number
+          reps?: number | null
+          rest_seconds?: number | null
+          sets?: number
+          workout_plan_id: string
+        }
+        Update: {
+          duration_seconds?: number | null
+          exercise_id?: string
+          id?: string
+          order_index?: number
+          reps?: number | null
+          rest_seconds?: number | null
+          sets?: number
+          workout_plan_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_plan_exercises_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workout_plan_exercises_workout_plan_id_fkey"
+            columns: ["workout_plan_id"]
+            isOneToOne: false
+            referencedRelation: "workout_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workout_plans: {
+        Row: {
+          created_at: string
+          days_per_week: number | null
+          description: string | null
+          difficulty_level: string | null
+          duration_weeks: number | null
+          id: string
+          is_public: boolean | null
+          name: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          days_per_week?: number | null
+          description?: string | null
+          difficulty_level?: string | null
+          duration_weeks?: number | null
+          id?: string
+          is_public?: boolean | null
+          name: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          days_per_week?: number | null
+          description?: string | null
+          difficulty_level?: string | null
+          duration_weeks?: number | null
+          id?: string
+          is_public?: boolean | null
+          name?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      workout_sessions: {
+        Row: {
+          calories_burned: number | null
+          completed_at: string | null
+          created_at: string
+          duration_minutes: number | null
+          id: string
+          notes: string | null
+          started_at: string
+          user_id: string
+          workout_plan_id: string | null
+        }
+        Insert: {
+          calories_burned?: number | null
+          completed_at?: string | null
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          notes?: string | null
+          started_at?: string
+          user_id: string
+          workout_plan_id?: string | null
+        }
+        Update: {
+          calories_burned?: number | null
+          completed_at?: string | null
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          notes?: string | null
+          started_at?: string
+          user_id?: string
+          workout_plan_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workout_sessions_workout_plan_id_fkey"
+            columns: ["workout_plan_id"]
+            isOneToOne: false
+            referencedRelation: "workout_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -500,6 +897,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_conversation_member: {
+        Args: { conv: string; user_uuid: string }
         Returns: boolean
       }
       is_phone_verified: {
