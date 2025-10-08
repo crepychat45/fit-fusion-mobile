@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
+import { SocialLogin } from "./social-login";
 
 interface EnhancedAuthFormProps {
   onSuccess?: () => void;
@@ -501,6 +502,8 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
                   </Button>
                 )}
               </form>
+
+              <SocialLogin />
 
               {/* Password Reset Modal */}
               <AnimatePresence>

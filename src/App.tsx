@@ -23,6 +23,7 @@ import Subscription from "./pages/subscription";
 import ChatPage from "./pages/chat";
 import AuthPage from "./components/auth/auth-page";
 import ResetPassword from "./pages/reset-password";
+import { ProtectedRoute } from "./components/auth/protected-route";
 import TermsOfService from "./pages/terms-of-service";
 import PrivacyPolicy from "./pages/privacy-policy";
 import Onboarding from "./pages/onboarding";
@@ -48,29 +49,29 @@ const AppContent: React.FC = () => {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/auth" element={<AuthPage />} />
-        <Route path="/onboarding" element={<Onboarding />} />
-        <Route path="/workouts" element={<Workouts />} />
-        <Route path="/workout-plans" element={<WorkoutPlans />} />
-        <Route path="/workout-detail/:id" element={<WorkoutDetail />} />
-        <Route path="/workout-session/:id" element={<WorkoutSession />} />
-        <Route path="/community" element={<Community />} />
-        <Route
-          path="/exercise/:workoutId/:exerciseId"
-          element={<ExerciseDetail />}
-        />
-        <Route path="/progress" element={<Progress />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/chat" element={<ChatPage />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/notifications" element={<NotificationsPage />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/help" element={<Help />} />
-        <Route path="/wearables" element={<Wearables />} />
-        <Route path="/export-data" element={<ExportData />} />
-        <Route path="/subscription" element={<Subscription />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/terms-of-service" element={<TermsOfService />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        
+        {/* Protected Routes - Require Authentication */}
+        <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+        <Route path="/workouts" element={<ProtectedRoute><Workouts /></ProtectedRoute>} />
+        <Route path="/workout-plans" element={<ProtectedRoute><WorkoutPlans /></ProtectedRoute>} />
+        <Route path="/workout-detail/:id" element={<ProtectedRoute><WorkoutDetail /></ProtectedRoute>} />
+        <Route path="/workout-session/:id" element={<ProtectedRoute><WorkoutSession /></ProtectedRoute>} />
+        <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
+        <Route path="/exercise/:workoutId/:exerciseId" element={<ProtectedRoute><ExerciseDetail /></ProtectedRoute>} />
+        <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+        <Route path="/privacy" element={<ProtectedRoute><Privacy /></ProtectedRoute>} />
+        <Route path="/help" element={<ProtectedRoute><Help /></ProtectedRoute>} />
+        <Route path="/wearables" element={<ProtectedRoute><Wearables /></ProtectedRoute>} />
+        <Route path="/export-data" element={<ProtectedRoute><ExportData /></ProtectedRoute>} />
+        <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
+        
         <Route path="*" element={<NotFound />} />
       </Routes>
       <FitAssistant />
