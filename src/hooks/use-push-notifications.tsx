@@ -57,15 +57,15 @@ export function usePushNotifications() {
       
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey) as BufferSource,
       });
 
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
-        // Store subscription in database
+        // Store subscription in database (cast to any until types regenerate)
         const subscriptionData = sub.toJSON();
-        await supabase.from('push_subscriptions').upsert({
+        await (supabase.from as any)('push_subscriptions').upsert({
           user_id: user.id,
           subscription: subscriptionData,
           endpoint: subscriptionData.endpoint,
@@ -103,8 +103,7 @@ export function usePushNotifications() {
         const { data: { user } } = await supabase.auth.getUser();
         
         if (user) {
-          await supabase
-            .from('push_subscriptions')
+          await (supabase.from as any)('push_subscriptions')
             .delete()
             .eq('user_id', user.id);
         }
@@ -143,7 +142,7 @@ export function usePushNotifications() {
         throw new Error('User not authenticated');
       }
 
-      await supabase.from('scheduled_notifications').insert({
+      await (supabase.from as any)('scheduled_notifications').insert({
         user_id: user.id,
         title,
         body,

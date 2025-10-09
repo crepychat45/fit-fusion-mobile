@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_events: {
+        Row: {
+          created_at: string
+          device: string | null
+          event: string
+          id: string
+          page: string | null
+          properties: Json | null
+          referrer: string | null
+          session_id: string | null
+          timestamp: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          device?: string | null
+          event: string
+          id?: string
+          page?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          timestamp: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          device?: string | null
+          event?: string
+          id?: string
+          page?: string | null
+          properties?: Json | null
+          referrer?: string | null
+          session_id?: string | null
+          timestamp?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       challenge_participants: {
         Row: {
           challenge_id: string
@@ -501,6 +540,66 @@ export type Database = {
         }
         Relationships: []
       }
+      push_subscriptions: {
+        Row: {
+          created_at: string
+          endpoint: string
+          id: string
+          subscription: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          endpoint: string
+          id?: string
+          subscription: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string
+          id?: string
+          subscription?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      scheduled_notifications: {
+        Row: {
+          body: string
+          created_at: string
+          data: Json | null
+          id: string
+          scheduled_for: string
+          sent_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          data?: Json | null
+          id?: string
+          scheduled_for: string
+          sent_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          data?: Json | null
+          id?: string
+          scheduled_for?: string
+          sent_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       sms_auth_logs: {
         Row: {
           attempts: number | null
@@ -871,6 +970,10 @@ export type Database = {
       cleanup_expired_sms_codes: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      get_auth_uid: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       get_user_profile: {
         Args: Record<PropertyKey, never> | { user_id: string }

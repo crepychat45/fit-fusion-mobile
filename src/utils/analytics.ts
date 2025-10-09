@@ -105,7 +105,7 @@ class Analytics {
       const eventsToSend = [...this.events];
       this.events = [];
 
-      await supabase.from('analytics_events').insert(eventsToSend);
+      await (supabase.from as any)('analytics_events').insert(eventsToSend);
     } catch (error) {
       console.error('Error flushing analytics:', error);
       // Re-add events back if flush failed
@@ -190,8 +190,7 @@ class Analytics {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
 
-      let query = supabase
-        .from('analytics_events')
+      let query = (supabase.from as any)('analytics_events')
         .select('*')
         .eq('user_id', user.id);
 
@@ -210,10 +209,10 @@ class Analytics {
       // Process analytics data
       const summary = {
         totalEvents: data.length,
-        workoutsCompleted: data.filter(e => e.event === 'workout_completed').length,
-        goalsAchieved: data.filter(e => e.event === 'goal_achieved').length,
-        achievementsUnlocked: data.filter(e => e.event === 'achievement_unlocked').length,
-        socialInteractions: data.filter(e => 
+        workoutsCompleted: data.filter((e: any) => e.event === 'workout_completed').length,
+        goalsAchieved: data.filter((e: any) => e.event === 'goal_achieved').length,
+        achievementsUnlocked: data.filter((e: any) => e.event === 'achievement_unlocked').length,
+        socialInteractions: data.filter((e: any) => 
           ['post_created', 'post_liked', 'comment_added'].includes(e.event)
         ).length,
       };
