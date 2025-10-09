@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import type { Database } from '@/integrations/supabase/types';
 
-export interface PushSubscription {
+export interface PushSubscriptionData {
   endpoint: string;
   keys: {
     p256dh: string;
@@ -55,21 +56,25 @@ export function usePushNotifications() {
       // Generate VAPID public key (in production, this should come from your server)
       const vapidPublicKey = 'YOUR_VAPID_PUBLIC_KEY';
       
+      const vapidKey = urlBase64ToUint8Array(vapidPublicKey);
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey) as BufferSource,
+        applicationServerKey: new Uint8Array(vapidKey),
       });
 
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
-        // Store subscription in database (cast to any until types regenerate)
         const subscriptionData = sub.toJSON();
-        await (supabase.from as any)('push_subscriptions').upsert({
-          user_id: user.id,
-          subscription: subscriptionData,
-          endpoint: subscriptionData.endpoint,
-        });
+        
+        // Store subscription using generic Database type
+        await supabase
+          .from('push_subscriptions' as any)
+          .upsert({
+            user_id: user.id,
+            subscription: subscriptionData,
+            endpoint: subscriptionData.endpoint,
+          } as any);
 
         setIsSubscribed(true);
         setSubscription(subscriptionData);
@@ -103,7 +108,8 @@ export function usePushNotifications() {
         const { data: { user } } = await supabase.auth.getUser();
         
         if (user) {
-          await (supabase.from as any)('push_subscriptions')
+          await supabase
+            .from('push_subscriptions' as any)
             .delete()
             .eq('user_id', user.id);
         }
@@ -142,13 +148,15 @@ export function usePushNotifications() {
         throw new Error('User not authenticated');
       }
 
-      await (supabase.from as any)('scheduled_notifications').insert({
-        user_id: user.id,
-        title,
-        body,
-        scheduled_for: scheduledTime.toISOString(),
-        data: data || {},
-      });
+      await supabase
+        .from('scheduled_notifications' as any)
+        .insert({
+          user_id: user.id,
+          title,
+          body,
+          scheduled_for: scheduledTime.toISOString(),
+          data: data || {},
+        } as any);
 
       toast({
         title: 'Reminder Set',
