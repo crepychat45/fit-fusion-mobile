@@ -3,6 +3,10 @@ import { Routes, Route } from "react-router-dom";
 import { SEOManager } from "./components/seo-manager";
 import { PerformanceUtils } from "./utils/performance-utils";
 import { AppWrapper } from "./components/app-wrapper";
+import { ErrorBoundaryWrapper } from "./components/error-boundary-wrapper";
+import { SkipNav } from "./components/accessibility/skip-nav";
+import { InstallPrompt } from "./components/pwa/install-prompt";
+import { OfflineIndicator } from "./components/pwa/offline-indicator";
 import Index from "./pages/Index";
 import Workouts from "./pages/workouts";
 import WorkoutDetail from "./pages/workout-detail";
@@ -45,8 +49,12 @@ const AppContent: React.FC = () => {
   }, []);
 
   return (
-    <SEOManager>
-      <Routes>
+    <ErrorBoundaryWrapper>
+      <SkipNav />
+      <SEOManager>
+        <InstallPrompt />
+        <OfflineIndicator />
+        <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/reset-password" element={<ResetPassword />} />
@@ -73,10 +81,11 @@ const AppContent: React.FC = () => {
         <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
         
         <Route path="*" element={<NotFound />} />
-      </Routes>
-      <FitAssistant />
-      <PerformanceMonitor />
-    </SEOManager>
+        </Routes>
+        <FitAssistant />
+        <PerformanceMonitor />
+      </SEOManager>
+    </ErrorBoundaryWrapper>
   );
 };
 
