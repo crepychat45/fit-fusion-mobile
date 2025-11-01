@@ -12,6 +12,7 @@ import { userProfile } from "@/data/user";
 import { DailyTip } from "@/components/daily-tip";
 import { WelcomeHeader } from "@/components/dashboard/welcome-header";
 import { EnhancedSmartwatchHub } from "@/components/dashboard/enhanced-smartwatch-hub";
+import { ProfileHeader } from "@/components/profile-header";
 import { TodaysWorkout } from "@/components/dashboard/todays-workout";
 import { UpcomingWorkouts } from "@/components/dashboard/upcoming-workouts";
 import { RecentActivitySection } from "@/components/dashboard/recent-activity-section";
@@ -41,6 +42,7 @@ import {
 } from "lucide-react";
 import { ErrorFixManager } from "@/components/error-fix-manager";
 import { EnhancedHomeFeatures } from "@/components/enhanced-home-features";
+import { AIWorkoutCoach } from "@/components/ai/ai-workout-coach";
 
 const scheduledWorkouts = [
   {
@@ -180,6 +182,16 @@ const Index = () => {
       </div>
 
       <WelcomeHeader userName={userProfile.name} showCompactProfile={true} />
+
+      {/* Profile Header */}
+      <motion.div
+        variants={itemVariants}
+        initial="hidden"
+        animate="visible"
+        className="px-4 mt-4"
+      >
+        <ProfileHeader />
+      </motion.div>
 
       <motion.div
         variants={containerVariants}
@@ -405,6 +417,11 @@ const Index = () => {
         {/* Enhanced Home Features - Replace popup notifications */}
         <motion.div variants={itemVariants} className="px-4">
           <EnhancedHomeFeatures />
+        </motion.div>
+
+        {/* AI Workout Coach */}
+        <motion.div variants={itemVariants} className="px-4">
+          <AIWorkoutCoach />
         </motion.div>
 
         {/* Enhanced Recent Activity */}

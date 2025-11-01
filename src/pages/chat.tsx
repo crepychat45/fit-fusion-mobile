@@ -379,15 +379,15 @@ const ChatPage = () => {
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
-              <div>
-                <h1 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
-                  <MessageCircle className="h-6 w-6" />
-                  FitFusion Chat
-                </h1>
-                <p className="text-white/90 text-xs md:text-sm">
-                  Secure fitness community • v6.2.1
-                </p>
-              </div>
+            <div>
+              <h1 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
+                <MessageCircle className="h-6 w-6" />
+                FitFusion Chat
+              </h1>
+              <p className="text-white/90 text-xs md:text-sm">
+                Secure fitness community • v7.0.0 • Enhanced AI
+              </p>
+            </div>
             </div>
 
             <div className="flex items-center gap-2">
@@ -419,6 +419,20 @@ const ChatPage = () => {
                     <ShieldCheck className="h-3 w-3 mr-1" />
                     {isMobile ? "SECURE" : securityLevel.toUpperCase()}
                   </Badge>
+
+                  {/* Profile Display */}
+                  {user && (
+                    <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-xs font-bold">
+                        {user.email?.charAt(0).toUpperCase()}
+                      </div>
+                      {!isMobile && (
+                        <span className="text-white text-xs font-medium max-w-[100px] truncate">
+                          {user.email?.split('@')[0]}
+                        </span>
+                      )}
+                    </div>
+                  )}
 
                   {/* Mobile Menu for Settings */}
                   {isMobile ? (

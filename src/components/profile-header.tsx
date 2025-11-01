@@ -1,13 +1,17 @@
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Camera, Edit2, Settings } from "lucide-react";
+import { Camera, Edit2 } from "lucide-react";
 import { useProfile, useAvatarUpload } from "@/hooks/use-profile";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 export function ProfileHeader() {
+  const navigate = useNavigate();
   const [user, setUser] = React.useState<any>(null);
+  const [refreshKey, setRefreshKey] = React.useState(0);
   const { profile, isLoading } = useProfile(user?.id);
   const { uploadAvatar } = useAvatarUpload();
   const { toast } = useToast();
@@ -17,6 +21,16 @@ export function ProfileHeader() {
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user);
     });
+
+    // Listen for profile updates
+    const handleProfileUpdate = () => {
+      setRefreshKey(prev => prev + 1);
+    };
+
+    window.addEventListener("profileUpdated", handleProfileUpdate);
+    return () => {
+      window.removeEventListener("profileUpdated", handleProfileUpdate);
+    };
   }, []);
 
   const handleAvatarClick = () => {
@@ -38,8 +52,19 @@ export function ProfileHeader() {
 
     try {
       await uploadAvatar.mutateAsync(file);
+      toast({
+        title: "Success",
+        description: "Profile picture updated successfully!",
+      });
+      // Trigger profile update event
+      window.dispatchEvent(new Event("profileUpdated"));
     } catch (error) {
       console.error("Avatar upload error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update profile picture",
+        variant: "destructive",
+      });
     }
   };
 
@@ -87,16 +112,23 @@ export function ProfileHeader() {
         />
       </div>
       
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold text-sm truncate">{displayName}</p>
-        <p className="text-xs text-muted-foreground truncate">
-          {profile.bio || "Fitness enthusiast"}
-        </p>
-      </div>
+      <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
+        <div>
+          <p className="font-semibold text-sm truncate">{displayName}</p>
+          <p className="text-xs text-muted-foreground truncate">
+            {profile.bio || "Fitness enthusiast"}
+          </p>
+        </div>
 
-      <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
-        <Edit2 className="h-4 w-4" />
-      </Button>
+        {/* Edit Profile Badge */}
+        <Badge 
+          variant="outline" 
+          className="bg-primary/5 text-primary border-primary/20 cursor-pointer hover:bg-primary/10 transition-colors text-xs px-2 py-0.5 shrink-0"
+          onClick={() => navigate("/profile")}
+        >
+          Edit
+        </Badge>
+      </div>
     </div>
   );
 }

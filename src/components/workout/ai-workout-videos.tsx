@@ -23,11 +23,13 @@ import {
   Share2,
   Heart,
 } from "lucide-react";
+import { VideoPlayer } from "./video-player";
 
 interface WorkoutVideo {
   id: string;
   title: string;
   thumbnail: string;
+  videoUrl: string;
   duration: string;
   difficulty: "beginner" | "intermediate" | "advanced";
   calories: number;
@@ -36,6 +38,7 @@ interface WorkoutVideo {
   views: number;
   rating: number;
   isFavorite: boolean;
+  description: string;
 }
 
 const workoutVideos: WorkoutVideo[] = [
@@ -43,6 +46,7 @@ const workoutVideos: WorkoutVideo[] = [
     id: "1",
     title: "30-Min HIIT Cardio Blast",
     thumbnail: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=600&fit=crop",
+    videoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     duration: "30:00",
     difficulty: "intermediate",
     calories: 350,
@@ -51,11 +55,13 @@ const workoutVideos: WorkoutVideo[] = [
     views: 12500,
     rating: 4.8,
     isFavorite: true,
+    description: "High-intensity interval training designed to maximize calorie burn and improve cardiovascular endurance.",
   },
   {
     id: "2",
     title: "Full Body Strength Training",
     thumbnail: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=800&h=600&fit=crop",
+    videoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
     duration: "45:00",
     difficulty: "advanced",
     calories: 420,
@@ -64,11 +70,13 @@ const workoutVideos: WorkoutVideo[] = [
     views: 18200,
     rating: 4.9,
     isFavorite: false,
+    description: "Complete strength workout targeting all major muscle groups with progressive overload techniques.",
   },
   {
     id: "3",
     title: "Yoga Flow for Beginners",
     thumbnail: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&h=600&fit=crop",
+    videoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
     duration: "20:00",
     difficulty: "beginner",
     calories: 150,
@@ -77,11 +85,13 @@ const workoutVideos: WorkoutVideo[] = [
     views: 9800,
     rating: 4.7,
     isFavorite: true,
+    description: "Gentle yoga flow perfect for beginners focusing on flexibility and mindfulness.",
   },
   {
     id: "4",
     title: "Core Crusher Abs Workout",
     thumbnail: "https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=800&h=600&fit=crop",
+    videoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
     duration: "15:00",
     difficulty: "intermediate",
     calories: 180,
@@ -90,11 +100,13 @@ const workoutVideos: WorkoutVideo[] = [
     views: 15600,
     rating: 4.6,
     isFavorite: false,
+    description: "Intense core workout targeting abs, obliques, and lower back for a strong midsection.",
   },
   {
     id: "5",
     title: "Dance Cardio Party",
     thumbnail: "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&h=600&fit=crop",
+    videoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
     duration: "40:00",
     difficulty: "beginner",
     calories: 300,
@@ -103,11 +115,13 @@ const workoutVideos: WorkoutVideo[] = [
     views: 11200,
     rating: 4.9,
     isFavorite: true,
+    description: "Fun and energetic dance cardio session that'll have you moving and grooving while burning calories.",
   },
   {
     id: "6",
     title: "Power Pilates",
     thumbnail: "https://images.unsplash.com/photo-1518310383802-640c2de311b2?w=800&h=600&fit=crop",
+    videoUrl: "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
     duration: "35:00",
     difficulty: "intermediate",
     calories: 250,
@@ -116,6 +130,7 @@ const workoutVideos: WorkoutVideo[] = [
     views: 8900,
     rating: 4.8,
     isFavorite: false,
+    description: "Dynamic Pilates workout focusing on core strength, flexibility, and body alignment.",
   },
 ];
 
@@ -278,9 +293,14 @@ export function AIWorkoutVideos() {
             <DialogTitle>{selectedVideo?.title}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="aspect-video bg-black rounded-lg flex items-center justify-center">
-              <p className="text-white">Video player would be integrated here</p>
-            </div>
+            {selectedVideo && (
+              <VideoPlayer
+                videoUrl={selectedVideo.videoUrl}
+                thumbnailUrl={selectedVideo.thumbnail}
+                title={selectedVideo.title}
+                autoPlay
+              />
+            )}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <Badge className={getDifficultyColor(selectedVideo?.difficulty || "beginner")}>
@@ -306,6 +326,9 @@ export function AIWorkoutVideos() {
             </div>
             <div>
               <h4 className="font-semibold mb-2">About this workout</h4>
+              <p className="text-sm text-muted-foreground mb-2">
+                {selectedVideo?.description}
+              </p>
               <p className="text-sm text-muted-foreground">
                 Join {selectedVideo?.instructor} for an amazing {selectedVideo?.category} workout.
                 This {selectedVideo?.duration} session is designed for {selectedVideo?.difficulty} level
