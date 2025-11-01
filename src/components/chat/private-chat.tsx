@@ -28,7 +28,7 @@ import {
   UserPlus,
   Search,
 } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
 
 interface PrivateMessage {

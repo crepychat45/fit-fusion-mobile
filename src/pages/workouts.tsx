@@ -40,8 +40,10 @@ import {
   Award,
   Flame,
   Brain,
+  Video,
 } from "lucide-react";
 import { workouts } from "@/data/workouts";
+import { AIWorkoutVideos } from "@/components/workout/ai-workout-videos";
 
 const Workouts = () => {
   const { toast } = useToast();
@@ -306,13 +308,20 @@ const Workouts = () => {
 
         {/* Enhanced Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-4 mb-6 bg-muted/50 backdrop-blur-sm">
+          <TabsList className="grid grid-cols-5 mb-6 bg-muted/50 backdrop-blur-sm">
             <TabsTrigger
               value="all"
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
             >
               <Target className="h-4 w-4 mr-2" />
               All
+            </TabsTrigger>
+            <TabsTrigger
+              value="videos"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            >
+              <Video className="h-4 w-4 mr-2" />
+              Videos
             </TabsTrigger>
             <TabsTrigger
               value="ai"
@@ -442,6 +451,10 @@ const Workouts = () => {
                     </motion.div>
                   ))}
                 </div>
+              </TabsContent>
+
+              <TabsContent value="videos" className="mt-0">
+                <AIWorkoutVideos />
               </TabsContent>
 
               <TabsContent value="ai" className="space-y-4 mt-0">

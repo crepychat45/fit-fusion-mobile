@@ -7,6 +7,7 @@ import { ErrorBoundaryWrapper } from "./components/error-boundary-wrapper";
 import { SkipNav } from "./components/accessibility/skip-nav";
 import { InstallPrompt } from "./components/pwa/install-prompt";
 import { OfflineIndicator } from "./components/pwa/offline-indicator";
+import { VersionUpdateDialog } from "./components/version-update-dialog";
 import Index from "./pages/Index";
 import Workouts from "./pages/workouts";
 import WorkoutDetail from "./pages/workout-detail";
@@ -52,6 +53,7 @@ const AppContent: React.FC = () => {
     <ErrorBoundaryWrapper>
       <SkipNav />
       <SEOManager>
+        <VersionUpdateDialog />
         <InstallPrompt />
         <OfflineIndicator />
         <Routes>
