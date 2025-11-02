@@ -33,33 +33,34 @@ interface VersionUpdate {
 }
 
 const latestVersion: VersionUpdate = {
-  version: "5.4.2",
-  releaseDate: "January 20, 2025",
+  version: "5.4.0",
+  releaseDate: "January 22, 2025",
   features: [
-    "Fitness Tools Page with BMI and TDEE calculators",
-    "Progress Tracker with bodyweight logging and charts",
-    "Nutrition Page with recipe library and food logger",
-    "Enhanced video player integration",
-    "AI Workout Coach on home page",
-    "Improved notification system - all in notification tab"
+    "AI Fitness Tools: 1RM Calculator and Body Fat % Calculator",
+    "Enhanced AI Workout Coach with chat history and export",
+    "Smartwatch Hub with brand logos (Apple, Samsung, Garmin)",
+    "Comprehensive AI responses for nutrition, injury prevention, motivation",
+    "Chat history persistence in localStorage and Supabase",
+    "Settings auto-save with cloud sync"
   ],
   improvements: [
-    "Smartwatch Hub with new dialogs and features",
-    "Real-time profile updates across the app",
-    "Modern gradient UI redesign",
-    "Better mobile/tablet/desktop layouts",
-    "Data persistence with localStorage"
+    "All chat conversations saved to storage automatically",
+    "AI Coach answers extended topics: nutrition, injuries, consistency",
+    "Smartwatch brand visual indicators with emojis",
+    "Enhanced profile management with instant updates",
+    "Better AI tool algorithms and calculations",
+    "Modern icon set across entire application"
   ],
   bugFixes: [
-    "Fixed notification pop-ups",
-    "Resolved profile sync issues",
-    "Fixed video player controls",
-    "Improved responsive layouts"
+    "Fixed settings not persisting across sessions",
+    "Resolved chat history loss on refresh",
+    "Fixed Smartwatch Hub connection issues",
+    "Improved AI response accuracy"
   ],
   securityUpdates: [
-    "Enhanced RLS policies",
-    "Improved input validation",
-    "Secure data storage"
+    "Secure data encryption for chat history",
+    "Enhanced Supabase RLS policies",
+    "Improved localStorage security practices"
   ]
 };
 

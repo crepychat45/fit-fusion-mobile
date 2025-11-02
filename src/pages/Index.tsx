@@ -43,6 +43,7 @@ import {
 import { ErrorFixManager } from "@/components/error-fix-manager";
 import { EnhancedHomeFeatures } from "@/components/enhanced-home-features";
 import { AIWorkoutCoach } from "@/components/ai/ai-workout-coach";
+import { AIFitnessTools } from "@/components/ai/ai-fitness-tools";
 
 const scheduledWorkouts = [
   {
@@ -422,6 +423,11 @@ const Index = () => {
         {/* AI Workout Coach */}
         <motion.div variants={itemVariants} className="px-4">
           <AIWorkoutCoach />
+        </motion.div>
+
+        {/* AI Fitness Tools */}
+        <motion.div variants={itemVariants} className="px-4">
+          <AIFitnessTools />
         </motion.div>
 
         {/* Enhanced Recent Activity */}

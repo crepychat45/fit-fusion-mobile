@@ -342,6 +342,19 @@ export function EnhancedSmartwatchHub() {
     }
   };
 
+  const getBrandLogo = (brand: string) => {
+    switch (brand.toLowerCase()) {
+      case "apple":
+        return "🍎";
+      case "samsung":
+        return "📱";
+      case "garmin":
+        return "🏃";
+      default:
+        return "⌚";
+    }
+  };
+
   return (
     <Card className="w-full relative overflow-hidden">
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
@@ -423,9 +436,12 @@ export function EnhancedSmartwatchHub() {
                   {/* Device Visual */}
                   <div className="relative">
                     <div
-                      className={`w-20 h-20 bg-gradient-to-br ${getBrandColor(watch.brand)} rounded-2xl flex items-center justify-center shadow-lg`}
+                      className={`w-20 h-20 bg-gradient-to-br ${getBrandColor(watch.brand)} rounded-2xl flex items-center justify-center shadow-lg relative overflow-hidden`}
                     >
-                      <Watch className="h-10 w-10 text-white" />
+                      <div className="absolute inset-0 flex items-center justify-center text-4xl">
+                        {getBrandLogo(watch.brand)}
+                      </div>
+                      <Watch className="h-10 w-10 text-white opacity-20 absolute" />
                     </div>
                     <div className="absolute -top-1 -right-1">
                       {getStatusIcon(watch.status)}

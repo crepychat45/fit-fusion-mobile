@@ -43,21 +43,21 @@ export function AppUpdateManager() {
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo>(() => {
     // Always use the fixed latest version
     const currentVersion =
-      localStorage.getItem("fitfusion-app-version") || "4.9.1";
-    const latestVersion = "5.0.2";
+      localStorage.getItem("fitfusion-app-version") || "5.4.0";
+    const latestVersion = "5.4.0";
     return {
       currentVersion,
       latestVersion,
       updateAvailable: currentVersion !== latestVersion,
-      updateSize: "18.7 MB",
+      updateSize: "20.5 MB",
       releaseNotes: [
-        "🎉 Major UI redesign with improved navigation",
-        "🔧 Fixed update installation and version persistence",
-        "📊 Enhanced dashboard with real-time analytics",
-        "🔒 Advanced security features and privacy controls",
-        "⚡ 60% performance improvement in load times",
-        "🎯 Smart workout recommendations with AI",
-        "📱 Better mobile responsiveness across all devices",
+        "🤖 AI Fitness Tools: 1RM & Body Fat Calculator",
+        "💬 Enhanced AI Coach with chat history & export",
+        "⌚ Smartwatch Hub with brand logos",
+        "💾 All settings & chats saved to storage",
+        "🔒 Enhanced security & data encryption",
+        "⚡ Improved performance & stability",
+        "🎨 New modern icon set throughout app",
       ],
       downloadUrl: "#",
       mandatory: false,

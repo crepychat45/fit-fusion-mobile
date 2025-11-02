@@ -1,5 +1,70 @@
 # FitFusion Changelog
 
+## Version 5.4.0 (2025-01-22)
+
+### 🎉 New Features
+- **AI Fitness Tools**: Advanced calculators powered by AI algorithms
+  - 1 Rep Max Calculator with training percentages
+  - Body Fat Percentage Calculator using US Navy Method
+- **Enhanced AI Workout Coach**: Comprehensive fitness assistant with extended knowledge
+  - Chat history persistence across sessions
+  - Export chat conversations to JSON
+  - Clear history functionality
+  - Answers questions about nutrition, injury prevention, motivation, consistency
+- **Smartwatch Hub Enhancements**: 
+  - Brand visual indicators (🍎 Apple, 📱 Samsung, 🏃 Garmin)
+  - Improved brand-specific styling and colors
+  - Better device connection status indicators
+- **Storage & Persistence**:
+  - All settings automatically saved to localStorage
+  - Chat conversations persisted across sessions
+  - Supabase cloud sync for backup
+  - Auto-save functionality with connection monitoring
+
+### ⚡ Improvements
+- **AI Intelligence**: Extended AI Coach knowledge base
+  - Comprehensive nutrition guidance
+  - Injury prevention and management advice
+  - Motivation and consistency strategies
+  - Detailed workout programming
+- **User Experience**: 
+  - Settings auto-save every 5 seconds
+  - Connection status monitoring
+  - Offline mode support
+  - Real-time sync indicators
+- **Design Updates**:
+  - New icon set throughout application
+  - Modern gradient cards on home page
+  - Enhanced smartwatch brand visuals
+  - Better mobile responsiveness
+
+### 🐛 Bug Fixes
+- Fixed settings not persisting across browser sessions
+- Resolved chat history being lost on page refresh
+- Fixed smartwatch connection status inconsistencies
+- Corrected AI Coach response accuracy issues
+- Improved localStorage error handling
+
+### 🔒 Security Updates
+- Encrypted chat history storage
+- Enhanced Supabase RLS policies for user data
+- Secure localStorage practices implemented
+- Protected API endpoints with validation
+
+### 💾 Data Management
+- All user data now saved to both localStorage and Supabase
+- Automatic backup and sync functionality
+- Export capabilities for chat conversations
+- Clear data options in settings
+
+### 🎨 UI/UX Enhancements
+- New AI tools card with modern design
+- Enhanced profile header with instant updates
+- Improved smartwatch device cards
+- Better visual feedback for all actions
+
+---
+
 ## Version 5.4.2 (2025-01-20)
 
 ### 🎉 New Features

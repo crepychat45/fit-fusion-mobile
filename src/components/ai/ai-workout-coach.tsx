@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,6 +14,8 @@ import {
   Heart,
   Zap,
   MessageSquare,
+  Trash2,
+  Download,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -25,18 +27,42 @@ interface Message {
 }
 
 export function AIWorkoutCoach() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      role: "assistant",
-      content:
-        "👋 Hi! I'm your AI Workout Coach. I can help you create personalized workout plans, provide form tips, suggest exercises, and answer your fitness questions. How can I assist you today?",
-      timestamp: new Date(),
-    },
-  ]);
+  // Load messages from localStorage
+  const [messages, setMessages] = useState<Message[]>(() => {
+    try {
+      const saved = localStorage.getItem("ai-coach-messages");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed.map((msg: any) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp),
+        }));
+      }
+    } catch (error) {
+      console.error("Error loading messages:", error);
+    }
+    return [
+      {
+        id: "1",
+        role: "assistant",
+        content:
+          "👋 Hi! I'm your AI Workout Coach. I can help you create personalized workout plans, provide form tips, suggest exercises, answer fitness questions, and provide nutrition advice. How can I assist you today?",
+        timestamp: new Date(),
+      },
+    ];
+  });
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem("ai-coach-messages", JSON.stringify(messages));
+    } catch (error) {
+      console.error("Error saving messages:", error);
+    }
+  }, [messages]);
 
   const quickPrompts = [
     { icon: Target, text: "Create a workout plan", color: "text-blue-500" },
@@ -182,6 +208,102 @@ Would you like a specific muscle-building workout plan?`;
 Ready to create your personalized plan?`;
     }
 
+    if (lowerQuery.includes("nutrition") || lowerQuery.includes("diet")) {
+      return `🥗 Comprehensive nutrition guidance:
+
+**Macronutrient Basics:**
+- Protein: 1.6-2.2g per kg body weight
+- Carbs: 3-6g per kg (adjust based on activity)
+- Fats: 0.8-1g per kg for hormonal health
+
+**Pre-Workout Nutrition:**
+- 1-2 hours before: Complex carbs + moderate protein
+- Example: Oatmeal with banana and peanut butter
+- Hydrate: 500ml water 2 hours before
+
+**Post-Workout Nutrition:**
+- Within 30-60 minutes: Fast-digesting protein + simple carbs
+- Example: Protein shake with fruit
+- Helps muscle recovery and glycogen replenishment
+
+**Meal Timing:**
+- Eat every 3-4 hours to maintain metabolism
+- Don't skip breakfast
+- Last meal 2-3 hours before bed
+
+**Hydration:**
+- 2-3L water daily minimum
+- More during training
+- Monitor urine color (pale yellow = well hydrated)
+
+Want specific meal plans or recipes?`;
+    }
+
+    if (lowerQuery.includes("injury") || lowerQuery.includes("pain")) {
+      return `🏥 Injury prevention and management:
+
+**Prevention:**
+- Always warm up 5-10 minutes
+- Progressive overload, not sudden jumps
+- Listen to your body
+- Proper form over heavy weight
+- Rest days are crucial
+
+**Common Issues:**
+- Joint pain: Check form, reduce weight
+- Muscle soreness: Normal if DOMS (24-48h)
+- Sharp pain: STOP immediately
+
+**Recovery Strategies:**
+- RICE: Rest, Ice, Compression, Elevation
+- Mobility work and stretching
+- Foam rolling for myofascial release
+- Sleep 7-9 hours nightly
+- Active recovery (light cardio, yoga)
+
+**When to See a Doctor:**
+- Pain persists beyond 2 weeks
+- Sharp, stabbing pain
+- Limited range of motion
+- Swelling that doesn't reduce
+
+Never train through sharp pain!`;
+    }
+
+    if (lowerQuery.includes("motivation") || lowerQuery.includes("consistency")) {
+      return `💪 Building lasting motivation and consistency:
+
+**Set SMART Goals:**
+- Specific: "Run 5km" not "get fit"
+- Measurable: Track weekly progress
+- Achievable: Start realistic
+- Relevant: Align with your values
+- Time-bound: 12-week target
+
+**Build Habits:**
+- Same time each day
+- Prepare gear night before
+- Start small (10 min daily)
+- Never miss twice in a row
+- Track with a calendar/app
+
+**Stay Motivated:**
+- Find a workout buddy
+- Join fitness community
+- Progress photos monthly
+- Celebrate small wins
+- Mix up your routine
+- Remember your "why"
+
+**Overcome Obstacles:**
+- Tired? Do 10 minutes anyway
+- No time? Morning workouts work best
+- Bored? Try new exercises
+- Plateau? Change your program
+
+Consistency beats intensity!`;
+    }
+
     return `I understand you're asking about "${query}". I'm here to help with:
 
 ✅ Creating custom workout plans
@@ -190,12 +312,46 @@ Ready to create your personalized plan?`;
 ✅ Recovery and injury prevention
 ✅ Progress tracking strategies
 ✅ Motivation and consistency tips
+✅ Specific exercise recommendations
+✅ Training for specific goals (strength, endurance, fat loss)
 
 Could you provide more details about what you'd like to know? The more specific you are, the better I can help!`;
   };
 
   const handleQuickPrompt = (prompt: string) => {
     setInput(prompt);
+  };
+
+  const clearHistory = () => {
+    if (confirm("Are you sure you want to clear all chat history?")) {
+      setMessages([
+        {
+          id: "1",
+          role: "assistant",
+          content:
+            "👋 Hi! I'm your AI Workout Coach. How can I assist you today?",
+          timestamp: new Date(),
+        },
+      ]);
+      toast({
+        title: "History Cleared",
+        description: "All messages have been deleted.",
+      });
+    }
+  };
+
+  const exportChat = () => {
+    const chatData = JSON.stringify(messages, null, 2);
+    const blob = new Blob([chatData], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `ai-coach-chat-${new Date().toISOString().split("T")[0]}.json`;
+    a.click();
+    toast({
+      title: "Chat Exported",
+      description: "Your conversation has been downloaded.",
+    });
   };
 
   return (
@@ -211,13 +367,31 @@ Could you provide more details about what you'd like to know? The more specific 
               Your personal AI fitness assistant
             </p>
           </div>
-          <Badge
-            variant="outline"
-            className="ml-auto bg-green-50 text-green-700 border-green-200"
-          >
-            <Sparkles className="h-3 w-3 mr-1" />
-            Online
-          </Badge>
+          <div className="ml-auto flex items-center gap-2">
+            <Badge
+              variant="outline"
+              className="bg-green-50 text-green-700 border-green-200"
+            >
+              <Sparkles className="h-3 w-3 mr-1" />
+              Online
+            </Badge>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={exportChat}
+              title="Export chat"
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearHistory}
+              title="Clear history"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         </CardTitle>
       </CardHeader>
 
