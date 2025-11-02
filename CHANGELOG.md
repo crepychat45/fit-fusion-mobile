@@ -1,6 +1,60 @@
 # FitFusion Changelog
 
-## Version 3.5.0 (2025-01-15)
+## Version 5.4.2 (2025-01-20)
+
+### 🎉 New Features
+- **Fitness Tools Page**: BMI Calculator and TDEE (Calorie) Calculator with detailed results
+- **Progress Tracker Page**: Bodyweight logging with visual charts, measurement tracking (waist, chest, arms, thighs)
+- **Nutrition Page**: High-protein recipe library with 6+ healthy recipes, comprehensive food logger for meal tracking
+- **Enhanced Video Player**: Integrated video player with controls (play/pause, volume, seek, fullscreen, playback speed)
+- **AI Workout Coach**: Personalized AI chatbot on home page providing workout plans and fitness advice
+- **Improved Chat Interface**: User avatars, email display, and enhanced mobile/desktop layouts
+- **Enhanced Notification System**: All notifications now display only in notification tab, removed intrusive pop-ups
+
+### ⚡ Improvements
+- **Smartwatch Hub Enhancements**: New dialog interfaces, improved watch face and wallpaper selection
+- **Profile Management**: Profile header displays on home page, real-time updates after name/image changes
+- **UI/UX Redesign**: Modern gradient cards, new icon set throughout the application
+- **Mobile Responsiveness**: Improved layouts for all screen sizes (mobile, tablet, desktop)
+- **Data Persistence**: All tools and trackers save to localStorage for seamless user experience
+- **Performance**: Faster page loads, optimized charts and visualizations
+
+### 🐛 Bug Fixes
+- Fixed notification pop-ups appearing on screen
+- Resolved profile update synchronization issues
+- Fixed video player autoplay and control issues
+- Corrected localStorage error handling across all features
+- Fixed responsive layouts on chat page for all devices
+
+### 🔒 Security Updates
+- Updated RLS policies for user data protection
+- Enhanced input validation on all forms
+- Improved error handling and user feedback
+- Secure data storage practices implemented
+
+### 📱 Mobile Improvements
+- Better touch interactions on all calculators and forms
+- Improved navigation between tools and features
+- Enhanced mobile chat interface
+- Optimized charts and graphs for mobile viewing
+
+### 🎨 Design Updates
+- New gradient color schemes across all pages
+- Modern card designs with hover effects
+- Improved icon consistency (Lucide React icons)
+- Better spacing and typography
+- Enhanced dark mode support
+
+### 🔧 Technical Improvements
+- Added Recharts library for data visualization
+- Improved TypeScript type definitions
+- Better state management with localStorage
+- Enhanced form validation
+- Optimized component structure
+
+---
+
+## Version 4.0.0 (2025-01-16)
 
 ### 🎉 New Features
 - **AI-Powered Workout Video Library**: Browse and watch workout videos with AI-powered recommendations, filtering by category, difficulty, and duration
@@ -67,7 +121,25 @@
 
 ---
 
-## Version 3.4.0 (Previous Release)
+### 🎉 New Features
+- **AI-Powered Workout Coach**: Interactive AI assistant for personalized fitness guidance
+- **Video Player Integration**: Full-featured video player with controls for workout videos
+- **Profile Header Component**: Enhanced user profile display with real-time updates
+- **Enhanced Chat UI**: Improved layouts, user avatars, and email display
+
+### ⚡ Improvements
+- Profile picture updates now reflect immediately across the application
+- Better mobile responsiveness on chat page
+- Enhanced smartwatch hub interface
+
+### 🐛 Bug Fixes
+- Fixed profile data refresh issues
+- Resolved video player control errors
+- Corrected avatar upload feedback
+
+---
+
+## Version 3.5.0 (2025-01-15)
 
 ### Features
 - Initial SmartWatch Hub implementation

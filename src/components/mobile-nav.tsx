@@ -17,6 +17,9 @@ import {
   Bell,
   Camera,
   Mic,
+  Calculator,
+  Apple,
+  TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -67,6 +70,24 @@ export function MobileNav() {
   const isMobile = useIsMobile();
 
   const additionalItems = [
+    {
+      href: "/tools",
+      icon: Calculator,
+      label: "Tools",
+      color: "text-blue-500",
+    },
+    {
+      href: "/progress-tracker",
+      icon: TrendingUp,
+      label: "Tracker",
+      color: "text-green-500",
+    },
+    {
+      href: "/nutrition",
+      icon: Apple,
+      label: "Nutrition",
+      color: "text-orange-500",
+    },
     {
       href: "/settings",
       icon: Settings,
@@ -270,7 +291,7 @@ export function MobileNav() {
               </div>
 
               {/* Traditional Items */}
-              <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-3 gap-3 mb-6">
                 {additionalItems.map((item, index) => {
                   const Icon = item.icon;
                   return (

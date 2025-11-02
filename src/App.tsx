@@ -8,6 +8,9 @@ import { SkipNav } from "./components/accessibility/skip-nav";
 import { InstallPrompt } from "./components/pwa/install-prompt";
 import { OfflineIndicator } from "./components/pwa/offline-indicator";
 import { VersionUpdateDialog } from "./components/version-update-dialog";
+import ToolsPage from "./pages/tools";
+import ProgressTrackerPage from "./pages/progress-tracker";
+import NutritionPage from "./pages/nutrition";
 import Index from "./pages/Index";
 import Workouts from "./pages/workouts";
 import WorkoutDetail from "./pages/workout-detail";
@@ -81,6 +84,9 @@ const AppContent: React.FC = () => {
         <Route path="/wearables" element={<ProtectedRoute><Wearables /></ProtectedRoute>} />
         <Route path="/export-data" element={<ProtectedRoute><ExportData /></ProtectedRoute>} />
         <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
+        <Route path="/tools" element={<ProtectedRoute><ToolsPage /></ProtectedRoute>} />
+        <Route path="/progress-tracker" element={<ProtectedRoute><ProgressTrackerPage /></ProtectedRoute>} />
+        <Route path="/nutrition" element={<ProtectedRoute><NutritionPage /></ProtectedRoute>} />
         
         <Route path="*" element={<NotFound />} />
         </Routes>

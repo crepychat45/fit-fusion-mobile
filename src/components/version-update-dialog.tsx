@@ -29,39 +29,38 @@ interface VersionUpdate {
   features: string[];
   improvements: string[];
   bugFixes: string[];
-  security: string[];
+  securityUpdates: string[];
 }
 
 const latestVersion: VersionUpdate = {
-  version: "3.5.0",
-  releaseDate: "2025-01-15",
+  version: "5.4.2",
+  releaseDate: "January 20, 2025",
   features: [
-    "AI-Powered Workout Video Library with personalized recommendations",
-    "Enhanced Profile Header with instant avatar updates",
-    "Smart Watch Face & Wallpaper Customization",
-    "Real-time Sync Across All Devices",
-    "Advanced Error Handling & Recovery System",
+    "Fitness Tools Page with BMI and TDEE calculators",
+    "Progress Tracker with bodyweight logging and charts",
+    "Nutrition Page with recipe library and food logger",
+    "Enhanced video player integration",
+    "AI Workout Coach on home page",
+    "Improved notification system - all in notification tab"
   ],
   improvements: [
-    "Optimized toast notification system across all components",
-    "Enhanced UI/UX with modern icon set",
-    "Improved cache management for faster loading",
-    "Better mobile responsiveness",
-    "Performance optimizations (50% faster page loads)",
+    "Smartwatch Hub with new dialogs and features",
+    "Real-time profile updates across the app",
+    "Modern gradient UI redesign",
+    "Better mobile/tablet/desktop layouts",
+    "Data persistence with localStorage"
   ],
   bugFixes: [
-    "Fixed import path issues in toast components",
-    "Resolved missing key props in map functions",
-    "Fixed undefined image sources",
-    "Corrected smartwatch hub wallpaper display",
-    "Fixed profile picture upload issues",
+    "Fixed notification pop-ups",
+    "Resolved profile sync issues",
+    "Fixed video player controls",
+    "Improved responsive layouts"
   ],
-  security: [
-    "Enhanced Content Security Policy headers",
-    "Improved service worker security",
-    "Added SMS auth log protection",
-    "Strengthened API endpoint security",
-  ],
+  securityUpdates: [
+    "Enhanced RLS policies",
+    "Improved input validation",
+    "Secure data storage"
+  ]
 };
 
 export function VersionUpdateDialog() {
@@ -210,7 +209,7 @@ export function VersionUpdateDialog() {
                 <h3 className="font-semibold text-lg">🔒 Security</h3>
               </div>
               <ul className="space-y-2">
-                {latestVersion.security.map((update, index) => (
+                {latestVersion.securityUpdates.map((update, index) => (
                   <li key={index} className="flex items-start gap-2 text-sm">
                     <CheckCircle2 className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
                     <span>{update}</span>
