@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ActiveWorkoutSession } from "@/components/workout/active-workout-session";
+import { EnhancedWorkoutPlayer } from "@/components/workout/enhanced-workout-player";
 import { workouts } from "@/data/workouts";
 import { useToast } from "@/hooks/use-toast";
 
@@ -31,6 +31,15 @@ export default function WorkoutSession() {
   }
 
   const handleComplete = () => {
+    // Save workout completion to localStorage
+    const completedWorkouts = JSON.parse(localStorage.getItem('completedWorkouts') || '[]');
+    completedWorkouts.push({
+      id: workout.id,
+      title: workout.title,
+      completedAt: new Date().toISOString(),
+    });
+    localStorage.setItem('completedWorkouts', JSON.stringify(completedWorkouts));
+
     toast({
       title: "Workout Complete! 🎉",
       description: `Great job completing ${workout.title}! Keep up the amazing work.`,
@@ -45,10 +54,10 @@ export default function WorkoutSession() {
   };
 
   return (
-    <ActiveWorkoutSession
-      workoutId={workout.id}
-      workoutTitle={workout.title}
+    <EnhancedWorkoutPlayer
       exercises={workout.exercises}
+      workoutName={workout.title}
+      totalDuration={workout.duration}
       onComplete={handleComplete}
       onExit={handleExit}
     />

@@ -44,25 +44,25 @@ export function AppUpdateManager() {
     // Always use the fixed latest version
     const currentVersion =
       localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || "5.2.0";
-    const latestVersion = "5.4.0";
+    const latestVersion = "5.4.3";
     return {
       currentVersion,
       latestVersion,
       updateAvailable: currentVersion !== latestVersion,
-      updateSize: "22.3 MB",
+      updateSize: "22.8 MB",
       releaseNotes: [
-        "🧮 AI Fitness Tools: 1RM & Body Fat Calculator",
-        "💬 Enhanced AI Coach with chat history & export",
-        "⌚ Smartwatch Hub with brand logos (🍎📱🏃)",
-        "🛠️ Tools Page: BMI & TDEE Calculators",
-        "📊 Progress Tracker with visual charts",
-        "🍎 Nutrition Page with recipe library",
-        "💾 All settings & chats saved to storage",
-        "🔒 Enhanced security: 2FA, biometric, VPN",
-        "⚡ No notification popups - all in tab",
-        "📜 Fixed scroll in settings panels",
-        "👤 Profile info displays correctly",
-        "🎨 New modern icon set throughout app",
+        "🎥 Enhanced Workout Video Player with full-screen support",
+        "🎯 Real-time workout tracking with completion markers",
+        "⌚ Interactive Smartwatch Hub with brand icons (🍎📱🏃)",
+        "🧠 AI-Powered Insights with persistence",
+        "🔐 Enhanced Security Center with settings save",
+        "💾 Workout completion history tracking",
+        "🔔 All notifications in notification center (no popups)",
+        "📱 Better mobile chat layouts",
+        "⚙️ All settings auto-save properly",
+        "🐛 Fixed smartwatch dialog and icons",
+        "🔧 Fixed AI insights persistence",
+        "🎬 Fixed workout video player controls",
       ],
       downloadUrl: "#",
       mandatory: false,
@@ -185,7 +185,7 @@ export function AppUpdateManager() {
       const now = new Date();
       const currentVersion =
         localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || "5.2.0";
-      const latestVersion = "5.4.0";
+      const latestVersion = "5.4.3";
 
       console.log(
         "Update check - Current:",

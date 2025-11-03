@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,36 +29,52 @@ interface AIInsight {
   actionable: boolean;
 }
 
-const aiInsights: AIInsight[] = [
-  {
-    id: "1",
-    type: "performance",
-    title: "Optimize Your Morning Routine",
-    description: "Based on your activity patterns, starting workouts 30 minutes earlier could improve performance by 15%",
-    confidence: 89,
-    actionable: true
-  },
-  {
-    id: "2",
-    type: "nutrition",
-    title: "Post-Workout Nutrition Window",
-    description: "Your muscle recovery could improve with protein intake within 30 minutes of cardio sessions",
-    confidence: 92,
-    actionable: true
-  },
-  {
-    id: "3",
-    type: "recovery",
-    title: "Sleep Quality Impact",
-    description: "Your workout intensity correlates with sleep duration. Consider 7.5+ hours for optimal recovery",
-    confidence: 85,
-    actionable: false
-  }
-];
-
 export function EnhancedHomeFeatures() {
+  const [aiInsights, setAiInsights] = useState<AIInsight[]>(() => {
+    try {
+      const saved = localStorage.getItem('ai-insights');
+      return saved ? JSON.parse(saved) : [
+        {
+          id: "1",
+          type: "performance",
+          title: "Optimize Your Morning Routine",
+          description: "Based on your activity patterns, starting workouts 30 minutes earlier could improve performance by 15%",
+          confidence: 89,
+          actionable: true
+        },
+        {
+          id: "2",
+          type: "nutrition",
+          title: "Post-Workout Nutrition Window",
+          description: "Your muscle recovery could improve with protein intake within 30 minutes of cardio sessions",
+          confidence: 92,
+          actionable: true
+        },
+        {
+          id: "3",
+          type: "recovery",
+          title: "Sleep Quality Impact",
+          description: "Your workout intensity correlates with sleep duration. Consider 7.5+ hours for optimal recovery",
+          confidence: 85,
+          actionable: false
+        }
+      ];
+    } catch {
+      return [];
+    }
+  });
+
   const [selectedInsight, setSelectedInsight] = useState<AIInsight | null>(null);
   const [aiThinking, setAIThinking] = useState(false);
+
+  // Save insights to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem('ai-insights', JSON.stringify(aiInsights));
+    } catch (error) {
+      console.error('Failed to save AI insights:', error);
+    }
+  }, [aiInsights]);
 
   const generateNewInsight = async () => {
     setAIThinking(true);

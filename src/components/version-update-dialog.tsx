@@ -33,48 +33,42 @@ interface VersionUpdate {
 }
 
 const latestVersion: VersionUpdate = {
-  version: "5.4.0",
-  releaseDate: "January 23, 2025",
+  version: "5.4.3",
+  releaseDate: "January 24, 2025",
   features: [
-    "AI Fitness Tools: 1RM Calculator and Body Fat % Calculator",
-    "Enhanced AI Workout Coach with chat history and export",
-    "Smartwatch Hub with brand logos (Apple, Samsung, Garmin)",
-    "Tools Page: BMI Calculator, TDEE Calculator for nutrition planning",
-    "Progress Tracker: Bodyweight logging with visual charts",
-    "Nutrition Page: High-protein recipe library and food logger",
-    "Chat history persistence in localStorage and Supabase",
-    "Settings auto-save with cloud sync and connection monitoring",
-    "Security Center: Two-factor auth, biometric login, VPN protection"
+    "Enhanced Workout Video Player with full-screen support and advanced controls",
+    "Real-time workout tracking with exercise completion markers",
+    "Interactive Smartwatch Hub with brand-specific icons (Apple 🍎, Samsung 📱, Garmin 🏃)",
+    "AI-Powered Insights with localStorage persistence",
+    "Enhanced Security Center with proper settings persistence",
+    "Workout completion history tracking",
+    "All notifications now show in notification center only (no popups)"
   ],
   improvements: [
-    "All settings automatically saved to localStorage and cloud",
-    "AI Coach answers extended topics: nutrition, injuries, consistency",
-    "Smartwatch brand visual indicators with emojis",
-    "Enhanced profile management with instant updates on home page",
-    "Better AI tool algorithms and calculations",
-    "Modern icon set throughout application",
-    "Improved scroll behavior in settings and chat pages",
-    "Video player with full controls for workout videos",
-    "Auto-save functionality with offline support"
+    "Improved workout video playback with video player controls",
+    "Better settings persistence in Security Center and Chat Settings",
+    "Enhanced profile display with complete user information",
+    "Optimized AI insights to maintain state across sessions",
+    "Better mobile responsiveness for chat interfaces",
+    "All settings auto-save to localStorage and Supabase",
+    "Enhanced smartwatch dialog functionality",
+    "Improved workout session tracking"
   ],
   bugFixes: [
-    "Fixed settings not persisting across sessions",
-    "Resolved chat history loss on refresh",
-    "Fixed Smartwatch Hub connection issues",
-    "Improved AI response accuracy",
-    "Fixed notification popups - all show only in notification tab",
-    "Fixed scroll issues in settings panels",
-    "Profile information now displays correctly after updates",
-    "Security settings now persist properly"
+    "Fixed smartwatch icon display and dialog functionality",
+    "Fixed settings not saving properly in Security Center",
+    "Fixed AI insights not persisting between sessions",
+    "Fixed workout video player not showing all exercises",
+    "Fixed chat component layout issues on mobile",
+    "Removed all popup notifications",
+    "Fixed workout player controls",
+    "Fixed settings persistence across components"
   ],
   securityUpdates: [
-    "Secure data encryption for all chat and settings",
-    "Enhanced Supabase RLS policies for user data",
+    "Enhanced data encryption for stored settings",
     "Improved localStorage security practices",
-    "Two-factor authentication with TOTP support",
-    "Biometric authentication for mobile devices",
-    "VPN requirement option for enhanced privacy",
-    "Secure mode for sensitive operations"
+    "Better error handling for sensitive operations",
+    "Secure workout data storage"
   ]
 };
 

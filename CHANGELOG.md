@@ -1,5 +1,49 @@
 # FitFusion Changelog
 
+## Version 5.4.3 (2025-01-24)
+
+### 🎉 New Features
+- **Enhanced Workout Video Player**: Full-screen support with advanced playback controls
+- **Real-time Workout Tracking**: Exercise completion markers with progress tracking
+- **Interactive Smartwatch Hub**: Brand-specific icons and dialogs for Apple, Samsung, and Garmin
+- **AI-Powered Insights Persistence**: AI insights now saved across sessions
+- **Enhanced Security Center**: All security settings properly saved and persisted
+
+### ⚡ Improvements
+- Improved workout video playback with advanced video player controls
+- Better settings persistence in Security Center, Chat Settings, and Smartwatch Hub
+- Enhanced profile display with complete user information on home page
+- Optimized AI insights to maintain state across sessions
+- Better mobile responsiveness for chat interfaces
+- All settings now auto-save to localStorage and Supabase
+
+### 🐛 Bug Fixes
+- Fixed smartwatch icon display and dialog functionality  
+- Fixed settings not saving properly in Security Center
+- Fixed AI insights not persisting between sessions
+- Fixed workout video player not showing all exercises properly
+- Fixed chat component layout issues on mobile devices
+- Removed all popup notifications (now showing in notification center only)
+
+### 🔒 Security Updates
+- Enhanced data encryption for all stored settings
+- Improved localStorage security practices
+- Better error handling for sensitive operations
+
+### 💾 Data Management
+- EnhancedWorkoutPlayer component for better workout tracking
+- Improved localStorage management across all components
+- Workout completion history now saved
+- Better state persistence for all user preferences
+
+### 🎨 UI/UX Enhancements
+- Interactive watch brand logos in Smartwatch Hub
+- Better visual feedback for settings changes
+- Improved notification system (no more popups)
+- Enhanced mobile chat layouts
+
+---
+
 ## Version 5.4.0 (2025-01-23)
 
 ### 🎉 New Features

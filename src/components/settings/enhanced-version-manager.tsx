@@ -42,6 +42,48 @@ interface ChangelogEntry {
 
 const mockChangelog: ChangelogEntry[] = [
   {
+    version: "5.4.3",
+    date: "2025-01-24",
+    type: "major",
+    changes: {
+      features: [
+        "🎥 Enhanced Workout Video Player with full-screen support and advanced controls",
+        "🎯 Real-time workout tracking with exercise completion markers",
+        "⌚ Interactive Smartwatch Hub with brand-specific icons (Apple 🍎, Samsung 📱, Garmin 🏃)",
+        "🧠 AI-Powered Insights with localStorage persistence",
+        "🔐 Enhanced Security Center with proper settings save",
+        "💾 Workout completion history tracking",
+        "🔔 All notifications now in notification center (no popups)",
+      ],
+      improvements: [
+        "🎬 Improved workout video playback with advanced player controls",
+        "💾 Better settings persistence across all components",
+        "👤 Enhanced profile display with complete user information",
+        "🧠 Optimized AI insights to maintain state across sessions",
+        "📱 Better mobile responsiveness for chat interfaces",
+        "⚙️ All settings auto-save to localStorage and Supabase",
+        "⌚ Enhanced smartwatch dialog functionality",
+        "🏋️ Improved workout session tracking",
+      ],
+      fixes: [
+        "Fixed smartwatch icon display and dialog functionality",
+        "Fixed settings not saving properly in Security Center",
+        "Fixed AI insights not persisting between sessions",
+        "Fixed workout video player not showing all exercises",
+        "Fixed chat component layout issues on mobile",
+        "Removed all popup notifications",
+        "Fixed workout player controls",
+        "Fixed settings persistence across components",
+      ],
+      security: [
+        "Enhanced data encryption for stored settings",
+        "Improved localStorage security practices",
+        "Better error handling for sensitive operations",
+        "Secure workout data storage",
+      ],
+    },
+  },
+  {
     version: "5.4.0",
     date: "2025-01-23",
     type: "major",
@@ -224,11 +266,11 @@ export function EnhancedVersionManager() {
   });
 
   const [latestVersionAvailable, setLatestVersionAvailable] =
-    useState<string>("5.4.0");
+    useState<string>("5.4.3");
   const [updateAvailable, setUpdateAvailable] = useState(() => {
     const stored = localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version");
     const current = stored || "5.2.0";
-    return current !== "5.4.0";
+    return current !== "5.4.3";
   });
 
   const [updateProgress, setUpdateProgress] = useState<number>(0);
