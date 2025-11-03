@@ -34,33 +34,47 @@ interface VersionUpdate {
 
 const latestVersion: VersionUpdate = {
   version: "5.4.0",
-  releaseDate: "January 22, 2025",
+  releaseDate: "January 23, 2025",
   features: [
     "AI Fitness Tools: 1RM Calculator and Body Fat % Calculator",
     "Enhanced AI Workout Coach with chat history and export",
     "Smartwatch Hub with brand logos (Apple, Samsung, Garmin)",
-    "Comprehensive AI responses for nutrition, injury prevention, motivation",
+    "Tools Page: BMI Calculator, TDEE Calculator for nutrition planning",
+    "Progress Tracker: Bodyweight logging with visual charts",
+    "Nutrition Page: High-protein recipe library and food logger",
     "Chat history persistence in localStorage and Supabase",
-    "Settings auto-save with cloud sync"
+    "Settings auto-save with cloud sync and connection monitoring",
+    "Security Center: Two-factor auth, biometric login, VPN protection"
   ],
   improvements: [
-    "All chat conversations saved to storage automatically",
+    "All settings automatically saved to localStorage and cloud",
     "AI Coach answers extended topics: nutrition, injuries, consistency",
     "Smartwatch brand visual indicators with emojis",
-    "Enhanced profile management with instant updates",
+    "Enhanced profile management with instant updates on home page",
     "Better AI tool algorithms and calculations",
-    "Modern icon set across entire application"
+    "Modern icon set throughout application",
+    "Improved scroll behavior in settings and chat pages",
+    "Video player with full controls for workout videos",
+    "Auto-save functionality with offline support"
   ],
   bugFixes: [
     "Fixed settings not persisting across sessions",
     "Resolved chat history loss on refresh",
     "Fixed Smartwatch Hub connection issues",
-    "Improved AI response accuracy"
+    "Improved AI response accuracy",
+    "Fixed notification popups - all show only in notification tab",
+    "Fixed scroll issues in settings panels",
+    "Profile information now displays correctly after updates",
+    "Security settings now persist properly"
   ],
   securityUpdates: [
-    "Secure data encryption for chat history",
-    "Enhanced Supabase RLS policies",
-    "Improved localStorage security practices"
+    "Secure data encryption for all chat and settings",
+    "Enhanced Supabase RLS policies for user data",
+    "Improved localStorage security practices",
+    "Two-factor authentication with TOTP support",
+    "Biometric authentication for mobile devices",
+    "VPN requirement option for enhanced privacy",
+    "Secure mode for sensitive operations"
   ]
 };
 
@@ -71,7 +85,7 @@ export function VersionUpdateDialog() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const lastVersion = localStorage.getItem("app-version");
+    const lastVersion = localStorage.getItem("app-version") || localStorage.getItem("fitfusion-app-version");
     const hasSeenUpdate = localStorage.getItem(`update-${latestVersion.version}`);
 
     if (lastVersion !== latestVersion.version && !hasSeenUpdate) {
@@ -83,29 +97,46 @@ export function VersionUpdateDialog() {
     setInstalling(true);
     setProgress(0);
 
-    // Simulate installation progress
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 200);
+    // Simulate installation progress with realistic steps
+    const steps = [
+      { progress: 10, delay: 300 },
+      { progress: 25, delay: 400 },
+      { progress: 40, delay: 500 },
+      { progress: 60, delay: 400 },
+      { progress: 80, delay: 300 },
+      { progress: 95, delay: 200 },
+      { progress: 100, delay: 100 },
+    ];
 
-    await new Promise((resolve) => setTimeout(resolve, 2500));
+    for (const step of steps) {
+      await new Promise((resolve) => setTimeout(resolve, step.delay));
+      setProgress(step.progress);
+    }
 
+    // Update all version storage locations
     localStorage.setItem("app-version", latestVersion.version);
+    localStorage.setItem("fitfusion-app-version", latestVersion.version);
     localStorage.setItem(`update-${latestVersion.version}`, "true");
+    localStorage.setItem("fitfusion-last-update", new Date().toISOString());
 
-    toast({
-      title: "✨ Update Installed!",
-      description: `FitFusion ${latestVersion.version} is now active`,
-    });
+    // Dispatch version update event
+    window.dispatchEvent(
+      new CustomEvent("versionUpdated", { detail: latestVersion.version })
+    );
 
     setInstalling(false);
     setOpen(false);
+
+    // Show success notification (not popup)
+    window.dispatchEvent(
+      new CustomEvent("showNotification", {
+        detail: {
+          type: "success",
+          title: "✨ Update Installed!",
+          message: `FitFusion ${latestVersion.version} is now active`,
+        },
+      })
+    );
 
     // Reload to apply changes
     setTimeout(() => {

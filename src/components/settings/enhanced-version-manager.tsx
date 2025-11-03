@@ -42,6 +42,54 @@ interface ChangelogEntry {
 
 const mockChangelog: ChangelogEntry[] = [
   {
+    version: "5.4.0",
+    date: "2025-01-23",
+    type: "major",
+    changes: {
+      features: [
+        "🧮 AI Fitness Tools: 1RM Calculator and Body Fat % Calculator",
+        "🤖 Enhanced AI Workout Coach with chat history and export functionality",
+        "⌚ Smartwatch Hub with brand logos (Apple 🍎, Samsung 📱, Garmin 🏃)",
+        "🛠️ Tools Page: BMI Calculator and TDEE Calculator",
+        "📊 Progress Tracker: Bodyweight logging with visual charts",
+        "🍎 Nutrition Page: High-protein recipe library and food logger",
+        "💾 Chat history persistence in localStorage and Supabase",
+        "⚙️ Settings auto-save with cloud sync and connection monitoring",
+        "🔐 Security Center: Two-factor auth, biometric login, VPN protection",
+        "🎥 Video player with full controls for workout videos",
+      ],
+      improvements: [
+        "💾 All settings automatically saved to localStorage and cloud",
+        "🤖 AI Coach answers nutrition, injury prevention, motivation questions",
+        "⌚ Smartwatch brand visual indicators with emojis",
+        "👤 Enhanced profile management with instant updates on home page",
+        "🧮 Better AI tool algorithms and calculations",
+        "🎨 Modern icon set throughout entire application",
+        "📜 Improved scroll behavior in settings and chat pages",
+        "🔄 Auto-save functionality with offline support",
+      ],
+      fixes: [
+        "Fixed settings not persisting across sessions",
+        "Resolved chat history loss on page refresh",
+        "Fixed Smartwatch Hub connection status issues",
+        "Improved AI response accuracy and context",
+        "Fixed notification popups - all show only in notification tab",
+        "Fixed scroll issues in settings panels",
+        "Profile information now displays correctly after updates",
+        "Security settings now persist properly across sessions",
+      ],
+      security: [
+        "Secure data encryption for all chat and settings",
+        "Enhanced Supabase RLS policies for user data protection",
+        "Improved localStorage security practices",
+        "Two-factor authentication with TOTP support",
+        "Biometric authentication for mobile devices",
+        "VPN requirement option for enhanced privacy",
+        "Secure mode for sensitive operations",
+      ],
+    },
+  },
+  {
     version: "5.2.0",
     date: "2024-12-30",
     type: "major",
@@ -171,16 +219,16 @@ export function EnhancedVersionManager() {
 
   // Get current version from localStorage or default
   const [currentVersion, setCurrentVersion] = useState<string>(() => {
-    const stored = localStorage.getItem("fitfusion-app-version");
-    return stored || "5.1.0";
+    const stored = localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version");
+    return stored || "5.2.0";
   });
 
   const [latestVersionAvailable, setLatestVersionAvailable] =
-    useState<string>("5.1.0");
+    useState<string>("5.4.0");
   const [updateAvailable, setUpdateAvailable] = useState(() => {
-    const stored = localStorage.getItem("fitfusion-app-version");
-    const current = stored || "4.8.0";
-    return current !== "5.1.0";
+    const stored = localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version");
+    const current = stored || "5.2.0";
+    return current !== "5.4.0";
   });
 
   const [updateProgress, setUpdateProgress] = useState<number>(0);

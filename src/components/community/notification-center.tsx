@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Sheet,
   SheetContent,
@@ -71,6 +71,29 @@ const SAMPLE_NOTIFICATIONS: Notification[] = [
 export function NotificationCenter() {
   const [notifications, setNotifications] = useState(SAMPLE_NOTIFICATIONS);
   const unreadCount = notifications.filter((n) => !n.isRead).length;
+
+  // Listen for new notifications (instead of showing toast popups)
+  useEffect(() => {
+    const handleNewNotification = (event: CustomEvent) => {
+      const { type, title, message } = event.detail;
+      
+      const newNotification: Notification = {
+        id: `n${Date.now()}`,
+        type: type === "success" ? "achievement" : "challenge",
+        content: `${title}: ${message}`,
+        timestamp: new Date(),
+        isRead: false,
+      };
+      
+      setNotifications((prev) => [newNotification, ...prev]);
+    };
+
+    window.addEventListener("showNotification" as any, handleNewNotification);
+    
+    return () => {
+      window.removeEventListener("showNotification" as any, handleNewNotification);
+    };
+  }, []);
 
   const getNotificationIcon = (type: Notification["type"]) => {
     switch (type) {

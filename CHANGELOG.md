@@ -1,6 +1,6 @@
 # FitFusion Changelog
 
-## Version 5.4.0 (2025-01-22)
+## Version 5.4.0 (2025-01-23)
 
 ### 🎉 New Features
 - **AI Fitness Tools**: Advanced calculators powered by AI algorithms
@@ -15,11 +15,30 @@
   - Brand visual indicators (🍎 Apple, 📱 Samsung, 🏃 Garmin)
   - Improved brand-specific styling and colors
   - Better device connection status indicators
+- **Tools Page**: Comprehensive fitness calculators
+  - BMI Calculator with health category indicators
+  - TDEE (Total Daily Energy Expenditure) Calculator
+  - Activity level selection for accurate calorie calculations
+- **Progress Tracker Page**: Complete progress monitoring
+  - Bodyweight logging with visual charts
+  - Measurement tracking (waist, chest, arms, thighs)
+  - Historical data visualization with trends
+- **Nutrition Page**: Dietary management features
+  - High-protein recipe library with 6+ healthy recipes
+  - Comprehensive food logger for meal tracking
+  - Calorie and macro tracking
 - **Storage & Persistence**:
   - All settings automatically saved to localStorage
   - Chat conversations persisted across sessions
   - Supabase cloud sync for backup
   - Auto-save functionality with connection monitoring
+- **Security Center Enhancements**:
+  - Two-factor authentication with TOTP support
+  - Biometric authentication (fingerprint, Face ID)
+  - Secure mode for sensitive operations
+  - VPN requirement option for enhanced privacy
+  - Device trust management
+  - All security settings persist properly
 
 ### ⚡ Improvements
 - **AI Intelligence**: Extended AI Coach knowledge base
@@ -29,14 +48,23 @@
   - Detailed workout programming
 - **User Experience**: 
   - Settings auto-save every 5 seconds
-  - Connection status monitoring
-  - Offline mode support
+  - Connection status monitoring with offline support
   - Real-time sync indicators
+  - No notification popups - all show in notification tab only
 - **Design Updates**:
   - New icon set throughout application
   - Modern gradient cards on home page
   - Enhanced smartwatch brand visuals
   - Better mobile responsiveness
+  - Improved scroll behavior in all settings panels
+- **Profile Display**:
+  - Profile information shows correctly on home page
+  - Instant updates after name/photo changes
+  - Real-time synchronization across components
+- **Video Player**: 
+  - Full controls for workout videos
+  - Play/pause, volume, seek, fullscreen
+  - Playback speed control
 
 ### 🐛 Bug Fixes
 - Fixed settings not persisting across browser sessions
@@ -44,24 +72,38 @@
 - Fixed smartwatch connection status inconsistencies
 - Corrected AI Coach response accuracy issues
 - Improved localStorage error handling
+- **Fixed notification popups** - all notifications now show only in notification tab
+- **Fixed scroll issues** in settings and chat settings panels
+- **Profile information** now displays correctly after updates
+- **Security settings** now persist properly across sessions
+- Fixed video player autoplay and control issues
 
 ### 🔒 Security Updates
 - Encrypted chat history storage
 - Enhanced Supabase RLS policies for user data
 - Secure localStorage practices implemented
 - Protected API endpoints with validation
+- Two-factor authentication security enhancements
+- Biometric data encryption
+- VPN detection and enforcement
+- Secure mode with additional validation
 
 ### 💾 Data Management
 - All user data now saved to both localStorage and Supabase
 - Automatic backup and sync functionality
 - Export capabilities for chat conversations
 - Clear data options in settings
+- Connection monitoring for offline/online states
+- Auto-save with 5-second debounce
 
 ### 🎨 UI/UX Enhancements
 - New AI tools card with modern design
 - Enhanced profile header with instant updates
 - Improved smartwatch device cards
 - Better visual feedback for all actions
+- Scroll areas in all settings panels
+- Modern animations and transitions
+- Responsive design improvements
 
 ---
 

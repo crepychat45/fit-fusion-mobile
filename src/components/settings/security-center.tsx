@@ -14,6 +14,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Shield,
   Lock,
@@ -38,19 +39,78 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export function SecurityCenter() {
   const { toast } = useToast();
-  const [encryptionEnabled, setEncryptionEnabled] = useState(true);
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-  const [biometricEnabled, setBiometricEnabled] = useState(false);
-  const [autoLockEnabled, setAutoLockEnabled] = useState(true);
-  const [vpnRequired, setVpnRequired] = useState(false);
-  const [secureMode, setSecureMode] = useState(false);
+  
+  // Load settings from localStorage
+  const [encryptionEnabled, setEncryptionEnabled] = useState(() => {
+    const saved = localStorage.getItem("security-encryption");
+    return saved ? JSON.parse(saved) : true;
+  });
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(() => {
+    const saved = localStorage.getItem("security-2fa");
+    return saved ? JSON.parse(saved) : false;
+  });
+  const [biometricEnabled, setBiometricEnabled] = useState(() => {
+    const saved = localStorage.getItem("security-biometric");
+    return saved ? JSON.parse(saved) : false;
+  });
+  const [autoLockEnabled, setAutoLockEnabled] = useState(() => {
+    const saved = localStorage.getItem("security-autolock");
+    return saved ? JSON.parse(saved) : true;
+  });
+  const [vpnRequired, setVpnRequired] = useState(() => {
+    const saved = localStorage.getItem("security-vpn");
+    return saved ? JSON.parse(saved) : false;
+  });
+  const [secureMode, setSecureMode] = useState(() => {
+    const saved = localStorage.getItem("security-secure-mode");
+    return saved ? JSON.parse(saved) : false;
+  });
   const [lastSecurityScan, setLastSecurityScan] = useState<Date | null>(null);
   const [securityScore, setSecurityScore] = useState(85);
   const [showQRCode, setShowQRCode] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
-  const [passwordlessLogin, setPasswordlessLogin] = useState(false);
-  const [deviceTrust, setDeviceTrust] = useState(true);
+  const [passwordlessLogin, setPasswordlessLogin] = useState(() => {
+    const saved = localStorage.getItem("security-passwordless");
+    return saved ? JSON.parse(saved) : false;
+  });
+  const [deviceTrust, setDeviceTrust] = useState(() => {
+    const saved = localStorage.getItem("security-device-trust");
+    return saved ? JSON.parse(saved) : true;
+  });
   const [sessionTimeout, setSessionTimeout] = useState(30);
+
+  // Save settings to localStorage whenever they change
+  React.useEffect(() => {
+    localStorage.setItem("security-encryption", JSON.stringify(encryptionEnabled));
+  }, [encryptionEnabled]);
+
+  React.useEffect(() => {
+    localStorage.setItem("security-2fa", JSON.stringify(twoFactorEnabled));
+  }, [twoFactorEnabled]);
+
+  React.useEffect(() => {
+    localStorage.setItem("security-biometric", JSON.stringify(biometricEnabled));
+  }, [biometricEnabled]);
+
+  React.useEffect(() => {
+    localStorage.setItem("security-autolock", JSON.stringify(autoLockEnabled));
+  }, [autoLockEnabled]);
+
+  React.useEffect(() => {
+    localStorage.setItem("security-vpn", JSON.stringify(vpnRequired));
+  }, [vpnRequired]);
+
+  React.useEffect(() => {
+    localStorage.setItem("security-secure-mode", JSON.stringify(secureMode));
+  }, [secureMode]);
+
+  React.useEffect(() => {
+    localStorage.setItem("security-passwordless", JSON.stringify(passwordlessLogin));
+  }, [passwordlessLogin]);
+
+  React.useEffect(() => {
+    localStorage.setItem("security-device-trust", JSON.stringify(deviceTrust));
+  }, [deviceTrust]);
 
   const runSecurityScan = async () => {
     setLastSecurityScan(new Date());
@@ -183,7 +243,8 @@ export function SecurityCenter() {
   const SecurityIcon = currentSecurityLevel.icon;
 
   return (
-    <div className="space-y-6 h-full overflow-y-auto">
+    <ScrollArea className="h-[calc(100vh-12rem)]">
+      <div className="space-y-6 pr-4">
       {/* Enhanced Security Dashboard */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -556,6 +617,7 @@ export function SecurityCenter() {
           </CardContent>
         </Card>
       </motion.div>
-    </div>
+      </div>
+    </ScrollArea>
   );
 }

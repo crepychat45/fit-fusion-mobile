@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bell, Lock, Smartphone } from "lucide-react";
 import { ChatSettings } from "@/types/chat";
 import { VersionManager } from "./version-manager";
@@ -96,8 +97,9 @@ export function ChatSettingsPanel() {
   };
 
   return (
-    <div className="space-y-6">
-      <Tabs defaultValue="security">
+    <ScrollArea className="h-[calc(100vh-16rem)]">
+      <div className="space-y-6 pr-4">
+        <Tabs defaultValue="security">
         <TabsList className="grid grid-cols-4 mb-6">
           <TabsTrigger value="security">Security</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
@@ -395,6 +397,7 @@ export function ChatSettingsPanel() {
           </div>
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </ScrollArea>
   );
 }

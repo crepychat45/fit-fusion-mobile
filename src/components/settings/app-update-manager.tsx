@@ -43,20 +43,25 @@ export function AppUpdateManager() {
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo>(() => {
     // Always use the fixed latest version
     const currentVersion =
-      localStorage.getItem("fitfusion-app-version") || "5.4.0";
+      localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || "5.2.0";
     const latestVersion = "5.4.0";
     return {
       currentVersion,
       latestVersion,
       updateAvailable: currentVersion !== latestVersion,
-      updateSize: "20.5 MB",
+      updateSize: "22.3 MB",
       releaseNotes: [
-        "🤖 AI Fitness Tools: 1RM & Body Fat Calculator",
+        "🧮 AI Fitness Tools: 1RM & Body Fat Calculator",
         "💬 Enhanced AI Coach with chat history & export",
-        "⌚ Smartwatch Hub with brand logos",
+        "⌚ Smartwatch Hub with brand logos (🍎📱🏃)",
+        "🛠️ Tools Page: BMI & TDEE Calculators",
+        "📊 Progress Tracker with visual charts",
+        "🍎 Nutrition Page with recipe library",
         "💾 All settings & chats saved to storage",
-        "🔒 Enhanced security & data encryption",
-        "⚡ Improved performance & stability",
+        "🔒 Enhanced security: 2FA, biometric, VPN",
+        "⚡ No notification popups - all in tab",
+        "📜 Fixed scroll in settings panels",
+        "👤 Profile info displays correctly",
         "🎨 New modern icon set throughout app",
       ],
       downloadUrl: "#",
@@ -116,11 +121,12 @@ export function AppUpdateManager() {
   // Sync versions across the app
   const syncVersions = () => {
     const storedVersion =
-      localStorage.getItem("fitfusion-app-version") || "4.9.1";
+      localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || "5.2.0";
 
     // Always make sure localStorage has the correct version
     if (updateInfo.currentVersion !== storedVersion) {
       localStorage.setItem("fitfusion-app-version", updateInfo.currentVersion);
+      localStorage.setItem("app-version", updateInfo.currentVersion);
       console.log("Version synced to:", updateInfo.currentVersion);
     }
 
@@ -178,8 +184,8 @@ export function AppUpdateManager() {
 
       const now = new Date();
       const currentVersion =
-        localStorage.getItem("fitfusion-app-version") || "4.9.1";
-      const latestVersion = "5.0.2";
+        localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || "5.2.0";
+      const latestVersion = "5.4.0";
 
       console.log(
         "Update check - Current:",
@@ -263,6 +269,7 @@ export function AppUpdateManager() {
       // Update version info and localStorage IMMEDIATELY
       const newVersion = updateInfo.latestVersion;
       localStorage.setItem("fitfusion-app-version", newVersion);
+      localStorage.setItem("app-version", newVersion);
       localStorage.setItem("fitfusion-last-update", new Date().toISOString());
 
       console.log("Update installed, new version:", newVersion);
