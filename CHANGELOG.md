@@ -1,5 +1,30 @@
 # FitFusion Changelog
 
+## Version 5.4.4 (2025-01-24)
+
+### 🎉 New Features
+- **New Fitness Fusion Logo**: Modern animated logo with activity and energy theme
+- **Daily Workouts**: Personalized daily workout recommendations with progress tracking
+- **Advanced Smartwatch Hub**:
+  - Device onboarding wizard with step-by-step setup for all major brands
+  - Watch face gallery with filtering and one-click apply
+  - Custom wallpaper uploader with live preview and editing
+  - Notification management for apps, fitness alerts, and system notifications
+  - Find My Device with ping, vibrate, and location tracking
+- **Enhanced Profile Display**: Complete profile information on home page with avatar
+
+### 🔧 Improvements
+- Optimized home page loading performance
+- Enhanced workout video playback controls
+- Improved mobile responsiveness
+
+### 🐛 Bug Fixes
+- Fixed smartwatch settings persistence
+- Resolved workout video playback issues
+- Fixed scroll issues in settings pages
+
+---
+
 ## Version 5.4.3 (2025-01-24)
 
 ### 🎉 New Features

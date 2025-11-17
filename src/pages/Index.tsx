@@ -44,6 +44,8 @@ import { ErrorFixManager } from "@/components/error-fix-manager";
 import { EnhancedHomeFeatures } from "@/components/enhanced-home-features";
 import { AIWorkoutCoach } from "@/components/ai/ai-workout-coach";
 import { AIFitnessTools } from "@/components/ai/ai-fitness-tools";
+import { DailyWorkouts } from "@/components/dashboard/daily-workouts";
+import { FitnessFusionLogo } from "@/components/fitness-fusion-logo";
 
 const scheduledWorkouts = [
   {
