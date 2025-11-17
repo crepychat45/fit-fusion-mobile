@@ -33,11 +33,16 @@ interface VersionUpdate {
 }
 
 const latestVersion: VersionUpdate = {
-  version: "5.4.3",
+  version: "5.4.4",
   releaseDate: "January 24, 2025",
   features: [
-    "Enhanced Workout Video Player with full-screen support and advanced controls",
-    "Real-time workout tracking with exercise completion markers",
+    "New Fitness Fusion Logo with animated activity theme",
+    "Daily Workouts: Personalized recommendations with progress tracking",
+    "Advanced Smartwatch Hub with device onboarding wizard",
+    "Watch Face Gallery with 100+ customizable faces",
+    "Custom Wallpaper Uploader with live preview and editing",
+    "Find My Device with ping and location tracking",
+    "Enhanced Notification Management for apps and fitness alerts",
     "Interactive Smartwatch Hub with brand-specific icons (Apple 🍎, Samsung 📱, Garmin 🏃)",
     "AI-Powered Insights with localStorage persistence",
     "Enhanced Security Center with proper settings persistence",
