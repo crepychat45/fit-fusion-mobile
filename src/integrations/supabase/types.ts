@@ -967,22 +967,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      cleanup_expired_sms_codes: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      get_auth_uid: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      get_user_profile: {
-        Args: Record<PropertyKey, never> | { user_id: string }
-        Returns: {
-          email: string
-          id: number
-          username: string
-        }[]
-      }
+      cleanup_expired_sms_codes: { Args: never; Returns: number }
+      get_auth_uid: { Args: never; Returns: string }
+      get_user_profile:
+        | {
+            Args: never
+            Returns: {
+              email: string
+              id: number
+              username: string
+            }[]
+          }
+        | { Args: { user_id: string }; Returns: Json }
       grant_user_role: {
         Args: {
           _admin_id: string
@@ -991,10 +987,7 @@ export type Database = {
         }
         Returns: undefined
       }
-      handle_new_user: {
-        Args: { p_user_id: string }
-        Returns: undefined
-      }
+      handle_new_user: { Args: { p_user_id: string }; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1006,45 +999,29 @@ export type Database = {
         Args: { conv: string; user_uuid: string }
         Returns: boolean
       }
-      is_phone_verified: {
-        Args: { _user_id: string }
-        Returns: boolean
-      }
-      manage_user_profiles: {
-        Args:
-          | Record<PropertyKey, never>
-          | {
+      is_phone_verified: { Args: { _user_id: string }; Returns: boolean }
+      manage_user_profiles:
+        | {
+            Args: {
               action: string
               new_email?: string
               new_username?: string
               user_id?: number
             }
-        Returns: {
-          email: string
-          id: number
-          username: string
-        }[]
-      }
-      "Money Manager pro": {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      recover_password: {
-        Args: Record<PropertyKey, never> | { user_email: string }
-        Returns: undefined
-      }
-      "SMS Auth Relay": {
-        Args: { fitfusion: number }
-        Returns: undefined
-      }
-      sms_auth_relay: {
-        Args: { fitfusion: number }
-        Returns: Json
-      }
-      sms_auth_relay_proxy: {
-        Args: { fitfusion: number }
-        Returns: Json
-      }
+            Returns: {
+              email: string
+              id: number
+              username: string
+            }[]
+          }
+        | { Args: never; Returns: undefined }
+      "Money Manager pro": { Args: never; Returns: undefined }
+      recover_password:
+        | { Args: { user_email: string }; Returns: undefined }
+        | { Args: never; Returns: undefined }
+      "SMS Auth Relay": { Args: { fitfusion: number }; Returns: undefined }
+      sms_auth_relay: { Args: { fitfusion: number }; Returns: Json }
+      sms_auth_relay_proxy: { Args: { fitfusion: number }; Returns: Json }
       sms_auth_relay_wrapper: {
         Args: { fitfusion: number }
         Returns: undefined
