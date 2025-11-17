@@ -307,6 +307,11 @@ const Index = () => {
           )}
         </AnimatePresence>
 
+        {/* Daily Workouts */}
+        <motion.div variants={itemVariants} className="px-4">
+          <DailyWorkouts />
+        </motion.div>
+
         {/* Enhanced Smartwatch Hub */}
         <motion.div
           variants={itemVariants}

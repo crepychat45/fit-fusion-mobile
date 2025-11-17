@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Dialog,
   DialogContent,
@@ -13,8 +14,11 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
-import watchFacesImage from "@/assets/watch-faces-preview.jpg";
-import watchWallpapersImage from "@/assets/watch-wallpapers.jpg";
+import { SmartWatchDeviceWizard } from "./smartwatch-device-wizard";
+import { WatchFaceGallery } from "./smartwatch-face-gallery";
+import { CustomWallpaperUploader } from "./smartwatch-custom-wallpaper";
+import { SmartWatchNotifications } from "./smartwatch-notifications";
+import { FindMyDevice } from "./smartwatch-find-device";
 import {
   Watch,
   Battery,
@@ -41,6 +45,9 @@ import {
   Download,
   Star,
   Clock,
+  Bell,
+  MapPin,
+  Plus,
 } from "lucide-react";
 
 interface SmartWatchData {
@@ -157,9 +164,11 @@ export function EnhancedSmartwatchHub() {
   const [activeWorkout, setActiveWorkout] = useState<WorkoutData | null>(
     currentWorkout,
   );
-  const [selectedWallpaper, setSelectedWallpaper] = useState("nature");
-  const [selectedWatchFace, setSelectedWatchFace] = useState("analog");
-  const [showCustomization, setShowCustomization] = useState(false);
+  const [showAddDevice, setShowAddDevice] = useState(false);
+  const [showWatchFaces, setShowWatchFaces] = useState(false);
+  const [showWallpaper, setShowWallpaper] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showFindDevice, setShowFindDevice] = useState(false);
   const [watchSettings, setWatchSettings] = useState(() => {
     try {
       const saved = localStorage.getItem("smartwatch-settings");
@@ -312,6 +321,24 @@ export function EnhancedSmartwatchHub() {
     }
   };
 
+  const handleAddDevice = (newDevice: any) => {
+    setWatches(prev => [...prev, newDevice]);
+    setShowAddDevice(false);
+    setSelectedWatch(newDevice.id);
+    toast({
+      title: "Device Added!",
+      description: `${newDevice.name} has been added to your hub`,
+    });
+  };
+
+  const handleApplyWatchFace = (faceId: string) => {
+    setShowWatchFaces(false);
+  };
+
+  const handleApplyWallpaper = (imageData: string) => {
+    setShowWallpaper(false);
+  };
+
   const getBatteryColor = (level: number) => {
     if (level > 50) return "text-green-500";
     if (level > 20) return "text-yellow-500";
@@ -374,6 +401,15 @@ export function EnhancedSmartwatchHub() {
           </CardTitle>
 
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowAddDevice(true)}
+              className="gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Add Device
+            </Button>
             <Badge
               variant="outline"
               className="bg-green-50 text-green-700 border-green-200"
@@ -658,7 +694,7 @@ export function EnhancedSmartwatchHub() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {/* Watch Faces */}
-                    <Dialog>
+                    <Dialog open={showWatchFaces} onOpenChange={setShowWatchFaces}>
                       <DialogTrigger asChild>
                         <Button
                           variant="outline"
@@ -668,36 +704,24 @@ export function EnhancedSmartwatchHub() {
                           <div className="text-left">
                             <div className="font-medium">Watch Faces</div>
                             <div className="text-xs text-muted-foreground">
-                              Choose from 50+ designs
+                              Choose from 100+ designs
                             </div>
                           </div>
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-2xl">
+                      <DialogContent className="max-w-4xl max-h-[80vh]">
                         <DialogHeader>
-                          <DialogTitle>Choose Watch Face</DialogTitle>
+                          <DialogTitle>Watch Face Gallery</DialogTitle>
                         </DialogHeader>
-                        <div className="space-y-4">
-                          <img
-                            src={watchFacesImage}
-                            alt="Watch Faces"
-                            className="w-full rounded-lg"
-                          />
-                          <div className="grid grid-cols-4 gap-2">
-                            {["Digital", "Analog", "Sport", "Minimal"].map(
-                              (face) => (
-                                <Button key={face} variant="outline" size="sm">
-                                  {face}
-                                </Button>
-                              ),
-                            )}
-                          </div>
-                        </div>
+                        <WatchFaceGallery
+                          deviceBrand={watch.brand}
+                          onApply={handleApplyWatchFace}
+                        />
                       </DialogContent>
                     </Dialog>
 
                     {/* Wallpapers */}
-                    <Dialog>
+                    <Dialog open={showWallpaper} onOpenChange={setShowWallpaper}>
                       <DialogTrigger asChild>
                         <Button
                           variant="outline"
@@ -705,47 +729,77 @@ export function EnhancedSmartwatchHub() {
                         >
                           <ImageIcon className="h-4 w-4" />
                           <div className="text-left">
-                            <div className="font-medium">Wallpapers</div>
+                            <div className="font-medium">Custom Wallpaper</div>
                             <div className="text-xs text-muted-foreground">
-                              Personalize your display
+                              Upload your own image
                             </div>
                           </div>
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-2xl">
+                      <DialogContent className="max-w-3xl">
                         <DialogHeader>
-                          <DialogTitle>Choose Wallpaper</DialogTitle>
+                          <DialogTitle>Custom Wallpaper</DialogTitle>
                         </DialogHeader>
-                        <div className="space-y-4">
-                          <img
-                            src={watchWallpapersImage}
-                            alt="Watch Wallpapers"
-                            className="w-full rounded-lg"
-                          />
-                          <div className="grid grid-cols-3 gap-2">
-                            {["Nature", "Abstract", "Fitness"].map(
-                              (wallpaper) => (
-                                <Button
-                                  key={wallpaper}
-                                  variant={
-                                    selectedWallpaper ===
-                                    wallpaper.toLowerCase()
-                                      ? "default"
-                                      : "outline"
-                                  }
-                                  size="sm"
-                                  onClick={() =>
-                                    setSelectedWallpaper(
-                                      wallpaper.toLowerCase(),
-                                    )
-                                  }
-                                >
-                                  {wallpaper}
-                                </Button>
-                              ),
-                            )}
+                        <CustomWallpaperUploader
+                          deviceModel={watch.model}
+                          onApply={handleApplyWallpaper}
+                          onCancel={() => setShowWallpaper(false)}
+                        />
+                      </DialogContent>
+                    </Dialog>
+
+                    {/* Notifications */}
+                    <Dialog open={showNotifications} onOpenChange={setShowNotifications}>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start gap-2 h-auto p-3"
+                        >
+                          <Bell className="h-4 w-4" />
+                          <div className="text-left">
+                            <div className="font-medium">Notifications</div>
+                            <div className="text-xs text-muted-foreground">
+                              Manage app & fitness alerts
+                            </div>
                           </div>
-                        </div>
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl max-h-[80vh]">
+                        <DialogHeader>
+                          <DialogTitle>Notification Settings</DialogTitle>
+                        </DialogHeader>
+                        <ScrollArea className="h-[600px]">
+                          <SmartWatchNotifications />
+                        </ScrollArea>
+                      </DialogContent>
+                    </Dialog>
+
+                    {/* Find My Device */}
+                    <Dialog open={showFindDevice} onOpenChange={setShowFindDevice}>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start gap-2 h-auto p-3"
+                        >
+                          <MapPin className="h-4 w-4" />
+                          <div className="text-left">
+                            <div className="font-medium">Find My Device</div>
+                            <div className="text-xs text-muted-foreground">
+                              Locate your watch
+                            </div>
+                          </div>
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl max-h-[80vh]">
+                        <DialogHeader>
+                          <DialogTitle>Find My Device</DialogTitle>
+                        </DialogHeader>
+                        <ScrollArea className="h-[600px]">
+                          <FindMyDevice
+                            deviceName={watch.name}
+                            deviceConnected={watch.connected}
+                          />
+                        </ScrollArea>
                       </DialogContent>
                     </Dialog>
 
@@ -897,6 +951,19 @@ export function EnhancedSmartwatchHub() {
           ))}
         </Tabs>
       </CardContent>
+
+      {/* Add Device Dialog */}
+      <Dialog open={showAddDevice} onOpenChange={setShowAddDevice}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Add New Smartwatch</DialogTitle>
+          </DialogHeader>
+          <SmartWatchDeviceWizard
+            onComplete={handleAddDevice}
+            onCancel={() => setShowAddDevice(false)}
+          />
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

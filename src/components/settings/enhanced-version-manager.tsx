@@ -42,6 +42,46 @@ interface ChangelogEntry {
 
 const mockChangelog: ChangelogEntry[] = [
   {
+    version: "5.4.4",
+    date: "2025-01-24",
+    type: "major",
+    changes: {
+      features: [
+        "🎨 New Fitness Fusion Logo with animated activity theme and energy burst effect",
+        "📅 Daily Workouts: Personalized workout recommendations that reset daily",
+        "⌚ Advanced Smartwatch Hub with comprehensive device management",
+        "🧙 Device Onboarding Wizard: Step-by-step setup for all major brands (Apple, Samsung, Garmin, Fitbit, Huawei)",
+        "🎭 Watch Face Gallery: 100+ customizable faces with categories and one-click apply",
+        "🖼️ Custom Wallpaper Uploader: Upload images with live preview, crop, zoom, and rotation",
+        "📍 Find My Device: Ping watch with sound/vibrate and view last known location on map",
+        "🔔 Advanced Notification Management: Separate settings for apps, fitness, and system alerts",
+        "👤 Enhanced Profile Display: Complete user info with avatar on home page",
+      ],
+      improvements: [
+        "⚡ Optimized home page loading with lazy-loaded components",
+        "🎬 Enhanced workout video playback with better controls",
+        "📱 Improved mobile responsiveness across all features",
+        "💾 Better localStorage persistence for all settings",
+        "🎨 Modernized UI with consistent design tokens",
+        "🧠 Smarter workout recommendations based on user progress",
+      ],
+      fixes: [
+        "Fixed smartwatch settings not saving properly",
+        "Resolved workout video playback issues",
+        "Fixed scroll issues in settings pages",
+        "Corrected profile information display",
+        "Fixed watch face application sync",
+        "Improved notification delivery reliability",
+      ],
+      security: [
+        "Enhanced device pairing security",
+        "Secure storage of watch settings",
+        "Encrypted communication with connected devices",
+        "Privacy-focused location tracking",
+      ],
+    },
+  },
+  {
     version: "5.4.3",
     date: "2025-01-24",
     type: "major",
@@ -266,11 +306,11 @@ export function EnhancedVersionManager() {
   });
 
   const [latestVersionAvailable, setLatestVersionAvailable] =
-    useState<string>("5.4.3");
+    useState<string>("5.4.4");
   const [updateAvailable, setUpdateAvailable] = useState(() => {
     const stored = localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version");
     const current = stored || "5.2.0";
-    return current !== "5.4.3";
+    return current !== "5.4.4";
   });
 
   const [updateProgress, setUpdateProgress] = useState<number>(0);

@@ -44,25 +44,23 @@ export function AppUpdateManager() {
     // Always use the fixed latest version
     const currentVersion =
       localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || "5.2.0";
-    const latestVersion = "5.4.3";
+    const latestVersion = "5.4.4";
     return {
       currentVersion,
       latestVersion,
       updateAvailable: currentVersion !== latestVersion,
-      updateSize: "22.8 MB",
+      updateSize: "23.2 MB",
       releaseNotes: [
-        "🎥 Enhanced Workout Video Player with full-screen support",
-        "🎯 Real-time workout tracking with completion markers",
-        "⌚ Interactive Smartwatch Hub with brand icons (🍎📱🏃)",
-        "🧠 AI-Powered Insights with persistence",
-        "🔐 Enhanced Security Center with settings save",
-        "💾 Workout completion history tracking",
-        "🔔 All notifications in notification center (no popups)",
-        "📱 Better mobile chat layouts",
-        "⚙️ All settings auto-save properly",
-        "🐛 Fixed smartwatch dialog and icons",
-        "🔧 Fixed AI insights persistence",
-        "🎬 Fixed workout video player controls",
+        "🎨 New Fitness Fusion Logo with animated theme",
+        "📅 Daily Workouts with personalized recommendations",
+        "⌚ Advanced Smartwatch Hub with device wizard",
+        "🎭 Watch Face Gallery with 100+ customizable faces",
+        "🖼️ Custom Wallpaper Uploader with live preview",
+        "📍 Find My Device with ping and location tracking",
+        "🔔 Enhanced Notification Management",
+        "👤 Improved Profile Display on home page",
+        "⚡ Faster page loading performance",
+        "🐛 Fixed smartwatch settings persistence",
       ],
       downloadUrl: "#",
       mandatory: false,
