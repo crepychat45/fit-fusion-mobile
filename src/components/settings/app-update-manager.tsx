@@ -44,20 +44,19 @@ export function AppUpdateManager() {
     // Always use the fixed latest version
     const currentVersion =
       localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || "5.2.0";
-    const latestVersion = "5.4.4";
+    const latestVersion = "5.5.0";
     return {
       currentVersion,
       latestVersion,
       updateAvailable: currentVersion !== latestVersion,
-      updateSize: "23.2 MB",
+      updateSize: "24.8 MB",
       releaseNotes: [
-        "🎨 New Fitness Fusion Logo with animated theme",
-        "📅 Daily Workouts with personalized recommendations",
-        "⌚ Advanced Smartwatch Hub with device wizard",
-        "🎭 Watch Face Gallery with 100+ customizable faces",
-        "🖼️ Custom Wallpaper Uploader with live preview",
-        "📍 Find My Device with ping and location tracking",
-        "🔔 Enhanced Notification Management",
+        "🔗 Fitness App Integrations (Strava, MyFitnessPal, Apple Health, Google Fit, Fitbit, Garmin)",
+        "⌚ Redesigned Watch Face Gallery with original icons",
+        "📊 Comprehensive data sync across platforms",
+        "🎯 Auto-sync fitness data in real-time",
+        "🎭 Category filtering for watch faces",
+        "📍 Enhanced Find My Device feature",
         "👤 Improved Profile Display on home page",
         "⚡ Faster page loading performance",
         "🐛 Fixed smartwatch settings persistence",

@@ -33,21 +33,19 @@ interface VersionUpdate {
 }
 
 const latestVersion: VersionUpdate = {
-  version: "5.4.4",
-  releaseDate: "January 24, 2025",
+  version: "5.5.0",
+  releaseDate: "December 4, 2024",
   features: [
-    "New Fitness Fusion Logo with animated activity theme",
-    "Daily Workouts: Personalized recommendations with progress tracking",
-    "Advanced Smartwatch Hub with device onboarding wizard",
-    "Watch Face Gallery with 100+ customizable faces",
-    "Custom Wallpaper Uploader with live preview and editing",
-    "Find My Device with ping and location tracking",
-    "Enhanced Notification Management for apps and fitness alerts",
-    "Interactive Smartwatch Hub with brand-specific icons (Apple 🍎, Samsung 📱, Garmin 🏃)",
-    "AI-Powered Insights with localStorage persistence",
-    "Enhanced Security Center with proper settings persistence",
-    "Workout completion history tracking",
-    "All notifications now show in notification center only (no popups)"
+    "Fitness App Integrations: Connect Strava, MyFitnessPal, Apple Health, Google Fit, Fitbit, Garmin",
+    "Auto-sync fitness data across all connected apps with real-time updates",
+    "Redesigned Watch Face Gallery with 8+ customizable faces and original icons",
+    "Watch face preview with realistic device simulation",
+    "Category filtering for watch faces (digital, analog, fitness, minimal, sport)",
+    "Enhanced device management and connection wizard",
+    "Improved notification settings per app integration",
+    "Find My Device feature with sound/vibration trigger",
+    "Comprehensive data sync showing steps, calories, heart rate, sleep, workouts, distance",
+    "Connected apps summary panel with aggregated daily stats"
   ],
   improvements: [
     "Improved workout video playback with video player controls",
