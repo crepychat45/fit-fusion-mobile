@@ -41,25 +41,25 @@ interface UpdateInfo {
 export function AppUpdateManager() {
   const { toast } = useToast();
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo>(() => {
-    // Always use the fixed latest version
     const currentVersion =
-      localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || "5.2.0";
-    const latestVersion = "5.5.0";
+      localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || "5.5.0";
+    const latestVersion = "5.6.0";
     return {
       currentVersion,
       latestVersion,
       updateAvailable: currentVersion !== latestVersion,
-      updateSize: "24.8 MB",
+      updateSize: "28.5 MB",
       releaseNotes: [
-        "🔗 Fitness App Integrations (Strava, MyFitnessPal, Apple Health, Google Fit, Fitbit, Garmin)",
-        "⌚ Redesigned Watch Face Gallery with original icons",
-        "📊 Comprehensive data sync across platforms",
-        "🎯 Auto-sync fitness data in real-time",
-        "🎭 Category filtering for watch faces",
-        "📍 Enhanced Find My Device feature",
-        "👤 Improved Profile Display on home page",
-        "⚡ Faster page loading performance",
-        "🐛 Fixed smartwatch settings persistence",
+        "🎯 Unified Fitness Hub - Merged Apps & Smartwatch features",
+        "🔒 Security Patch Updates with download & changelog",
+        "💬 Enhanced Chat with AI features & improvements",
+        "⚙️ All Settings sections enhanced with new features",
+        "🛡️ Security Center with vulnerability fixes",
+        "📊 Data Management Center added",
+        "📱 Mobile AI Coach enhancements",
+        "🎨 Improved UI/UX across all pages",
+        "⚡ Performance optimizations",
+        "🐛 Fixed all security vulnerabilities",
       ],
       downloadUrl: "#",
       mandatory: false,

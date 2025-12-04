@@ -33,45 +33,40 @@ interface VersionUpdate {
 }
 
 const latestVersion: VersionUpdate = {
-  version: "5.5.0",
+  version: "5.6.0",
   releaseDate: "December 4, 2024",
   features: [
-    "Fitness App Integrations: Connect Strava, MyFitnessPal, Apple Health, Google Fit, Fitbit, Garmin",
-    "Auto-sync fitness data across all connected apps with real-time updates",
-    "Redesigned Watch Face Gallery with 8+ customizable faces and original icons",
-    "Watch face preview with realistic device simulation",
-    "Category filtering for watch faces (digital, analog, fitness, minimal, sport)",
-    "Enhanced device management and connection wizard",
-    "Improved notification settings per app integration",
-    "Find My Device feature with sound/vibration trigger",
-    "Comprehensive data sync showing steps, calories, heart rate, sleep, workouts, distance",
-    "Connected apps summary panel with aggregated daily stats"
+    "🎯 Unified Fitness Hub: Merged Fitness App Integrations and Smartwatch Hub",
+    "🔒 Security Patch Updates with download and changelog",
+    "💬 Enhanced Chat with AI features and improvements",
+    "⚙️ All Settings sections enhanced with new features",
+    "📊 Data Management Center for local data management",
+    "📱 Mobile AI Coach with voice enhancements",
+    "🛡️ Security Center with vulnerability fixes",
+    "🔄 Smart Features: Sleep-based alarms and hydration reminders"
   ],
   improvements: [
-    "Improved workout video playback with video player controls",
-    "Better settings persistence in Security Center and Chat Settings",
-    "Enhanced profile display with complete user information",
-    "Optimized AI insights to maintain state across sessions",
-    "Better mobile responsiveness for chat interfaces",
-    "All settings auto-save to localStorage and Supabase",
-    "Enhanced smartwatch dialog functionality",
-    "Improved workout session tracking"
+    "Unified data sync across all connected apps and watches",
+    "Improved notification management",
+    "Better mobile responsiveness and performance",
+    "Enhanced data persistence across sessions",
+    "Modernized UI with consistent design system",
+    "Real-time sync status updates across all devices"
   ],
   bugFixes: [
-    "Fixed smartwatch icon display and dialog functionality",
-    "Fixed settings not saving properly in Security Center",
-    "Fixed AI insights not persisting between sessions",
-    "Fixed workout video player not showing all exercises",
-    "Fixed chat component layout issues on mobile",
-    "Removed all popup notifications",
-    "Fixed workout player controls",
-    "Fixed settings persistence across components"
+    "Fixed all security vulnerabilities",
+    "Resolved sync issues across apps",
+    "Fixed settings persistence problems",
+    "Improved error handling throughout app",
+    "Fixed mobile layout issues",
+    "Corrected profile display bugs"
   ],
   securityUpdates: [
-    "Enhanced data encryption for stored settings",
-    "Improved localStorage security practices",
-    "Better error handling for sensitive operations",
-    "Secure workout data storage"
+    "Critical security patches applied",
+    "Enhanced encryption protocols",
+    "Improved authentication security",
+    "Fixed vulnerability in data handling",
+    "Enhanced privacy controls"
   ]
 };
 
