@@ -25,6 +25,7 @@ import { WeatherWidget } from "@/components/dashboard/weather-widget";
 import { MotivationalQuotes } from "@/components/dashboard/motivational-quotes";
 import { WatchPanel } from "@/components/dashboard/watch-panel";
 import { EnhancedNotifications } from "@/components/dashboard/enhanced-notifications";
+import { FitnessAppIntegrations } from "@/components/dashboard/fitness-app-integrations";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -312,6 +313,11 @@ const Index = () => {
           <DailyWorkouts />
         </motion.div>
 
+        {/* Fitness App Integrations */}
+        <motion.div variants={itemVariants} className="px-4">
+          <FitnessAppIntegrations />
+        </motion.div>
+
         {/* Enhanced Smartwatch Hub */}
         <motion.div
           variants={itemVariants}
@@ -325,6 +331,11 @@ const Index = () => {
           >
             <EnhancedSmartwatchHub />
           </motion.div>
+        </motion.div>
+
+        {/* Watch Faces Panel */}
+        <motion.div variants={itemVariants} className="px-4">
+          <WatchPanel />
         </motion.div>
 
         {/* Enhanced Quick Actions Panel */}
