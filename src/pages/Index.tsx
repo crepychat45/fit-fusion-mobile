@@ -11,7 +11,7 @@ import { ActivitySummary } from "@/components/activity-summary";
 import { userProfile } from "@/data/user";
 import { DailyTip } from "@/components/daily-tip";
 import { WelcomeHeader } from "@/components/dashboard/welcome-header";
-import { EnhancedSmartwatchHub } from "@/components/dashboard/enhanced-smartwatch-hub";
+import { UnifiedFitnessHub } from "@/components/dashboard/unified-fitness-hub";
 import { ProfileHeader } from "@/components/profile-header";
 import { TodaysWorkout } from "@/components/dashboard/todays-workout";
 import { UpcomingWorkouts } from "@/components/dashboard/upcoming-workouts";
@@ -23,9 +23,7 @@ import { HealthMetricsPanel } from "@/components/dashboard/health-metrics-panel"
 import { AchievementNotifications } from "@/components/dashboard/achievement-notifications";
 import { WeatherWidget } from "@/components/dashboard/weather-widget";
 import { MotivationalQuotes } from "@/components/dashboard/motivational-quotes";
-import { WatchPanel } from "@/components/dashboard/watch-panel";
 import { EnhancedNotifications } from "@/components/dashboard/enhanced-notifications";
-import { FitnessAppIntegrations } from "@/components/dashboard/fitness-app-integrations";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -313,12 +311,7 @@ const Index = () => {
           <DailyWorkouts />
         </motion.div>
 
-        {/* Fitness App Integrations */}
-        <motion.div variants={itemVariants} className="px-4">
-          <FitnessAppIntegrations />
-        </motion.div>
-
-        {/* Enhanced Smartwatch Hub */}
+        {/* Unified Fitness Hub - Apps, Watches & Health Data */}
         <motion.div
           variants={itemVariants}
           className="px-4"
@@ -329,13 +322,8 @@ const Index = () => {
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             className="hover-lift"
           >
-            <EnhancedSmartwatchHub />
+            <UnifiedFitnessHub />
           </motion.div>
-        </motion.div>
-
-        {/* Watch Faces Panel */}
-        <motion.div variants={itemVariants} className="px-4">
-          <WatchPanel />
         </motion.div>
 
         {/* Enhanced Quick Actions Panel */}

@@ -42,40 +42,65 @@ interface ChangelogEntry {
 
 const mockChangelog: ChangelogEntry[] = [
   {
+    version: "5.6.0",
+    date: "2025-12-04",
+    type: "major",
+    changes: {
+      features: [
+        "🎯 Unified Fitness Hub: Merged Fitness App Integrations and Smartwatch Hub into one powerful component",
+        "🔒 Security Patch Updates: Download security patches with detailed changelogs",
+        "💬 Enhanced Chat: New AI features, improved interface, and better performance",
+        "⚙️ Settings Improvements: All sections enhanced with new features",
+        "📊 Data Management Center: Manage local data and export preferences",
+        "📱 Mobile AI Coach: Enhanced mobile experience with voice features",
+        "🛡️ Security Center: Fixed all vulnerabilities, enhanced protection",
+      ],
+      improvements: [
+        "⚡ Unified data sync across all connected apps and watches",
+        "🔔 Improved notification management",
+        "📱 Better mobile responsiveness",
+        "💾 Enhanced data persistence",
+        "🎨 Modernized UI with consistent design",
+        "🔄 Real-time sync status updates",
+      ],
+      fixes: [
+        "Fixed all security vulnerabilities",
+        "Resolved sync issues across apps",
+        "Fixed settings persistence problems",
+        "Improved error handling",
+        "Fixed mobile layout issues",
+        "Corrected profile display bugs",
+      ],
+      security: [
+        "Critical security patches applied",
+        "Enhanced encryption protocols",
+        "Improved authentication security",
+        "Fixed vulnerability in data handling",
+        "Enhanced privacy controls",
+      ],
+    },
+  },
+  {
     version: "5.5.0",
-    date: "2024-12-04",
+    date: "2025-12-03",
     type: "major",
     changes: {
       features: [
         "🔗 Fitness App Integrations: Connect Strava, MyFitnessPal, Apple Health, Google Fit, Fitbit, Garmin",
         "📊 Auto-sync fitness data across all connected apps with real-time updates",
         "⌚ Redesigned Watch Face Gallery with 8+ customizable faces and original icons",
-        "🎯 Watch face preview with realistic device simulation",
-        "🎭 Category filtering for watch faces (digital, analog, fitness, minimal, sport)",
-        "📈 Connected apps summary panel with aggregated daily stats",
-        "🔄 Comprehensive data sync showing steps, calories, heart rate, sleep, workouts, distance",
       ],
       improvements: [
         "⚡ Enhanced device management and connection wizard",
         "🔔 Improved notification settings per app integration",
-        "📱 Better mobile responsiveness and performance",
-        "💾 Improved data persistence across sessions",
-        "🎨 Modernized UI with consistent design system",
       ],
       fixes: [
         "Fixed watch face selection not saving properly",
         "Resolved sync status display issues",
-        "Fixed notification badge counts",
-        "Fixed scroll issues in settings pages",
-        "Corrected profile information display",
-        "Fixed watch face application sync",
-        "Improved notification delivery reliability",
       ],
       security: [
         "Enhanced device pairing security",
         "Secure storage of watch settings",
-        "Encrypted communication with connected devices",
-        "Privacy-focused location tracking",
       ],
     },
   },
@@ -297,18 +322,16 @@ const mockChangelog: ChangelogEntry[] = [
 export function EnhancedVersionManager() {
   const { toast } = useToast();
 
-  // Get current version from localStorage or default
   const [currentVersion, setCurrentVersion] = useState<string>(() => {
     const stored = localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version");
-    return stored || "5.2.0";
+    return stored || "5.5.0";
   });
 
-  const [latestVersionAvailable, setLatestVersionAvailable] =
-    useState<string>("5.4.4");
+  const [latestVersionAvailable, setLatestVersionAvailable] = useState<string>("5.6.0");
   const [updateAvailable, setUpdateAvailable] = useState(() => {
     const stored = localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version");
-    const current = stored || "5.2.0";
-    return current !== "5.4.4";
+    const current = stored || "5.5.0";
+    return current !== "5.6.0";
   });
 
   const [updateProgress, setUpdateProgress] = useState<number>(0);
