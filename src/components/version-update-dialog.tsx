@@ -33,40 +33,40 @@ interface VersionUpdate {
 }
 
 const latestVersion: VersionUpdate = {
-  version: "5.6.0",
-  releaseDate: "December 4, 2024",
+  version: "5.7.0",
+  releaseDate: "December 5, 2024",
   features: [
-    "🎯 Unified Fitness Hub: Merged Fitness App Integrations and Smartwatch Hub",
-    "🔒 Security Patch Updates with download and changelog",
-    "💬 Enhanced Chat with AI features and improvements",
-    "⚙️ All Settings sections enhanced with new features",
-    "📊 Data Management Center for local data management",
-    "📱 Mobile AI Coach with voice enhancements",
-    "🛡️ Security Center with vulnerability fixes",
-    "🔄 Smart Features: Sleep-based alarms and hydration reminders"
+    "🎨 New Glass Design Animated Logo",
+    "🔒 Security Patch Download System with detailed changelogs",
+    "📁 Holographic Vault with document upload, preview, download & share",
+    "⌚ Enhanced Fitness Hub with Watch dialog box improvements",
+    "🔐 Enhanced Mobile Security Center",
+    "📱 Redesigned Auth/Login Page for mobile & desktop",
+    "🛡️ Complete Security & Privacy Protection overhaul",
+    "📊 Improved layouts for mobile and desktop versions"
   ],
   improvements: [
-    "Unified data sync across all connected apps and watches",
-    "Improved notification management",
-    "Better mobile responsiveness and performance",
-    "Enhanced data persistence across sessions",
-    "Modernized UI with consistent design system",
-    "Real-time sync status updates across all devices"
+    "Notifications now only show in notification tab (no popups)",
+    "Better mobile responsiveness and layout clarity",
+    "Enhanced Fitness Hub with AI features and watch management",
+    "Improved authentication interface design",
+    "Unified notification management system",
+    "Real-time sync status across all connected devices"
   ],
   bugFixes: [
-    "Fixed all security vulnerabilities",
-    "Resolved sync issues across apps",
-    "Fixed settings persistence problems",
+    "Fixed all security vulnerabilities and patches",
+    "Resolved layout issues on mobile and desktop",
+    "Fixed authentication page interface issues",
     "Improved error handling throughout app",
-    "Fixed mobile layout issues",
-    "Corrected profile display bugs"
+    "Fixed notification popup issues",
+    "Corrected profile and settings display bugs"
   ],
   securityUpdates: [
-    "Critical security patches applied",
-    "Enhanced encryption protocols",
-    "Improved authentication security",
-    "Fixed vulnerability in data handling",
-    "Enhanced privacy controls"
+    "Critical security patches v2024.12.05",
+    "Enhanced encryption for Holographic Vault",
+    "Improved authentication security protocols",
+    "Fixed data handling vulnerabilities",
+    "Enhanced privacy controls and protection"
   ]
 };
 
@@ -77,11 +77,12 @@ export function VersionUpdateDialog() {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Version update dialog is now only shown in Settings > Updates page
+    // No automatic popup on screen - users can check updates manually
     const lastVersion = localStorage.getItem("app-version") || localStorage.getItem("fitfusion-app-version");
-    const hasSeenUpdate = localStorage.getItem(`update-${latestVersion.version}`);
-
-    if (lastVersion !== latestVersion.version && !hasSeenUpdate) {
-      setTimeout(() => setOpen(true), 2000);
+    if (!lastVersion) {
+      localStorage.setItem("app-version", latestVersion.version);
+      localStorage.setItem("fitfusion-app-version", latestVersion.version);
     }
   }, []);
 

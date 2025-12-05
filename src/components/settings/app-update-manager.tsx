@@ -42,24 +42,24 @@ export function AppUpdateManager() {
   const { toast } = useToast();
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo>(() => {
     const currentVersion =
-      localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || "5.5.0";
-    const latestVersion = "5.6.0";
+      localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || "5.6.0";
+    const latestVersion = "5.7.0";
     return {
       currentVersion,
       latestVersion,
       updateAvailable: currentVersion !== latestVersion,
-      updateSize: "28.5 MB",
+      updateSize: "32.8 MB",
       releaseNotes: [
-        "🎯 Unified Fitness Hub - Merged Apps & Smartwatch features",
-        "🔒 Security Patch Updates with download & changelog",
-        "💬 Enhanced Chat with AI features & improvements",
-        "⚙️ All Settings sections enhanced with new features",
-        "🛡️ Security Center with vulnerability fixes",
-        "📊 Data Management Center added",
-        "📱 Mobile AI Coach enhancements",
-        "🎨 Improved UI/UX across all pages",
-        "⚡ Performance optimizations",
-        "🐛 Fixed all security vulnerabilities",
+        "🎨 New Glass Design Animated Logo",
+        "🔒 Security Patch Download System with changelogs",
+        "📁 Holographic Vault - document upload, preview, download & share",
+        "⌚ Enhanced Fitness Hub with Watch dialog improvements",
+        "🔐 Enhanced Mobile Security Center",
+        "📱 Redesigned Auth/Login Page (mobile & desktop)",
+        "🛡️ Complete Security & Privacy Protection overhaul",
+        "📊 Improved layouts for all screen sizes",
+        "🔔 Notifications only in notification tab (no popups)",
+        "⚡ Performance and stability improvements",
       ],
       downloadUrl: "#",
       mandatory: false,

@@ -32,7 +32,7 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2">
-          <FitnessFusionLogo size="md" animated={true} />
+          <FitnessFusionLogo size="md" animated={true} variant="glass" />
         </Link>
 
         {/* Desktop Navigation */}

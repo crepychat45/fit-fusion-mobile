@@ -385,7 +385,7 @@ const ChatPage = () => {
                 FitFusion Chat
               </h1>
               <p className="text-white/90 text-xs md:text-sm">
-                Secure fitness community • v5.6.0 • Enhanced AI
+                Secure fitness community • v5.7.0 • Enhanced AI
               </p>
             </div>
             </div>
