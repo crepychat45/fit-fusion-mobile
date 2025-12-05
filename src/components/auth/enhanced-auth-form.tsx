@@ -2,15 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { motion, AnimatePresence } from "framer-motion";
@@ -28,8 +21,7 @@ import {
   AlertTriangle,
   Fingerprint,
   Smartphone,
-  Zap,
-  Star,
+  Activity,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
@@ -52,27 +44,19 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
   const { loading, signIn, signUp, resetPassword } = useEnhancedAuth();
   const { toast } = useToast();
 
-  // Form states
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
-
-  // Validation states
   const [emailValid, setEmailValid] = useState<boolean | null>(null);
-  const [passwordStrength, setPasswordStrength] =
-    useState<PasswordStrength | null>(null);
+  const [passwordStrength, setPasswordStrength] = useState<PasswordStrength | null>(null);
   const [formValid, setFormValid] = useState(false);
-
-  // Advanced features
   const [biometricAvailable, setBiometricAvailable] = useState(false);
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
 
   useEffect(() => {
-    // Check for biometric availability
     if ("credentials" in navigator && "create" in navigator.credentials) {
       setBiometricAvailable(true);
     }
@@ -91,23 +75,10 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
   }, [password]);
 
   useEffect(() => {
-    const isValid =
-      emailValid &&
-      (!isSignUp ||
-        (passwordStrength?.score >= 3 &&
-          password === confirmPassword &&
-          acceptTerms &&
-          name.length >= 2));
-    setFormValid(isValid);
-  }, [
-    emailValid,
-    passwordStrength,
-    password,
-    confirmPassword,
-    acceptTerms,
-    name,
-    isSignUp,
-  ]);
+    const isValid = emailValid && password.length >= 6 &&
+      (!isSignUp || (passwordStrength?.score >= 3 && password === confirmPassword && acceptTerms && name.length >= 2));
+    setFormValid(isValid ?? false);
+  }, [emailValid, passwordStrength, password, confirmPassword, acceptTerms, name, isSignUp]);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -144,22 +115,13 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
       5: { color: "text-green-600", label: "Very Strong" },
     };
 
-    return {
-      score,
-      feedback,
-      ...strengthMap[score as keyof typeof strengthMap],
-    };
+    return { score, feedback, ...strengthMap[score as keyof typeof strengthMap] };
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!formValid) {
-      toast({
-        title: "Form Invalid",
-        description: "Please check all fields and try again.",
-        variant: "destructive",
-      });
+      toast({ title: "Form Invalid", description: "Please check all fields.", variant: "destructive" });
       return;
     }
 
@@ -171,100 +133,92 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
         const { error } = await signIn(email, password);
         if (error) throw new Error(error);
       }
-
       if (onSuccess) onSuccess();
     } catch (error: any) {
-      toast({
-        title: isSignUp ? "Sign Up Failed" : "Sign In Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleBiometricAuth = async () => {
-    try {
-      // Placeholder for biometric authentication
-      toast({
-        title: "Biometric Auth",
-        description: "Feature coming soon!",
-      });
-    } catch (error) {
-      toast({
-        title: "Biometric Failed",
-        description: "Please try again or use password.",
-        variant: "destructive",
-      });
+      toast({ title: isSignUp ? "Sign Up Failed" : "Sign In Failed", description: error.message, variant: "destructive" });
     }
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!resetEmail || !validateEmail(resetEmail)) {
-      toast({
-        title: "Invalid Email",
-        description: "Please enter a valid email address.",
-        variant: "destructive",
-      });
+      toast({ title: "Invalid Email", description: "Please enter a valid email.", variant: "destructive" });
       return;
     }
 
     try {
       const { error } = await resetPassword(resetEmail);
       if (error) throw new Error(error);
-
-      toast({
-        title: "Reset Email Sent",
-        description: "Check your email for the password reset link.",
-      });
+      toast({ title: "Reset Email Sent", description: "Check your email for the reset link." });
       setShowForgotPassword(false);
       setResetEmail("");
     } catch (error: any) {
-      toast({
-        title: "Reset Failed",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Reset Failed", description: error.message, variant: "destructive" });
     }
   };
 
+  if (showForgotPassword) {
+    return (
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md mx-auto px-4">
+        <Card className="bg-background/95 backdrop-blur-xl border-border/50 shadow-2xl">
+          <CardHeader className="text-center space-y-4 pb-4">
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}
+              className="mx-auto w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-primary to-primary/70 rounded-2xl flex items-center justify-center">
+              <Lock className="h-7 w-7 md:h-8 md:w-8 text-primary-foreground" />
+            </motion.div>
+            <div>
+              <CardTitle className="text-xl md:text-2xl font-bold text-foreground">Reset Password</CardTitle>
+              <p className="text-sm text-muted-foreground mt-2">Enter your email to receive a reset link</p>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4 px-4 md:px-6">
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="resetEmail" className="text-sm">Email Address</Label>
+                <div className="relative">
+                  <Input id="resetEmail" type="email" placeholder="Enter your email" value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)} className="pl-10 h-12" />
+                  <Mail className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
+                </div>
+              </div>
+              <Button type="submit" className="w-full h-12 bg-primary hover:bg-primary/90" disabled={loading}>
+                {loading ? <div className="h-5 w-5 rounded-full border-2 border-primary-foreground border-t-transparent animate-spin" /> : "Send Reset Link"}
+              </Button>
+              <Button type="button" variant="ghost" className="w-full" onClick={() => setShowForgotPassword(false)}>
+                Back to Sign In
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
+  }
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="w-full max-w-lg mx-auto"
-    >
-      <Card className="bg-white/80 backdrop-blur-xl border-white/20 shadow-2xl">
-        <CardHeader className="text-center space-y-4">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 200 }}
-            className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center"
-          >
-            <Shield className="h-8 w-8 text-white" />
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md mx-auto px-4">
+      <Card className="bg-background/95 backdrop-blur-xl border-border/50 shadow-2xl">
+        <CardHeader className="text-center space-y-4 pb-4">
+          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}
+            className="mx-auto w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-primary to-primary/70 rounded-2xl flex items-center justify-center">
+            <Activity className="h-7 w-7 md:h-8 md:w-8 text-primary-foreground" />
           </motion.div>
 
           <div>
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <CardTitle className="text-xl md:text-2xl font-bold text-foreground">
               {isSignUp ? "Join FitFusion" : "Welcome Back"}
             </CardTitle>
-            <p className="text-muted-foreground mt-2">
-              {isSignUp
-                ? "Create your account with advanced security"
-                : "Sign in to your secure account"}
+            <p className="text-sm text-muted-foreground mt-2">
+              {isSignUp ? "Create your secure account" : "Sign in to continue"}
             </p>
           </div>
 
-          {/* Security Features Badge */}
-          <div className="flex justify-center gap-2">
-            <Badge variant="outline" className="text-xs">
+          <div className="flex justify-center gap-2 flex-wrap">
+            <Badge variant="outline" className="text-xs bg-secondary/50">
               <Shield className="h-3 w-3 mr-1" />
               256-bit Encryption
             </Badge>
             {biometricAvailable && (
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-xs bg-secondary/50">
                 <Fingerprint className="h-3 w-3 mr-1" />
                 Biometric Ready
               </Badge>
@@ -272,342 +226,131 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-6">
-          <Tabs defaultValue="email" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="email" className="flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                Email
-              </TabsTrigger>
-              <TabsTrigger value="advanced" className="flex items-center gap-2">
-                <Zap className="h-4 w-4" />
-                Advanced
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="email">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {isSignUp && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="space-y-2"
-                  >
-                    <Label htmlFor="name">Full Name</Label>
-                    <div className="relative">
-                      <Input
-                        id="name"
-                        type="text"
-                        placeholder="Enter your full name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="pl-10"
-                      />
-                      <UserPlus className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                    </div>
-                  </motion.div>
-                )}
-
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
+        <CardContent className="space-y-5 px-4 md:px-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <AnimatePresence>
+              {isSignUp && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="space-y-2">
+                  <Label htmlFor="name" className="text-sm">Full Name</Label>
                   <div className="relative">
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="Enter your email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className={`pl-10 pr-10 ${
-                        emailValid === true
-                          ? "border-green-500"
-                          : emailValid === false
-                            ? "border-red-500"
-                            : ""
-                      }`}
-                    />
-                    <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                    {emailValid !== null && (
-                      <div className="absolute right-3 top-2.5">
-                        {emailValid ? (
-                          <CheckCircle className="h-5 w-5 text-green-500" />
-                        ) : (
-                          <XCircle className="h-5 w-5 text-red-500" />
-                        )}
-                      </div>
-                    )}
+                    <Input id="name" type="text" placeholder="Enter your full name" value={name}
+                      onChange={(e) => setName(e.target.value)} className="pl-10 h-12" />
+                    <UserPlus className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
                   </div>
-                </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 pr-10"
-                    />
-                    <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </Button>
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm">Email Address</Label>
+              <div className="relative">
+                <Input id="email" type="email" placeholder="Enter your email" value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={`pl-10 pr-10 h-12 ${emailValid === true ? "border-green-500" : emailValid === false ? "border-red-500" : ""}`} />
+                <Mail className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
+                {emailValid !== null && (
+                  <div className="absolute right-3 top-3.5">
+                    {emailValid ? <CheckCircle className="h-5 w-5 text-green-500" /> : <XCircle className="h-5 w-5 text-red-500" />}
                   </div>
-
-                  {/* Password Strength Indicator */}
-                  <AnimatePresence>
-                    {passwordStrength && isSignUp && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="space-y-2"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">
-                            Password Strength
-                          </span>
-                          <span
-                            className={`text-sm font-medium ${passwordStrength.color}`}
-                          >
-                            {passwordStrength.label}
-                          </span>
-                        </div>
-                        <Progress
-                          value={(passwordStrength.score / 5) * 100}
-                          className="h-2"
-                        />
-                        {passwordStrength.feedback.length > 0 && (
-                          <ul className="text-xs text-muted-foreground space-y-1">
-                            {passwordStrength.feedback.map((item, index) => (
-                              <li
-                                key={index}
-                                className="flex items-center gap-1"
-                              >
-                                <AlertTriangle className="h-3 w-3" />
-                                {item}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                {isSignUp && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    className="space-y-4"
-                  >
-                    <div className="space-y-2">
-                      <Label htmlFor="confirmPassword">Confirm Password</Label>
-                      <div className="relative">
-                        <Input
-                          id="confirmPassword"
-                          type="password"
-                          placeholder="Confirm your password"
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          className={`pl-10 pr-10 ${
-                            confirmPassword && password === confirmPassword
-                              ? "border-green-500"
-                              : confirmPassword && password !== confirmPassword
-                                ? "border-red-500"
-                                : ""
-                          }`}
-                        />
-                        <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                        {confirmPassword && (
-                          <div className="absolute right-3 top-2.5">
-                            {password === confirmPassword ? (
-                              <CheckCircle className="h-5 w-5 text-green-500" />
-                            ) : (
-                              <XCircle className="h-5 w-5 text-red-500" />
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="terms"
-                        checked={acceptTerms}
-                        onCheckedChange={(checked) =>
-                          setAcceptTerms(checked as boolean)
-                        }
-                      />
-                      <Label htmlFor="terms" className="text-sm">
-                        I agree to the{" "}
-                        <a
-                          href="/terms-of-service"
-                          className="text-blue-600 hover:underline"
-                        >
-                          Terms of Service
-                        </a>{" "}
-                        and{" "}
-                        <a
-                          href="/privacy-policy"
-                          className="text-blue-600 hover:underline"
-                        >
-                          Privacy Policy
-                        </a>
-                      </Label>
-                    </div>
-                  </motion.div>
                 )}
+              </div>
+            </div>
 
-                <Button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                  disabled={loading || !formValid}
-                >
-                  {loading ? (
-                    <div className="h-5 w-5 rounded-full border-2 border-background border-t-transparent animate-spin" />
-                  ) : isSignUp ? (
-                    <>
-                      Create Account
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </>
-                  ) : (
-                    <>
-                      Sign In
-                      <LogIn className="ml-2 h-4 w-4" />
-                    </>
-                  )}
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm">Password</Label>
+              <div className="relative">
+                <Input id="password" type={showPassword ? "text" : "password"} placeholder="Enter your password"
+                  value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10 h-12" />
+                <Lock className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
+                <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3"
+                  onClick={() => setShowPassword(!showPassword)}>
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
+              </div>
 
-                {!isSignUp && (
-                  <Button
-                    type="button"
-                    variant="link"
-                    className="text-sm mt-2"
-                    onClick={() => setShowForgotPassword(true)}
-                  >
-                    Forgot your password?
-                  </Button>
-                )}
-              </form>
-
-              <SocialLogin />
-
-              {/* Password Reset Modal */}
               <AnimatePresence>
-                {showForgotPassword && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
-                    onClick={() => setShowForgotPassword(false)}
-                  >
-                    <motion.div
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0.8, opacity: 0 }}
-                      className="bg-white rounded-lg p-6 w-full max-w-md"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <h3 className="text-lg font-semibold mb-4">
-                        Reset Password
-                      </h3>
-                      <form
-                        onSubmit={handleForgotPassword}
-                        className="space-y-4"
-                      >
-                        <div>
-                          <Label htmlFor="resetEmail">Email Address</Label>
-                          <Input
-                            id="resetEmail"
-                            type="email"
-                            placeholder="Enter your email"
-                            value={resetEmail}
-                            onChange={(e) => setResetEmail(e.target.value)}
-                            required
-                          />
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            type="submit"
-                            className="flex-1"
-                            disabled={loading}
-                          >
-                            {loading ? "Sending..." : "Send Reset Link"}
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setShowForgotPassword(false)}
-                          >
-                            Cancel
-                          </Button>
-                        </div>
-                      </form>
-                    </motion.div>
+                {passwordStrength && isSignUp && (
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">Password Strength</span>
+                      <span className={`text-xs font-medium ${passwordStrength.color}`}>{passwordStrength.label}</span>
+                    </div>
+                    <Progress value={(passwordStrength.score / 5) * 100} className="h-1.5" />
+                    {passwordStrength.feedback.length > 0 && (
+                      <ul className="text-xs text-muted-foreground space-y-0.5">
+                        {passwordStrength.feedback.map((item, index) => (
+                          <li key={index} className="flex items-center gap-1">
+                            <AlertTriangle className="h-3 w-3" />{item}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
-            </TabsContent>
+            </div>
 
-            <TabsContent value="advanced" className="space-y-4">
-              <div className="text-center space-y-4">
-                <h3 className="font-semibold">Advanced Authentication</h3>
+            <AnimatePresence>
+              {isSignUp && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword" className="text-sm">Confirm Password</Label>
+                    <div className="relative">
+                      <Input id="confirmPassword" type="password" placeholder="Confirm your password"
+                        value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
+                        className={`pl-10 pr-10 h-12 ${confirmPassword && password === confirmPassword ? "border-green-500" : confirmPassword && password !== confirmPassword ? "border-red-500" : ""}`} />
+                      <Lock className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
+                      {confirmPassword && (
+                        <div className="absolute right-3 top-3.5">
+                          {password === confirmPassword ? <CheckCircle className="h-5 w-5 text-green-500" /> : <XCircle className="h-5 w-5 text-red-500" />}
+                        </div>
+                      )}
+                    </div>
+                  </div>
 
-                {biometricAvailable && (
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={handleBiometricAuth}
-                  >
-                    <Fingerprint className="mr-2 h-4 w-4" />
-                    Use Biometric Authentication
-                  </Button>
-                )}
+                  <div className="flex items-start space-x-2">
+                    <Checkbox id="terms" checked={acceptTerms} onCheckedChange={(checked) => setAcceptTerms(checked as boolean)} className="mt-1" />
+                    <Label htmlFor="terms" className="text-xs leading-relaxed">
+                      I agree to the <a href="/terms-of-service" className="text-primary hover:underline">Terms of Service</a> and{" "}
+                      <a href="/privacy-policy" className="text-primary hover:underline">Privacy Policy</a>
+                    </Label>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-                <Button variant="outline" className="w-full">
-                  <Smartphone className="mr-2 h-4 w-4" />
-                  SMS Two-Factor Authentication
-                </Button>
+            <Button type="submit" className="w-full h-12 bg-primary hover:bg-primary/90 font-medium" disabled={loading || !formValid}>
+              {loading ? (
+                <div className="h-5 w-5 rounded-full border-2 border-primary-foreground border-t-transparent animate-spin" />
+              ) : isSignUp ? (
+                <>Create Account<ArrowRight className="ml-2 h-4 w-4" /></>
+              ) : (
+                <>Sign In<LogIn className="ml-2 h-4 w-4" /></>
+              )}
+            </Button>
 
-                <div className="text-xs text-muted-foreground">
-                  Advanced features require account setup
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
+            {!isSignUp && (
+              <Button type="button" variant="link" className="w-full text-sm" onClick={() => setShowForgotPassword(true)}>
+                Forgot your password?
+              </Button>
+            )}
+          </form>
 
-        <CardFooter className="flex flex-col space-y-4">
-          <Button
-            variant="link"
-            onClick={() => setIsSignUp(!isSignUp)}
-            className="text-sm"
-            disabled={loading}
-          >
-            {isSignUp
-              ? "Already have an account? Sign in"
-              : "Don't have an account? Sign up"}
-          </Button>
-
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Shield className="h-3 w-3" />
-            Secured with end-to-end encryption
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+            </div>
           </div>
-        </CardFooter>
+
+          <SocialLogin />
+
+          <div className="text-center">
+            <Button variant="link" className="text-sm" onClick={() => setIsSignUp(!isSignUp)}>
+              {isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
+            </Button>
+          </div>
+        </CardContent>
       </Card>
     </motion.div>
   );
