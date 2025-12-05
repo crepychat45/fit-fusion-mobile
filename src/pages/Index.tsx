@@ -323,7 +323,7 @@ const Index = () => {
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             className="hover-lift"
           >
-            <UnifiedFitnessHub />
+            <EnhancedFitnessHub />
           </motion.div>
         </motion.div>
 
