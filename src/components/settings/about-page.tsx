@@ -40,9 +40,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function AboutPage() {
   const { toast } = useToast();
-  const [appVersion] = useState("5.0.4");
-  const [buildNumber] = useState("20241206.002");
-  const [releaseDate] = useState("June 6, 2025");
+  const [appVersion] = useState("5.7.0");
+  const [buildNumber] = useState("20241205.001");
+  const [releaseDate] = useState("December 5, 2024");
   const [userStats, setUserStats] = useState({
     totalUsers: 125000,
     activeToday: 8500,
@@ -55,77 +55,84 @@ export function AboutPage() {
       icon: Brain,
       title: "AI-Powered Workouts",
       description: "Personalized fitness routines using machine learning",
-      version: "5.0.0",
+      version: "5.7.0",
     },
     {
       icon: Shield,
       title: "Advanced Security",
       description: "End-to-end encryption and biometric authentication",
-      version: "5.0.1",
+      version: "5.7.0",
     },
     {
       icon: Database,
-      title: "Smart Analytics",
-      description: "Comprehensive fitness tracking and insights",
-      version: "4.8.0",
+      title: "Holographic Vault",
+      description: "Secure document storage with encryption",
+      version: "5.7.0",
     },
     {
       icon: Smartphone,
       title: "Mobile Optimized",
       description: "Seamless experience across all devices",
-      version: "5.0.3",
+      version: "5.7.0",
     },
     {
       icon: MessageCircle,
       title: "Enhanced Chat",
       description: "Secure communication with fitness community",
-      version: "5.0.4",
+      version: "5.7.0",
     },
     {
       icon: Network,
-      title: "AI Integration",
-      description: "Integrated AI throughout the platform",
-      version: "5.0.4",
+      title: "Unified Fitness Hub",
+      description: "All fitness apps and watches in one place",
+      version: "5.7.0",
     },
   ];
 
   const changelog = [
     {
-      version: "5.0.4",
-      date: "June 6, 2025",
+      version: "5.7.0",
+      date: "December 5, 2024",
       type: "major",
       changes: [
-        "🧠 Enhanced AI integration throughout the entire platform",
-        "💬 Redesigned chat interface with voice message support",
-        "🔒 Improved security with biometric authentication",
-        "💪 New smart workout recommendation system",
-        "📊 Enhanced analytics dashboard with goal tracking",
-        "💳 Secure payment gateway for subscriptions",
-        "🎨 UI/UX improvements across all pages",
-        "📱 Better mobile experience with responsive design",
-        "🏆 Expanded achievements and goals system",
-        "🔄 Sync optimizations for faster data transfer",
+        "🎨 New Glass Design Animated Logo",
+        "🔒 Security Patch Download System with changelogs",
+        "📁 Holographic Vault for secure document storage",
+        "⌚ Enhanced Fitness Hub with Watch dialog improvements",
+        "🔐 Enhanced Mobile Security Center",
+        "📱 Redesigned Auth/Login Page (mobile & desktop)",
+        "🛡️ Complete Security & Privacy Protection overhaul",
+        "📊 Improved layouts for all screen sizes",
+        "🔔 Notifications only in notification tab (no popups)",
+        "⚡ Performance and stability improvements",
       ],
     },
     {
-      version: "5.0.3",
-      date: "December 6, 2024",
+      version: "5.6.0",
+      date: "December 4, 2024",
       type: "major",
       changes: [
-        "🎨 Complete UI/UX redesign with modern animations",
-        "📱 Enhanced mobile responsiveness and touch interactions",
-        "🔐 Advanced biometric authentication support",
-        "⚡ 40% performance improvement in app loading",
-        "🤖 New AI workout recommendations engine",
-        "🌙 Improved dark mode with better contrast",
-        "🔧 Enhanced settings validation and auto-fix features",
-        "📊 Real-time analytics dashboard",
-        "🎯 Personalized goal tracking system",
-        "🔄 Seamless data sync across devices",
+        "🎯 Unified Fitness Hub - Merged Apps & Smartwatch features",
+        "🔒 Security Patch Updates with download & changelog",
+        "💬 Enhanced Chat with AI features & improvements",
+        "⚙️ All Settings sections enhanced with new features",
+        "🛡️ Security Center with vulnerability fixes",
+        "📊 Data Management Center added",
+        "📱 Mobile AI Coach enhancements",
       ],
     },
     {
-      version: "5.0.2",
+      version: "5.5.0",
+      date: "December 3, 2024",
+      type: "major",
+      changes: [
+        "🔗 Fitness App Integrations (Strava, MyFitnessPal, etc.)",
+        "📊 Auto-sync fitness data across all connected apps",
+        "⌚ Redesigned Watch Face Gallery",
+      ],
+    },
+    {
+      version: "5.4.0",
       date: "November 20, 2024",
       type: "minor",
       changes: [
@@ -133,29 +140,6 @@ export function AboutPage() {
         "🔔 Smart notification system",
         "🐛 Critical bug fixes for data synchronization",
         "⚡ Performance optimizations",
-      ],
-    },
-    {
-      version: "5.0.1",
-      date: "November 10, 2024",
-      type: "patch",
-      changes: [
-        "🔐 Enhanced security protocols",
-        "🌐 Added 5 new language translations",
-        "🔧 Minor UI improvements",
-        "🐛 Bug fixes and stability improvements",
-      ],
-    },
-    {
-      version: "5.0.0",
-      date: "October 25, 2024",
-      type: "major",
-      changes: [
-        "🚀 Major version release with AI integration",
-        "💡 Intelligent workout planning",
-        "📈 Advanced progress tracking",
-        "🎨 Complete visual overhaul",
-        "⚡ Rewritten for better performance",
       ],
     },
   ];

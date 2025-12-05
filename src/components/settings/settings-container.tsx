@@ -9,6 +9,7 @@ import { AboutPage } from "./about-page";
 import { AppUpdateManager } from "./app-update-manager";
 import { SecurityCenter } from "./security-center";
 import { VersionManager } from "./version-manager";
+import { SecurityPatchSystem } from "./security-patch-system";
 import { SettingsNavigation } from "./settings-navigation";
 import { NotificationSettings } from "./notification-settings";
 import { UnitPreferences } from "./unit-preferences";
@@ -375,6 +376,7 @@ export function SettingsContainer() {
             <TabsContent value="updates" className="mt-0">
               <div className="space-y-6">
                 <AppUpdateManager />
+                <SecurityPatchSystem />
                 <VersionManager />
               </div>
             </TabsContent>

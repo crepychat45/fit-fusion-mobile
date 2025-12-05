@@ -20,6 +20,7 @@ import {
   Calculator,
   Apple,
   TrendingUp,
+  FolderLock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -87,6 +88,12 @@ export function MobileNav() {
       icon: Apple,
       label: "Nutrition",
       color: "text-orange-500",
+    },
+    {
+      href: "/vault",
+      icon: FolderLock,
+      label: "Vault",
+      color: "text-purple-500",
     },
     {
       href: "/settings",
