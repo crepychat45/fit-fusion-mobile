@@ -142,23 +142,13 @@ export function DeveloperOptions() {
       return;
     }
 
-    try {
-      addLog(`Executing: ${customScript}`);
-      const result = eval(customScript);
-      addLog(`Result: ${JSON.stringify(result)}`);
-
-      toast({
-        title: "✅ Script executed",
-        description: "Check the console for results.",
-      });
-    } catch (error) {
-      addLog(`Error: ${error}`);
-      toast({
-        title: "❌ Script error",
-        description: "Check the console for error details.",
-        variant: "destructive",
-      });
-    }
+    // Custom script execution is disabled for security reasons
+    addLog(`Script execution disabled for security: ${customScript.substring(0, 50)}...`);
+    toast({
+      title: "🔒 Script execution disabled",
+      description: "Custom script execution has been disabled for security reasons. Use browser DevTools instead.",
+      variant: "destructive",
+    });
   };
 
   const simulateError = () => {
