@@ -2,16 +2,16 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { lovable } from "@/integrations/lovable";
-import { Chrome, Loader2 } from "lucide-react";
+import { Chrome, Apple, Loader2 } from "lucide-react";
 
 export function SocialLogin() {
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
+  const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
 
-  const handleGoogleSignIn = async () => {
-    setLoading(true);
+  const handleOAuthSignIn = async (provider: "google" | "apple") => {
+    setLoadingProvider(provider);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
+      const result = await lovable.auth.signInWithOAuth(provider, {
         redirect_uri: window.location.origin,
       });
 
@@ -20,12 +20,12 @@ export function SocialLogin() {
       }
     } catch (error: any) {
       toast({
-        title: "Google Sign In Failed",
+        title: `${provider === "google" ? "Google" : "Apple"} Sign In Failed`,
         description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setLoadingProvider(null);
     }
   };
 
@@ -42,20 +42,37 @@ export function SocialLogin() {
         </div>
       </div>
 
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full"
-        onClick={handleGoogleSignIn}
-        disabled={loading}
-      >
-        {loading ? (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        ) : (
-          <Chrome className="mr-2 h-4 w-4" />
-        )}
-        Continue with Google
-      </Button>
+      <div className="grid grid-cols-2 gap-3">
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={() => handleOAuthSignIn("google")}
+          disabled={!!loadingProvider}
+        >
+          {loadingProvider === "google" ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Chrome className="mr-2 h-4 w-4" />
+          )}
+          Google
+        </Button>
+
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={() => handleOAuthSignIn("apple")}
+          disabled={!!loadingProvider}
+        >
+          {loadingProvider === "apple" ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Apple className="mr-2 h-4 w-4" />
+          )}
+          Apple
+        </Button>
+      </div>
     </div>
   );
 }
