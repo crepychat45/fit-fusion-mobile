@@ -6,8 +6,7 @@ export interface WorkoutSession {
   id: string;
   user_id: string;
   workout_plan_id?: string;
-  started_at: string;
-  completed_at?: string;
+  completed_at: string;
   duration_minutes?: number;
   calories_burned?: number;
   notes?: string;
@@ -41,7 +40,7 @@ export const useWorkoutSessions = (userId?: string) => {
         .from('workout_sessions')
         .select('*')
         .eq('user_id', targetUserId)
-        .order('started_at', { ascending: false });
+        .order('completed_at', { ascending: false });
       
       if (error) throw error;
       return data as WorkoutSession[];
@@ -59,7 +58,7 @@ export const useWorkoutSessions = (userId?: string) => {
         .insert({
           user_id: user.id,
           workout_plan_id: workoutPlanId,
-          started_at: new Date().toISOString(),
+          completed_at: new Date().toISOString(),
         })
         .select()
         .single();

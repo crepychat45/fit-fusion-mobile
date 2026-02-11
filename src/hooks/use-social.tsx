@@ -8,9 +8,7 @@ export interface Post {
   user_id: string;
   content: string;
   image_url?: string;
-  workout_session_id?: string;
   likes_count: number;
-  comments_count: number;
   created_at: string;
   updated_at: string;
 }
@@ -21,7 +19,6 @@ export interface PostComment {
   user_id: string;
   content: string;
   created_at: string;
-  updated_at: string;
 }
 
 export const usePosts = () => {
@@ -64,7 +61,7 @@ export const usePosts = () => {
   }, [queryClient]);
 
   const createPost = useMutation({
-    mutationFn: async (post: { content: string; image_url?: string; workout_session_id?: string }) => {
+    mutationFn: async (post: { content: string; image_url?: string }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
