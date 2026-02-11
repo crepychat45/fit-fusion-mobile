@@ -13,8 +13,9 @@ import {
   Activity, Heart, Footprints, Flame, Moon, Dumbbell, TrendingUp, RefreshCw, Check, Settings,
   Watch, Battery, Wifi, Signal, CheckCircle, AlertTriangle, Smartphone, Bluetooth, Target,
   PlayCircle, Palette, Download, Star, Bell, MapPin, Plus, Brain, Droplets, Zap, Timer,
-  Sparkles, Crown, Waves, Sun, CloudRain, Thermometer, Wind,
+  Sparkles, Crown, Waves, Sun, CloudRain, Thermometer, Wind, Store,
 } from "lucide-react";
+import { WatchAppStore } from "./watch-app-store";
 
 interface FitnessApp {
   id: string;
@@ -208,11 +209,14 @@ export function EnhancedFitnessHub() {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4 mb-4">
+          <TabsList className="grid w-full grid-cols-5 mb-4">
             <TabsTrigger value="overview" className="text-xs">Overview</TabsTrigger>
             <TabsTrigger value="apps" className="text-xs">Apps</TabsTrigger>
             <TabsTrigger value="watches" className="text-xs">Watches</TabsTrigger>
             <TabsTrigger value="faces" className="text-xs">Faces</TabsTrigger>
+            <TabsTrigger value="store" className="text-xs">
+              <Store className="h-3 w-3 mr-1" />Store
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-4">
@@ -382,6 +386,9 @@ export function EnhancedFitnessHub() {
                 </div>
               </ScrollArea>
             </div>
+          </TabsContent>
+          <TabsContent value="store">
+            <WatchAppStore />
           </TabsContent>
         </Tabs>
       </CardContent>
