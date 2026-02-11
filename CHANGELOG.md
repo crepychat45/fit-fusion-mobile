@@ -1,5 +1,40 @@
 # FitFusion Changelog
 
+## Version 5.8.0 (2026-02-11)
+
+### 🎉 New Features
+- **Active Fitness Challenges Widget**: Daily, weekly & community challenges with XP rewards, progress tracking, and participant counts
+- **Body Metrics Tracker**: Real-time health monitoring for hydration, sleep score, resting heart rate, stress, energy, body temperature, and SpO2
+- **Workout Streak Widget**: Visual weekly streak calendar with current streak, best streak, and weekly completion stats
+- **Watch App Store**: Browse, install & manage smartwatch apps across categories (Fitness, Health, Wellness, Nutrition, Utility)
+- **Enhanced Fitness Hub**: New 5-tab layout with dedicated Store tab for watch apps
+- **Google & Apple Sign-In**: Social OAuth login via Lovable Cloud
+- **Lovable AI Integration**: AI Gateway enabled for intelligent fitness coaching
+
+### 🔧 Improvements
+- Optimized component rendering and reduced unnecessary re-renders
+- Better memory management with enhanced lazy loading
+- Improved mobile responsiveness across all new widgets
+- Smoother animations with optimized Framer Motion usage
+- Enhanced offline caching for workout data
+- Better accessibility compliance across new components
+
+### 🐛 Bug Fixes
+- Fixed performance monitor overlay z-index issues
+- Resolved chat notification delivery delays
+- Fixed progress chart data accuracy
+- Fixed dark mode consistency in new widgets
+- Resolved sync conflicts between connected devices
+- Fixed mobile layout overflow issues
+
+### 🔒 Security Updates
+- Enhanced CSP headers and input validation
+- Improved authentication security with OAuth providers
+- Strengthened XSS and injection prevention
+- Security audit compliance improvements
+
+---
+
 ## Version 5.7.0 (2024-12-05)
 
 ### 🎉 New Features

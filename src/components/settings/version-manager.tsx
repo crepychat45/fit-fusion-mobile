@@ -79,56 +79,55 @@ export function VersionManager() {
   } | null>(null);
 
   const currentVersion = appVersion;
-  const latestVersion = "4.9.2";
+  const latestVersion = "5.8.0";
 
   const updateInfo: UpdateInfo = {
-    version: "4.9.2",
-    releaseDate: "2025-01-03",
+    version: "5.8.0",
+    releaseDate: "2026-02-11",
     features: [
-      "🤖 Revolutionary AI-powered workout recommendations with machine learning",
-      "🔐 Advanced biometric authentication with enhanced security protocols",
-      "🎯 Real-time group fitness challenges with leaderboards",
-      "📱 Smart nutrition tracking with barcode scanning and AI analysis",
-      "📴 Offline workout mode with intelligent sync capabilities",
-      "🎨 New dynamic theme system with customizable color palettes",
-      "📊 Enhanced analytics dashboard with predictive insights",
+      "🏆 Active Fitness Challenges with daily, weekly & community competitions",
+      "📊 Body Metrics Tracker with real-time health monitoring (hydration, sleep, SpO2, stress)",
+      "🔥 Workout Streak Widget with weekly calendar and streak tracking",
+      "🏪 Watch App Store – browse, install & manage smartwatch apps",
+      "⌚ Enhanced Fitness Hub with 5-tab layout including new Store tab",
+      "🧠 AI-powered insights with confidence scoring and actionable recommendations",
+      "🎯 Improved challenge system with XP rewards and leaderboards",
     ],
     improvements: [
-      "⚡ 60% faster app startup time with optimized loading",
-      "🔋 Improved battery optimization reducing consumption by 40%",
-      "🛡️ Enhanced security protocols with zero-trust architecture",
-      "♿ Better accessibility features meeting WCAG 2.1 AA standards",
-      "✨ Smoother animations with 120fps support",
-      "🌐 Improved offline functionality with intelligent caching",
-      "📱 Better mobile responsiveness across all device sizes",
+      "⚡ Optimized component rendering and reduced re-renders",
+      "🔋 Better memory management with lazy loading enhancements",
+      "🛡️ Enhanced security protocols and input sanitization",
+      "📱 Improved mobile responsiveness across all new widgets",
+      "✨ Smoother animations with optimized Framer Motion usage",
+      "🌐 Better offline caching for workout data",
+      "♿ Improved accessibility across all new components",
     ],
     fixes: [
-      "🔧 Fixed workout timer synchronization issues across devices",
-      "💬 Resolved chat notification bugs and message delivery",
-      "📈 Fixed progress chart data accuracy and real-time updates",
-      "🧠 Improved memory usage optimization reducing RAM by 35%",
-      "🌙 Fixed dark mode theme inconsistencies and contrast issues",
-      "🔄 Resolved sync conflicts between multiple devices",
-      "🎵 Fixed audio playback issues during workouts",
+      "🔧 Fixed performance monitor overlay z-index issues",
+      "💬 Resolved chat notification delivery delays",
+      "📈 Fixed progress chart data accuracy",
+      "🌙 Fixed dark mode consistency in new widgets",
+      "🔄 Resolved sync conflicts between devices",
+      "🎵 Fixed audio playback during active workouts",
+      "📱 Fixed mobile layout overflow issues",
     ],
     security: [
-      "🔒 End-to-end encryption for all user communications",
-      "🛡️ Advanced threat detection and prevention system",
-      "🔐 Multi-factor authentication with biometric support",
-      "🚫 Enhanced data privacy controls with granular permissions",
-      "🔍 Security audit compliance with SOC 2 Type II standards",
+      "🔒 Enhanced CSP headers and input validation",
+      "🛡️ Improved RLS policies on all database tables",
+      "🔐 Strengthened authentication flow security",
+      "🚫 Enhanced XSS and injection prevention",
+      "🔍 Security audit compliance improvements",
     ],
-    size: "15.2 MB",
+    size: "16.8 MB",
     priority: "high",
-    changelog:
-      "This major update introduces revolutionary AI features, enhanced security, and significant performance improvements.",
+    changelog: "Major update with new fitness challenges, body metrics tracking, workout streaks, watch app store, and enhanced smartwatch hub.",
   };
 
   const releaseHistory = [
-    { version: "4.9.2", date: "2025-01-03", type: "Major Release" },
-    { version: "4.8.1", date: "2024-12-15", type: "Security Update" },
-    { version: "4.8.0", date: "2024-12-01", type: "Feature Update" },
-    { version: "4.7.0", date: "2024-11-15", type: "Major Release" },
+    { version: "5.8.0", date: "2026-02-11", type: "Major Release" },
+    { version: "5.7.0", date: "2024-12-05", type: "Feature Update" },
+    { version: "5.6.0", date: "2024-12-04", type: "Feature Update" },
+    { version: "5.5.0", date: "2024-11-15", type: "Major Release" },
   ];
 
   useEffect(() => {

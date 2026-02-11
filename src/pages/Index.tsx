@@ -46,6 +46,9 @@ import { AIWorkoutCoach } from "@/components/ai/ai-workout-coach";
 import { AIFitnessTools } from "@/components/ai/ai-fitness-tools";
 import { DailyWorkouts } from "@/components/dashboard/daily-workouts";
 import { FitnessFusionLogo } from "@/components/fitness-fusion-logo";
+import { FitnessChallengesWidget } from "@/components/dashboard/fitness-challenges-widget";
+import { BodyMetricsTracker } from "@/components/dashboard/body-metrics-tracker";
+import { WorkoutStreakWidget } from "@/components/dashboard/workout-streak-widget";
 
 const scheduledWorkouts = [
   {
@@ -327,6 +330,11 @@ const Index = () => {
           </motion.div>
         </motion.div>
 
+        {/* Workout Streak */}
+        <motion.div variants={itemVariants} className="px-4">
+          <WorkoutStreakWidget />
+        </motion.div>
+
         {/* Enhanced Quick Actions Panel */}
         <motion.div variants={itemVariants} whileHover={{ scale: 1.01 }}>
           <QuickActionsPanel />
@@ -425,6 +433,16 @@ const Index = () => {
         {/* Enhanced Home Features - Replace popup notifications */}
         <motion.div variants={itemVariants} className="px-4">
           <EnhancedHomeFeatures />
+        </motion.div>
+
+        {/* Fitness Challenges */}
+        <motion.div variants={itemVariants} className="px-4">
+          <FitnessChallengesWidget />
+        </motion.div>
+
+        {/* Body Metrics Tracker */}
+        <motion.div variants={itemVariants} className="px-4">
+          <BodyMetricsTracker />
         </motion.div>
 
         {/* AI Workout Coach */}
