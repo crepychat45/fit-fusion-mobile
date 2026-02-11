@@ -1,32 +1,31 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { Chrome } from "lucide-react";
+import { lovable } from "@/integrations/lovable";
+import { Chrome, Loader2 } from "lucide-react";
 
 export function SocialLogin() {
   const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
 
   const handleGoogleSignIn = async () => {
+    setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/`,
-          queryParams: {
-            access_type: "offline",
-            prompt: "consent",
-          },
-        },
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
       });
 
-      if (error) throw error;
+      if (result.error) {
+        throw result.error;
+      }
     } catch (error: any) {
       toast({
         title: "Google Sign In Failed",
-        description: error.message,
+        description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -48,8 +47,13 @@ export function SocialLogin() {
         variant="outline"
         className="w-full"
         onClick={handleGoogleSignIn}
+        disabled={loading}
       >
-        <Chrome className="mr-2 h-4 w-4" />
+        {loading ? (
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        ) : (
+          <Chrome className="mr-2 h-4 w-4" />
+        )}
         Continue with Google
       </Button>
     </div>
