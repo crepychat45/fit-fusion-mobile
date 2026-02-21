@@ -77,13 +77,9 @@ export function VersionUpdateDialog() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Version update dialog is now only shown in Settings > Updates page
-    // No automatic popup on screen - users can check updates manually
-    const lastVersion = localStorage.getItem("app-version") || localStorage.getItem("fitfusion-app-version");
-    if (!lastVersion) {
-      localStorage.setItem("app-version", latestVersion.version);
-      localStorage.setItem("fitfusion-app-version", latestVersion.version);
-    }
+    // No automatic popup - version updates only in Settings > Updates
+    localStorage.setItem("app-version", latestVersion.version);
+    localStorage.setItem("fitfusion-app-version", latestVersion.version);
   }, []);
 
   const handleInstall = async () => {
