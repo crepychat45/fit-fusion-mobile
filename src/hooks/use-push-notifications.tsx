@@ -27,7 +27,7 @@ export function usePushNotifications() {
   const checkSubscription = async () => {
     try {
       const registration = await navigator.serviceWorker.ready;
-      const sub = await registration.pushManager.getSubscription();
+      const sub = await (registration as any).pushManager.getSubscription();
       
       if (sub) {
         setIsSubscribed(true);
@@ -57,7 +57,7 @@ export function usePushNotifications() {
       const vapidPublicKey = 'YOUR_VAPID_PUBLIC_KEY';
       
       const vapidKey = urlBase64ToUint8Array(vapidPublicKey);
-      const sub = await registration.pushManager.subscribe({
+      const sub = await (registration as any).pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: new Uint8Array(vapidKey),
       });
@@ -100,7 +100,7 @@ export function usePushNotifications() {
   const unsubscribe = async () => {
     try {
       const registration = await navigator.serviceWorker.ready;
-      const sub = await registration.pushManager.getSubscription();
+      const sub = await (registration as any).pushManager.getSubscription();
       
       if (sub) {
         await sub.unsubscribe();
