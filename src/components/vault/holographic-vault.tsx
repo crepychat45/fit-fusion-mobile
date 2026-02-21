@@ -1,51 +1,33 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Shield,
-  Lock,
-  Upload,
-  Download,
-  Share2,
-  Eye,
-  Trash2,
-  File,
-  FileText,
-  FileImage,
-  FilePlus,
-  Folder,
-  Search,
-  Grid,
-  List,
-  MoreVertical,
-  CheckCircle,
-  X,
-  Copy,
-  ExternalLink,
-  Clock,
-  HardDrive,
-  Fingerprint,
-  Sparkles,
+  Shield, Lock, Upload, Download, Share2, Eye, Trash2, File, FileText,
+  FileImage, FilePlus, Folder, Search, Grid, List, MoreVertical,
+  CheckCircle, X, Copy, ExternalLink, Clock, HardDrive, Fingerprint,
+  Sparkles, Play, FileSpreadsheet, FileVideo,
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface VaultDocument {
   id: string;
   name: string;
-  type: "pdf" | "image" | "document" | "other";
+  type: "pdf" | "image" | "document" | "video" | "spreadsheet" | "other";
+  mimeType?: string;
   size: string;
   sizeBytes: number;
   uploadDate: string;
   encrypted: boolean;
   shared: boolean;
   previewUrl?: string;
+  fileBlob?: Blob;
 }
 
 const initialDocuments: VaultDocument[] = [
@@ -54,6 +36,28 @@ const initialDocuments: VaultDocument[] = [
   { id: "3", name: "Diet_Recommendations.docx", type: "document", size: "856 KB", sizeBytes: 856000, uploadDate: "2024-11-25", encrypted: true, shared: true },
   { id: "4", name: "Medical_Certificate.pdf", type: "pdf", size: "1.2 MB", sizeBytes: 1200000, uploadDate: "2024-11-20", encrypted: true, shared: false },
 ];
+
+function detectFileType(file: File): VaultDocument["type"] {
+  const ext = file.name.split(".").pop()?.toLowerCase() || "";
+  const mime = file.type;
+  if (mime.startsWith("image/")) return "image";
+  if (mime.startsWith("video/") || ["mp4", "webm", "mov", "avi", "mkv"].includes(ext)) return "video";
+  if (mime === "application/pdf" || ext === "pdf") return "pdf";
+  if (["xls", "xlsx", "csv"].includes(ext) || mime.includes("spreadsheet") || mime.includes("excel")) return "spreadsheet";
+  if (["doc", "docx", "txt", "rtf", "odt"].includes(ext) || mime.includes("document") || mime.includes("msword")) return "document";
+  return "other";
+}
+
+function getFileIcon(type: string) {
+  switch (type) {
+    case "pdf": return FileText;
+    case "image": return FileImage;
+    case "video": return FileVideo;
+    case "spreadsheet": return FileSpreadsheet;
+    case "document": return File;
+    default: return File;
+  }
+}
 
 export function HolographicVault() {
   const { toast } = useToast();
@@ -66,114 +70,172 @@ export function HolographicVault() {
   const [selectedDoc, setSelectedDoc] = useState<VaultDocument | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
-  const [biometricVerified, setBiometricVerified] = useState(true);
 
-  const filteredDocs = documents.filter(doc => 
+  const filteredDocs = documents.filter(doc =>
     doc.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const totalStorage = documents.reduce((sum, doc) => sum + doc.sizeBytes, 0);
-  const maxStorage = 15 * 1024 * 1024 * 1024; // 15 GB
+  const maxStorage = 15 * 1024 * 1024 * 1024;
   const storagePercent = (totalStorage / maxStorage) * 100;
 
-  const getFileIcon = (type: string) => {
-    switch (type) {
-      case "pdf": return FileText;
-      case "image": return FileImage;
-      case "document": return File;
-      default: return File;
-    }
-  };
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     setUploading(true);
     setUploadProgress(0);
 
-    for (const file of Array.from(files)) {
-      // Simulate upload progress
-      for (let i = 0; i <= 100; i += 20) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        setUploadProgress(i);
+    const newDocs: VaultDocument[] = [];
+    for (let fi = 0; fi < files.length; fi++) {
+      const file = files[fi];
+      for (let i = 0; i <= 100; i += 25) {
+        await new Promise(resolve => setTimeout(resolve, 60));
+        setUploadProgress(Math.round(((fi + i / 100) / files.length) * 100));
       }
 
-      const newDoc: VaultDocument = {
-        id: Date.now().toString(),
+      const type = detectFileType(file);
+      const previewUrl = (type === "image" || type === "video") ? URL.createObjectURL(file) : undefined;
+
+      newDocs.push({
+        id: `${Date.now()}-${fi}`,
         name: file.name,
-        type: file.type.includes("pdf") ? "pdf" : file.type.includes("image") ? "image" : file.type.includes("doc") ? "document" : "other",
-        size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+        type,
+        mimeType: file.type,
+        size: file.size >= 1024 * 1024 ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : `${(file.size / 1024).toFixed(0)} KB`,
         sizeBytes: file.size,
         uploadDate: new Date().toISOString().split("T")[0],
         encrypted: true,
         shared: false,
-        previewUrl: file.type.includes("image") ? URL.createObjectURL(file) : undefined,
-      };
-
-      setDocuments(prev => [newDoc, ...prev]);
+        previewUrl,
+        fileBlob: file,
+      });
     }
 
+    setDocuments(prev => [...newDocs, ...prev]);
     setUploading(false);
     setUploadProgress(0);
-    toast({ title: "✅ Upload Complete", description: "Your files have been encrypted and stored securely." });
-  };
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    toast({ title: "✅ Upload Complete", description: `${newDocs.length} file(s) encrypted and stored securely.` });
+  }, [toast]);
 
-  const handleDownload = (doc: VaultDocument) => {
-    toast({ title: "⬇️ Downloading", description: `${doc.name} is being downloaded...` });
-    
-    // Create actual download
-    if (doc.previewUrl) {
-      const link = document.createElement("a");
-      link.href = doc.previewUrl;
-      link.download = doc.name;
-      link.target = "_blank";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } else {
-      // For non-image files, create a text placeholder download
-      const blob = new Blob([`File: ${doc.name}\nType: ${doc.type}\nSize: ${doc.size}\nEncrypted: ${doc.encrypted}`], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = doc.name;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+  const handleDownload = useCallback((doc: VaultDocument) => {
+    try {
+      if (doc.fileBlob) {
+        const url = URL.createObjectURL(doc.fileBlob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = doc.name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } else if (doc.previewUrl) {
+        const link = document.createElement("a");
+        link.href = doc.previewUrl;
+        link.download = doc.name;
+        link.target = "_blank";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        const blob = new Blob([`File: ${doc.name}\nType: ${doc.type}\nSize: ${doc.size}`], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = doc.name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
+      toast({ title: "✅ Downloaded", description: `${doc.name} saved to your device.` });
+    } catch {
+      toast({ title: "❌ Download Failed", description: "Could not download the file.", variant: "destructive" });
     }
-    
-    setTimeout(() => {
-      toast({ title: "✅ Download Complete", description: `${doc.name} has been saved to your device.` });
-    }, 500);
-  };
+  }, [toast]);
 
-  const handleShare = (doc: VaultDocument) => {
+  const handleShare = useCallback((doc: VaultDocument) => {
     setSelectedDoc(doc);
     setShareDialogOpen(true);
-  };
+  }, []);
 
-  const handleCopyLink = () => {
+  const handleCopyLink = useCallback(() => {
     navigator.clipboard.writeText(`https://fitfusion.app/vault/share/${selectedDoc?.id}`);
-    toast({ title: "📋 Link Copied", description: "Secure sharing link has been copied to clipboard." });
-  };
+    toast({ title: "📋 Link Copied", description: "Secure sharing link copied to clipboard." });
+  }, [selectedDoc, toast]);
 
-  const handleDelete = (docId: string) => {
+  const handleDelete = useCallback((docId: string) => {
+    const doc = documents.find(d => d.id === docId);
+    if (doc?.previewUrl && doc.fileBlob) URL.revokeObjectURL(doc.previewUrl);
     setDocuments(prev => prev.filter(d => d.id !== docId));
-    toast({ title: "🗑️ File Deleted", description: "File has been permanently removed from vault." });
-  };
+    toast({ title: "🗑️ Deleted", description: "File permanently removed from vault." });
+  }, [documents, toast]);
 
-  const handlePreview = (doc: VaultDocument) => {
+  const handlePreview = useCallback((doc: VaultDocument) => {
     setSelectedDoc(doc);
     setPreviewOpen(true);
-  };
+  }, []);
 
-  const handleBiometricVerify = async () => {
-    toast({ title: "🔐 Verifying", description: "Please authenticate with biometrics..." });
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setBiometricVerified(true);
-    toast({ title: "✅ Verified", description: "Biometric authentication successful." });
+  const renderPreviewContent = () => {
+    if (!selectedDoc) return null;
+
+    // Image preview
+    if (selectedDoc.type === "image" && selectedDoc.previewUrl) {
+      return (
+        <div className="flex flex-col items-center gap-4">
+          <img
+            src={selectedDoc.previewUrl}
+            alt={selectedDoc.name}
+            className="max-w-full max-h-[60vh] rounded-lg object-contain"
+            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+          />
+          <PreviewActions doc={selectedDoc} onDownload={handleDownload} onShare={handleShare} onClose={() => setPreviewOpen(false)} />
+        </div>
+      );
+    }
+
+    // Video preview with player
+    if (selectedDoc.type === "video" && selectedDoc.previewUrl) {
+      return (
+        <div className="flex flex-col items-center gap-4">
+          <video
+            src={selectedDoc.previewUrl}
+            controls
+            autoPlay={false}
+            className="max-w-full max-h-[60vh] rounded-lg bg-black"
+            controlsList="nodownload"
+          >
+            Your browser does not support the video tag.
+          </video>
+          <PreviewActions doc={selectedDoc} onDownload={handleDownload} onShare={handleShare} onClose={() => setPreviewOpen(false)} />
+        </div>
+      );
+    }
+
+    // PDF preview via iframe
+    if (selectedDoc.type === "pdf" && selectedDoc.fileBlob) {
+      const pdfUrl = URL.createObjectURL(selectedDoc.fileBlob);
+      return (
+        <div className="flex flex-col items-center gap-4">
+          <iframe src={pdfUrl} className="w-full h-[60vh] rounded-lg border" title={selectedDoc.name} />
+          <PreviewActions doc={selectedDoc} onDownload={handleDownload} onShare={handleShare} onClose={() => setPreviewOpen(false)} />
+        </div>
+      );
+    }
+
+    // Fallback icon-based preview for all other types
+    const IconComp = getFileIcon(selectedDoc.type);
+    const iconColor = selectedDoc.type === "pdf" ? "text-red-500" : selectedDoc.type === "spreadsheet" ? "text-green-500" : selectedDoc.type === "video" ? "text-purple-500" : "text-blue-500";
+
+    return (
+      <div className="flex flex-col items-center justify-center py-8 bg-muted/30 rounded-lg">
+        <IconComp className={`h-16 w-16 ${iconColor} mb-4`} />
+        <p className="font-medium text-lg">{selectedDoc.name}</p>
+        <p className="text-sm text-muted-foreground mt-1">{selectedDoc.type.charAt(0).toUpperCase() + selectedDoc.type.slice(1)} • {selectedDoc.size}</p>
+        <PreviewActions doc={selectedDoc} onDownload={handleDownload} onShare={handleShare} onClose={() => setPreviewOpen(false)} />
+      </div>
+    );
   };
 
   return (
@@ -202,7 +264,6 @@ export function HolographicVault() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Storage Info */}
           <div className="p-4 bg-gradient-to-r from-purple-50 via-pink-50 to-cyan-50 dark:from-purple-950/30 dark:via-pink-950/30 dark:to-cyan-950/30 rounded-xl">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
@@ -210,48 +271,41 @@ export function HolographicVault() {
                 <span className="text-sm font-medium">Secure Storage</span>
               </div>
               <span className="text-sm text-muted-foreground">
-                {totalStorage < 1024 * 1024 * 1024 
-                  ? `${(totalStorage / 1024 / 1024).toFixed(1)} MB` 
+                {totalStorage < 1024 * 1024 * 1024
+                  ? `${(totalStorage / 1024 / 1024).toFixed(1)} MB`
                   : `${(totalStorage / 1024 / 1024 / 1024).toFixed(2)} GB`} / 15 GB
               </span>
             </div>
             <Progress value={storagePercent} className="h-2" />
           </div>
 
-          {/* Security Status */}
           <div className="flex flex-wrap gap-2">
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 dark:bg-green-950/30 dark:text-green-300 dark:border-green-800">
               <Lock className="h-3 w-3 mr-1" />AES-256 Encrypted
             </Badge>
-            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-300 dark:border-blue-800">
               <Fingerprint className="h-3 w-3 mr-1" />Biometric Protected
             </Badge>
-            <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+            <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/30 dark:text-purple-300 dark:border-purple-800">
               <CheckCircle className="h-3 w-3 mr-1" />{documents.length} Files
             </Badge>
           </div>
         </CardContent>
       </Card>
 
-      {/* Actions Bar */}
+      {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search documents..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
+          <Input placeholder="Search documents..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="icon" onClick={() => setViewMode(viewMode === "grid" ? "list" : "grid")}>
+          <Button variant="outline" size="icon" onClick={() => setViewMode(v => v === "grid" ? "list" : "grid")}>
             {viewMode === "grid" ? <List className="h-4 w-4" /> : <Grid className="h-4 w-4" />}
           </Button>
           <input type="file" ref={fileInputRef} multiple className="hidden" onChange={handleFileUpload} accept="*/*" />
           <Button onClick={() => fileInputRef.current?.click()} disabled={uploading} className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
-            <Upload className="h-4 w-4 mr-2" />
-            Upload
+            <Upload className="h-4 w-4 mr-2" />Upload
           </Button>
         </div>
       </div>
@@ -276,91 +330,81 @@ export function HolographicVault() {
         )}
       </AnimatePresence>
 
-      {/* Documents Grid/List */}
+      {/* Documents */}
       <ScrollArea className="h-[400px]">
         <div className={viewMode === "grid" ? "grid grid-cols-1 sm:grid-cols-2 gap-3" : "space-y-2"}>
           {filteredDocs.map((doc, index) => {
             const FileIcon = getFileIcon(doc.type);
             return (
-              <motion.div
-                key={doc.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-              >
-                <Card className={`p-4 hover:shadow-md transition-all cursor-pointer group ${viewMode === "list" ? "flex items-center gap-4" : ""}`}>
+              <motion.div key={doc.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.03 }}>
+                <Card className={`p-4 hover:shadow-md transition-all cursor-pointer group ${viewMode === "list" ? "flex items-center gap-4" : ""}`}
+                  onClick={() => handlePreview(doc)}>
                   <div className={`flex ${viewMode === "grid" ? "flex-col gap-3" : "items-center gap-4 flex-1"}`}>
-                    <div className={`${viewMode === "grid" ? "flex items-center justify-between" : ""}`}>
+                    <div className={viewMode === "grid" ? "flex items-center justify-between" : ""}>
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-lg">
                           <FileIcon className="h-5 w-5 text-purple-600" />
                         </div>
-                        <div className={viewMode === "list" ? "flex-1" : ""}>
+                        <div>
                           <p className="font-medium text-sm truncate max-w-[200px]">{doc.name}</p>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <span>{doc.size}</span>
                             <span>•</span>
-                            <span className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" />{doc.uploadDate}
-                            </span>
+                            <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{doc.uploadDate}</span>
                           </div>
                         </div>
                       </div>
                       {viewMode === "grid" && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={(e) => e.stopPropagation()}>
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handlePreview(doc)}>
+                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handlePreview(doc); }}>
                               <Eye className="h-4 w-4 mr-2" />Preview
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDownload(doc)}>
+                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDownload(doc); }}>
                               <Download className="h-4 w-4 mr-2" />Download
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleShare(doc)}>
+                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleShare(doc); }}>
                               <Share2 className="h-4 w-4 mr-2" />Share
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleDelete(doc.id)} className="text-red-600">
+                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDelete(doc.id); }} className="text-red-600">
                               <Trash2 className="h-4 w-4 mr-2" />Delete
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       )}
                     </div>
-
                     {viewMode === "grid" && (
                       <div className="flex items-center gap-2">
                         {doc.encrypted && (
-                          <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                          <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200 dark:bg-green-950/30 dark:text-green-300">
                             <Lock className="h-2.5 w-2.5 mr-1" />Encrypted
                           </Badge>
                         )}
                         {doc.shared && (
-                          <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                          <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-300">
                             <Share2 className="h-2.5 w-2.5 mr-1" />Shared
+                          </Badge>
+                        )}
+                        {doc.type === "video" && (
+                          <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/30 dark:text-purple-300">
+                            <Play className="h-2.5 w-2.5 mr-1" />Video
                           </Badge>
                         )}
                       </div>
                     )}
                   </div>
-
                   {viewMode === "list" && (
-                    <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => handlePreview(doc)}>
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDownload(doc)}>
-                        <Download className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleShare(doc)}>
-                        <Share2 className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(doc.id)} className="text-red-600 hover:text-red-700">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                      <Button variant="ghost" size="icon" onClick={() => handlePreview(doc)}><Eye className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleDownload(doc)}><Download className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleShare(doc)}><Share2 className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(doc.id)} className="text-red-600 hover:text-red-700"><Trash2 className="h-4 w-4" /></Button>
                     </div>
                   )}
                 </Card>
@@ -368,7 +412,6 @@ export function HolographicVault() {
             );
           })}
         </div>
-
         {filteredDocs.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <Folder className="h-16 w-16 text-muted-foreground/30 mb-4" />
@@ -385,60 +428,15 @@ export function HolographicVault() {
 
       {/* Preview Dialog */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Eye className="h-5 w-5" />
-              Preview: {selectedDoc?.name}
+              {selectedDoc?.name}
             </DialogTitle>
+            <DialogDescription>File preview • {selectedDoc?.size}</DialogDescription>
           </DialogHeader>
-          <div className="p-4">
-            {selectedDoc?.type === "image" && selectedDoc.previewUrl ? (
-              <img src={selectedDoc.previewUrl} alt={selectedDoc.name} className="w-full rounded-lg" />
-            ) : selectedDoc?.type === "pdf" ? (
-              <div className="flex flex-col items-center justify-center py-8 bg-muted/30 rounded-lg">
-                <FileText className="h-16 w-16 text-red-500 mb-4" />
-                <p className="font-medium text-lg">{selectedDoc.name}</p>
-                <p className="text-sm text-muted-foreground mt-1">PDF Document • {selectedDoc.size}</p>
-                <div className="flex gap-2 mt-4">
-                  <Button variant="outline" onClick={() => selectedDoc && handleDownload(selectedDoc)}>
-                    <Download className="h-4 w-4 mr-2" />Download
-                  </Button>
-                  <Button variant="outline" onClick={() => { handleShare(selectedDoc); setPreviewOpen(false); }}>
-                    <Share2 className="h-4 w-4 mr-2" />Share
-                  </Button>
-                </div>
-              </div>
-            ) : selectedDoc?.type === "document" ? (
-              <div className="flex flex-col items-center justify-center py-8 bg-muted/30 rounded-lg">
-                <File className="h-16 w-16 text-blue-500 mb-4" />
-                <p className="font-medium text-lg">{selectedDoc.name}</p>
-                <p className="text-sm text-muted-foreground mt-1">Document • {selectedDoc.size}</p>
-                <div className="flex gap-2 mt-4">
-                  <Button variant="outline" onClick={() => selectedDoc && handleDownload(selectedDoc)}>
-                    <Download className="h-4 w-4 mr-2" />Download
-                  </Button>
-                  <Button variant="outline" onClick={() => { handleShare(selectedDoc); setPreviewOpen(false); }}>
-                    <Share2 className="h-4 w-4 mr-2" />Share
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-8 bg-muted/30 rounded-lg">
-                <File className="h-16 w-16 text-muted-foreground mb-4" />
-                <p className="font-medium text-lg">{selectedDoc?.name}</p>
-                <p className="text-sm text-muted-foreground mt-1">{selectedDoc?.size}</p>
-                <div className="flex gap-2 mt-4">
-                  <Button variant="outline" onClick={() => selectedDoc && handleDownload(selectedDoc)}>
-                    <Download className="h-4 w-4 mr-2" />Download
-                  </Button>
-                  <Button variant="outline" onClick={() => { if (selectedDoc) { handleShare(selectedDoc); setPreviewOpen(false); } }}>
-                    <Share2 className="h-4 w-4 mr-2" />Share
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
+          <div className="py-2">{renderPreviewContent()}</div>
         </DialogContent>
       </Dialog>
 
@@ -447,18 +445,16 @@ export function HolographicVault() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Share2 className="h-5 w-5" />
-              Share: {selectedDoc?.name}
+              <Share2 className="h-5 w-5" />Share: {selectedDoc?.name}
             </DialogTitle>
+            <DialogDescription>Create a secure sharing link</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 p-4">
             <div className="p-4 bg-muted/50 rounded-lg">
               <p className="text-sm text-muted-foreground mb-2">Secure sharing link (expires in 24 hours)</p>
               <div className="flex items-center gap-2">
                 <Input value={`https://fitfusion.app/vault/share/${selectedDoc?.id}`} readOnly className="text-xs" />
-                <Button size="icon" onClick={handleCopyLink}>
-                  <Copy className="h-4 w-4" />
-                </Button>
+                <Button size="icon" onClick={handleCopyLink}><Copy className="h-4 w-4" /></Button>
               </div>
             </div>
             <div className="flex items-center gap-2 p-3 bg-yellow-50 dark:bg-yellow-950/30 rounded-lg border border-yellow-200 dark:border-yellow-800">
@@ -467,12 +463,30 @@ export function HolographicVault() {
                 Shared files remain encrypted. Recipients will need to verify their identity.
               </p>
             </div>
-            <Button className="w-full" onClick={() => { setShareDialogOpen(false); toast({ title: "✅ Share Link Created", description: "Link has been copied to clipboard." }); handleCopyLink(); }}>
+            <Button className="w-full" onClick={() => { setShareDialogOpen(false); handleCopyLink(); }}>
               <ExternalLink className="h-4 w-4 mr-2" />Create & Copy Share Link
             </Button>
           </div>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function PreviewActions({ doc, onDownload, onShare, onClose }: {
+  doc: VaultDocument;
+  onDownload: (doc: VaultDocument) => void;
+  onShare: (doc: VaultDocument) => void;
+  onClose: () => void;
+}) {
+  return (
+    <div className="flex gap-2 mt-4">
+      <Button variant="outline" onClick={() => onDownload(doc)}>
+        <Download className="h-4 w-4 mr-2" />Download
+      </Button>
+      <Button variant="outline" onClick={() => { onShare(doc); onClose(); }}>
+        <Share2 className="h-4 w-4 mr-2" />Share
+      </Button>
     </div>
   );
 }
