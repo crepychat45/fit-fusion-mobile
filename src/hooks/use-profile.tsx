@@ -38,6 +38,25 @@ export const useProfile = (userId?: string) => {
         .eq('user_id', targetUserId)
         .single();
       
+      // If no profile exists, auto-create one from auth metadata
+      if (error && error.code === 'PGRST116' && user) {
+        const meta = user.user_metadata || {};
+        const newProfile = {
+          user_id: targetUserId,
+          name: meta.full_name || meta.name || null,
+          username: meta.email?.split('@')[0] || null,
+          avatar_url: meta.avatar_url || meta.picture || null,
+          bio: null,
+        };
+        const { data: created, error: createError } = await supabase
+          .from('profiles')
+          .insert(newProfile)
+          .select()
+          .single();
+        if (createError) throw createError;
+        return created as UserProfile;
+      }
+      
       if (error) throw error;
       return data as UserProfile;
     },

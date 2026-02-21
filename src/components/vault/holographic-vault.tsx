@@ -73,7 +73,7 @@ export function HolographicVault() {
   );
 
   const totalStorage = documents.reduce((sum, doc) => sum + doc.sizeBytes, 0);
-  const maxStorage = 100 * 1024 * 1024; // 100 MB
+  const maxStorage = 15 * 1024 * 1024 * 1024; // 15 GB
   const storagePercent = (totalStorage / maxStorage) * 100;
 
   const getFileIcon = (type: string) => {
@@ -121,10 +121,32 @@ export function HolographicVault() {
 
   const handleDownload = (doc: VaultDocument) => {
     toast({ title: "⬇️ Downloading", description: `${doc.name} is being downloaded...` });
-    // Simulate download
+    
+    // Create actual download
+    if (doc.previewUrl) {
+      const link = document.createElement("a");
+      link.href = doc.previewUrl;
+      link.download = doc.name;
+      link.target = "_blank";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      // For non-image files, create a text placeholder download
+      const blob = new Blob([`File: ${doc.name}\nType: ${doc.type}\nSize: ${doc.size}\nEncrypted: ${doc.encrypted}`], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = doc.name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+    
     setTimeout(() => {
-      toast({ title: "✅ Download Complete", description: `${doc.name} has been downloaded.` });
-    }, 1500);
+      toast({ title: "✅ Download Complete", description: `${doc.name} has been saved to your device.` });
+    }, 500);
   };
 
   const handleShare = (doc: VaultDocument) => {
@@ -188,7 +210,9 @@ export function HolographicVault() {
                 <span className="text-sm font-medium">Secure Storage</span>
               </div>
               <span className="text-sm text-muted-foreground">
-                {(totalStorage / 1024 / 1024).toFixed(1)} MB / 100 MB
+                {totalStorage < 1024 * 1024 * 1024 
+                  ? `${(totalStorage / 1024 / 1024).toFixed(1)} MB` 
+                  : `${(totalStorage / 1024 / 1024 / 1024).toFixed(2)} GB`} / 15 GB
               </span>
             </div>
             <Progress value={storagePercent} className="h-2" />
@@ -371,13 +395,47 @@ export function HolographicVault() {
           <div className="p-4">
             {selectedDoc?.type === "image" && selectedDoc.previewUrl ? (
               <img src={selectedDoc.previewUrl} alt={selectedDoc.name} className="w-full rounded-lg" />
+            ) : selectedDoc?.type === "pdf" ? (
+              <div className="flex flex-col items-center justify-center py-8 bg-muted/30 rounded-lg">
+                <FileText className="h-16 w-16 text-red-500 mb-4" />
+                <p className="font-medium text-lg">{selectedDoc.name}</p>
+                <p className="text-sm text-muted-foreground mt-1">PDF Document • {selectedDoc.size}</p>
+                <div className="flex gap-2 mt-4">
+                  <Button variant="outline" onClick={() => selectedDoc && handleDownload(selectedDoc)}>
+                    <Download className="h-4 w-4 mr-2" />Download
+                  </Button>
+                  <Button variant="outline" onClick={() => { handleShare(selectedDoc); setPreviewOpen(false); }}>
+                    <Share2 className="h-4 w-4 mr-2" />Share
+                  </Button>
+                </div>
+              </div>
+            ) : selectedDoc?.type === "document" ? (
+              <div className="flex flex-col items-center justify-center py-8 bg-muted/30 rounded-lg">
+                <File className="h-16 w-16 text-blue-500 mb-4" />
+                <p className="font-medium text-lg">{selectedDoc.name}</p>
+                <p className="text-sm text-muted-foreground mt-1">Document • {selectedDoc.size}</p>
+                <div className="flex gap-2 mt-4">
+                  <Button variant="outline" onClick={() => selectedDoc && handleDownload(selectedDoc)}>
+                    <Download className="h-4 w-4 mr-2" />Download
+                  </Button>
+                  <Button variant="outline" onClick={() => { handleShare(selectedDoc); setPreviewOpen(false); }}>
+                    <Share2 className="h-4 w-4 mr-2" />Share
+                  </Button>
+                </div>
+              </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-12 bg-muted/30 rounded-lg">
-                <FileText className="h-16 w-16 text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">Preview not available for this file type</p>
-                <Button variant="outline" className="mt-4" onClick={() => selectedDoc && handleDownload(selectedDoc)}>
-                  <Download className="h-4 w-4 mr-2" />Download to View
-                </Button>
+              <div className="flex flex-col items-center justify-center py-8 bg-muted/30 rounded-lg">
+                <File className="h-16 w-16 text-muted-foreground mb-4" />
+                <p className="font-medium text-lg">{selectedDoc?.name}</p>
+                <p className="text-sm text-muted-foreground mt-1">{selectedDoc?.size}</p>
+                <div className="flex gap-2 mt-4">
+                  <Button variant="outline" onClick={() => selectedDoc && handleDownload(selectedDoc)}>
+                    <Download className="h-4 w-4 mr-2" />Download
+                  </Button>
+                  <Button variant="outline" onClick={() => { if (selectedDoc) { handleShare(selectedDoc); setPreviewOpen(false); } }}>
+                    <Share2 className="h-4 w-4 mr-2" />Share
+                  </Button>
+                </div>
               </div>
             )}
           </div>
