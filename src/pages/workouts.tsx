@@ -44,6 +44,8 @@ import {
 } from "lucide-react";
 import { workouts } from "@/data/workouts";
 import { AIWorkoutVideos } from "@/components/workout/ai-workout-videos";
+import { AIWorkoutBuilder } from "@/components/features/ai-workout-builder";
+import { Sparkles } from "lucide-react";
 
 const Workouts = () => {
   const { toast } = useToast();
@@ -308,41 +310,24 @@ const Workouts = () => {
 
         {/* Enhanced Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-5 mb-6 bg-muted/50 backdrop-blur-sm">
-            <TabsTrigger
-              value="all"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-            >
-              <Target className="h-4 w-4 mr-2" />
-              All
+          <TabsList className="grid grid-cols-6 mb-6 bg-muted/50 backdrop-blur-sm">
+            <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Target className="h-4 w-4 mr-1" />All
             </TabsTrigger>
-            <TabsTrigger
-              value="videos"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-            >
-              <Video className="h-4 w-4 mr-2" />
-              Videos
+            <TabsTrigger value="builder" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Sparkles className="h-4 w-4 mr-1" />AI Build
             </TabsTrigger>
-            <TabsTrigger
-              value="ai"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-            >
-              <Brain className="h-4 w-4 mr-2" />
-              AI Smart
+            <TabsTrigger value="videos" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Video className="h-4 w-4 mr-1" />Videos
             </TabsTrigger>
-            <TabsTrigger
-              value="plans"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-            >
-              <Calendar className="h-4 w-4 mr-2" />
-              Plans
+            <TabsTrigger value="ai" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Brain className="h-4 w-4 mr-1" />Smart
             </TabsTrigger>
-            <TabsTrigger
-              value="favorites"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-            >
-              <Heart className="h-4 w-4 mr-2" />
-              Saved
+            <TabsTrigger value="plans" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Calendar className="h-4 w-4 mr-1" />Plans
+            </TabsTrigger>
+            <TabsTrigger value="favorites" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Heart className="h-4 w-4 mr-1" />Saved
             </TabsTrigger>
           </TabsList>
 
@@ -451,6 +436,10 @@ const Workouts = () => {
                     </motion.div>
                   ))}
                 </div>
+              </TabsContent>
+
+              <TabsContent value="builder" className="mt-0">
+                <AIWorkoutBuilder />
               </TabsContent>
 
               <TabsContent value="videos" className="mt-0">
