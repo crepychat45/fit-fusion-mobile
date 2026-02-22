@@ -79,52 +79,46 @@ export function VersionManager() {
   } | null>(null);
 
   const currentVersion = appVersion;
-  const latestVersion = "5.8.0";
+  const latestVersion = "5.9.0";
 
   const updateInfo: UpdateInfo = {
-    version: "5.8.0",
-    releaseDate: "2026-02-11",
+    version: "5.9.0",
+    releaseDate: "2026-02-22",
     features: [
-      "🏆 Active Fitness Challenges with daily, weekly & community competitions",
-      "📊 Body Metrics Tracker with real-time health monitoring (hydration, sleep, SpO2, stress)",
-      "🔥 Workout Streak Widget with weekly calendar and streak tracking",
-      "🏪 Watch App Store – browse, install & manage smartwatch apps",
-      "⌚ Enhanced Fitness Hub with 5-tab layout including new Store tab",
-      "🧠 AI-powered insights with confidence scoring and actionable recommendations",
-      "🎯 Improved challenge system with XP rewards and leaderboards",
+      "🤖 AI Workout Builder — generate custom routines from goals",
+      "📈 3-Month Progress Prediction Charts with AI forecasting",
+      "🌟 Community Transformation Stories section",
+      "🏋️ Enhanced Workout page with AI Build tab",
+      "🏆 Fitness Challenges & Body Metrics tracking",
+      "🏪 Watch App Store for smartwatch apps",
     ],
     improvements: [
-      "⚡ Optimized component rendering and reduced re-renders",
-      "🔋 Better memory management with lazy loading enhancements",
-      "🛡️ Enhanced security protocols and input sanitization",
-      "📱 Improved mobile responsiveness across all new widgets",
-      "✨ Smoother animations with optimized Framer Motion usage",
-      "🌐 Better offline caching for workout data",
-      "♿ Improved accessibility across all new components",
+      "⚡ Faster animation transitions across the app",
+      "🛡️ Enhanced security protocols",
+      "📱 Improved mobile responsiveness",
+      "✨ Smoother Framer Motion animations",
+      "🌐 Better offline caching",
     ],
     fixes: [
-      "🔧 Fixed performance monitor overlay z-index issues",
-      "💬 Resolved chat notification delivery delays",
-      "📈 Fixed progress chart data accuracy",
-      "🌙 Fixed dark mode consistency in new widgets",
-      "🔄 Resolved sync conflicts between devices",
-      "🎵 Fixed audio playback during active workouts",
-      "📱 Fixed mobile layout overflow issues",
+      "🔧 Fixed vault image preview crash",
+      "💬 Fixed profile name editing persistence",
+      "📈 Fixed startup popup notifications",
+      "🌙 Fixed dark mode consistency",
+      "📱 Fixed mobile layout issues",
     ],
     security: [
       "🔒 Enhanced CSP headers and input validation",
-      "🛡️ Improved RLS policies on all database tables",
-      "🔐 Strengthened authentication flow security",
-      "🚫 Enhanced XSS and injection prevention",
-      "🔍 Security audit compliance improvements",
+      "🛡️ Improved RLS policies",
+      "🔐 Strengthened authentication flow",
     ],
-    size: "16.8 MB",
+    size: "17.2 MB",
     priority: "high",
-    changelog: "Major update with new fitness challenges, body metrics tracking, workout streaks, watch app store, and enhanced smartwatch hub.",
+    changelog: "AI Workout Builder, progress predictions, transformation stories, and enhanced stability.",
   };
 
   const releaseHistory = [
-    { version: "5.8.0", date: "2026-02-11", type: "Major Release" },
+    { version: "5.9.0", date: "2026-02-22", type: "Major Release" },
+    { version: "5.8.0", date: "2026-02-21", type: "Feature Update" },
     { version: "5.7.0", date: "2024-12-05", type: "Feature Update" },
     { version: "5.6.0", date: "2024-12-04", type: "Feature Update" },
     { version: "5.5.0", date: "2024-11-15", type: "Major Release" },

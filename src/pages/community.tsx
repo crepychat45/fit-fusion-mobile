@@ -5,7 +5,8 @@ import { ActivityFeed } from "@/components/community/activity-feed";
 import { Leaderboard } from "@/components/community/leaderboard";
 import { ChallengeCard, SAMPLE_CHALLENGES } from "@/components/community/challenge-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Trophy, Activity } from "lucide-react";
+import { Users, Trophy, Activity, Star } from "lucide-react";
+import { TransformationStories } from "@/components/community/transformation-stories";
 
 export default function Community() {
   return (
@@ -19,18 +20,18 @@ export default function Community() {
         </div>
 
         <Tabs defaultValue="feed" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 max-w-md">
+          <TabsList className="grid w-full grid-cols-4 max-w-lg">
             <TabsTrigger value="feed">
-              <Activity className="h-4 w-4 mr-2" />
-              Feed
+              <Activity className="h-4 w-4 mr-2" />Feed
+            </TabsTrigger>
+            <TabsTrigger value="stories">
+              <Star className="h-4 w-4 mr-2" />Stories
             </TabsTrigger>
             <TabsTrigger value="challenges">
-              <Trophy className="h-4 w-4 mr-2" />
-              Challenges
+              <Trophy className="h-4 w-4 mr-2" />Challenges
             </TabsTrigger>
             <TabsTrigger value="leaderboard">
-              <Users className="h-4 w-4 mr-2" />
-              Leaderboard
+              <Users className="h-4 w-4 mr-2" />Leaderboard
             </TabsTrigger>
           </TabsList>
 
@@ -44,6 +45,10 @@ export default function Community() {
                 <Leaderboard />
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="stories" className="space-y-6">
+            <TransformationStories />
           </TabsContent>
 
           <TabsContent value="challenges" className="space-y-6">

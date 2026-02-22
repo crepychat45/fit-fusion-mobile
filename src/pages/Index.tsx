@@ -49,6 +49,7 @@ import { FitnessFusionLogo } from "@/components/fitness-fusion-logo";
 import { FitnessChallengesWidget } from "@/components/dashboard/fitness-challenges-widget";
 import { BodyMetricsTracker } from "@/components/dashboard/body-metrics-tracker";
 import { WorkoutStreakWidget } from "@/components/dashboard/workout-streak-widget";
+import { ProgressPrediction } from "@/components/dashboard/progress-prediction";
 
 const scheduledWorkouts = [
   {
@@ -333,6 +334,11 @@ const Index = () => {
         {/* Workout Streak */}
         <motion.div variants={itemVariants} className="px-4">
           <WorkoutStreakWidget />
+        </motion.div>
+
+        {/* Progress Prediction */}
+        <motion.div variants={itemVariants} className="px-4">
+          <ProgressPrediction />
         </motion.div>
 
         {/* Enhanced Quick Actions Panel */}

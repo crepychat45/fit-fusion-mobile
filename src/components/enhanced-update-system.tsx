@@ -26,7 +26,7 @@ interface EnhancedUpdateSystemProps {
 }
 
 export function EnhancedUpdateSystem({
-  currentVersion = "5.7.0",
+  currentVersion = "5.8.0",
   onUpdateComplete,
 }: EnhancedUpdateSystemProps) {
   const { toast } = useToast();
@@ -37,36 +37,32 @@ export function EnhancedUpdateSystem({
   const [availableUpdate, setAvailableUpdate] = useState<UpdateInfo | null>(null);
   const [lastCheck, setLastCheck] = useState<Date | null>(null);
 
-  const latestVersion = "5.8.0";
+  const latestVersion = "5.9.0";
 
   const updateInfo: UpdateInfo = {
-    version: "5.8.0",
-    releaseDate: "2026-02-21",
+    version: "5.9.0",
+    releaseDate: "2026-02-22",
     features: [
-      "🏋️ Fitness Challenges Widget on homepage",
-      "📊 Body Metrics Tracker with visual charts",
-      "⌚ Watch App Store with install/uninstall",
-      "🔥 Workout Streak Widget with animations",
-      "🔒 Enhanced Vault with MP4/PDF/XLS preview",
-      "✏️ Inline profile name editing in Settings",
+      "🤖 AI Workout Builder — generate custom routines from your goals",
+      "📈 3-Month Progress Prediction Charts",
+      "🌟 Community Transformation Stories",
+      "🏋️ Enhanced Workout Tabs with AI Build",
     ],
     improvements: [
-      "Removed all startup notification popups",
-      "Faster app load with optimized animations",
-      "Better file preview support in Vault",
-      "Enhanced settings page responsiveness",
-      "Improved dark mode consistency",
+      "Faster animation transitions across the app",
+      "Improved vault file preview stability",
+      "Better community page with Stories tab",
+      "Enhanced update installation animation",
     ],
     fixes: [
-      "Fixed Vault image preview crash",
-      "Fixed profile name editing not working",
+      "Fixed vault image preview crash on upload",
+      "Fixed profile name editing persistence",
       "Fixed startup popup notifications",
-      "Fixed file download to local storage",
-      "Fixed video preview in Vault",
+      "Improved edge function error handling",
     ],
-    size: "14.2 MB",
+    size: "15.8 MB",
     priority: "high",
-    changelog: "Major update with new fitness widgets, vault improvements, and bug fixes.",
+    changelog: "AI Workout Builder, progress predictions, transformation stories, and stability improvements.",
   };
 
   useEffect(() => {
