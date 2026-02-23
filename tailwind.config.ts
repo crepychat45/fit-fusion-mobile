@@ -258,7 +258,7 @@ export default {
   		},
   		fontFamily: {
   			sans: [
-  				'Lato',
+  				'Poppins',
   				'ui-sans-serif',
   				'system-ui',
   				'-apple-system',
@@ -271,7 +271,7 @@ export default {
   				'sans-serif'
   			],
   			serif: [
-  				'EB Garamond',
+  				'Merriweather',
   				'ui-serif',
   				'Georgia',
   				'Cambria',
@@ -280,7 +280,7 @@ export default {
   				'serif'
   			],
   			mono: [
-  				'Fira Code',
+  				'JetBrains Mono',
   				'ui-monospace',
   				'SFMono-Regular',
   				'Menlo',
