@@ -233,7 +233,7 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
 
   // Version info - sync with localStorage and listen for updates
   const [appVersion, setAppVersionState] = useState(() => {
-    return localStorage.getItem("fitfusion-app-version") || "5.9.0";
+    return localStorage.getItem("fitfusion-app-version") || "6.0.0";
   });
 
   // Listen for version updates from other components

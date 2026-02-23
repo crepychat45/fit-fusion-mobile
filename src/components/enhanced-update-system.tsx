@@ -5,7 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Download, CheckCircle, RefreshCw, Package, Sparkles, Gift, Clock, Rocket, ShieldCheck, Zap,
+  Download, CheckCircle, RefreshCw, Package, Sparkles, Gift, Clock, Rocket, ShieldCheck, Zap, Shield, Cpu,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -26,7 +26,7 @@ interface EnhancedUpdateSystemProps {
 }
 
 export function EnhancedUpdateSystem({
-  currentVersion = "5.8.0",
+  currentVersion = "5.9.0",
   onUpdateComplete,
 }: EnhancedUpdateSystemProps) {
   const { toast } = useToast();
@@ -34,49 +34,63 @@ export function EnhancedUpdateSystem({
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateProgress, setUpdateProgress] = useState(0);
   const [updateStage, setUpdateStage] = useState("");
+  const [stageIcon, setStageIcon] = useState("🔍");
   const [availableUpdate, setAvailableUpdate] = useState<UpdateInfo | null>(null);
   const [lastCheck, setLastCheck] = useState<Date | null>(null);
+  const [installed, setInstalled] = useState(false);
 
-  const latestVersion = "5.9.0";
+  const latestVersion = "6.0.0";
 
   const updateInfo: UpdateInfo = {
-    version: "5.9.0",
-    releaseDate: "2026-02-22",
+    version: "6.0.0",
+    releaseDate: "2026-02-23",
     features: [
-      "🤖 AI Workout Builder — generate custom routines from your goals",
-      "📈 3-Month Progress Prediction Charts",
-      "🌟 Community Transformation Stories",
-      "🏋️ Enhanced Workout Tabs with AI Build",
+      "🧠 AI Adaptive Workout Engine — auto-adjusts difficulty from biometrics",
+      "🎬 Exercise Video Demos in AI Workout Builder",
+      "🖥️ Live Biometric HUD — Jarvis-style real-time dashboard",
+      "💧 Interactive Hydration & Energy Tracker",
+      "🔒 Enhanced Double-Layer Security & App Lock",
+      "📊 Improved Progress Prediction Charts",
     ],
     improvements: [
-      "Faster animation transitions across the app",
-      "Improved vault file preview stability",
-      "Better community page with Stories tab",
-      "Enhanced update installation animation",
+      "Smoother update installation animation with stages",
+      "Community Transformation Stories with liquid transitions",
+      "Offline caching for Daily Workouts",
+      "Security patch auto-check system",
     ],
     fixes: [
-      "Fixed vault image preview crash on upload",
-      "Fixed profile name editing persistence",
-      "Fixed startup popup notifications",
-      "Improved edge function error handling",
+      "Fixed App Lock trigger on launch",
+      "Fixed 2FA verification flow",
+      "Resolved security scan score calculation",
+      "Improved vault file handling stability",
     ],
-    size: "15.8 MB",
-    priority: "high",
-    changelog: "AI Workout Builder, progress predictions, transformation stories, and stability improvements.",
+    size: "18.2 MB",
+    priority: "critical",
+    changelog: "Major release: AI Adaptive Engine, Biometric HUD, Exercise Videos, Double-Layer Security, and Hydration Tracker.",
   };
 
   useEffect(() => {
-    const timer = setTimeout(() => checkForUpdates(), 1500);
-    return () => clearTimeout(timer);
+    // Check if already on latest
+    const storedVersion = localStorage.getItem("fitfusion-app-version");
+    if (storedVersion === latestVersion) {
+      setInstalled(true);
+    } else {
+      const timer = setTimeout(() => checkForUpdates(), 1000);
+      return () => clearTimeout(timer);
+    }
   }, []);
 
   const checkForUpdates = async () => {
     setIsChecking(true);
     setLastCheck(new Date());
     await new Promise((r) => setTimeout(r, 1200));
-    const needsUpdate = compareVersions(currentVersion, latestVersion) < 0;
+    const storedVersion = localStorage.getItem("fitfusion-app-version") || currentVersion;
+    const needsUpdate = compareVersions(storedVersion, latestVersion) < 0;
     if (needsUpdate) {
       setAvailableUpdate(updateInfo);
+      setInstalled(false);
+    } else {
+      setInstalled(true);
     }
     setIsChecking(false);
   };
@@ -87,17 +101,22 @@ export function EnhancedUpdateSystem({
     setUpdateProgress(0);
 
     const stages = [
-      { msg: "Preparing update...", icon: "🔍", progress: 15 },
-      { msg: "Downloading packages...", icon: "📦", progress: 35 },
-      { msg: "Installing components...", icon: "🔧", progress: 55 },
-      { msg: "Applying patches...", icon: "⚙️", progress: 75 },
-      { msg: "Optimizing performance...", icon: "⚡", progress: 90 },
-      { msg: "Finalizing update...", icon: "✨", progress: 100 },
+      { msg: "Verifying system integrity...", icon: "🔍", progress: 8 },
+      { msg: "Preparing secure connection...", icon: "🔐", progress: 15 },
+      { msg: "Downloading core packages...", icon: "📦", progress: 30 },
+      { msg: "Downloading AI modules...", icon: "🧠", progress: 45 },
+      { msg: "Installing security patches...", icon: "🛡️", progress: 55 },
+      { msg: "Updating biometric engine...", icon: "💚", progress: 65 },
+      { msg: "Compiling UI components...", icon: "🔧", progress: 75 },
+      { msg: "Optimizing performance...", icon: "⚡", progress: 85 },
+      { msg: "Running final checks...", icon: "✅", progress: 95 },
+      { msg: "Launching FitFusion v6.0...", icon: "🚀", progress: 100 },
     ];
 
     for (const stage of stages) {
-      setUpdateStage(`${stage.icon} ${stage.msg}`);
-      await new Promise((r) => setTimeout(r, 800));
+      setUpdateStage(stage.msg);
+      setStageIcon(stage.icon);
+      await new Promise((r) => setTimeout(r, 700));
       setUpdateProgress(stage.progress);
     }
 
@@ -107,12 +126,13 @@ export function EnhancedUpdateSystem({
     window.dispatchEvent(new CustomEvent("versionUpdated", { detail: availableUpdate.version }));
 
     setAvailableUpdate(null);
+    setInstalled(true);
     setIsUpdating(false);
     setUpdateProgress(0);
     onUpdateComplete?.();
 
-    toast({ title: "🚀 Update Installed!", description: `FitFusion v${latestVersion} is now active.` });
-    setTimeout(() => window.location.reload(), 1500);
+    toast({ title: "🚀 Update Complete!", description: `FitFusion v${latestVersion} is now active.` });
+    setTimeout(() => window.location.reload(), 2000);
   };
 
   const compareVersions = (v1: string, v2: string): number => {
@@ -127,7 +147,7 @@ export function EnhancedUpdateSystem({
 
   return (
     <Card className="relative overflow-hidden border-2">
-      {availableUpdate && (
+      {(availableUpdate || isUpdating) && (
         <motion.div
           animate={{
             background: [
@@ -148,8 +168,8 @@ export function EnhancedUpdateSystem({
             Update Center
           </span>
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="font-mono">v{currentVersion}</Badge>
-            {availableUpdate && (
+            <Badge variant="outline" className="font-mono">v{localStorage.getItem("fitfusion-app-version") || currentVersion}</Badge>
+            {availableUpdate && !installed && (
               <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
                 <Badge className="bg-gradient-to-r from-orange-500 to-red-500">
                   <Gift className="h-3 w-3 mr-1" />New
@@ -170,20 +190,62 @@ export function EnhancedUpdateSystem({
               exit={{ opacity: 0, scale: 0.95 }}
               className="space-y-4 p-6 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl border"
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}>
-                    <Rocket className="h-6 w-6 text-primary" />
-                  </motion.div>
-                  <div>
-                    <p className="font-semibold">Installing v{availableUpdate?.version || latestVersion}</p>
-                    <p className="text-sm text-muted-foreground">{updateStage}</p>
-                  </div>
-                </div>
-                <span className="text-lg font-bold text-primary">{Math.round(updateProgress)}%</span>
+              {/* Rocket animation */}
+              <div className="flex flex-col items-center mb-4">
+                <motion.div
+                  animate={{
+                    y: [0, -10, 0],
+                    rotate: [0, -3, 3, 0],
+                  }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                  className="text-4xl mb-2"
+                >
+                  {stageIcon}
+                </motion.div>
+                <p className="font-semibold text-center">Installing v{availableUpdate?.version || latestVersion}</p>
+                <p className="text-sm text-muted-foreground text-center">{updateStage}</p>
               </div>
-              <Progress value={updateProgress} className="h-3" />
-              <p className="text-xs text-center text-muted-foreground">Please keep the app open during installation...</p>
+
+              {/* Progress bar with glow */}
+              <div className="relative">
+                <Progress value={updateProgress} className="h-3" />
+                <motion.div
+                  className="absolute top-0 h-3 rounded-full bg-primary/30 blur-sm"
+                  animate={{ width: `${updateProgress}%` }}
+                  transition={{ duration: 0.5 }}
+                />
+              </div>
+
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">{Math.round(updateProgress)}% complete</span>
+                <span className="text-muted-foreground font-mono">{availableUpdate?.size || "18.2 MB"}</span>
+              </div>
+
+              {/* Stage indicators */}
+              <div className="grid grid-cols-5 gap-1">
+                {["Verify", "Download", "Install", "Optimize", "Launch"].map((s, i) => (
+                  <div key={s} className={`text-center text-[10px] py-1 rounded ${updateProgress >= (i + 1) * 20 ? "bg-primary/20 text-primary font-medium" : "bg-muted/50 text-muted-foreground"}`}>
+                    {s}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          ) : installed && !availableUpdate ? (
+            <motion.div
+              key="uptodate"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-xl border"
+            >
+              <motion.div animate={{ scale: [1, 1.05, 1] }} transition={{ duration: 2, repeat: Infinity }}>
+                <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+              </motion.div>
+              <h3 className="text-lg font-semibold text-green-700 dark:text-green-300 mb-2">You're All Set!</h3>
+              <p className="text-sm text-muted-foreground">FitFusion v{localStorage.getItem("fitfusion-app-version") || currentVersion} is the latest version.</p>
+              {lastCheck && (
+                <p className="text-xs text-muted-foreground mt-2">Last checked: {lastCheck.toLocaleString()}</p>
+              )}
             </motion.div>
           ) : availableUpdate ? (
             <motion.div
@@ -195,22 +257,28 @@ export function EnhancedUpdateSystem({
             >
               <div>
                 <h3 className="text-xl font-bold text-green-700 dark:text-green-300 mb-2">🎉 v{availableUpdate.version} Available!</h3>
-                <div className="flex items-center gap-2 mb-3">
-                  <Badge className="text-sm px-3 py-1 font-mono bg-gradient-to-r from-primary to-purple-600">v{availableUpdate.version}</Badge>
-                  <Badge variant="outline"><Sparkles className="h-3 w-3 mr-1" />Recommended</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">{availableUpdate.changelog}</p>
+                <Badge className="text-sm px-3 py-1 font-mono bg-gradient-to-r from-primary to-purple-600 mr-2">v{availableUpdate.version}</Badge>
+                <Badge variant="outline"><Sparkles className="h-3 w-3 mr-1" />Major Release</Badge>
+                <p className="text-sm text-muted-foreground mt-2">{availableUpdate.changelog}</p>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
+              {/* Feature highlights */}
+              <div className="space-y-1 max-h-40 overflow-y-auto">
+                {availableUpdate.features.map((f, i) => (
+                  <motion.p key={i} initial={{ x: -10, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: i * 0.05 }}
+                    className="text-xs text-muted-foreground">{f}</motion.p>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 text-xs">
                 <div className="flex items-center gap-2 p-2 bg-background/50 rounded-lg">
-                  <Zap className="h-4 w-4 text-primary" /><span>Performance</span>
+                  <Cpu className="h-4 w-4 text-primary" /><span>AI Engine</span>
                 </div>
                 <div className="flex items-center gap-2 p-2 bg-background/50 rounded-lg">
-                  <ShieldCheck className="h-4 w-4 text-green-500" /><span>Security</span>
+                  <Shield className="h-4 w-4 text-green-500" /><span>Security</span>
                 </div>
                 <div className="flex items-center gap-2 p-2 bg-background/50 rounded-lg">
-                  <Sparkles className="h-4 w-4 text-purple-500" /><span>New Features</span>
+                  <Zap className="h-4 w-4 text-yellow-500" /><span>Performance</span>
                 </div>
               </div>
 
@@ -225,22 +293,10 @@ export function EnhancedUpdateSystem({
               </div>
             </motion.div>
           ) : (
-            <motion.div
-              key="uptodate"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-xl border"
-            >
-              <motion.div animate={{ scale: [1, 1.05, 1] }} transition={{ duration: 2, repeat: Infinity }}>
-                <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-              </motion.div>
-              <h3 className="text-lg font-semibold text-green-700 dark:text-green-300 mb-2">You're All Set!</h3>
-              <p className="text-sm text-muted-foreground">FitFusion v{currentVersion} is the latest version.</p>
-              {lastCheck && (
-                <p className="text-xs text-muted-foreground mt-2">Last checked: {lastCheck.toLocaleString()}</p>
-              )}
-            </motion.div>
+            <div className="text-center p-6">
+              <RefreshCw className="h-8 w-8 text-muted-foreground mx-auto mb-2 animate-spin" />
+              <p className="text-sm text-muted-foreground">Checking for updates...</p>
+            </div>
           )}
         </AnimatePresence>
 
