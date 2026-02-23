@@ -79,49 +79,47 @@ export function VersionManager() {
   } | null>(null);
 
   const currentVersion = appVersion;
-  const latestVersion = "5.9.0";
+  const latestVersion = "6.0.0";
 
   const updateInfo: UpdateInfo = {
-    version: "5.9.0",
-    releaseDate: "2026-02-22",
+    version: "6.0.0",
+    releaseDate: "2026-02-23",
     features: [
-      "🤖 AI Workout Builder — generate custom routines from goals",
-      "📈 3-Month Progress Prediction Charts with AI forecasting",
-      "🌟 Community Transformation Stories section",
-      "🏋️ Enhanced Workout page with AI Build tab",
-      "🏆 Fitness Challenges & Body Metrics tracking",
-      "🏪 Watch App Store for smartwatch apps",
+      "🧠 AI Adaptive Workout Engine — auto-adjusts from biometrics",
+      "🎬 Exercise Video Demos in AI Workout Builder",
+      "🖥️ Live Biometric HUD — Jarvis-style dashboard",
+      "💧 Interactive Hydration & Energy Tracker",
+      "🔒 Double-Layer Security & App Lock",
+      "📊 Enhanced Progress Prediction Charts",
     ],
     improvements: [
-      "⚡ Faster animation transitions across the app",
-      "🛡️ Enhanced security protocols",
-      "📱 Improved mobile responsiveness",
-      "✨ Smoother Framer Motion animations",
-      "🌐 Better offline caching",
+      "⚡ Smoother update installation with 10-stage animation",
+      "🌟 Community Transformation Stories with liquid effects",
+      "📱 Offline caching for Daily Workouts",
+      "🛡️ Security patch auto-check system",
     ],
     fixes: [
-      "🔧 Fixed vault image preview crash",
-      "💬 Fixed profile name editing persistence",
-      "📈 Fixed startup popup notifications",
-      "🌙 Fixed dark mode consistency",
-      "📱 Fixed mobile layout issues",
+      "🔧 Fixed App Lock trigger on launch",
+      "💬 Fixed 2FA verification flow",
+      "📈 Resolved security scan score calculation",
+      "🔐 Improved vault file handling stability",
     ],
     security: [
-      "🔒 Enhanced CSP headers and input validation",
-      "🛡️ Improved RLS policies",
-      "🔐 Strengthened authentication flow",
+      "🔒 Double-layer app lock security",
+      "🛡️ Automated security patch checks",
+      "🔐 Enhanced biometric authentication",
     ],
-    size: "17.2 MB",
-    priority: "high",
-    changelog: "AI Workout Builder, progress predictions, transformation stories, and enhanced stability.",
+    size: "18.2 MB",
+    priority: "critical",
+    changelog: "Major release: AI Adaptive Engine, Biometric HUD, Exercise Videos, Double-Layer Security.",
   };
 
   const releaseHistory = [
-    { version: "5.9.0", date: "2026-02-22", type: "Major Release" },
+    { version: "6.0.0", date: "2026-02-23", type: "Major Release" },
+    { version: "5.9.0", date: "2026-02-22", type: "Feature Update" },
     { version: "5.8.0", date: "2026-02-21", type: "Feature Update" },
     { version: "5.7.0", date: "2024-12-05", type: "Feature Update" },
     { version: "5.6.0", date: "2024-12-04", type: "Feature Update" },
-    { version: "5.5.0", date: "2024-11-15", type: "Major Release" },
   ];
 
   useEffect(() => {

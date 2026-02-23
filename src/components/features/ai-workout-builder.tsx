@@ -9,8 +9,9 @@ import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Sparkles, Dumbbell, Clock, Flame, Target, Zap, ChevronRight, Loader2, RotateCcw,
+  Sparkles, Dumbbell, Clock, Flame, Target, Zap, ChevronRight, Loader2, RotateCcw, Video,
 } from "lucide-react";
+import { ExerciseVideoPlayer } from "@/components/workout/exercise-video-player";
 
 interface GeneratedExercise {
   name: string;
@@ -41,6 +42,7 @@ export function AIWorkoutBuilder() {
   const [level, setLevel] = useState("intermediate");
   const [isGenerating, setIsGenerating] = useState(false);
   const [workout, setWorkout] = useState<GeneratedWorkout | null>(null);
+  const [showVideoFor, setShowVideoFor] = useState<number | null>(null);
 
   const quickGoals = [
     "Build muscle with no equipment",
@@ -203,12 +205,20 @@ export function AIWorkoutBuilder() {
                             <span className="text-sm text-muted-foreground">{ex.sets} × {ex.reps}</span>
                           </div>
                           <p className="text-xs text-muted-foreground">{ex.instructions}</p>
-                          <div className="flex gap-1 mt-1 flex-wrap">
+                          <div className="flex gap-1 mt-1 flex-wrap items-center">
                             {ex.muscle_groups?.map((mg) => (
                               <Badge key={mg} variant="outline" className="text-xs">{mg}</Badge>
                             ))}
                             <Badge variant="secondary" className="text-xs">Rest: {ex.rest}</Badge>
+                            <Button variant="ghost" size="sm" className="ml-auto h-6 px-2 text-xs gap-1" onClick={() => setShowVideoFor(showVideoFor === i ? null : i)}>
+                              <Video className="h-3 w-3" />{showVideoFor === i ? "Hide" : "Demo"}
+                            </Button>
                           </div>
+                          {showVideoFor === i && (
+                            <div className="mt-2">
+                              <ExerciseVideoPlayer exerciseName={ex.name} muscleGroups={ex.muscle_groups} sets={ex.sets} reps={ex.reps} />
+                            </div>
+                          )}
                         </motion.div>
                       ))}
                     </div>

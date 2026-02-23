@@ -192,7 +192,7 @@ const ProgressPage = () => {
                 variant="secondary"
                 className="bg-white/20 text-white border-white/30"
               >
-                v5.9.0
+                v6.0.0
               </Badge>
               <Button
                 variant="ghost"

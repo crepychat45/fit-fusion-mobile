@@ -50,6 +50,9 @@ import { FitnessChallengesWidget } from "@/components/dashboard/fitness-challeng
 import { BodyMetricsTracker } from "@/components/dashboard/body-metrics-tracker";
 import { WorkoutStreakWidget } from "@/components/dashboard/workout-streak-widget";
 import { ProgressPrediction } from "@/components/dashboard/progress-prediction";
+import { AdaptiveWorkoutEngine } from "@/components/dashboard/adaptive-workout-engine";
+import { BiometricHUD } from "@/components/dashboard/biometric-hud";
+import { HydrationEnergyTracker } from "@/components/dashboard/hydration-energy-tracker";
 
 const scheduledWorkouts = [
   {
@@ -310,6 +313,19 @@ const Index = () => {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Biometric HUD */}
+        <motion.div variants={itemVariants} className="px-4">
+          <BiometricHUD />
+        </motion.div>
+
+        {/* AI Adaptive Engine + Hydration Side by Side */}
+        <motion.div variants={itemVariants} className="px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <AdaptiveWorkoutEngine />
+            <HydrationEnergyTracker />
+          </div>
+        </motion.div>
 
         {/* Daily Workouts */}
         <motion.div variants={itemVariants} className="px-4">
