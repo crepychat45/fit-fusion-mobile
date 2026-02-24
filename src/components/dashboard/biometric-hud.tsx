@@ -37,7 +37,7 @@ export function BiometricHUD() {
   }, []);
 
   return (
-    <Card className="overflow-hidden border-border/50 bg-black/80 backdrop-blur-xl relative">
+    <Card className="overflow-hidden border-border/50 liquid-glass-strong relative bg-gradient-to-br from-background/90 to-muted/30">
       {/* Scan line effect */}
       <motion.div
         animate={{ y: ["0%", "100%"] }}
@@ -63,14 +63,14 @@ export function BiometricHUD() {
           </Badge>
         </div>
 
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid grid-cols-5 gap-2 max-sm:grid-cols-3 max-[400px]:grid-cols-2">
           {metrics.map((metric, i) => (
             <motion.div
               key={metric.label}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.1 }}
-              className="relative text-center p-2 rounded-lg border border-cyan-500/20 bg-cyan-500/5"
+              className="relative text-center p-2 rounded-lg liquid-glass-subtle"
             >
               {/* Circular progress */}
               <div className="relative w-10 h-10 mx-auto mb-1">

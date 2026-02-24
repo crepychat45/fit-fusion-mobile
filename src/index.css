@@ -470,8 +470,8 @@ img.lazy.loaded {
   backdrop-filter: var(--glass-backdrop);
   -webkit-backdrop-filter: var(--glass-backdrop);
   border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
-  transition: all 0.3s var(--liquid-smooth);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.4s var(--liquid-smooth);
 }
 
 .liquid-glass-strong {
@@ -479,7 +479,7 @@ img.lazy.loaded {
   backdrop-filter: var(--glass-backdrop);
   -webkit-backdrop-filter: var(--glass-backdrop);
   border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .liquid-glass-subtle {
@@ -491,8 +491,29 @@ img.lazy.loaded {
 
 .liquid-glass:hover {
   background: var(--glass-strong);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px) scale(1.005);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), 0 0 20px rgba(139, 92, 246, 0.15);
+}
+
+/* Liquid Glass Buttons */
+.liquid-glass-btn {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-backdrop);
+  -webkit-backdrop-filter: var(--glass-backdrop);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  transition: all 0.3s var(--liquid-smooth);
+  cursor: pointer;
+}
+
+.liquid-glass-btn:hover {
+  background: var(--glass-strong);
+  transform: scale(1.03);
+  box-shadow: 0 0 24px rgba(139, 92, 246, 0.25);
+}
+
+.liquid-glass-btn:active {
+  transform: scale(0.97);
 }
 
 /* Liquid effects */

@@ -178,7 +178,7 @@ export function SettingsNavigation({
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 500 }}
-            className="absolute left-0 top-0 h-full w-80 bg-white shadow-2xl overflow-y-auto"
+            className="absolute left-0 top-0 h-full w-80 bg-background shadow-2xl overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6">
