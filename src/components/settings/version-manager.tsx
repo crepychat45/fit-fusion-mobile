@@ -79,44 +79,44 @@ export function VersionManager() {
   } | null>(null);
 
   const currentVersion = appVersion;
-  const latestVersion = "6.0.1";
+  const latestVersion = "6.1.0";
 
   const updateInfo: UpdateInfo = {
-    version: "6.0.1",
+    version: "6.1.0",
     releaseDate: "2026-02-24",
     features: [
-      "🎨 Liquid Glass Design System across all UI",
-      "🖥️ Responsive Biometric HUD with glass effects",
-      "🧠 AI Workout Builder improvements",
-      "💧 Hydration & Energy Tracker",
-      "🔒 Security & App Lock fixes",
+      "🎨 Liquid Glass Design on ALL buttons, cards & components",
+      "🖥️ Frosted glass backdrop-blur on every page",
+      "🔄 Redesigned Update Center with liquid glass animations",
+      "💎 Glass-morphic progress bars with gradient glow",
+      "⚡ Enhanced liquid transitions on all interactions",
     ],
     improvements: [
-      "⚡ Dark mode contrast fix in Settings",
-      "💬 Chat input bar pinned correctly",
-      "📱 Responsive grid for Biometric HUD",
-      "🎨 Liquid glass button animations",
+      "⚡ All buttons have frosted glass effect",
+      "💬 Cards use translucent glass background",
+      "📱 Progress bars show gradient glow animation",
+      "🎨 Update system properly detects current version",
     ],
     fixes: [
-      "🔧 Fixed white-on-white text in dark mode settings",
-      "💬 Fixed chat input cut off on mobile",
-      "📊 Fixed Biometric HUD layout on small screens",
-      "🔄 Fixed update system re-prompting",
+      "🔧 Fixed update system showing outdated versions",
+      "💬 Fixed AppUpdateManager referencing old v5.7.0",
+      "📊 Synchronized version across all components",
+      "🔄 Cleaned up duplicate update logic",
     ],
     security: [
-      "🔒 Enhanced security patch system",
-      "🛡️ App Lock trigger improvements",
+      "🔒 Enhanced glass-effect security indicators",
+      "🛡️ Improved version integrity checks",
     ],
-    size: "12.4 MB",
+    size: "14.2 MB",
     priority: "high",
-    changelog: "v6.0.1: Liquid Glass design, dark mode fixes, responsive HUD, chat input fix.",
+    changelog: "v6.1.0: Full Liquid Glass on all components, redesigned Update Center, frosted buttons & cards.",
   };
 
   const releaseHistory = [
+    { version: "6.1.0", date: "2026-02-24", type: "Feature Release" },
     { version: "6.0.1", date: "2026-02-24", type: "Patch Release" },
     { version: "6.0.0", date: "2026-02-23", type: "Major Release" },
     { version: "5.9.0", date: "2026-02-22", type: "Feature Update" },
-    { version: "5.8.0", date: "2026-02-21", type: "Feature Update" },
   ];
 
   useEffect(() => {

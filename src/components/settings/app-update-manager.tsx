@@ -42,8 +42,8 @@ export function AppUpdateManager() {
   const { toast } = useToast();
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo>(() => {
     const currentVersion =
-      localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || "5.6.0";
-    const latestVersion = "5.7.0";
+      localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || "6.1.0";
+    const latestVersion = "6.1.0";
     return {
       currentVersion,
       latestVersion,
@@ -118,7 +118,7 @@ export function AppUpdateManager() {
   // Sync versions across the app
   const syncVersions = () => {
     const storedVersion =
-      localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || "5.2.0";
+      localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || "6.1.0";
 
     // Always make sure localStorage has the correct version
     if (updateInfo.currentVersion !== storedVersion) {
@@ -181,8 +181,8 @@ export function AppUpdateManager() {
 
       const now = new Date();
       const currentVersion =
-        localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || "5.2.0";
-      const latestVersion = "5.4.3";
+        localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || "6.1.0";
+      const latestVersion = "6.1.0";
 
       console.log(
         "Update check - Current:",
