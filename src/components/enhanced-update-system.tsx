@@ -26,7 +26,7 @@ interface EnhancedUpdateSystemProps {
 }
 
 export function EnhancedUpdateSystem({
-  currentVersion = "5.9.0",
+  currentVersion = "6.0.1",
   onUpdateComplete,
 }: EnhancedUpdateSystemProps) {
   const { toast } = useToast();
@@ -39,34 +39,33 @@ export function EnhancedUpdateSystem({
   const [lastCheck, setLastCheck] = useState<Date | null>(null);
   const [installed, setInstalled] = useState(false);
 
-  const latestVersion = "6.0.0";
+  const latestVersion = "6.0.1";
 
   const updateInfo: UpdateInfo = {
-    version: "6.0.0",
-    releaseDate: "2026-02-23",
+    version: "6.0.1",
+    releaseDate: "2026-02-24",
     features: [
-      "🧠 AI Adaptive Workout Engine — auto-adjusts difficulty from biometrics",
-      "🎬 Exercise Video Demos in AI Workout Builder",
-      "🖥️ Live Biometric HUD — Jarvis-style real-time dashboard",
+      "🎨 Liquid Glass Design System — frosted glass UI across all components",
+      "🖥️ Live Biometric HUD with responsive liquid glass layout",
+      "🧠 AI Workout Builder — refined edge function with structured JSON",
       "💧 Interactive Hydration & Energy Tracker",
-      "🔒 Enhanced Double-Layer Security & App Lock",
-      "📊 Improved Progress Prediction Charts",
+      "🔒 Enhanced Security Patches & App Lock fixes",
     ],
     improvements: [
-      "Smoother update installation animation with stages",
-      "Community Transformation Stories with liquid transitions",
-      "Offline caching for Daily Workouts",
-      "Security patch auto-check system",
+      "Dark mode settings menu contrast fix",
+      "Chat input bar pinned correctly on mobile/desktop",
+      "Biometric HUD responsive grid for all screen sizes",
+      "Smoother liquid glass animations & transitions",
     ],
     fixes: [
-      "Fixed App Lock trigger on launch",
-      "Fixed 2FA verification flow",
-      "Resolved security scan score calculation",
-      "Improved vault file handling stability",
+      "Fixed settings dark mode white-on-white text",
+      "Fixed chat input being cut off on mobile",
+      "Fixed Biometric HUD layout on small screens",
+      "Fixed update system re-prompting after install",
     ],
-    size: "18.2 MB",
-    priority: "critical",
-    changelog: "Major release: AI Adaptive Engine, Biometric HUD, Exercise Videos, Double-Layer Security, and Hydration Tracker.",
+    size: "12.4 MB",
+    priority: "high",
+    changelog: "v6.0.1: Liquid Glass design system, dark mode fixes, chat input fix, responsive Biometric HUD, and AI Workout Builder improvements.",
   };
 
   useEffect(() => {
