@@ -79,44 +79,44 @@ export function VersionManager() {
   } | null>(null);
 
   const currentVersion = appVersion;
-  const latestVersion = "6.1.0";
+  const latestVersion = "6.2.0";
 
   const updateInfo: UpdateInfo = {
-    version: "6.1.0",
-    releaseDate: "2026-02-24",
+    version: "6.2.0",
+    releaseDate: "2026-02-25",
     features: [
-      "🎨 Liquid Glass Design on ALL buttons, cards & components",
-      "🖥️ Frosted glass backdrop-blur on every page",
-      "🔄 Redesigned Update Center with liquid glass animations",
-      "💎 Glass-morphic progress bars with gradient glow",
-      "⚡ Enhanced liquid transitions on all interactions",
+      "🎨 Global Liquid Glass design on ALL pages & components",
+      "✨ Framer Motion page transitions between all routes",
+      "🔧 Settings: Full Name, Email, Password change works properly",
+      "💬 Chat input bar fixed — always visible on mobile & desktop",
+      "🚀 Update Center redesigned with changelog history",
     ],
     improvements: [
-      "⚡ All buttons have frosted glass effect",
-      "💬 Cards use translucent glass background",
-      "📱 Progress bars show gradient glow animation",
-      "🎨 Update system properly detects current version",
+      "⚡ Smooth liquid glass transitions everywhere",
+      "💬 Account settings properly save changes",
+      "📱 100% mobile/desktop responsive parity",
+      "🎨 Update system never re-prompts after install",
     ],
     fixes: [
-      "🔧 Fixed update system showing outdated versions",
-      "💬 Fixed AppUpdateManager referencing old v5.7.0",
-      "📊 Synchronized version across all components",
-      "🔄 Cleaned up duplicate update logic",
+      "🔧 Fixed repeated update install prompts",
+      "💬 Fixed chat input hidden on mobile",
+      "📊 Fixed account name/email change not persisting",
+      "🔄 Fixed dark mode contrast in settings",
     ],
     security: [
-      "🔒 Enhanced glass-effect security indicators",
+      "🔒 Enhanced privacy protocols",
       "🛡️ Improved version integrity checks",
     ],
-    size: "14.2 MB",
+    size: "16.8 MB",
     priority: "high",
-    changelog: "v6.1.0: Full Liquid Glass on all components, redesigned Update Center, frosted buttons & cards.",
+    changelog: "v6.2.0: Liquid Glass Universe — Global glass design, page transitions, account fixes.",
   };
 
   const releaseHistory = [
+    { version: "6.2.0", date: "2026-02-25", type: "Major Release" },
     { version: "6.1.0", date: "2026-02-24", type: "Feature Release" },
-    { version: "6.0.1", date: "2026-02-24", type: "Patch Release" },
+    { version: "6.0.1", date: "2026-02-23", type: "Patch Release" },
     { version: "6.0.0", date: "2026-02-23", type: "Major Release" },
-    { version: "5.9.0", date: "2026-02-22", type: "Feature Update" },
   ];
 
   useEffect(() => {

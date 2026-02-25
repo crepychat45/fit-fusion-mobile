@@ -363,10 +363,57 @@ export function AccountSettings() {
     });
   };
 
+  const [newEmail, setNewEmail] = useState("");
+  const [newName, setNewName] = useState("");
+  const [nameDialogOpen, setNameDialogOpen] = useState(false);
+
+  const handleNameChange = async () => {
+    if (!newName.trim()) {
+      toast({ title: "Invalid Input", description: "Name cannot be empty.", variant: "destructive" });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ data: { name: newName } });
+      if (error) throw error;
+      setName(newName);
+      localStorage.setItem("user_display_name", newName);
+      const savedProfile = localStorage.getItem("fitfusion-profile");
+      const profile = savedProfile ? JSON.parse(savedProfile) : {};
+      profile.name = newName;
+      localStorage.setItem("fitfusion-profile", JSON.stringify(profile));
+      window.dispatchEvent(new CustomEvent("profileUpdated"));
+      toast({ title: "✅ Name Updated", description: `Your name is now "${newName}".` });
+      setNameDialogOpen(false);
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message || "Failed to update name.", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleEmailChangeSubmit = async () => {
+    if (!newEmail.trim() || newEmail === email) {
+      toast({ title: "Invalid Input", description: "Please enter a different email address.", variant: "destructive" });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ email: newEmail });
+      if (error) throw error;
+      toast({ title: "📧 Email Update Initiated", description: "Check your new email for a confirmation link." });
+      setEmailDialogOpen(false);
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message || "Failed to update email.", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {!isAuthenticated ? (
-        <Card>
+        <Card className="liquid-glass border-border/30">
           <CardHeader>
             <CardTitle>Login or Create Account</CardTitle>
             <CardDescription>Sign in to access all features</CardDescription>
@@ -457,96 +504,43 @@ export function AccountSettings() {
               <CardDescription>Manage your account information</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between p-3 liquid-glass-subtle rounded-xl">
                 <div className="flex items-center">
                   <User className="h-4 w-4 mr-2 text-primary" />
                   <span>Full Name</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  {showProfileNameEditor ? (
-                    <div className="flex items-center gap-2">
-                      <Input
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="h-8 w-48"
-                        autoFocus
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            const updateName = async () => {
-                              try {
-                                await supabase.auth.updateUser({ data: { name } });
-                                localStorage.setItem("fitfusion-profile", JSON.stringify({ name }));
-                                window.dispatchEvent(new CustomEvent("profileUpdated"));
-                                toast({ title: "✅ Name Updated", description: `Your name is now "${name}".` });
-                              } catch { /* handled below */ }
-                              setShowProfileNameEditor(false);
-                            };
-                            updateName();
-                          }
-                          if (e.key === "Escape") setShowProfileNameEditor(false);
-                        }}
-                      />
-                      <Button size="sm" className="h-8" onClick={async () => {
-                        try {
-                          await supabase.auth.updateUser({ data: { name } });
-                          localStorage.setItem("fitfusion-profile", JSON.stringify({ name }));
-                          window.dispatchEvent(new CustomEvent("profileUpdated"));
-                          toast({ title: "✅ Name Updated", description: `Your name is now "${name}".` });
-                        } catch (err: any) {
-                          toast({ title: "❌ Error", description: err.message || "Failed to update name.", variant: "destructive" });
-                        }
-                        setShowProfileNameEditor(false);
-                      }}>Save</Button>
-                      <Button size="sm" variant="ghost" className="h-8" onClick={() => setShowProfileNameEditor(false)}>Cancel</Button>
-                    </div>
-                  ) : (
-                    <>
-                      <span className="font-medium">{name}</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0"
-                        onClick={() => setShowProfileNameEditor(true)}
-                      >
-                        <span className="sr-only">Edit</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                          <path d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
-                          <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" />
-                        </svg>
-                      </Button>
-                    </>
-                  )}
+                  <span className="font-medium">{name}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 liquid-glass-btn"
+                    onClick={() => { setNewName(name); setNameDialogOpen(true); }}
+                  >
+                    Edit
+                  </Button>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between p-3 liquid-glass-subtle rounded-xl">
                 <div className="flex items-center">
                   <Mail className="h-4 w-4 mr-2 text-primary" />
                   <span>Email Address</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="font-medium">{email}</span>
+                  <span className="font-medium text-sm truncate max-w-[180px]">{email}</span>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-8 w-8 p-0"
-                    onClick={() => setEmailDialogOpen(true)}
+                    className="h-8 liquid-glass-btn"
+                    onClick={() => { setNewEmail(email); setEmailDialogOpen(true); }}
                   >
-                    <span className="sr-only">Edit</span>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      className="w-4 h-4"
-                    >
-                      <path d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
-                      <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" />
-                    </svg>
+                    Edit
                   </Button>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between p-3 liquid-glass-subtle rounded-xl">
                 <div className="flex items-center">
                   <Key className="h-4 w-4 mr-2 text-primary" />
                   <span>Password</span>
@@ -554,6 +548,7 @@ export function AccountSettings() {
                 <Button
                   variant="outline"
                   size="sm"
+                  className="liquid-glass-btn"
                   onClick={() => setPasswordDialogOpen(true)}
                 >
                   Change Password
@@ -679,38 +674,61 @@ export function AccountSettings() {
         </DialogContent>
       </Dialog>
 
-      {/* Change Email Dialog */}
-      <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
-        <DialogContent>
+      {/* Change Name Dialog */}
+      <Dialog open={nameDialogOpen} onOpenChange={setNameDialogOpen}>
+        <DialogContent className="liquid-glass border-border/30">
           <DialogHeader>
-            <DialogTitle>Change Email Address</DialogTitle>
-            <DialogDescription>
-              Enter the new email address you want to use.
-            </DialogDescription>
+            <DialogTitle>Change Full Name</DialogTitle>
+            <DialogDescription>Update your display name across the app.</DialogDescription>
           </DialogHeader>
-
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="current-email">Current Email</Label>
-              <Input id="current-email" type="email" value={email} disabled />
+              <Label htmlFor="edit-name">Full Name</Label>
+              <Input
+                id="edit-name"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="Enter your full name"
+                onKeyDown={(e) => e.key === "Enter" && handleNameChange()}
+              />
             </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
+            <Button onClick={handleNameChange} disabled={isLoading}>
+              {isLoading ? "Saving..." : "Save Name"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
+      {/* Change Email Dialog */}
+      <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+        <DialogContent className="liquid-glass border-border/30">
+          <DialogHeader>
+            <DialogTitle>Change Email Address</DialogTitle>
+            <DialogDescription>A confirmation link will be sent to your new email.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Current Email</Label>
+              <Input type="email" value={email} disabled className="opacity-60" />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="new-email">New Email</Label>
               <Input
                 id="new-email"
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder="newemail@example.com"
+                onKeyDown={(e) => e.key === "Enter" && handleEmailChangeSubmit()}
               />
             </div>
           </div>
-
           <DialogFooter className="gap-2 sm:gap-0">
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            <Button onClick={handleEmailChange} disabled={isLoading}>
+            <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
+            <Button onClick={handleEmailChangeSubmit} disabled={isLoading}>
               {isLoading ? "Updating..." : "Update Email"}
             </Button>
           </DialogFooter>
@@ -742,73 +760,6 @@ export function AccountSettings() {
         </DialogContent>
       </Dialog>
 
-      {/* Profile Name Editor */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
-            Profile Display Name
-          </CardTitle>
-          <CardDescription>
-            Customize how your name appears throughout the app
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button
-            onClick={() => setShowProfileNameEditor(true)}
-            className="w-full"
-          >
-            Edit Display Name
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Profile Name Editor Modal */}
-      {showProfileNameEditor && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <Card className="w-full max-w-md mx-4">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                Edit Profile Name
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="profileName">Display Name</Label>
-                <Input
-                  id="profileName"
-                  placeholder="Enter your name"
-                  className="w-full"
-                />
-              </div>
-
-              <div className="flex gap-2 pt-4">
-                <Button
-                  onClick={() => {
-                    toast({
-                      title: "Profile Updated",
-                      description:
-                        "Your display name has been saved successfully.",
-                    });
-                    setShowProfileNameEditor(false);
-                  }}
-                  className="flex-1"
-                >
-                  Save
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowProfileNameEditor(false)}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   );
 }
