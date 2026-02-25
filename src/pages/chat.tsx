@@ -385,7 +385,7 @@ const ChatPage = () => {
                 FitFusion Chat
               </h1>
               <p className="text-white/90 text-xs md:text-sm">
-                Secure fitness community • v6.0.1 • Enhanced AI
+                Secure fitness community • v6.2.0 • Enhanced AI
               </p>
             </div>
             </div>
@@ -554,7 +554,7 @@ const ChatPage = () => {
 
       {/* Main Content */}
       <div
-        className={`flex-1 flex flex-col overflow-hidden ${isMobile ? "pb-24" : ""}`}
+        className={`flex-1 flex flex-col overflow-hidden ${isMobile ? "pb-28" : "pb-4"}`}
         style={{ minHeight: 0 }}
       >
         {isAuthenticated ? (

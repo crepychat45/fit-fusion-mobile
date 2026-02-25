@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Download, CheckCircle, RefreshCw, Package, Sparkles, Gift, Clock, Rocket,
-  ShieldCheck, Zap, Shield, Cpu, Wifi, Activity, Star,
+  ShieldCheck, Zap, Shield, Cpu, Wifi, Activity, Star, ChevronDown, ChevronUp,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -26,33 +25,65 @@ interface EnhancedUpdateSystemProps {
   onUpdateComplete?: () => void;
 }
 
-const LATEST_VERSION = "6.1.0";
+const LATEST_VERSION = "6.2.0";
+
+const CHANGELOG_HISTORY = [
+  {
+    version: "6.2.0",
+    date: "2026-02-25",
+    title: "Liquid Glass Universe",
+    changes: [
+      "🎨 Global Liquid Glass design on ALL pages & components",
+      "✨ Framer Motion page transitions between all routes",
+      "🔧 Settings: Full Name, Email, Password change now works properly",
+      "💬 Chat input bar fixed — always visible on mobile & desktop",
+      "🚀 Update Center redesigned with liquid glass progress bar",
+      "🔒 Enhanced security & privacy protocols",
+      "⚡ Performance optimizations with lazy loading",
+      "📱 100% mobile/desktop responsive parity",
+    ],
+  },
+  {
+    version: "6.1.0",
+    date: "2026-02-24",
+    title: "Glass Foundation",
+    changes: [
+      "🎨 Liquid Glass Design on buttons, cards & components",
+      "🔄 Redesigned Update Center with liquid progress",
+      "💎 Glass-morphic progress bars with gradient glow",
+    ],
+  },
+  {
+    version: "6.0.1",
+    date: "2026-02-23",
+    title: "Visual Polish",
+    changes: [
+      "🌙 Dark mode contrast fix in Settings",
+      "💬 Chat input padding fix",
+      "📊 Biometric HUD liquid glass styling",
+    ],
+  },
+];
 
 const UPDATE_INFO: UpdateInfo = {
   version: LATEST_VERSION,
-  releaseDate: "2026-02-24",
-  features: [
-    "🎨 Liquid Glass Design applied to ALL buttons, cards & components",
-    "🖥️ Frosted glass effect on every page with backdrop-blur",
-    "🔄 Redesigned Update Center with liquid progress animation",
-    "💎 Glass-morphic progress bars with gradient glow",
-    "⚡ Enhanced liquid transitions on all interactions",
-  ],
+  releaseDate: "2026-02-25",
+  features: CHANGELOG_HISTORY[0].changes,
   improvements: [
-    "All buttons now have frosted glass backdrop-blur effect",
-    "Cards use translucent glass background with smooth hover",
-    "Progress bars show gradient glow animation",
-    "Update system detects version properly — no re-prompting",
+    "Smooth liquid glass transitions on every interaction",
+    "Account settings properly save name/email/password",
+    "Chat input always visible with proper bottom padding",
+    "Update system never re-prompts after successful install",
   ],
   fixes: [
-    "Fixed update system showing outdated version numbers",
-    "Fixed AppUpdateManager referencing old v5.7.0",
-    "Synchronized version across all settings components",
-    "Cleaned up duplicate update logic",
+    "Fixed update system showing repeated install prompts",
+    "Fixed chat input bar hidden on mobile devices",
+    "Fixed account name/email change not persisting",
+    "Fixed dark mode contrast in settings navigation",
   ],
-  size: "14.2 MB",
+  size: "16.8 MB",
   priority: "high",
-  changelog: "v6.1.0: Full Liquid Glass design on all components, redesigned Update Center, frosted buttons & cards.",
+  changelog: `v${LATEST_VERSION}: ${CHANGELOG_HISTORY[0].title} — ${CHANGELOG_HISTORY[0].changes.slice(0, 3).join(", ")}`,
 };
 
 const INSTALL_STAGES = [
@@ -61,14 +92,14 @@ const INSTALL_STAGES = [
   { label: "Download", msg: "Downloading core packages...", icon: "📦", target: 35 },
   { label: "AI", msg: "Updating AI engine modules...", icon: "🧠", target: 48 },
   { label: "Security", msg: "Installing security patches...", icon: "🛡️", target: 58 },
-  { label: "Components", msg: "Compiling glass UI components...", icon: "💎", target: 70 },
-  { label: "Optimize", msg: "Optimizing liquid animations...", icon: "⚡", target: 82 },
+  { label: "Glass UI", msg: "Compiling liquid glass components...", icon: "💎", target: 70 },
+  { label: "Optimize", msg: "Optimizing animations & performance...", icon: "⚡", target: 82 },
   { label: "Verify", msg: "Running integrity checks...", icon: "✅", target: 92 },
-  { label: "Launch", msg: "Launching FitFusion v6.1...", icon: "🚀", target: 100 },
+  { label: "Launch", msg: `Launching FitFusion v${LATEST_VERSION}...`, icon: "🚀", target: 100 },
 ];
 
 export function EnhancedUpdateSystem({
-  currentVersion = "6.0.1",
+  currentVersion = "6.1.0",
   onUpdateComplete,
 }: EnhancedUpdateSystemProps) {
   const { toast } = useToast();
@@ -77,10 +108,10 @@ export function EnhancedUpdateSystem({
   const [progress, setProgress] = useState(0);
   const [stageMsg, setStageMsg] = useState("");
   const [stageIcon, setStageIcon] = useState("🔍");
-  const [stageIndex, setStageIndex] = useState(0);
   const [availableUpdate, setAvailableUpdate] = useState<UpdateInfo | null>(null);
   const [lastCheck, setLastCheck] = useState<Date | null>(null);
   const [installed, setInstalled] = useState(false);
+  const [showChangelog, setShowChangelog] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("fitfusion-app-version");
@@ -120,25 +151,20 @@ export function EnhancedUpdateSystem({
     if (!availableUpdate) return;
     setIsUpdating(true);
     setProgress(0);
-    setStageIndex(0);
 
     for (let i = 0; i < INSTALL_STAGES.length; i++) {
       const stage = INSTALL_STAGES[i];
-      setStageIndex(i);
       setStageMsg(stage.msg);
       setStageIcon(stage.icon);
-      
-      // Smooth progress animation to target
       const prevTarget = i > 0 ? INSTALL_STAGES[i - 1].target : 0;
-      const steps = 10;
+      const steps = 12;
       for (let s = 1; s <= steps; s++) {
-        await new Promise((r) => setTimeout(r, 60));
+        await new Promise((r) => setTimeout(r, 50));
         setProgress(prevTarget + ((stage.target - prevTarget) * s) / steps);
       }
-      await new Promise((r) => setTimeout(r, 200));
+      await new Promise((r) => setTimeout(r, 150));
     }
 
-    // Persist
     localStorage.setItem("app-version", LATEST_VERSION);
     localStorage.setItem("fitfusion-app-version", LATEST_VERSION);
     localStorage.setItem("fitfusion-last-update", new Date().toISOString());
@@ -156,7 +182,6 @@ export function EnhancedUpdateSystem({
 
   return (
     <Card className="relative overflow-hidden liquid-glass-strong border-border/30">
-      {/* Animated top bar */}
       {(availableUpdate || isUpdating) && (
         <motion.div
           animate={{
@@ -204,7 +229,6 @@ export function EnhancedUpdateSystem({
               exit={{ opacity: 0, scale: 0.95 }}
               className="space-y-5 p-6 liquid-glass rounded-2xl"
             >
-              {/* Animated icon */}
               <div className="flex flex-col items-center">
                 <motion.div
                   animate={{ y: [0, -12, 0], rotate: [0, -3, 3, 0] }}
@@ -217,18 +241,24 @@ export function EnhancedUpdateSystem({
                 <p className="text-sm text-muted-foreground">{stageMsg}</p>
               </div>
 
-              {/* Glass progress bar */}
+              {/* Liquid glass progress bar */}
               <div className="relative">
-                <div className="h-4 rounded-full liquid-glass-subtle overflow-hidden">
+                <div className="h-5 rounded-full liquid-glass-subtle overflow-hidden border border-border/20">
                   <motion.div
-                    className="h-full rounded-full bg-gradient-to-r from-primary via-primary/80 to-accent"
-                    animate={{ width: `${progress}%` }}
-                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    className="h-full rounded-full bg-gradient-to-r from-primary via-accent to-primary"
+                    style={{ backgroundSize: "200% 100%" }}
+                    animate={{ 
+                      width: `${progress}%`,
+                      backgroundPosition: ["0% 0%", "100% 0%", "0% 0%"],
+                    }}
+                    transition={{ 
+                      width: { duration: 0.3, ease: "easeOut" },
+                      backgroundPosition: { duration: 2, repeat: Infinity },
+                    }}
                   />
                 </div>
-                {/* Glow effect */}
                 <motion.div
-                  className="absolute top-0 h-4 rounded-full bg-primary/20 blur-md"
+                  className="absolute top-0 h-5 rounded-full bg-primary/20 blur-lg"
                   animate={{ width: `${progress}%` }}
                   transition={{ duration: 0.3 }}
                 />
@@ -239,7 +269,6 @@ export function EnhancedUpdateSystem({
                 <span className="text-muted-foreground">{UPDATE_INFO.size}</span>
               </div>
 
-              {/* Stage indicators */}
               <div className="flex gap-1">
                 {["Verify", "Download", "Install", "Optimize", "Launch"].map((s, i) => {
                   const thresholds = [16, 48, 70, 92, 100];
@@ -311,7 +340,6 @@ export function EnhancedUpdateSystem({
                 <p className="text-sm text-muted-foreground">{availableUpdate.changelog}</p>
               </div>
 
-              {/* Feature list */}
               <div className="space-y-1.5 max-h-36 overflow-y-auto custom-scrollbar">
                 {availableUpdate.features.map((f, i) => (
                   <motion.p
@@ -327,7 +355,6 @@ export function EnhancedUpdateSystem({
                 ))}
               </div>
 
-              {/* Info chips */}
               <div className="grid grid-cols-3 gap-2 text-xs">
                 {[
                   { icon: Cpu, label: "AI Engine", color: "text-primary" },
@@ -351,7 +378,6 @@ export function EnhancedUpdateSystem({
                 </Button>
               </div>
             </motion.div>
-
           ) : (
             <div className="text-center p-6 liquid-glass rounded-2xl">
               <RefreshCw className="h-8 w-8 text-muted-foreground mx-auto mb-2 animate-spin" />
@@ -359,6 +385,56 @@ export function EnhancedUpdateSystem({
             </div>
           )}
         </AnimatePresence>
+
+        {/* Changelog History */}
+        <div className="pt-3 border-t border-border/30">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowChangelog(!showChangelog)}
+            className="w-full justify-between liquid-glass-subtle"
+          >
+            <span className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              Version History & Changelog
+            </span>
+            {showChangelog ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </Button>
+
+          <AnimatePresence>
+            {showChangelog && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="space-y-3 mt-3 max-h-60 overflow-y-auto custom-scrollbar">
+                  {CHANGELOG_HISTORY.map((entry, idx) => (
+                    <motion.div
+                      key={entry.version}
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: idx * 0.1 }}
+                      className="p-3 liquid-glass-subtle rounded-xl"
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="outline" className="font-mono text-xs">v{entry.version}</Badge>
+                        <span className="text-xs text-muted-foreground">{entry.date}</span>
+                        <span className="text-xs font-medium text-primary">{entry.title}</span>
+                      </div>
+                      <div className="space-y-1">
+                        {entry.changes.map((c, i) => (
+                          <p key={i} className="text-xs text-muted-foreground">{c}</p>
+                        ))}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
         <div className="flex justify-between items-center pt-3 border-t border-border/30">
           <Button variant="ghost" onClick={checkForUpdates} disabled={isChecking || isUpdating} size="sm" className="liquid-glass-subtle">
