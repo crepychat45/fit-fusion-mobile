@@ -68,10 +68,8 @@ export async function runStartupDiagnostics(): Promise<DiagnosticResult[]> {
 
   const failed = results.filter((r) => !r.ok);
   if (failed.length === 0) {
-    // eslint-disable-next-line no-console
     console.info("[FitFusion Diagnostics] ✅ All checks passed", results);
   } else {
-    // eslint-disable-next-line no-console
     console.warn("[FitFusion Diagnostics] ⚠️ Issues found", failed, "Full report:", results);
   }
 
