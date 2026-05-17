@@ -13,6 +13,10 @@ import { SecurityPatchSystem } from "./security-patch-system";
 import { SettingsNavigation } from "./settings-navigation";
 import { NotificationSettings } from "./notification-settings";
 import { UnitPreferences } from "./unit-preferences";
+import { UpdateScheduler } from "./update-scheduler";
+import { SettingsBackupRestore } from "./settings-backup-restore";
+import { DataManagementPanel } from "./data-management-panel";
+import { SettingsSearch } from "./settings-search";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -345,6 +349,35 @@ export function SettingsContainer() {
           transition={{ duration: 0.3 }}
         >
           <Tabs value={activeTab} onValueChange={handleTabChange}>
+            <TabsContent value="search" className="mt-0">
+              <div className="max-w-2xl">
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold mb-2">Search Settings</h2>
+                  <p className="text-muted-foreground">
+                    Find the settings you're looking for quickly and easily
+                  </p>
+                </div>
+                <SettingsSearch
+                  onResultClick={(result) => {
+                    // Handle result click - navigate to appropriate tab
+                    const tabMap: Record<string, string> = {
+                      Account: "account",
+                      Display: "display",
+                      Privacy: "privacy",
+                      Notifications: "notifications",
+                      Updates: "updates",
+                      Security: "security",
+                      Data: "data",
+                    };
+                    const targetTab = tabMap[result.category];
+                    if (targetTab) {
+                      handleTabChange(targetTab);
+                    }
+                  }}
+                />
+              </div>
+            </TabsContent>
+
             <TabsContent value="account" className="mt-0">
               <AccountSettings />
             </TabsContent>
@@ -376,6 +409,7 @@ export function SettingsContainer() {
             <TabsContent value="updates" className="mt-0">
               <div className="space-y-6">
                 <AppUpdateManager />
+                <UpdateScheduler />
                 <SecurityPatchSystem />
                 <VersionManager />
               </div>
@@ -383,19 +417,46 @@ export function SettingsContainer() {
 
             <TabsContent value="enhanced" className="mt-0">
               <div className="space-y-6">
+                <SettingsBackupRestore />
+                <DataManagementPanel />
                 <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 p-6 rounded-lg border">
-                  <h3 className="text-lg font-semibold mb-4">Enhanced Settings</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Advanced configuration options for power users
+                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                    Data Management Center
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-6">
+                    Manage your local data, account session, and export
+                    preferences with advanced controls
                   </p>
-                  <Button onClick={validateAllSettings} disabled={isValidating}>
-                    {isValidating ? "Validating..." : "Validate Settings"}
-                  </Button>
-                  {isValidating && (
-                    <div className="mt-4">
-                      <Progress value={validationProgress} className="h-2" />
-                    </div>
-                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-between h-auto p-4"
+                      onClick={handleClearLocalData}
+                    >
+                      <div className="text-left">
+                        <div className="font-medium">Clear Local Data</div>
+                        <div className="text-xs text-muted-foreground">
+                          Removes app data from this device
+                        </div>
+                      </div>
+                      <Database className="h-4 w-4" />
+                    </Button>
+
+                    <Button
+                      variant="destructive"
+                      className="w-full justify-between h-auto p-4 md:col-span-2"
+                      onClick={handleLogout}
+                    >
+                      <div className="text-left">
+                        <div className="font-medium">Log Out</div>
+                        <div className="text-xs">
+                          End your current session securely
+                        </div>
+                      </div>
+                      <Shield className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </TabsContent>
