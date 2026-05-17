@@ -17,6 +17,7 @@ import { UpdateScheduler } from "./update-scheduler";
 import { SettingsBackupRestore } from "./settings-backup-restore";
 import { DataManagementPanel } from "./data-management-panel";
 import { SettingsSearch } from "./settings-search";
+import { PerformanceMetricsPanel } from "./performance-metrics-panel";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -417,6 +418,7 @@ export function SettingsContainer() {
 
             <TabsContent value="enhanced" className="mt-0">
               <div className="space-y-6">
+                <PerformanceMetricsPanel />
                 <SettingsBackupRestore />
                 <DataManagementPanel />
                 <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 p-6 rounded-lg border">
