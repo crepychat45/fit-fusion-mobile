@@ -16,7 +16,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
@@ -195,7 +195,7 @@ const ChatPage = () => {
     if (!authListenerRef.current) {
       const {
         data: { subscription },
-      } = supabase.auth.onAuthStateChange((event, session) => {
+      } = supabase.auth.onAuthStateChange((event: string, session: any) => {
         console.log("Auth state changed:", event);
 
         // Handle different auth events without causing loops
@@ -391,7 +391,7 @@ const ChatPage = () => {
                 FitFusion Chat
               </h1>
               <p className="text-white/90 text-xs md:text-sm">
-                Secure fitness community • v6.2.0 • Enhanced AI
+                Secure fitness community • v6.2.5 • Enhanced AI with Security Patches
               </p>
             </div>
             </div>

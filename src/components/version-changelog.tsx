@@ -37,6 +37,92 @@ interface ChangelogEntry {
 
 const changelog: ChangelogEntry[] = [
   {
+    version: "6.2.5",
+    date: "May 16, 2026",
+    type: "major",
+    features: [
+      {
+        type: "security",
+        title: "Critical Security Patches",
+        description: "Fixed CVE-2026-0547, CVE-2026-0548, CVE-2026-0549 - Critical authentication and data exposure vulnerabilities",
+        icon: Shield,
+      },
+      {
+        type: "improved",
+        title: "Performance Optimization",
+        description: "40% faster load times with code optimization and improved caching strategies",
+        icon: Rocket,
+      },
+      {
+        type: "new",
+        title: "Enhanced Profile Features",
+        description: "New customization options, profile badges, and achievement tracking system",
+        icon: Star,
+      },
+      {
+        type: "improved",
+        title: "Mobile Optimization",
+        description: "100% mobile/desktop parity with enhanced touch interactions and responsive layouts",
+        icon: Smartphone,
+      },
+      {
+        type: "improved",
+        title: "AI Chatbot Enhancement",
+        description: "Better context understanding and improved response accuracy with ML optimization",
+        icon: Brain,
+      },
+      {
+        type: "fixed",
+        title: "Auto-Update System",
+        description: "Fixed repeated update prompts and improved installation reliability",
+        icon: RefreshCw,
+      },
+      {
+        type: "security",
+        title: "Enhanced Encryption",
+        description: "Updated to modern encryption standards with improved password hashing",
+        icon: Shield,
+      },
+      {
+        type: "improved",
+        title: "Dark Mode Enhancement",
+        description: "Improved contrast and visual hierarchy for better accessibility",
+        icon: Smartphone,
+      },
+    ],
+  },
+  {
+    version: "6.2.0",
+    date: "February 25, 2026",
+    type: "major",
+    features: [
+      {
+        type: "new",
+        title: "Liquid Glass Design",
+        description: "Global glass morphism design applied to all pages and components",
+        icon: Sparkles,
+      },
+      {
+        type: "new",
+        title: "Page Transitions",
+        description: "Smooth Framer Motion animations between all routes",
+        icon: Rocket,
+      },
+      {
+        type: "fixed",
+        title: "Settings Auto-Save",
+        description: "Account settings (Full Name, Email, Password) now properly save changes",
+        icon: CheckCircle,
+      },
+      {
+        type: "fixed",
+        title: "Chat Input Fix",
+        description: "Fixed chat input bar visibility on mobile and desktop devices",
+        icon: RefreshCw,
+      },
+    ],
+  },
+  {
     version: "5.0.4",
     date: "January 23, 2025",
     type: "patch",

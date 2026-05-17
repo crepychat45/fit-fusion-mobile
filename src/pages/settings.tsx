@@ -41,7 +41,7 @@ const Settings = () => {
               </div>
             </div>
             <Badge className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30 text-xs">
-              v6.2.0
+              v6.2.5 Security Patch
             </Badge>
           </div>
         </motion.div>

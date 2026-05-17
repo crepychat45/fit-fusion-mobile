@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { installAppRecovery } from "@/utils/app-recovery";
+import "@/utils/app-initializer"; // Initialize FitFusion v6.2.5 enhancements
 
 installAppRecovery({ startupTimeoutMs: 14_000 });
 
