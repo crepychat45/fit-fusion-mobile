@@ -468,7 +468,7 @@ export function SettingsContainer() {
             </TabsContent>
 
             <TabsContent value="developer" className="mt-0">
-              <DeveloperOptions />
+              <L><DeveloperOptions /></L>
             </TabsContent>
 
             <TabsContent value="data" className="mt-0">
@@ -516,8 +516,9 @@ export function SettingsContainer() {
             </TabsContent>
 
             <TabsContent value="about" className="mt-0">
-              <AboutPage />
+              <L>{React.createElement(lazy(() => import("./about-page").then(m => ({ default: m.AboutPage }))))}</L>
             </TabsContent>
+
           </Tabs>
         </motion.div>
       </div>
