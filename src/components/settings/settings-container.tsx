@@ -517,7 +517,7 @@ export function SettingsContainer() {
             </TabsContent>
 
             <TabsContent value="about" className="mt-0">
-              <L>{React.createElement(lazy(() => import("./about-page").then(m => ({ default: m.AboutPage }))))}</L>
+              <L><AboutPage /></L>
             </TabsContent>
 
           </Tabs>
