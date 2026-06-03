@@ -1,30 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { lazy, Suspense, useState, useEffect } from "react";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { AccountSettings } from "./account-settings";
-import { DisplaySettings } from "./display-settings";
-import { PrivacySettings } from "./privacy-settings";
-import { DeveloperOptions } from "./developer-options";
-import { ChatSettingsPanel } from "./chat-settings";
-import { AboutPage } from "./about-page";
-import { AppUpdateManager } from "./app-update-manager";
-import { SecurityCenter } from "./security-center";
-import { VersionManager } from "./version-manager";
-import { SecurityPatchSystem } from "./security-patch-system";
 import { SettingsNavigation } from "./settings-navigation";
-import { NotificationSettings } from "./notification-settings";
-import { UnitPreferences } from "./unit-preferences";
-import { UpdateScheduler } from "./update-scheduler";
-import { SettingsBackupRestore } from "./settings-backup-restore";
-import { DataManagementPanel } from "./data-management-panel";
 import { SettingsSearch } from "./settings-search";
-import { PerformanceMetricsPanel } from "./performance-metrics-panel";
-import { AdvancedSettingsReset } from "./advanced-settings-reset";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import {
   CheckCircle,
   AlertTriangle,
@@ -37,6 +18,30 @@ import {
   Shield,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+
+// Lazy-load each panel — only the active tab loads, making Settings open fast.
+const AccountSettings = lazy(() => import("./account-settings").then(m => ({ default: m.AccountSettings })));
+const DisplaySettings = lazy(() => import("./display-settings").then(m => ({ default: m.DisplaySettings })));
+const PrivacySettings = lazy(() => import("./privacy-settings").then(m => ({ default: m.PrivacySettings })));
+const DeveloperOptions = lazy(() => import("./developer-options").then(m => ({ default: m.DeveloperOptions })));
+const ChatSettingsPanel = lazy(() => import("./chat-settings").then(m => ({ default: m.ChatSettingsPanel })));
+const SecurityCenter = lazy(() => import("./security-center").then(m => ({ default: m.SecurityCenter })));
+const NotificationSettings = lazy(() => import("./notification-settings").then(m => ({ default: m.NotificationSettings })));
+const UnitPreferences = lazy(() => import("./unit-preferences").then(m => ({ default: m.UnitPreferences })));
+const SettingsBackupRestore = lazy(() => import("./settings-backup-restore").then(m => ({ default: m.SettingsBackupRestore })));
+const DataManagementPanel = lazy(() => import("./data-management-panel").then(m => ({ default: m.DataManagementPanel })));
+const PerformanceMetricsPanel = lazy(() => import("./performance-metrics-panel").then(m => ({ default: m.PerformanceMetricsPanel })));
+const AdvancedSettingsReset = lazy(() => import("./advanced-settings-reset").then(m => ({ default: m.AdvancedSettingsReset })));
+const UnifiedUpdateManager = lazy(() => import("./unified-update-manager").then(m => ({ default: m.UnifiedUpdateManager })));
+
+const PanelLoader = () => (
+  <div className="flex items-center justify-center py-12">
+    <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+  </div>
+);
+const L: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <Suspense fallback={<PanelLoader />}>{children}</Suspense>
+);
 
 export function SettingsContainer() {
   const { toast } = useToast();
