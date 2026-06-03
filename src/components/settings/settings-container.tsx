@@ -25,6 +25,7 @@ const DisplaySettings = lazy(() => import("./display-settings").then(m => ({ def
 const PrivacySettings = lazy(() => import("./privacy-settings").then(m => ({ default: m.PrivacySettings })));
 const DeveloperOptions = lazy(() => import("./developer-options").then(m => ({ default: m.DeveloperOptions })));
 const ChatSettingsPanel = lazy(() => import("./chat-settings").then(m => ({ default: m.ChatSettingsPanel })));
+const AboutPage = lazy(() => import("./about-page").then(m => ({ default: m.AboutPage })));
 const SecurityCenter = lazy(() => import("./security-center").then(m => ({ default: m.SecurityCenter })));
 const NotificationSettings = lazy(() => import("./notification-settings").then(m => ({ default: m.NotificationSettings })));
 const UnitPreferences = lazy(() => import("./unit-preferences").then(m => ({ default: m.UnitPreferences })));
