@@ -1,0 +1,343 @@
+import React, { useEffect, useMemo, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Download,
+  CheckCircle2,
+  Sparkles,
+  Zap,
+  Bug,
+  Shield,
+  RefreshCw,
+  Clock,
+  PackageCheck,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Card } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
+import {
+  APP_VERSION,
+  APP_RELEASE_DATE,
+  RELEASE_NOTES,
+  getInstalledVersion,
+  setInstalledVersion,
+  isUpdateAvailable,
+} from "@/lib/app-version";
+
+const iconMap = {
+  sparkles: Sparkles,
+  zap: Zap,
+  bug: Bug,
+  shield: Shield,
+} as const;
+
+const sectionAccent = {
+  sparkles: "text-yellow-500",
+  zap: "text-blue-500",
+  bug: "text-orange-500",
+  shield: "text-red-500",
+} as const;
+
+type Phase = "idle" | "downloading" | "installing" | "verifying" | "done";
+
+const phaseLabel: Record<Phase, string> = {
+  idle: "Ready",
+  downloading: "Downloading update package…",
+  installing: "Installing new version…",
+  verifying: "Verifying signature & integrity…",
+  done: "Installed successfully",
+};
+
+export function UnifiedUpdateManager() {
+  const { toast } = useToast();
+  const [installed, setInstalled] = useState(getInstalledVersion());
+  const [phase, setPhase] = useState<Phase>("idle");
+  const [progress, setProgress] = useState(0);
+  const [autoUpdate, setAutoUpdate] = useState(
+    () => localStorage.getItem("fitfusion-auto-update") !== "false"
+  );
+  const [showPostInstall, setShowPostInstall] = useState(false);
+  const [expanded, setExpanded] = useState<string | null>(APP_VERSION);
+  const [lastChecked, setLastChecked] = useState<Date | null>(null);
+
+  const updateAvailable = useMemo(() => installed !== APP_VERSION, [installed]);
+  const latest = RELEASE_NOTES[0];
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const v = (e as CustomEvent<string>).detail;
+      if (v) setInstalled(v);
+    };
+    window.addEventListener("versionUpdated", handler);
+    return () => window.removeEventListener("versionUpdated", handler);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("fitfusion-auto-update", String(autoUpdate));
+  }, [autoUpdate]);
+
+  const handleCheck = () => {
+    setLastChecked(new Date());
+    toast({
+      title: updateAvailable ? "Update available" : "You're up to date",
+      description: updateAvailable
+        ? `FitFusion ${APP_VERSION} is ready to install.`
+        : `Running the latest version (${APP_VERSION}).`,
+    });
+  };
+
+  const runPhase = async (next: Phase, from: number, to: number, durMs: number) => {
+    setPhase(next);
+    const steps = 20;
+    const stepMs = durMs / steps;
+    for (let i = 1; i <= steps; i++) {
+      await new Promise((r) => setTimeout(r, stepMs));
+      setProgress(from + ((to - from) * i) / steps);
+    }
+  };
+
+  const handleInstall = async () => {
+    if (phase !== "idle" && phase !== "done") return;
+    setProgress(0);
+    setShowPostInstall(false);
+    try {
+      await runPhase("downloading", 0, 55, 900);
+      await runPhase("installing", 55, 85, 700);
+      await runPhase("verifying", 85, 100, 500);
+      setInstalledVersion(APP_VERSION);
+      setInstalled(APP_VERSION);
+      setPhase("done");
+      setShowPostInstall(true);
+      toast({
+        title: `Updated to v${APP_VERSION}`,
+        description: "Installation complete. New features are now available.",
+      });
+    } catch (err) {
+      setPhase("idle");
+      toast({
+        title: "Install failed",
+        description: "Please try again in a moment.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Hero card */}
+      <Card className="relative overflow-hidden border-white/20 bg-gradient-to-br from-background/60 to-background/30 backdrop-blur-xl">
+        <div className="absolute -top-24 -right-24 w-72 h-72 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-accent/20 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative p-6">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="flex items-start gap-4">
+              <div className="p-3 rounded-2xl bg-gradient-to-br from-primary to-accent shadow-lg">
+                <PackageCheck className="h-6 w-6 text-primary-foreground" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-xl font-bold">App Updates</h2>
+                  <Badge variant={updateAvailable ? "default" : "secondary"}>
+                    {updateAvailable ? "Update Available" : "Up to date"}
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Installed <span className="font-mono">v{installed}</span>
+                  {updateAvailable && (
+                    <>
+                      {" "}→{" "}
+                      <span className="font-mono text-primary font-semibold">v{APP_VERSION}</span>
+                    </>
+                  )}
+                  {" · Released "}
+                  {new Date(APP_RELEASE_DATE).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={handleCheck} disabled={phase !== "idle" && phase !== "done"}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Check
+              </Button>
+              <Button
+                onClick={handleInstall}
+                disabled={!updateAvailable || (phase !== "idle" && phase !== "done")}
+                className="bg-gradient-to-r from-primary to-accent text-primary-foreground"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                {updateAvailable ? "Install Update" : "Installed"}
+              </Button>
+            </div>
+          </div>
+
+          {/* Progress */}
+          <AnimatePresence>
+            {phase !== "idle" && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-5 space-y-2"
+              >
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground flex items-center gap-2">
+                    {phase === "done" ? (
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                    )}
+                    {phaseLabel[phase]}
+                  </span>
+                  <span className="font-mono">{Math.round(progress)}%</span>
+                </div>
+                <Progress value={progress} className="h-2" />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Auto-update */}
+          <div className="mt-5 flex items-center justify-between rounded-xl border border-white/10 bg-background/40 backdrop-blur-sm p-3">
+            <div>
+              <div className="text-sm font-medium">Automatic updates</div>
+              <div className="text-xs text-muted-foreground">
+                Install security & feature updates silently in the background.
+              </div>
+            </div>
+            <Switch checked={autoUpdate} onCheckedChange={setAutoUpdate} />
+          </div>
+
+          {lastChecked && (
+            <div className="mt-3 text-xs text-muted-foreground flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              Last checked {lastChecked.toLocaleTimeString()}
+            </div>
+          )}
+        </div>
+      </Card>
+
+      {/* Post-install "What's new" */}
+      <AnimatePresence>
+        {showPostInstall && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+          >
+            <Card className="p-5 border-primary/30 bg-gradient-to-br from-primary/10 to-accent/10 backdrop-blur-xl">
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold">What's new in v{APP_VERSION}</h3>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">{latest.highlight}</p>
+              <div className="grid sm:grid-cols-2 gap-3">
+                {latest.sections.map((s) => {
+                  const Icon = iconMap[s.icon];
+                  return (
+                    <div key={s.title} className="rounded-lg bg-background/50 p-3 border border-white/10">
+                      <div className={`flex items-center gap-2 mb-2 ${sectionAccent[s.icon]}`}>
+                        <Icon className="h-4 w-4" />
+                        <span className="text-sm font-medium text-foreground">{s.title}</span>
+                      </div>
+                      <ul className="space-y-1">
+                        {s.items.slice(0, 4).map((item) => (
+                          <li key={item} className="text-xs text-muted-foreground flex gap-2">
+                            <CheckCircle2 className="h-3 w-3 mt-0.5 shrink-0 text-green-500" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Changelog */}
+      <Card className="p-5 backdrop-blur-xl bg-background/40 border-white/10">
+        <h3 className="font-semibold mb-4 flex items-center gap-2">
+          <Clock className="h-4 w-4" /> Version history
+        </h3>
+        <div className="space-y-3">
+          {RELEASE_NOTES.map((note) => {
+            const isOpen = expanded === note.version;
+            const isCurrent = note.version === installed;
+            return (
+              <div
+                key={note.version}
+                className="rounded-xl border border-white/10 bg-background/40 overflow-hidden"
+              >
+                <button
+                  onClick={() => setExpanded(isOpen ? null : note.version)}
+                  className="w-full flex items-center justify-between p-3 hover:bg-background/60 transition-colors text-left"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="font-mono text-sm font-semibold">v{note.version}</span>
+                    <Badge variant="outline" className="text-xs">{note.type}</Badge>
+                    {isCurrent && (
+                      <Badge className="text-xs bg-green-500/20 text-green-600 border-green-500/30">
+                        Installed
+                      </Badge>
+                    )}
+                    <span className="text-xs text-muted-foreground hidden sm:inline truncate">
+                      {note.highlight}
+                    </span>
+                  </div>
+                  {isOpen ? (
+                    <ChevronUp className="h-4 w-4 shrink-0" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 shrink-0" />
+                  )}
+                </button>
+                <AnimatePresence>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="p-4 pt-2 border-t border-white/10 space-y-3">
+                        <p className="text-xs text-muted-foreground">
+                          Released {new Date(note.date).toLocaleDateString()}
+                        </p>
+                        {note.sections.map((s) => {
+                          const Icon = iconMap[s.icon];
+                          return (
+                            <div key={s.title}>
+                              <div className={`flex items-center gap-2 mb-1 ${sectionAccent[s.icon]}`}>
+                                <Icon className="h-4 w-4" />
+                                <span className="text-sm font-medium text-foreground">{s.title}</span>
+                              </div>
+                              <ul className="space-y-1 pl-6">
+                                {s.items.map((item) => (
+                                  <li key={item} className="text-xs text-muted-foreground list-disc">
+                                    {item}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+export default UnifiedUpdateManager;
