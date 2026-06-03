@@ -899,7 +899,7 @@ export function EnhancedVersionManager() {
           </Button>
           <Button
             variant="outline"
-            onClick={checkForUpdates}
+            onClick={() => checkForUpdates(true)}
             disabled={isCheckingUpdates}
           >
             <RefreshCw
