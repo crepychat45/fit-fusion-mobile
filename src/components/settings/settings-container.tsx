@@ -386,41 +386,37 @@ export function SettingsContainer() {
             </TabsContent>
 
             <TabsContent value="account" className="mt-0">
-              <AccountSettings />
+              <L><AccountSettings /></L>
             </TabsContent>
 
             <TabsContent value="security" className="mt-0">
-              <SecurityCenter />
+              <L><SecurityCenter /></L>
             </TabsContent>
 
             <TabsContent value="display" className="mt-0">
-              <DisplaySettings />
+              <L><DisplaySettings /></L>
             </TabsContent>
 
             <TabsContent value="privacy" className="mt-0">
-              <PrivacySettings />
+              <L><PrivacySettings /></L>
             </TabsContent>
 
             <TabsContent value="notifications" className="mt-0">
-              <NotificationSettings />
+              <L><NotificationSettings /></L>
             </TabsContent>
 
             <TabsContent value="units" className="mt-0">
-              <UnitPreferences />
+              <L><UnitPreferences /></L>
             </TabsContent>
 
             <TabsContent value="chat" className="mt-0">
-              <ChatSettingsPanel />
+              <L><ChatSettingsPanel /></L>
             </TabsContent>
 
             <TabsContent value="updates" className="mt-0">
-              <div className="space-y-6">
-                <AppUpdateManager />
-                <UpdateScheduler />
-                <SecurityPatchSystem />
-                <VersionManager />
-              </div>
+              <L><UnifiedUpdateManager /></L>
             </TabsContent>
+
 
             <TabsContent value="enhanced" className="mt-0">
               <div className="space-y-6">
