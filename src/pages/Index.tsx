@@ -27,6 +27,7 @@ const WorkoutStreakWidget = lazy(() => import("@/components/dashboard/workout-st
 const BiometricHUD = lazy(() => import("@/components/dashboard/biometric-hud").then((m) => ({ default: m.BiometricHUD })));
 const HydrationEnergyTracker = lazy(() => import("@/components/dashboard/hydration-energy-tracker").then((m) => ({ default: m.HydrationEnergyTracker })));
 const AdaptiveWorkoutEngine = lazy(() => import("@/components/dashboard/adaptive-workout-engine").then((m) => ({ default: m.AdaptiveWorkoutEngine })));
+const TodaysGoalsWidget = lazy(() => import("@/components/dashboard/todays-goals-widget").then((m) => ({ default: m.TodaysGoalsWidget })));
 const MobileNav = lazy(() => import("@/components/mobile-nav").then((m) => ({ default: m.MobileNav })));
 const MobileFloatingActions = lazy(() => import("@/components/mobile/mobile-floating-actions").then((m) => ({ default: m.MobileFloatingActions })));
 const MobileAIAssistant = lazy(() => import("@/components/mobile/mobile-ai-assistant").then((m) => ({ default: m.MobileAIAssistant })));
