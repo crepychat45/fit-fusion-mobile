@@ -420,10 +420,11 @@ export function SettingsContainer() {
 
             <TabsContent value="enhanced" className="mt-0">
               <div className="space-y-6">
-                <PerformanceMetricsPanel />
-                <AdvancedSettingsReset />
-                <SettingsBackupRestore />
-                <DataManagementPanel />
+                <L><PerformanceMetricsPanel /></L>
+                <L><AdvancedSettingsReset /></L>
+                <L><SettingsBackupRestore /></L>
+                <L><DataManagementPanel /></L>
+
                 <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 p-6 rounded-lg border">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                     Data Management Center
