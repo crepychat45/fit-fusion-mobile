@@ -43,7 +43,7 @@ export function AppUpdateManager() {
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo>(() => {
     const currentVersion =
       localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || "6.2.0";
-    const latestVersion = "6.2.0";
+    const latestVersion = "6.2.5";
     return {
       currentVersion,
       latestVersion,
@@ -182,7 +182,7 @@ export function AppUpdateManager() {
       const now = new Date();
       const currentVersion =
         localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || "6.2.0";
-      const latestVersion = "6.2.0";
+      const latestVersion = "6.2.5";
 
       console.log(
         "Update check - Current:",
