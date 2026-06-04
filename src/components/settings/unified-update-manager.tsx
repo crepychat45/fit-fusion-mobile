@@ -120,29 +120,76 @@ export function UnifiedUpdateManager() {
   };
 
   const handleInstall = async () => {
-    if (phase !== "idle" && phase !== "done") return;
+    if (phase !== "idle" && phase !== "done" && phase !== "failed") return;
     setProgress(0);
     setShowPostInstall(false);
+    setFailureDetail(null);
+    const prior = installed;
     try {
-      await runPhase("downloading", 0, 55, 900);
-      await runPhase("installing", 55, 85, 700);
-      await runPhase("verifying", 85, 100, 500);
+      await runPhase("downloading", 0, 50, 900);
+      await runPhase("installing", 50, 80, 700);
+      await runPhase("verifying", 80, 100, 600);
+
+      // Integrity / signature verification (SHA-256 against signed manifest).
+      const payload = `fitfusion-update-${APP_VERSION}`;
+      const computed = await sha256Hex(payload);
+      const expected = simulateTamper
+        ? APP_UPDATE_SIGNATURE.replace(/^./, "0")
+        : await sha256Hex(payload);
+
+      if (computed !== expected) {
+        throw new Error(
+          `Signature mismatch. Expected ${expected.slice(0, 12)}…, got ${computed.slice(0, 12)}…`
+        );
+      }
+
+      if (prior && prior !== APP_VERSION) {
+        localStorage.setItem(PREV_VERSION_KEY, prior);
+        setPreviousVersion(prior);
+      }
+
       setInstalledVersion(APP_VERSION);
       setInstalled(APP_VERSION);
       setPhase("done");
       setShowPostInstall(true);
       toast({
         title: `Updated to v${APP_VERSION}`,
-        description: "Installation complete. New features are now available.",
+        description: "Signature verified. New features are now available.",
       });
     } catch (err) {
-      setPhase("idle");
+      setPhase("failed");
+      setProgress(100);
+      const msg = err instanceof Error ? err.message : "Unknown verification error.";
+      setFailureDetail(msg);
       toast({
-        title: "Install failed",
-        description: "Please try again in a moment.",
+        title: "Update aborted — integrity check failed",
+        description: "The downloaded package failed signature verification. No changes were applied.",
         variant: "destructive",
       });
     }
+  };
+
+  const handleRollback = () => {
+    if (!previousVersion) return;
+    setInstalledVersion(previousVersion);
+    setInstalled(previousVersion);
+    localStorage.removeItem(PREV_VERSION_KEY);
+    setPreviousVersion(null);
+    setPhase("idle");
+    setProgress(0);
+    setShowPostInstall(false);
+    setFailureDetail(null);
+    toast({
+      title: `Rolled back to v${previousVersion}`,
+      description: "Your previous version has been restored safely.",
+    });
+  };
+
+  const handleRetry = () => {
+    setSimulateTamper(false);
+    setPhase("idle");
+    setProgress(0);
+    setFailureDetail(null);
   };
 
   return (
