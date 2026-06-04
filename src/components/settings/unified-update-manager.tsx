@@ -227,13 +227,13 @@ export function UnifiedUpdateManager() {
             </div>
 
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handleCheck} disabled={phase !== "idle" && phase !== "done"}>
+              <Button variant="outline" size="sm" onClick={handleCheck} disabled={phase === "downloading" || phase === "installing" || phase === "verifying"}>
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Check
               </Button>
               <Button
                 onClick={handleInstall}
-                disabled={!updateAvailable || (phase !== "idle" && phase !== "done")}
+                disabled={!updateAvailable || phase === "downloading" || phase === "installing" || phase === "verifying"}
                 className="bg-gradient-to-r from-primary to-accent text-primary-foreground"
               >
                 <Download className="h-4 w-4 mr-2" />
