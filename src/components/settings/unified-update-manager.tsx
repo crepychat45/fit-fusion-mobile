@@ -12,6 +12,9 @@ import {
   PackageCheck,
   ChevronDown,
   ChevronUp,
+  ShieldAlert,
+  Undo2,
+  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,10 +25,10 @@ import { useToast } from "@/hooks/use-toast";
 import {
   APP_VERSION,
   APP_RELEASE_DATE,
+  APP_UPDATE_SIGNATURE,
   RELEASE_NOTES,
   getInstalledVersion,
   setInstalledVersion,
-  isUpdateAvailable,
 } from "@/lib/app-version";
 
 const iconMap = {
@@ -42,7 +45,7 @@ const sectionAccent = {
   shield: "text-red-500",
 } as const;
 
-type Phase = "idle" | "downloading" | "installing" | "verifying" | "done";
+type Phase = "idle" | "downloading" | "installing" | "verifying" | "done" | "failed";
 
 const phaseLabel: Record<Phase, string> = {
   idle: "Ready",
@@ -50,7 +53,18 @@ const phaseLabel: Record<Phase, string> = {
   installing: "Installing new version…",
   verifying: "Verifying signature & integrity…",
   done: "Installed successfully",
+  failed: "Verification failed — update aborted",
 };
+
+const PREV_VERSION_KEY = "fitfusion-previous-version";
+
+async function sha256Hex(input: string): Promise<string> {
+  const buf = new TextEncoder().encode(input);
+  const hash = await crypto.subtle.digest("SHA-256", buf);
+  return Array.from(new Uint8Array(hash))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
 
 export function UnifiedUpdateManager() {
   const { toast } = useToast();
@@ -63,6 +77,11 @@ export function UnifiedUpdateManager() {
   const [showPostInstall, setShowPostInstall] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(APP_VERSION);
   const [lastChecked, setLastChecked] = useState<Date | null>(null);
+  const [failureDetail, setFailureDetail] = useState<string | null>(null);
+  const [simulateTamper, setSimulateTamper] = useState(false);
+  const [previousVersion, setPreviousVersion] = useState<string | null>(
+    () => (typeof window !== "undefined" ? localStorage.getItem(PREV_VERSION_KEY) : null)
+  );
 
   const updateAvailable = useMemo(() => installed !== APP_VERSION, [installed]);
   const latest = RELEASE_NOTES[0];
