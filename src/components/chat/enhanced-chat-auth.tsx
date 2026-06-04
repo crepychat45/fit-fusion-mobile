@@ -101,7 +101,7 @@ export function EnhancedChatAuth({
           setAuthStep("success");
           toast({
             title: "Login Successful",
-            description: "Welcome back to FitFusion Chat!",
+            description: "Welcome back to FitX Fusion Chat!",
           });
           onAuthSuccess();
         }
@@ -233,7 +233,7 @@ export function EnhancedChatAuth({
           <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
             <CheckCircle className="h-6 w-6 text-green-600" />
           </div>
-          <CardTitle>Welcome to FitFusion Chat</CardTitle>
+          <CardTitle>Welcome to FitX Fusion Chat</CardTitle>
           <CardDescription>
             You're successfully authenticated and ready to start chatting!
           </CardDescription>
@@ -249,7 +249,7 @@ export function EnhancedChatAuth({
         <CardDescription>
           {isLogin
             ? "Welcome back! Please sign in to continue."
-            : "Join FitFusion Chat to connect with fitness enthusiasts"}
+            : "Join FitX Fusion Chat to connect with fitness enthusiasts"}
         </CardDescription>
         <div className="flex items-center justify-center gap-2 mt-2">
           <Badge variant="outline" className="text-xs">

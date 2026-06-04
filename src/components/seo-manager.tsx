@@ -35,7 +35,7 @@ const pageMetadata: Record<string, PageMeta> = {
       "progress tracking, fitness analytics, health metrics, achievement tracking",
   },
   "/chat": {
-    title: "FitFusion Chat - Connect with Fitness Community",
+    title: "FitX Fusion Chat - Connect with Fitness Community",
     description:
       "Join our secure fitness community. Chat with trainers, share progress, and get motivated with fellow fitness enthusiasts.",
     keywords: "fitness community, chat, trainers, motivation, social fitness",

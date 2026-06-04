@@ -61,8 +61,8 @@ export function ChatNotifications({
   const testNotification = () => {
     if ("Notification" in window) {
       if (Notification.permission === "granted") {
-        new Notification("FitFusion Chat", {
-          body: "This is a test notification from FitFusion Chat!",
+        new Notification("FitX Fusion Chat", {
+          body: "This is a test notification from FitX Fusion Chat!",
           icon: "/favicon.ico",
         });
 
@@ -74,7 +74,7 @@ export function ChatNotifications({
       } else if (Notification.permission !== "denied") {
         Notification.requestPermission().then((permission) => {
           if (permission === "granted") {
-            new Notification("FitFusion Chat", {
+            new Notification("FitX Fusion Chat", {
               body: "Notifications are now enabled!",
               icon: "/favicon.ico",
             });

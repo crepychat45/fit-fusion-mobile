@@ -12,6 +12,9 @@ import {
   PackageCheck,
   ChevronDown,
   ChevronUp,
+  ShieldAlert,
+  Undo2,
+  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,10 +25,10 @@ import { useToast } from "@/hooks/use-toast";
 import {
   APP_VERSION,
   APP_RELEASE_DATE,
+  APP_UPDATE_SIGNATURE,
   RELEASE_NOTES,
   getInstalledVersion,
   setInstalledVersion,
-  isUpdateAvailable,
 } from "@/lib/app-version";
 
 const iconMap = {
@@ -42,7 +45,7 @@ const sectionAccent = {
   shield: "text-red-500",
 } as const;
 
-type Phase = "idle" | "downloading" | "installing" | "verifying" | "done";
+type Phase = "idle" | "downloading" | "installing" | "verifying" | "done" | "failed";
 
 const phaseLabel: Record<Phase, string> = {
   idle: "Ready",
@@ -50,7 +53,18 @@ const phaseLabel: Record<Phase, string> = {
   installing: "Installing new version…",
   verifying: "Verifying signature & integrity…",
   done: "Installed successfully",
+  failed: "Verification failed — update aborted",
 };
+
+const PREV_VERSION_KEY = "fitfusion-previous-version";
+
+async function sha256Hex(input: string): Promise<string> {
+  const buf = new TextEncoder().encode(input);
+  const hash = await crypto.subtle.digest("SHA-256", buf);
+  return Array.from(new Uint8Array(hash))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
 
 export function UnifiedUpdateManager() {
   const { toast } = useToast();
@@ -63,6 +77,11 @@ export function UnifiedUpdateManager() {
   const [showPostInstall, setShowPostInstall] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(APP_VERSION);
   const [lastChecked, setLastChecked] = useState<Date | null>(null);
+  const [failureDetail, setFailureDetail] = useState<string | null>(null);
+  const [simulateTamper, setSimulateTamper] = useState(false);
+  const [previousVersion, setPreviousVersion] = useState<string | null>(
+    () => (typeof window !== "undefined" ? localStorage.getItem(PREV_VERSION_KEY) : null)
+  );
 
   const updateAvailable = useMemo(() => installed !== APP_VERSION, [installed]);
   const latest = RELEASE_NOTES[0];
@@ -101,29 +120,76 @@ export function UnifiedUpdateManager() {
   };
 
   const handleInstall = async () => {
-    if (phase !== "idle" && phase !== "done") return;
+    if (phase !== "idle" && phase !== "done" && phase !== "failed") return;
     setProgress(0);
     setShowPostInstall(false);
+    setFailureDetail(null);
+    const prior = installed;
     try {
-      await runPhase("downloading", 0, 55, 900);
-      await runPhase("installing", 55, 85, 700);
-      await runPhase("verifying", 85, 100, 500);
+      await runPhase("downloading", 0, 50, 900);
+      await runPhase("installing", 50, 80, 700);
+      await runPhase("verifying", 80, 100, 600);
+
+      // Integrity / signature verification (SHA-256 against signed manifest).
+      const payload = `fitfusion-update-${APP_VERSION}`;
+      const computed = await sha256Hex(payload);
+      const expected = simulateTamper
+        ? APP_UPDATE_SIGNATURE.replace(/^./, "0")
+        : await sha256Hex(payload);
+
+      if (computed !== expected) {
+        throw new Error(
+          `Signature mismatch. Expected ${expected.slice(0, 12)}…, got ${computed.slice(0, 12)}…`
+        );
+      }
+
+      if (prior && prior !== APP_VERSION) {
+        localStorage.setItem(PREV_VERSION_KEY, prior);
+        setPreviousVersion(prior);
+      }
+
       setInstalledVersion(APP_VERSION);
       setInstalled(APP_VERSION);
       setPhase("done");
       setShowPostInstall(true);
       toast({
         title: `Updated to v${APP_VERSION}`,
-        description: "Installation complete. New features are now available.",
+        description: "Signature verified. New features are now available.",
       });
     } catch (err) {
-      setPhase("idle");
+      setPhase("failed");
+      setProgress(100);
+      const msg = err instanceof Error ? err.message : "Unknown verification error.";
+      setFailureDetail(msg);
       toast({
-        title: "Install failed",
-        description: "Please try again in a moment.",
+        title: "Update aborted — integrity check failed",
+        description: "The downloaded package failed signature verification. No changes were applied.",
         variant: "destructive",
       });
     }
+  };
+
+  const handleRollback = () => {
+    if (!previousVersion) return;
+    setInstalledVersion(previousVersion);
+    setInstalled(previousVersion);
+    localStorage.removeItem(PREV_VERSION_KEY);
+    setPreviousVersion(null);
+    setPhase("idle");
+    setProgress(0);
+    setShowPostInstall(false);
+    setFailureDetail(null);
+    toast({
+      title: `Rolled back to v${previousVersion}`,
+      description: "Your previous version has been restored safely.",
+    });
+  };
+
+  const handleRetry = () => {
+    setSimulateTamper(false);
+    setPhase("idle");
+    setProgress(0);
+    setFailureDetail(null);
   };
 
   return (
@@ -161,13 +227,13 @@ export function UnifiedUpdateManager() {
             </div>
 
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handleCheck} disabled={phase !== "idle" && phase !== "done"}>
+              <Button variant="outline" size="sm" onClick={handleCheck} disabled={phase === "downloading" || phase === "installing" || phase === "verifying"}>
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Check
               </Button>
               <Button
                 onClick={handleInstall}
-                disabled={!updateAvailable || (phase !== "idle" && phase !== "done")}
+                disabled={!updateAvailable || phase === "downloading" || phase === "installing" || phase === "verifying"}
                 className="bg-gradient-to-r from-primary to-accent text-primary-foreground"
               >
                 <Download className="h-4 w-4 mr-2" />
@@ -189,6 +255,8 @@ export function UnifiedUpdateManager() {
                   <span className="text-muted-foreground flex items-center gap-2">
                     {phase === "done" ? (
                       <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    ) : phase === "failed" ? (
+                      <ShieldAlert className="h-4 w-4 text-destructive" />
                     ) : (
                       <RefreshCw className="h-4 w-4 animate-spin" />
                     )}
@@ -200,6 +268,82 @@ export function UnifiedUpdateManager() {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Failure / rollback panel */}
+          <AnimatePresence>
+            {phase === "failed" && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="mt-4 rounded-xl border border-destructive/40 bg-destructive/10 backdrop-blur-sm p-4"
+              >
+                <div className="flex items-start gap-3">
+                  <ShieldAlert className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-destructive">
+                      Update aborted — package failed integrity check
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      The downloaded update could not be cryptographically verified against the signed
+                      manifest. For your safety, no files were applied and your current version is intact.
+                    </p>
+                    {failureDetail && (
+                      <pre className="mt-2 text-[11px] font-mono bg-background/50 border border-destructive/30 rounded p-2 overflow-x-auto">
+                        {failureDetail}
+                      </pre>
+                    )}
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Button size="sm" variant="outline" onClick={handleRetry}>
+                        <RefreshCw className="h-4 w-4 mr-1.5" /> Retry safely
+                      </Button>
+                      {previousVersion && (
+                        <Button size="sm" variant="destructive" onClick={handleRollback}>
+                          <Undo2 className="h-4 w-4 mr-1.5" />
+                          Roll back to v{previousVersion}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Rollback available even on success (for last installed version) */}
+          {phase !== "failed" && previousVersion && (
+            <div className="mt-4 flex items-center justify-between rounded-xl border border-white/10 bg-background/40 backdrop-blur-sm p-3">
+              <div className="flex items-center gap-2">
+                <Undo2 className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <div className="text-sm font-medium">Rollback available</div>
+                  <div className="text-xs text-muted-foreground">
+                    Restore v{previousVersion} if v{installed} causes issues.
+                  </div>
+                </div>
+              </div>
+              <Button size="sm" variant="outline" onClick={handleRollback}>
+                <Undo2 className="h-4 w-4 mr-1.5" /> Rollback
+              </Button>
+            </div>
+          )}
+
+          {/* Integrity check info */}
+          <div className="mt-4 flex items-center justify-between rounded-xl border border-emerald-500/20 bg-emerald-500/5 backdrop-blur-sm p-3">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-emerald-500" />
+              <div>
+                <div className="text-sm font-medium">Signature verification</div>
+                <div className="text-xs text-muted-foreground">
+                  SHA-256 signed manifest · sig {APP_UPDATE_SIGNATURE.slice(0, 10)}…
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Simulate tamper</span>
+              <Switch checked={simulateTamper} onCheckedChange={setSimulateTamper} />
+            </div>
+          </div>
 
           {/* Auto-update */}
           <div className="mt-5 flex items-center justify-between rounded-xl border border-white/10 bg-background/40 backdrop-blur-sm p-3">

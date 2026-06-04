@@ -263,7 +263,7 @@ export function EnhancedMobileChat({ onClose }: EnhancedMobileChatProps) {
             >
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h2 className="text-xl font-bold">FitFusion Chat</h2>
+                  <h2 className="text-xl font-bold">FitX Fusion Chat</h2>
                   <p className="text-sm text-muted-foreground">
                     {mockConversations.length} conversations
                   </p>
