@@ -255,6 +255,8 @@ export function UnifiedUpdateManager() {
                   <span className="text-muted-foreground flex items-center gap-2">
                     {phase === "done" ? (
                       <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    ) : phase === "failed" ? (
+                      <ShieldAlert className="h-4 w-4 text-destructive" />
                     ) : (
                       <RefreshCw className="h-4 w-4 animate-spin" />
                     )}
@@ -266,6 +268,82 @@ export function UnifiedUpdateManager() {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Failure / rollback panel */}
+          <AnimatePresence>
+            {phase === "failed" && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="mt-4 rounded-xl border border-destructive/40 bg-destructive/10 backdrop-blur-sm p-4"
+              >
+                <div className="flex items-start gap-3">
+                  <ShieldAlert className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-destructive">
+                      Update aborted — package failed integrity check
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      The downloaded update could not be cryptographically verified against the signed
+                      manifest. For your safety, no files were applied and your current version is intact.
+                    </p>
+                    {failureDetail && (
+                      <pre className="mt-2 text-[11px] font-mono bg-background/50 border border-destructive/30 rounded p-2 overflow-x-auto">
+                        {failureDetail}
+                      </pre>
+                    )}
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Button size="sm" variant="outline" onClick={handleRetry}>
+                        <RefreshCw className="h-4 w-4 mr-1.5" /> Retry safely
+                      </Button>
+                      {previousVersion && (
+                        <Button size="sm" variant="destructive" onClick={handleRollback}>
+                          <Undo2 className="h-4 w-4 mr-1.5" />
+                          Roll back to v{previousVersion}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Rollback available even on success (for last installed version) */}
+          {phase !== "failed" && previousVersion && (
+            <div className="mt-4 flex items-center justify-between rounded-xl border border-white/10 bg-background/40 backdrop-blur-sm p-3">
+              <div className="flex items-center gap-2">
+                <Undo2 className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <div className="text-sm font-medium">Rollback available</div>
+                  <div className="text-xs text-muted-foreground">
+                    Restore v{previousVersion} if v{installed} causes issues.
+                  </div>
+                </div>
+              </div>
+              <Button size="sm" variant="outline" onClick={handleRollback}>
+                <Undo2 className="h-4 w-4 mr-1.5" /> Rollback
+              </Button>
+            </div>
+          )}
+
+          {/* Integrity check info */}
+          <div className="mt-4 flex items-center justify-between rounded-xl border border-emerald-500/20 bg-emerald-500/5 backdrop-blur-sm p-3">
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-emerald-500" />
+              <div>
+                <div className="text-sm font-medium">Signature verification</div>
+                <div className="text-xs text-muted-foreground">
+                  SHA-256 signed manifest · sig {APP_UPDATE_SIGNATURE.slice(0, 10)}…
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Simulate tamper</span>
+              <Switch checked={simulateTamper} onCheckedChange={setSimulateTamper} />
+            </div>
+          </div>
 
           {/* Auto-update */}
           <div className="mt-5 flex items-center justify-between rounded-xl border border-white/10 bg-background/40 backdrop-blur-sm p-3">
