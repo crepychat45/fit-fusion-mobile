@@ -47,7 +47,7 @@ interface Conversation {
 const mockConversations: Conversation[] = [
   {
     id: "1",
-    name: "Shifu",
+    name: "FitX Fusion Chat",
     lastMessage: "How's your workout going?",
     timestamp: "10:30 pm",
     online: true,
@@ -75,7 +75,7 @@ const mockConversations: Conversation[] = [
 const mockMessages: Message[] = [
   {
     id: "1",
-    sender: "Shifu",
+    sender: "FitX Fusion Chat",
     content: "Hey! How's your workout routine going?",
     timestamp: "10:25 pm",
     isOwn: false,
@@ -91,7 +91,7 @@ const mockMessages: Message[] = [
   },
   {
     id: "3",
-    sender: "Shifu",
+    sender: "FitX Fusion Chat",
     content:
       "That's awesome! Keep up the great work. Want to join me for a morning run tomorrow?",
     timestamp: "10:30 pm",
