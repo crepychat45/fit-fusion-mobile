@@ -185,7 +185,7 @@ export function FitfusionChatSection() {
               <MessageCircle className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">FitFusion Chat</CardTitle>
+              <CardTitle className="text-lg">FitX Fusion Chat</CardTitle>
               <div className="text-sm text-muted-foreground flex items-center gap-1">
                 <span>Secure fitness community</span>
                 <Badge variant="outline" className="ml-2 text-xs">

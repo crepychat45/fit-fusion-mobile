@@ -58,7 +58,7 @@ export function EnhancedChatInterface({
       sender: selectedUser ? selectedUser.name : "FitBot",
       content: selectedUser
         ? `Hi there! Ready to chat about fitness and workouts?`
-        : "Welcome to FitFusion Chat! I'm your AI fitness assistant. Ask me anything about workouts, nutrition, progress tracking, or get personalized recommendations. How can I help you achieve your fitness goals today?",
+        : "Welcome to FitX Fusion Chat! I'm your AI fitness assistant. Ask me anything about workouts, nutrition, progress tracking, or get personalized recommendations. How can I help you achieve your fitness goals today?",
       timestamp: new Date(Date.now() - 3600000),
       isOwnMessage: false,
       avatar: selectedUser ? selectedUser.avatar : "🤖",
@@ -280,7 +280,7 @@ export function EnhancedChatInterface({
               <AvatarFallback>FC</AvatarFallback>
             </Avatar>
             <div>
-              <h3 className="font-semibold text-sm">FitFusion Chat</h3>
+              <h3 className="font-semibold text-sm">FitX Fusion Chat</h3>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <span className="text-xs text-muted-foreground">Online</span>

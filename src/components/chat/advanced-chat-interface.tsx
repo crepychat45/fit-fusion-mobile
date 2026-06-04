@@ -132,7 +132,7 @@ export function AdvancedChatInterface({
         senderId: "fitbot",
         receiverId: "user",
         content:
-          "Welcome to FitFusion Chat! 🎉 How can I help you with your fitness journey today?",
+          "Welcome to FitX Fusion Chat! 🎉 How can I help you with your fitness journey today?",
         timestamp: new Date(Date.now() - 3600000),
         isRead: true,
       },

@@ -211,7 +211,7 @@ const ChatPage = () => {
 
               toast({
                 title: "Welcome back!",
-                description: "You're now connected to FitFusion Chat.",
+                description: "You're now connected to FitX Fusion Chat.",
               });
             }
             break;
@@ -230,7 +230,7 @@ const ChatPage = () => {
 
             toast({
               title: "Signed out",
-              description: "You've been signed out of FitFusion Chat.",
+              description: "You've been signed out of FitX Fusion Chat.",
             });
             break;
 
@@ -263,7 +263,7 @@ const ChatPage = () => {
     setConnectionStatus("connected");
     toast({
       title: "Authentication successful",
-      description: "Welcome to FitFusion Chat!",
+      description: "Welcome to FitX Fusion Chat!",
     });
   }, [toast]);
 
@@ -293,7 +293,7 @@ const ChatPage = () => {
 
       toast({
         title: "Logged out",
-        description: "You've been logged out of FitFusion Chat.",
+        description: "You've been logged out of FitX Fusion Chat.",
       });
     } catch (error) {
       toast({
@@ -310,7 +310,7 @@ const ChatPage = () => {
       await refreshSession();
       toast({
         title: "Reconnected",
-        description: "Successfully reconnected to FitFusion Chat.",
+        description: "Successfully reconnected to FitX Fusion Chat.",
       });
     } catch (error) {
       toast({
@@ -351,7 +351,7 @@ const ChatPage = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <LoadingSpinner size="lg" text="Connecting to FitFusion Chat..." />
+        <LoadingSpinner size="lg" text="Connecting to FitX Fusion Chat..." />
       </div>
     );
   }
@@ -388,7 +388,7 @@ const ChatPage = () => {
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
                 <MessageCircle className="h-6 w-6" />
-                FitFusion Chat
+                FitX Fusion Chat
               </h1>
               <p className="text-white/90 text-xs md:text-sm">
                 Secure fitness community • v6.2.5 • Enhanced AI with Security Patches

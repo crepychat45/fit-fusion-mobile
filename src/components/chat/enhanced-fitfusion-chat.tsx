@@ -107,7 +107,7 @@ export function EnhancedFitfusionChat() {
       >
         <div className="h-full flex flex-col">
           <div className="flex items-center justify-between p-4 border-b border-border">
-            <h2 className="text-lg font-semibold">FitFusion Chat</h2>
+            <h2 className="text-lg font-semibold">FitX Fusion Chat</h2>
             <div className="flex items-center gap-2">
               <Badge variant="secondary">{onlineUsers} online</Badge>
               <Button
@@ -147,7 +147,7 @@ export function EnhancedFitfusionChat() {
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2">
                     <MessageSquare className="h-5 w-5 text-primary" />
-                    <span className="font-semibold">FitFusion Chat</span>
+                    <span className="font-semibold">FitX Fusion Chat</span>
                   </div>
                   {selectedUser && (
                     <>

@@ -131,7 +131,7 @@ export function ResizableChatWindow({
         onMouseDown={(e) => handleMouseDown(e, "drag")}
       >
         <div className="flex items-center gap-2">
-          <div className="text-sm font-medium">FitFusion Chat</div>
+          <div className="text-sm font-medium">FitX Fusion Chat</div>
         </div>
 
         <div className="flex items-center gap-1">

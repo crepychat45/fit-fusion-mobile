@@ -752,7 +752,7 @@ export function FitfusionChat({ onLogout }: FitfusionChatProps) {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <CardTitle>FitFusion Chat</CardTitle>
+              <CardTitle>FitX Fusion Chat</CardTitle>
               <p className="text-xs text-muted-foreground">
                 Connect with fitness friends securely
               </p>
@@ -1410,7 +1410,7 @@ export function FitfusionChat({ onLogout }: FitfusionChatProps) {
                 <MessageSquare className="h-10 w-10 text-primary" />
               </div>
               <h3 className="text-xl font-semibold mb-1">
-                Welcome to FitFusion Chat
+                Welcome to FitX Fusion Chat
               </h3>
               <p className="text-muted-foreground text-center max-w-xs">
                 Connect with fitness buddies, trainers, and friends to share
