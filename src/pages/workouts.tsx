@@ -17,6 +17,7 @@ import {
 import { workouts } from "@/data/workouts";
 import { AIWorkoutVideos } from "@/components/workout/ai-workout-videos";
 import { AIWorkoutBuilder } from "@/components/features/ai-workout-builder";
+import { RecoveryFocusWidget } from "@/components/workout/recovery-focus-widget";
 
 const Workouts = () => {
   const { toast } = useToast();
