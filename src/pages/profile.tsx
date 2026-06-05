@@ -10,6 +10,7 @@ import { userProfile } from "@/data/user";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { BodyMetricsWidget } from "@/components/profile/body-metrics-widget";
 
 const Profile = () => {
   const { toast } = useToast();
