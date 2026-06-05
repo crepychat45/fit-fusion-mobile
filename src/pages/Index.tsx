@@ -142,6 +142,15 @@ const Index = () => {
             </Suspense>
           </motion.div>
 
+          {/* Personal Records Showcase */}
+          <motion.div variants={fadeUp} className="px-4">
+            <Suspense fallback={<HomeSectionFallback />}>
+              <PersonalRecordsWidget />
+            </Suspense>
+          </motion.div>
+
+
+
           {/* Weekly Summary Card */}
           <motion.div variants={fadeUp} className="px-4">
             <div className="rounded-2xl border border-border/20 bg-card/60 backdrop-blur-xl shadow-lg p-4">
