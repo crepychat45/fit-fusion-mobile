@@ -1,6 +1,6 @@
 // Single source of truth for app version + changelog
-export const APP_VERSION = "6.3.0";
-export const APP_RELEASE_DATE = "2026-06-04";
+export const APP_VERSION = "6.4.0";
+export const APP_RELEASE_DATE = "2026-06-05";
 export const VERSION_STORAGE_KEYS = ["fitfusion-app-version", "app-version"] as const;
 // Expected SHA-256 signature of the update package (mocked for client-side demo).
 // In a real deployment this is delivered by a signed manifest from the update server.
