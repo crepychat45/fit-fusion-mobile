@@ -105,6 +105,11 @@ const Workouts = () => {
         </div>
 
         <div className="px-4 py-5">
+          {/* Recovery & Focus */}
+          <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-5">
+            <RecoveryFocusWidget onStart={() => navigate("/workouts?quick=true")} />
+          </motion.div>
+
           {/* Search */}
           <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-5 space-y-3">
             <div className="relative">
