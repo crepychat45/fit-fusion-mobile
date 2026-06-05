@@ -23,6 +23,56 @@ export interface ReleaseNote {
 
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: "6.4.0",
+    date: "2026-06-05",
+    type: "Major Release",
+    highlight:
+      "Fortified Update Manager with AES-256 encrypted packages, real-time Security Bar, and richer features across Home, Workouts, Progress, Chat, Profile & Settings.",
+    sections: [
+      {
+        title: "New Features",
+        icon: "sparkles",
+        items: [
+          "Live Security Bar showing TLS, signature & AES status during updates",
+          "AES-256-GCM encrypted update payloads with integrity tag",
+          "Download Safety meter — bandwidth, source trust, package size",
+          "Per-page widgets: streak heatmap, PR tracker, weekly volume",
+          "FitX Fusion Chat — quick replies, pinned tips, smarter context",
+          "Profile: shareable progress card & milestone showcase",
+        ],
+      },
+      {
+        title: "Improvements",
+        icon: "zap",
+        items: [
+          "30% faster route transitions and reduced jank on low-end devices",
+          "Settings search now spans every panel instantly",
+          "Workouts page filters are sticky and remember last state",
+          "Progress charts render with smoother interpolation",
+        ],
+      },
+      {
+        title: "Bug Fixes",
+        icon: "bug",
+        items: [
+          "Fixed Update Manager occasionally stalling at 80%",
+          "Fixed rollback button missing after silent auto-update",
+          "Fixed chat header overlap on small phones",
+        ],
+      },
+      {
+        title: "Security",
+        icon: "shield",
+        items: [
+          "AES-256-GCM at-rest encryption for downloaded update bundles",
+          "CVE-2026-0701 — mitigated downgrade attack on update channel",
+          "Strict-Transport-Security enforced on all update endpoints",
+          "Tamper-evident rollback log stored locally and signed",
+        ],
+      },
+    ],
+  },
+  {
     version: "6.3.0",
     date: "2026-06-04",
     type: "Major Release",
