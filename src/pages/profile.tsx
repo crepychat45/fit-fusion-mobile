@@ -178,6 +178,9 @@ const Profile = () => {
               </TabsContent>
 
               <TabsContent value="stats" className="space-y-3 mt-0">
+                {/* Body Metrics & Goals */}
+                <BodyMetricsWidget />
+
                 {/* Fitness Score Dashboard */}
                 <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5 backdrop-blur-sm">
                   <CardHeader className="pb-3">
