@@ -15,6 +15,9 @@ import {
   ShieldAlert,
   Undo2,
   ShieldCheck,
+  Lock,
+  Wifi,
+  HardDrive,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
