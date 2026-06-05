@@ -10,6 +10,7 @@ import { userProfile } from "@/data/user";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { BodyMetricsWidget } from "@/components/profile/body-metrics-widget";
 
 const Profile = () => {
   const { toast } = useToast();
@@ -177,6 +178,9 @@ const Profile = () => {
               </TabsContent>
 
               <TabsContent value="stats" className="space-y-3 mt-0">
+                {/* Body Metrics & Goals */}
+                <BodyMetricsWidget />
+
                 {/* Fitness Score Dashboard */}
                 <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5 backdrop-blur-sm">
                   <CardHeader className="pb-3">

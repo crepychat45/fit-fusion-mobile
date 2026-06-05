@@ -286,57 +286,66 @@ export function SettingsContainer() {
         </Alert>
       )}
 
-      {/* Enhanced Header with modern design */}
-      <div className="sticky top-0 z-50 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 backdrop-blur-xl border-b border-white/20 shadow-lg">
-        <div className="max-w-screen-xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
-                  <Settings className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+      {/* Liquid Glass Header */}
+      <div className="sticky top-0 z-50 backdrop-blur-2xl bg-background/60 border-b border-white/10 shadow-[0_8px_32px_-12px_rgba(0,0,0,0.25)]">
+        <div className="relative overflow-hidden">
+          {/* Ambient orbs */}
+          <div className="pointer-events-none absolute -top-16 -left-16 w-56 h-56 rounded-full bg-primary/20 blur-3xl animate-float" />
+          <div
+            className="pointer-events-none absolute -bottom-20 -right-10 w-64 h-64 rounded-full bg-accent/20 blur-3xl animate-float"
+            style={{ animationDelay: "2s" }}
+          />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5" />
+
+          <div className="relative max-w-screen-xl mx-auto px-4 py-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="relative p-2.5 rounded-2xl bg-gradient-to-br from-primary to-accent shadow-lg shadow-primary/30"
+                >
+                  <Settings className="h-5 w-5 text-primary-foreground" />
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-white/30 to-transparent pointer-events-none" />
+                </motion.div>
+                <div className="min-w-0">
+                  <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-foreground via-primary to-accent-foreground bg-clip-text text-transparent">
                     Settings
                   </h1>
-                  <p className="text-sm text-muted-foreground">
-                    Customize your experience
+                  <p className="text-[11px] sm:text-xs text-muted-foreground truncate">
+                    Liquid Glass · personalize every detail
                   </p>
                 </div>
-              </div>
-              {lastSaved && (
-                <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground bg-green-50 dark:bg-green-950/20 px-3 py-1 rounded-full">
-                  <CheckCircle className="h-3 w-3 text-green-500" />
-                  Saved at {lastSaved.toLocaleTimeString()}
-                </div>
-              )}
-            </div>
-
-            <div className="flex items-center gap-3">
-              {/* Mobile Menu Toggle */}
-              <Button
-                variant="outline"
-                size="sm"
-                className="md:hidden bg-white/50 backdrop-blur-sm"
-                onClick={() => setShowMobileMenu(!showMobileMenu)}
-              >
-                {showMobileMenu ? (
-                  <X className="h-4 w-4" />
-                ) : (
-                  <Menu className="h-4 w-4" />
+                {lastSaved && (
+                  <div className="hidden md:flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full backdrop-blur-sm ml-2">
+                    <CheckCircle className="h-3 w-3" />
+                    Saved {lastSaved.toLocaleTimeString()}
+                  </div>
                 )}
-              </Button>
+              </div>
 
-              {hasUnsavedChanges && (
+              <div className="flex items-center gap-2 shrink-0">
+                {hasUnsavedChanges && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleManualSave}
+                    className="rounded-xl border-orange-400/40 bg-orange-500/10 text-orange-600 dark:text-orange-300 backdrop-blur-sm hover:bg-orange-500/20"
+                  >
+                    <Save className="h-3.5 w-3.5 mr-1" />
+                    Save
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   size="sm"
-                  className="bg-orange-50 border-orange-200 text-orange-700"
+                  className="md:hidden rounded-xl bg-background/40 backdrop-blur-sm border-white/20"
+                  onClick={() => setShowMobileMenu(!showMobileMenu)}
+                  aria-label="Toggle settings menu"
                 >
-                  <Save className="h-4 w-4 mr-1" />
-                  Save Changes
+                  {showMobileMenu ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
                 </Button>
-              )}
+              </div>
             </div>
           </div>
         </div>

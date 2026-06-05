@@ -17,6 +17,7 @@ import {
 import { workouts } from "@/data/workouts";
 import { AIWorkoutVideos } from "@/components/workout/ai-workout-videos";
 import { AIWorkoutBuilder } from "@/components/features/ai-workout-builder";
+import { RecoveryFocusWidget } from "@/components/workout/recovery-focus-widget";
 
 const Workouts = () => {
   const { toast } = useToast();
@@ -104,6 +105,11 @@ const Workouts = () => {
         </div>
 
         <div className="px-4 py-5">
+          {/* Recovery & Focus */}
+          <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-5">
+            <RecoveryFocusWidget onStart={() => navigate("/workouts?quick=true")} />
+          </motion.div>
+
           {/* Search */}
           <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-5 space-y-3">
             <div className="relative">
