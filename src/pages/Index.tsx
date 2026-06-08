@@ -150,6 +150,13 @@ const Index = () => {
             </Suspense>
           </motion.div>
 
+          {/* Quick Boost — 4 micro-actions for instant momentum */}
+          <motion.div variants={fadeUp}>
+            <Suspense fallback={<HomeSectionFallback />}>
+              <QuickBoostWidget />
+            </Suspense>
+          </motion.div>
+
 
 
           {/* Weekly Summary Card */}
