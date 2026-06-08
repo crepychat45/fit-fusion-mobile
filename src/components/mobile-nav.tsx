@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MobileAIAssistant } from "@/components/mobile/mobile-ai-assistant";
 import { MobileSecurityCenter } from "@/components/mobile/mobile-security-center";
+import { prefetchRoute } from "@/utils/route-prefetch";
 
 const navItems = [
   { href: "/", icon: Home, label: "Home" },
@@ -73,7 +74,7 @@ export function MobileNav() {
               const isActive = location.pathname === item.href;
               const Icon = item.icon;
               return (
-                <Link key={item.href} to={item.href} className="flex-1">
+                <Link key={item.href} to={item.href} className="flex-1" onMouseEnter={() => prefetchRoute(item.href)} onTouchStart={() => prefetchRoute(item.href)}>
                   <motion.div
                     whileTap={{ scale: 0.9 }}
                     className={cn(
@@ -179,7 +180,7 @@ export function MobileNav() {
                 {additionalItems.map((item) => {
                   const Icon = item.icon;
                   return (
-                    <Link key={item.href} to={item.href} onClick={() => setShowMore(false)}>
+                    <Link key={item.href} to={item.href} onClick={() => setShowMore(false)} onMouseEnter={() => prefetchRoute(item.href)} onTouchStart={() => prefetchRoute(item.href)}>
                       <motion.div
                         whileTap={{ scale: 0.97 }}
                         className="flex flex-col items-center p-3 rounded-2xl border border-border/20 bg-muted/20 hover:bg-muted/40 transition-all duration-200"
