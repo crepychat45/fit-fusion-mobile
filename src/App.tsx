@@ -5,13 +5,10 @@ import { ProtectedRoute } from "./components/auth/protected-route";
 import { AnimatePresence } from "framer-motion";
 import { ErrorBoundary } from "@/components/common/error-boundary";
 import { clearAppCaches, isRecoverableResourceError, markAppReady, recoverApp } from "@/utils/app-recovery";
+import { PageSkeleton } from "@/components/common/page-skeleton";
+import { prefetchAllRoutes } from "@/utils/route-prefetch";
 
-// Minimal inline loader
-const Loader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-background">
-    <div style={{ width: 32, height: 32, border: '3px solid hsl(328, 85%, 70%)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-  </div>
-);
+const Loader = PageSkeleton;
 
 const lazyWithRetry = <T extends React.ComponentType<any>>(importer: () => Promise<{ default: T }>) =>
   lazy(() =>
@@ -81,7 +78,12 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     const enableAssistant = () => setAssistantEnabled(true);
     const timeout = window.setTimeout(enableAssistant, 3500);
-    return () => window.clearTimeout(timeout);
+    // Pre-warm route chunks during idle so navigations feel instant
+    const prefetchTimeout = window.setTimeout(() => prefetchAllRoutes(), 1200);
+    return () => {
+      window.clearTimeout(timeout);
+      window.clearTimeout(prefetchTimeout);
+    };
   }, []);
 
   return (
