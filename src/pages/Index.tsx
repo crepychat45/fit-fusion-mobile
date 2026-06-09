@@ -30,6 +30,7 @@ const AdaptiveWorkoutEngine = lazy(() => import("@/components/dashboard/adaptive
 const TodaysGoalsWidget = lazy(() => import("@/components/dashboard/todays-goals-widget").then((m) => ({ default: m.TodaysGoalsWidget })));
 const PersonalRecordsWidget = lazy(() => import("@/components/dashboard/personal-records-widget").then((m) => ({ default: m.PersonalRecordsWidget })));
 const QuickBoostWidget = lazy(() => import("@/components/dashboard/quick-boost-widget").then((m) => ({ default: m.QuickBoostWidget })));
+const DailyChallengeWidget = lazy(() => import("@/components/dashboard/daily-challenge-widget").then((m) => ({ default: m.DailyChallengeWidget })));
 const MobileNav = lazy(() => import("@/components/mobile-nav").then((m) => ({ default: m.MobileNav })));
 const MobileFloatingActions = lazy(() => import("@/components/mobile/mobile-floating-actions").then((m) => ({ default: m.MobileFloatingActions })));
 const MobileAIAssistant = lazy(() => import("@/components/mobile/mobile-ai-assistant").then((m) => ({ default: m.MobileAIAssistant })));
@@ -134,6 +135,13 @@ const Index = () => {
                 avgHeartRate={userProfile.stats.avgHeartRate}
               />
             </div>
+          </motion.div>
+
+          {/* Daily Challenge — claim XP for daily targets */}
+          <motion.div variants={fadeUp} className="px-4">
+            <Suspense fallback={<HomeSectionFallback />}>
+              <DailyChallengeWidget />
+            </Suspense>
           </motion.div>
 
           {/* Today's Goals (Liquid Glass) */}
