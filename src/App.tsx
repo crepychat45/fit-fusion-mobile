@@ -5,10 +5,10 @@ import { ProtectedRoute } from "./components/auth/protected-route";
 import { AnimatePresence } from "framer-motion";
 import { ErrorBoundary } from "@/components/common/error-boundary";
 import { clearAppCaches, isRecoverableResourceError, markAppReady, recoverApp } from "@/utils/app-recovery";
-import { PageSkeleton } from "@/components/common/page-skeleton";
+import { BootLoader } from "@/components/common/boot-loader";
 import { prefetchAllRoutes } from "@/utils/route-prefetch";
 
-const Loader = PageSkeleton;
+const Loader = BootLoader;
 
 const lazyWithRetry = <T extends React.ComponentType<any>>(importer: () => Promise<{ default: T }>) =>
   lazy(() =>

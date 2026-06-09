@@ -3,7 +3,17 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { installAppRecovery } from "@/utils/app-recovery";
-import "@/utils/app-initializer"; // Initialize FitFusion v6.2.5 enhancements
+
+// Defer non-critical initialization until after first paint to speed up startup
+if (typeof window !== "undefined") {
+  const w = window as Window & { requestIdleCallback?: (cb: () => void, opts?: { timeout?: number }) => number };
+  const loadInit = () => import("@/utils/app-initializer").catch(() => undefined);
+  if (typeof w.requestIdleCallback === "function") {
+    w.requestIdleCallback(loadInit, { timeout: 2000 });
+  } else {
+    window.setTimeout(loadInit, 1500);
+  }
+}
 
 installAppRecovery({ startupTimeoutMs: 14_000 });
 
