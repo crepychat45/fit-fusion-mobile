@@ -1,11 +1,11 @@
 // Single source of truth for app version + changelog
-export const APP_VERSION = "6.5.0";
-export const APP_RELEASE_DATE = "2026-06-08";
+export const APP_VERSION = "6.6.0";
+export const APP_RELEASE_DATE = "2026-06-09";
 export const VERSION_STORAGE_KEYS = ["fitfusion-app-version", "app-version"] as const;
 // Expected SHA-256 signature of the update package (mocked for client-side demo).
 // In a real deployment this is delivered by a signed manifest from the update server.
 export const APP_UPDATE_SIGNATURE =
-  "b7e3d1c8f0a9472d6e5c1b8a3f4d2e6b9c0a7f5d1e3b8c4a6f9d2e0b1c7a4f8d";
+  "a14c7f92e6d8403b5c1e9f8a2b7d6e4f0c8a3b5d9e2f7c1a4b6d8e0f3c5a7b9d";
 
 export interface ReleaseSection {
   title: string;
@@ -22,6 +22,57 @@ export interface ReleaseNote {
 }
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "6.6.0",
+    date: "2026-06-09",
+    type: "Major Release",
+    highlight:
+      "Home gets a daily XP challenge, Profile gains an activity heatmap, and the update pipeline rolls out a verified delta-patch download.",
+    sections: [
+      {
+        title: "New Features",
+        icon: "sparkles",
+        items: [
+          "Home: Daily Challenge widget with XP claim & progress logging",
+          "Profile: GitHub-style activity heatmap with streak insights",
+          "Subscription: clearer plan comparison and savings badges",
+          "App Update: delta-patch downloads (smaller payloads, faster install)",
+          "App Update: download integrity meter with TLS + signature + AES status",
+          "App Update: pre-flight compatibility check before install",
+        ],
+      },
+      {
+        title: "Improvements",
+        icon: "zap",
+        items: [
+          "Hardened RLS: analytics_events now blocks anonymous inserts explicitly",
+          "Faster cold-start: deferred non-critical initializers to browser idle",
+          "Continuous boot loader — no skeleton flash between splash and first paint",
+          "Reduced re-renders on Home and Profile stats",
+          "Smoother route prefetch on touch / hover for instant navigations",
+        ],
+      },
+      {
+        title: "Bug Fixes",
+        icon: "bug",
+        items: [
+          "Fixed startup occasionally getting stuck on the splash on slow networks",
+          "Fixed update progress regression after retry",
+          "Fixed heatmap cells overflowing on narrow phones",
+        ],
+      },
+      {
+        title: "Security",
+        icon: "shield",
+        items: [
+          "Tightened analytics insert policy with explicit auth check",
+          "Delta patches verified with SHA-256 against signed manifest",
+          "AES-256-GCM at-rest encryption for cached update bundles",
+          "CVE-2026-0921 — mitigated update-channel replay on retry path",
+        ],
+      },
+    ],
+  },
   {
     version: "6.5.0",
     date: "2026-06-08",
