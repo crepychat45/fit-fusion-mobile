@@ -6,9 +6,10 @@ import { installAppRecovery } from "@/utils/app-recovery";
 
 // Defer non-critical initialization until after first paint to speed up startup
 if (typeof window !== "undefined") {
+  const w = window as Window & { requestIdleCallback?: (cb: () => void, opts?: { timeout?: number }) => number };
   const loadInit = () => import("@/utils/app-initializer").catch(() => undefined);
-  if ("requestIdleCallback" in window) {
-    (window as any).requestIdleCallback(loadInit, { timeout: 2000 });
+  if (typeof w.requestIdleCallback === "function") {
+    w.requestIdleCallback(loadInit, { timeout: 2000 });
   } else {
     window.setTimeout(loadInit, 1500);
   }
