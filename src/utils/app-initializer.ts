@@ -150,13 +150,27 @@ export class AppInitializer {
    */
   private static async registerServiceWorker(): Promise<void> {
     try {
-      if ('serviceWorker' in navigator) {
-        // Check if SW.js exists
-        const response = await fetch('/sw.js', { method: 'HEAD' });
-        if (response.ok) {
-          await performanceEnhancer.registerServiceWorker();
-        }
+      if (!('serviceWorker' in navigator)) return;
+
+      const host = window.location.hostname;
+      const isPreview =
+        host === 'lovableproject.com' ||
+        host.endsWith('.lovableproject.com') ||
+        host === 'lovableproject-dev.com' ||
+        host.endsWith('.lovableproject-dev.com') ||
+        host.endsWith('.lovable.app') ||
+        host.startsWith('id-preview--') ||
+        window.location !== window.parent.location ||
+        new URLSearchParams(window.location.search).get('sw') === 'off';
+
+      if (isPreview || import.meta.env.DEV) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.allSettled(registrations.map((registration) => registration.unregister()));
+        return;
       }
+
+      // Run after startup only; no blocking HEAD request before registration.
+      await performanceEnhancer.registerServiceWorker();
     } catch (error) {
       console.log('ℹ️ Service Worker not available:', error);
     }
