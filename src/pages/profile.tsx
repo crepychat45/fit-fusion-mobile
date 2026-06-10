@@ -12,12 +12,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BodyMetricsWidget } from "@/components/profile/body-metrics-widget";
 import { ActivityHeatmap } from "@/components/profile/activity-heatmap";
+import { APP_VERSION, getInstalledVersion } from "@/lib/app-version";
 
 const Profile = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
-  const [currentVersion] = useState(() => localStorage.getItem("fitfusion-app-version") || "6.2.0");
+  const [currentVersion, setCurrentVersion] = useState(() => getInstalledVersion());
   const [profileData, setProfileData] = useState(userProfile);
 
   useEffect(() => {
@@ -25,6 +26,9 @@ const Profile = () => {
     if (saved) {
       try { setProfileData({ ...userProfile, ...JSON.parse(saved) }); } catch {}
     }
+    const syncVersion = () => setCurrentVersion(getInstalledVersion());
+    window.addEventListener("versionUpdated", syncVersion);
+    return () => window.removeEventListener("versionUpdated", syncVersion);
   }, []);
 
   const fadeUp = { hidden: { y: 12, opacity: 0 }, visible: { y: 0, opacity: 1, transition: { duration: 0.4 } } };
@@ -41,7 +45,9 @@ const Profile = () => {
               <h1 className="text-2xl font-bold">Profile</h1>
               <p className="text-primary-foreground/70 text-sm">Welcome, {profileData?.name || "User"} 👋</p>
             </div>
-            <Badge className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30 text-xs">v{currentVersion}</Badge>
+            <Badge className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30 text-xs">
+              v{currentVersion}{currentVersion === APP_VERSION ? " Active" : " Update Ready"}
+            </Badge>
           </div>
 
           <div className="grid grid-cols-3 gap-2">

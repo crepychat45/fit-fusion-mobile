@@ -30,6 +30,7 @@ import {
   APP_RELEASE_DATE,
   APP_UPDATE_SIGNATURE,
   RELEASE_NOTES,
+  getActiveFeatureRelease,
   getInstalledVersion,
   setInstalledVersion,
 } from "@/lib/app-version";
@@ -72,6 +73,7 @@ async function sha256Hex(input: string): Promise<string> {
 export function UnifiedUpdateManager() {
   const { toast } = useToast();
   const [installed, setInstalled] = useState(getInstalledVersion());
+  const [activeRelease, setActiveRelease] = useState(getActiveFeatureRelease());
   const [phase, setPhase] = useState<Phase>("idle");
   const [progress, setProgress] = useState(0);
   const [autoUpdate, setAutoUpdate] = useState(
@@ -86,13 +88,16 @@ export function UnifiedUpdateManager() {
     () => (typeof window !== "undefined" ? localStorage.getItem(PREV_VERSION_KEY) : null)
   );
 
-  const updateAvailable = useMemo(() => installed !== APP_VERSION, [installed]);
+  const updateAvailable = useMemo(() => installed !== APP_VERSION || activeRelease !== APP_VERSION, [installed, activeRelease]);
   const latest = RELEASE_NOTES[0];
 
   useEffect(() => {
     const handler = (e: Event) => {
       const v = (e as CustomEvent<string>).detail;
-      if (v) setInstalled(v);
+      if (v) {
+        setInstalled(v);
+        setActiveRelease(getActiveFeatureRelease());
+      }
     };
     window.addEventListener("versionUpdated", handler);
     return () => window.removeEventListener("versionUpdated", handler);
@@ -153,6 +158,7 @@ export function UnifiedUpdateManager() {
 
       setInstalledVersion(APP_VERSION);
       setInstalled(APP_VERSION);
+      setActiveRelease(APP_VERSION);
       setPhase("done");
       setShowPostInstall(true);
       toast({

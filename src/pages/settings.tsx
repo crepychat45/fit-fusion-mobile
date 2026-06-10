@@ -6,6 +6,7 @@ import { SafeSettingsWrapper } from "@/components/safe-settings-wrapper";
 import { SettingsContainer } from "@/components/settings/settings-container";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
+import { APP_VERSION } from "@/lib/app-version";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -41,7 +42,7 @@ const Settings = () => {
               </div>
             </div>
             <Badge className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30 text-xs">
-              v6.5.0 Secure Update
+              v{APP_VERSION} Secure Update
             </Badge>
           </div>
         </motion.div>
