@@ -49,15 +49,13 @@ const Index = () => {
   const [selectedWorkout, setSelectedWorkout] = useState<any>(null);
   const [scheduledDate, setScheduledDate] = useState<Date | undefined>(new Date());
   const [scheduledTime, setScheduledTime] = useState("07:00 AM");
-  const [isLoading, setIsLoading] = useState(false);
   const [showMobileAI, setShowMobileAI] = useState(false);
   const [showMobileSecurity, setShowMobileSecurity] = useState(false);
   const isMobile = useIsMobile();
 
   useEffect(() => {
     const handleProfileUpdate = () => {
-      setIsLoading(true);
-      setTimeout(() => setIsLoading(false), 300);
+      // Trigger any necessary updates
     };
     window.addEventListener("profileUpdated", handleProfileUpdate);
     return () => {
