@@ -1,34 +1,61 @@
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Camera, Edit2 } from "lucide-react";
 import { useProfile, useAvatarUpload } from "@/hooks/use-profile";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { userProfile } from "@/data/user";
+
+const getCachedProfileUser = () => {
+  if (typeof window === "undefined") return null;
+  try {
+    const rawProfile = localStorage.getItem("fitfusion-profile");
+    const parsedProfile = rawProfile ? JSON.parse(rawProfile) : {};
+    const email = parsedProfile.email || localStorage.getItem("fitfusion-last-email") || undefined;
+    return {
+      id: parsedProfile.user_id || undefined,
+      email,
+      user_metadata: { name: parsedProfile.name || userProfile.name, avatar_url: parsedProfile.avatar_url },
+    };
+  } catch {
+    return null;
+  }
+};
 
 export function ProfileHeader() {
   const navigate = useNavigate();
-  const [user, setUser] = React.useState<any>(null);
+  const [user, setUser] = React.useState<any>(() => getCachedProfileUser());
+  const [profileEnabled, setProfileEnabled] = React.useState(false);
   const [refreshKey, setRefreshKey] = React.useState(0);
-  const { profile, isLoading, error } = useProfile(user?.id);
+  const { profile, isLoading, error } = useProfile(user?.id, { enabled: profileEnabled && Boolean(user?.id) });
   const { uploadAvatar } = useAvatarUpload();
   const { toast } = useToast();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
-    });
+    const idle = (window as any).requestIdleCallback || ((cb: () => void) => window.setTimeout(cb, 1200));
+    const idleId = idle(() => {
+      supabase.auth.getUser().then(({ data }) => {
+        if (data.user) {
+          localStorage.setItem("fitfusion-last-email", data.user.email || "");
+          setUser(data.user);
+          setProfileEnabled(true);
+        }
+      }).catch(() => setProfileEnabled(false));
+    }, { timeout: 2500 });
 
     // Listen for profile updates
     const handleProfileUpdate = () => {
       setRefreshKey(prev => prev + 1);
+      setProfileEnabled(true);
     };
 
     window.addEventListener("profileUpdated", handleProfileUpdate);
     return () => {
+      if (typeof (window as any).cancelIdleCallback === "function") (window as any).cancelIdleCallback(idleId);
+      else window.clearTimeout(idleId);
       window.removeEventListener("profileUpdated", handleProfileUpdate);
     };
   }, []);
@@ -85,7 +112,7 @@ export function ProfileHeader() {
     );
   }
 
-  if (isLoading) {
+  if (profileEnabled && isLoading) {
     return (
       <div className="flex items-center gap-3 p-3 rounded-lg bg-accent/50 animate-pulse">
         <div className="h-10 w-10 rounded-full bg-muted" />
@@ -97,16 +124,19 @@ export function ProfileHeader() {
     );
   }
 
-  if (error || !profile) {
+  if (!profileEnabled || error || !profile) {
+    const cachedName = user?.user_metadata?.name || userProfile.name || fallbackName;
+    const cachedInitials = cachedName.slice(0, 2).toUpperCase();
     return (
       <div className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20">
         <Avatar className="h-10 w-10 ring-2 ring-primary/30">
-          <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground font-semibold">{fallbackInitials}</AvatarFallback>
+          <AvatarImage src={user?.user_metadata?.avatar_url || undefined} alt={cachedName} />
+          <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground font-semibold">{cachedInitials}</AvatarFallback>
         </Avatar>
         <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
           <div>
-            <p className="font-semibold text-sm truncate">{fallbackName}</p>
-            <p className="text-xs text-muted-foreground truncate">Profile syncing</p>
+            <p className="font-semibold text-sm truncate">{cachedName}</p>
+            <p className="text-xs text-muted-foreground truncate">Ready instantly · syncing in background</p>
           </div>
           <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 text-xs px-2 py-0.5 shrink-0">
             Online
