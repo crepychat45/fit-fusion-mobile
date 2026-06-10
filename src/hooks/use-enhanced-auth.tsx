@@ -27,6 +27,19 @@ let authSnapshot: AuthState = {
 let authInitStarted = false;
 const authListeners = new Set<(state: AuthState) => void>();
 
+const withTimeout = async <T,>(promise: Promise<T>, ms = 2500): Promise<T> => {
+  let timeoutId: number | undefined;
+  const timeout = new Promise<T>((resolve) => {
+    timeoutId = window.setTimeout(() => resolve({ data: { session: null }, error: null } as T), ms);
+  });
+
+  try {
+    return await Promise.race([promise, timeout]);
+  } finally {
+    if (timeoutId) window.clearTimeout(timeoutId);
+  }
+};
+
 const emitAuthState = (nextState: AuthState) => {
   authSnapshot = nextState;
   authListeners.forEach((listener) => listener(nextState));
@@ -42,10 +55,9 @@ const ensureAuthInitialized = () => {
       loading: false,
       error: authSnapshot.error ?? "Authentication is taking longer than expected.",
     });
-  }, 4500);
+  }, 2800);
 
-  supabase.auth
-    .getSession()
+  withTimeout(supabase.auth.getSession(), 2500)
     .then(({ data: { session }, error }) => {
       window.clearTimeout(authTimeout);
       emitAuthState(error
