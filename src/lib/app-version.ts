@@ -300,7 +300,7 @@ export function getInstalledVersion(): string {
     const v = localStorage.getItem(key);
     if (v) return v;
   }
-  return "6.2.0";
+  return "6.2.5";
 }
 
 export function setInstalledVersion(version: string) {
