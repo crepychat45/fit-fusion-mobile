@@ -28,6 +28,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
+import { APP_VERSION } from "@/lib/app-version";
 interface ChangelogEntry {
   version: string;
   date: string;
@@ -397,7 +398,7 @@ export function EnhancedVersionManager() {
   const [updateAvailable, setUpdateAvailable] = useState(() => {
     const stored = localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version");
     const current = stored || "6.2.0";
-    return current !== "6.2.5";
+    return current !== APP_VERSION;
   });
 
   const [updateProgress, setUpdateProgress] = useState<number>(0);

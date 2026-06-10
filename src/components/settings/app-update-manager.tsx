@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Changelog } from "./changelog";
+import { APP_VERSION } from "@/lib/app-version";
 
 interface UpdateInfo {
   currentVersion: string;
@@ -43,7 +44,7 @@ export function AppUpdateManager() {
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo>(() => {
     const currentVersion =
       localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || "6.2.0";
-    const latestVersion = "6.2.5";
+    const latestVersion = APP_VERSION;
     return {
       currentVersion,
       latestVersion,
@@ -182,7 +183,7 @@ export function AppUpdateManager() {
       const now = new Date();
       const currentVersion =
         localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || "6.2.0";
-      const latestVersion = "6.2.5";
+      const latestVersion = APP_VERSION;
 
       console.log(
         "Update check - Current:",
