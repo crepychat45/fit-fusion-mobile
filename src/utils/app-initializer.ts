@@ -158,7 +158,6 @@ export class AppInitializer {
         host.endsWith('.lovableproject.com') ||
         host === 'lovableproject-dev.com' ||
         host.endsWith('.lovableproject-dev.com') ||
-        host.endsWith('.lovable.app') ||
         host.startsWith('id-preview--') ||
         window.self !== window.top ||
         new URLSearchParams(window.location.search).get('sw') === 'off';
