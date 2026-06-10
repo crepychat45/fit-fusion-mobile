@@ -160,7 +160,7 @@ export class AppInitializer {
         host.endsWith('.lovableproject-dev.com') ||
         host.endsWith('.lovable.app') ||
         host.startsWith('id-preview--') ||
-        window.location !== window.parent.location ||
+        window.self !== window.top ||
         new URLSearchParams(window.location.search).get('sw') === 'off';
 
       if (isPreview || import.meta.env.DEV) {
