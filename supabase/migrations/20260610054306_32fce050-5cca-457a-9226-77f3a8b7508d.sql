@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.prevent_likes_count_tamper() FROM PUBLIC, anon, authenticated;
