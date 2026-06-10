@@ -30,8 +30,9 @@ export function prefetchRoute(path: string) {
 export function prefetchAllRoutes() {
   const idle =
     (window as any).requestIdleCallback ||
-    ((cb: any) => window.setTimeout(cb, 1));
-  Object.keys(routes).forEach((path, i) => {
-    idle(() => prefetchRoute(path), { timeout: 1500 + i * 250 });
+    ((cb: any, opts?: { timeout?: number }) => window.setTimeout(cb, opts?.timeout ?? 3000));
+  const priorityRoutes = ["/workouts", "/progress", "/profile", "/settings"];
+  priorityRoutes.forEach((path, i) => {
+    idle(() => prefetchRoute(path), { timeout: 3500 + i * 900 });
   });
 }
