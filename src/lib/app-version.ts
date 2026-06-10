@@ -1,11 +1,12 @@
 // Single source of truth for app version + changelog
-export const APP_VERSION = "6.6.0";
-export const APP_RELEASE_DATE = "2026-06-09";
+export const APP_VERSION = "6.7.0";
+export const APP_RELEASE_DATE = "2026-06-10";
 export const VERSION_STORAGE_KEYS = ["fitfusion-app-version", "app-version"] as const;
+export const FEATURE_UNLOCK_KEY = "fitfusion-active-feature-release";
 // Expected SHA-256 signature of the update package (mocked for client-side demo).
 // In a real deployment this is delivered by a signed manifest from the update server.
 export const APP_UPDATE_SIGNATURE =
-  "a14c7f92e6d8403b5c1e9f8a2b7d6e4f0c8a3b5d9e2f7c1a4b6d8e0f3c5a7b9d";
+  "211606c96197b323e2e0e486f281e1a8643e9e1d2ee035f9fbf73b82b51d7805";
 
 export interface ReleaseSection {
   title: string;
@@ -22,6 +23,56 @@ export interface ReleaseNote {
 }
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "6.7.0",
+    date: "2026-06-10",
+    type: "Major Release",
+    highlight:
+      "Startup no longer waits on slow auth/profile requests, updates unlock features immediately after install, and Home/Profile/Settings gain smoother working widgets.",
+    sections: [
+      {
+        title: "New Features",
+        icon: "sparkles",
+        items: [
+          "Home: Smart Start planner with one-tap focus selection",
+          "Home: post-update feature activation card after install",
+          "Profile: recovery readiness and weekly consistency insights",
+          "Settings: update install now unlocks active feature release immediately",
+          "Settings: version management syncs badges across pages without reload",
+        ],
+      },
+      {
+        title: "Improvements",
+        icon: "zap",
+        items: [
+          "Startup renders immediately while auth/profile sync runs in the background",
+          "Route prefetch is delayed and prioritized to reduce first-load network pressure",
+          "Preview/dev service workers are cleaned up to avoid stale loading screens",
+          "Profile header uses cached local data first, then refreshes safely",
+        ],
+      },
+      {
+        title: "Bug Fixes",
+        icon: "bug",
+        items: [
+          "Fixed splash screen getting stuck when auth/user endpoint is slow",
+          "Fixed App Update showing installed but not activating new feature state",
+          "Fixed hardcoded version badges on Settings/Profile",
+          "Fixed update check state not refreshing across open pages",
+        ],
+      },
+      {
+        title: "Security",
+        icon: "shield",
+        items: [
+          "Update package verification now uses the v6.7 signed manifest hash",
+          "Stale preview service-worker caches are removed before they can serve old chunks",
+          "Install state writes both version and feature-release activation keys atomically",
+          "Recovery remains available for failed chunk/resource loads",
+        ],
+      },
+    ],
+  },
   {
     version: "6.6.0",
     date: "2026-06-09",
