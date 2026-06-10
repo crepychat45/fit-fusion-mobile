@@ -357,11 +357,17 @@ export function getInstalledVersion(): string {
 export function setInstalledVersion(version: string) {
   if (typeof window === "undefined") return;
   VERSION_STORAGE_KEYS.forEach((key) => localStorage.setItem(key, version));
+  localStorage.setItem(FEATURE_UNLOCK_KEY, version);
   localStorage.setItem("fitfusion-last-update", new Date().toISOString());
   localStorage.setItem(`update-${version}`, "true");
   window.dispatchEvent(new CustomEvent("versionUpdated", { detail: version }));
 }
 
+export function getActiveFeatureRelease(): string {
+  if (typeof window === "undefined") return APP_VERSION;
+  return localStorage.getItem(FEATURE_UNLOCK_KEY) || getInstalledVersion();
+}
+
 export function isUpdateAvailable(): boolean {
-  return getInstalledVersion() !== APP_VERSION;
+  return getInstalledVersion() !== APP_VERSION || getActiveFeatureRelease() !== APP_VERSION;
 }
