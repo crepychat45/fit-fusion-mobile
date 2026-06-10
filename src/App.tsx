@@ -79,7 +79,7 @@ const AppContent: React.FC = () => {
     const enableAssistant = () => setAssistantEnabled(true);
     const timeout = window.setTimeout(enableAssistant, 3500);
     // Pre-warm route chunks during idle so navigations feel instant
-    const prefetchTimeout = window.setTimeout(() => prefetchAllRoutes(), 2600);
+    const prefetchTimeout = window.setTimeout(() => prefetchAllRoutes(), 5200);
     return () => {
       window.clearTimeout(timeout);
       window.clearTimeout(prefetchTimeout);

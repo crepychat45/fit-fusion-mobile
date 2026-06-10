@@ -11,7 +11,7 @@ const RECOVERY_STATE_KEY = "fitfusion:recovery-state";
 const RECOVERY_URL_KEY = "fitfusion:recovery-url";
 const MAX_RECOVERY_ATTEMPTS = 2;
 const RECOVERY_WINDOW_MS = 5 * 60 * 1000;
-const DEFAULT_STARTUP_TIMEOUT_MS = 14_000;
+const DEFAULT_STARTUP_TIMEOUT_MS = 22_000;
 
 let installed = false;
 let recovering = false;
