@@ -20,12 +20,14 @@ export interface UserProfile {
   updated_at: string;
 }
 
-export const useProfile = (userId?: string) => {
+export const useProfile = (userId?: string, options: { enabled?: boolean } = {}) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const enabled = options.enabled ?? true;
 
   const { data: profile, isLoading, error } = useQuery({
     queryKey: ['profile', userId],
+    enabled,
     retry: 1,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
