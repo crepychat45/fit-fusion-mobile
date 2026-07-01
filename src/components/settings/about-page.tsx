@@ -38,11 +38,19 @@ import { motion } from "framer-motion";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+import { APP_VERSION, APP_RELEASE_DATE, RELEASE_NOTES } from "@/lib/app-version";
+
 export function AboutPage() {
   const { toast } = useToast();
-  const [appVersion] = useState("5.7.0");
-  const [buildNumber] = useState("20241205.001");
-  const [releaseDate] = useState("December 5, 2024");
+  const [appVersion] = useState(APP_VERSION);
+  const [buildNumber] = useState(`${APP_RELEASE_DATE.replace(/-/g, "")}.001`);
+  const [releaseDate] = useState(
+    new Date(APP_RELEASE_DATE).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+  );
   const [userStats, setUserStats] = useState({
     totalUsers: 125000,
     activeToday: 8500,

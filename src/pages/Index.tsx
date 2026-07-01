@@ -31,6 +31,7 @@ const TodaysGoalsWidget = lazy(() => import("@/components/dashboard/todays-goals
 const PersonalRecordsWidget = lazy(() => import("@/components/dashboard/personal-records-widget").then((m) => ({ default: m.PersonalRecordsWidget })));
 const QuickBoostWidget = lazy(() => import("@/components/dashboard/quick-boost-widget").then((m) => ({ default: m.QuickBoostWidget })));
 const DailyChallengeWidget = lazy(() => import("@/components/dashboard/daily-challenge-widget").then((m) => ({ default: m.DailyChallengeWidget })));
+const MonthlySecurityScanWidget = lazy(() => import("@/components/home/monthly-security-scan-widget").then((m) => ({ default: m.MonthlySecurityScanWidget })));
 const MobileNav = lazy(() => import("@/components/mobile-nav").then((m) => ({ default: m.MobileNav })));
 const MobileFloatingActions = lazy(() => import("@/components/mobile/mobile-floating-actions").then((m) => ({ default: m.MobileFloatingActions })));
 const MobileAIAssistant = lazy(() => import("@/components/mobile/mobile-ai-assistant").then((m) => ({ default: m.MobileAIAssistant })));
@@ -155,6 +156,13 @@ const Index = () => {
               <PersonalRecordsWidget />
             </Suspense>
           </motion.div>
+          {/* Monthly Security & Privacy Scan */}
+          <motion.div variants={fadeUp} className="px-4">
+            <Suspense fallback={<HomeSectionFallback />}>
+              <MonthlySecurityScanWidget />
+            </Suspense>
+          </motion.div>
+
 
           {/* Quick Boost — 4 micro-actions for instant momentum */}
           <motion.div variants={fadeUp}>

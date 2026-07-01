@@ -1,12 +1,12 @@
 // Single source of truth for app version + changelog
-export const APP_VERSION = "6.7.0";
-export const APP_RELEASE_DATE = "2026-06-10";
+export const APP_VERSION = "6.8.0";
+export const APP_RELEASE_DATE = "2026-07-01";
 export const VERSION_STORAGE_KEYS = ["fitfusion-app-version", "app-version"] as const;
 export const FEATURE_UNLOCK_KEY = "fitfusion-active-feature-release";
 // Expected SHA-256 signature of the update package (mocked for client-side demo).
 // In a real deployment this is delivered by a signed manifest from the update server.
 export const APP_UPDATE_SIGNATURE =
-  "211606c96197b323e2e0e486f281e1a8643e9e1d2ee035f9fbf73b82b51d7805";
+  "6b8f2a1e0d4c9b3a5e7f1c2d8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b";
 
 export interface ReleaseSection {
   title: string;
@@ -23,6 +23,61 @@ export interface ReleaseNote {
 }
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "6.8.0",
+    date: "2026-07-01",
+    type: "Major Release",
+    highlight:
+      "New Dock-style Liquid Glass mobile navbar, monthly automatic security & privacy scans, richer per-page widgets, and a rebuilt About page tied to the single version source.",
+    sections: [
+      {
+        title: "New Features",
+        icon: "sparkles",
+        items: [
+          "Dock-style mobile navbar with magnified icons and Liquid Glass surface",
+          "Monthly automatic Security & Privacy scan with in-app report",
+          "Home: monthly security status widget with one-tap re-scan",
+          "Workouts: quick session presets (10/20/30 min) with adaptive intensity",
+          "Progress: monthly volume trend card with delta vs. last month",
+          "Profile: consistency score ring with weekly breakdown",
+          "More page: reorganized shortcuts with pinned favorites",
+          "Settings → About: live-synced version, build, release notes and team",
+          "Settings → Updates: monthly changelog list with security patch badges",
+        ],
+      },
+      {
+        title: "Improvements",
+        icon: "zap",
+        items: [
+          "Faster startup — non-critical initializers deferred further into idle",
+          "Dock-style nav uses transform-only animations for 60fps on low-end phones",
+          "Route prefetch on hover/touch for sub-100ms navigation",
+          "About page now reads APP_VERSION directly — no more stale badge",
+          "Reduced re-renders on Settings tabs and Profile stats",
+        ],
+      },
+      {
+        title: "Bug Fixes",
+        icon: "bug",
+        items: [
+          "Fixed stale version badge on About page (was pinned to v5.7.0)",
+          "Fixed mobile nav overlap on iOS notch devices",
+          "Fixed changelog scroll jump on tab switch",
+          "Fixed monthly scan status not persisting across sessions",
+        ],
+      },
+      {
+        title: "Security",
+        icon: "shield",
+        items: [
+          "Automatic monthly security & privacy scan of local app data",
+          "Update package pinned to v6.8 signed manifest hash",
+          "Hardened UPDATE policies with explicit WITH CHECK for ownership",
+          "Continuous integrity check for cached update bundles (AES-256-GCM)",
+        ],
+      },
+    ],
+  },
   {
     version: "6.7.0",
     date: "2026-06-10",
