@@ -49,14 +49,26 @@ export default defineConfig(({ mode }) => ({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (id.includes('react-dom')) return 'vendor-react-dom';
-            if (id.includes('react-router')) return 'vendor-router';
-            if (id.includes('@radix-ui')) return 'vendor-radix';
-            if (id.includes('framer-motion')) return 'vendor-motion';
-            if (id.includes('recharts') || id.includes('d3')) return 'vendor-charts';
+            // Keep React, React-DOM, scheduler, and anything that touches
+            // React internals (recharts, radix, framer-motion, router, query)
+            // in a single vendor chunk to guarantee React is initialized
+            // before any consumer accesses React.Children / hooks.
+            if (
+              id.includes('/react/') ||
+              id.includes('/react-dom/') ||
+              id.includes('/react-is/') ||
+              id.includes('/scheduler/') ||
+              id.includes('/react-router') ||
+              id.includes('@radix-ui') ||
+              id.includes('framer-motion') ||
+              id.includes('recharts') ||
+              id.includes('/d3-') ||
+              id.includes('@tanstack')
+            ) {
+              return 'vendor-react';
+            }
             if (id.includes('lucide')) return 'vendor-icons';
             if (id.includes('@supabase')) return 'vendor-supabase';
-            if (id.includes('@tanstack')) return 'vendor-query';
           }
         }
       }
