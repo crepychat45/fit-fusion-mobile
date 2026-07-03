@@ -64,6 +64,8 @@ const ProgressTrackerPage = lazyWithRetry(() => import("./pages/progress-tracker
 const NutritionPage = lazyWithRetry(() => import("./pages/nutrition"));
 const VaultPage = lazyWithRetry(() => import("./pages/vault"));
 const FitAssistant = lazyWithRetry(() => import("./components/fit-assistant").then(m => ({ default: m.FitAssistant })));
+const PerfDiagnosticsPanel = lazy(() => import("./components/perf-diagnostics-panel"));
+
 
 const P: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <ErrorBoundary>
@@ -128,9 +130,13 @@ const AppContent: React.FC = () => {
           <FitAssistant />
         </Suspense>
       )}
+      <Suspense fallback={null}>
+        <PerfDiagnosticsPanel />
+      </Suspense>
     </>
   );
 };
+
 
 const App: React.FC = () => (
   <ErrorBoundary>

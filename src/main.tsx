@@ -2,7 +2,12 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import "@/utils/perf-telemetry";
+import { mark } from "@/utils/perf-telemetry";
 import { installAppRecovery } from "@/utils/app-recovery";
+
+mark("main-tsx-start");
+
 
 // Defer non-critical initialization until after first paint to speed up startup
 if (typeof window !== "undefined") {
