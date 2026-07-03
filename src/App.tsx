@@ -130,9 +130,13 @@ const AppContent: React.FC = () => {
           <FitAssistant />
         </Suspense>
       )}
+      <Suspense fallback={null}>
+        <PerfDiagnosticsPanel />
+      </Suspense>
     </>
   );
 };
+
 
 const App: React.FC = () => (
   <ErrorBoundary>
