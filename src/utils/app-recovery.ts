@@ -186,10 +186,16 @@ export const recoverApp = async (reason: string, error?: unknown) => {
   window.location.replace(url.toString());
 };
 
+let appReadyMarked = false;
 export const markAppReady = () => {
   if (startupTimer) {
     window.clearTimeout(startupTimer);
     startupTimer = undefined;
+  }
+
+  if (!appReadyMarked) {
+    appReadyMarked = true;
+    import("@/utils/perf-telemetry").then((m) => m.mark("app-ready")).catch(() => undefined);
   }
 
   window.setTimeout(() => {
@@ -197,6 +203,7 @@ export const markAppReady = () => {
     removeSessionValue(RECOVERY_URL_KEY);
   }, 8_000);
 };
+
 
 const installFetchRecovery = () => {
   const key = "__fitfusionFetchRecoveryInstalled";
