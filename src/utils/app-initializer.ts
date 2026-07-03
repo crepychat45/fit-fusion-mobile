@@ -181,22 +181,23 @@ export class AppInitializer {
   private static setupMonitoring(): void {
     console.log('📊 Setting up monitoring...');
 
-    // Monitor performance
-    if ('PerformanceObserver' in window) {
+    // Only monitor slow ops in production; dev pre-bundling & HMR create false positives.
+    if (import.meta.env.PROD && 'PerformanceObserver' in window) {
       try {
         const observer = new PerformanceObserver((list) => {
           for (const entry of list.getEntries()) {
-            if (entry.duration > 1000) {
-              console.warn(`⚠️ Slow operation detected: ${entry.name} (${entry.duration.toFixed(2)}ms)`);
+            if (entry.duration > 3000) {
+              console.warn(`⚠️ Slow operation detected: ${entry.name} (${entry.duration.toFixed(0)}ms)`);
             }
           }
         });
 
         observer.observe({ entryTypes: ['measure', 'navigation', 'resource'] });
-      } catch (error) {
-        console.log('ℹ️ Performance observer not available');
+      } catch {
+        // no-op
       }
     }
+
 
     // Monitor memory
     if ((performance as any).memory) {

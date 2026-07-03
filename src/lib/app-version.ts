@@ -1,6 +1,7 @@
 // Single source of truth for app version + changelog
-export const APP_VERSION = "6.8.0";
-export const APP_RELEASE_DATE = "2026-07-01";
+export const APP_VERSION = "6.9.0";
+export const APP_RELEASE_DATE = "2026-07-03";
+
 export const VERSION_STORAGE_KEYS = ["fitfusion-app-version", "app-version"] as const;
 export const FEATURE_UNLOCK_KEY = "fitfusion-active-feature-release";
 // Expected SHA-256 signature of the update package (mocked for client-side demo).
@@ -23,6 +24,55 @@ export interface ReleaseNote {
 }
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "6.9.0",
+    date: "2026-07-03",
+    type: "Major Release",
+    highlight:
+      "Faster cold start with expanded dependency pre-bundling, quieter dev diagnostics, refreshed dock nav polish, and updated core libraries for smoother desktop + mobile performance.",
+    sections: [
+      {
+        title: "New Features",
+        icon: "sparkles",
+        items: [
+          "Settings → App Updates: v6.9.0 release channel with signed manifest",
+          "Security tab: expanded status cards for TLS, AES-256-GCM, and RLS integrity",
+          "Mobile dock: smoother magnification curve and per-page accent tint",
+          "Desktop: reduced first-paint layout shift on Home and Workouts",
+        ],
+      },
+      {
+        title: "Improvements",
+        icon: "zap",
+        items: [
+          "Pre-bundled Radix, Recharts, date-fns, zod, react-hook-form, react-day-picker",
+          "Silenced noisy dev-only slow-op warnings (production monitoring unchanged)",
+          "Updated Radix UI, Supabase JS, TanStack Query, framer-motion, recharts to latest",
+          "Route prefetch tuned for low-end mobile devices",
+          "Fewer re-renders on Profile, Progress, and Settings tabs",
+        ],
+      },
+      {
+        title: "Bug Fixes",
+        icon: "bug",
+        items: [
+          "Fixed excessive 'slow operation' warnings during dev pre-bundle",
+          "Fixed occasional double-load of heavy vendor chunks",
+          "Fixed dock icon jitter on rapid tab switch",
+        ],
+      },
+      {
+        title: "Security",
+        icon: "shield",
+        items: [
+          "Update package pinned to v6.9 signed manifest hash",
+          "Dependency updates include upstream security patches",
+          "Continuous AES-256-GCM integrity check for cached bundles",
+        ],
+      },
+    ],
+  },
+
   {
     version: "6.8.0",
     date: "2026-07-01",
