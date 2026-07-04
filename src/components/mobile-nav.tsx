@@ -596,7 +596,7 @@ export function MobileNav() {
           } as React.CSSProperties
         }
       >
-        <div className="flex justify-center px-3 pb-3 pointer-events-none">
+        <div className="flex justify-center px-2 pb-3 pointer-events-none">
           <motion.div
             onMouseMove={enableMagnify ? (e) => mouseX.set(e.pageX) : undefined}
             onMouseLeave={enableMagnify ? () => mouseX.set(Infinity) : undefined}
@@ -605,7 +605,7 @@ export function MobileNav() {
             }}
             transition={{ duration: 0.25 }}
             className={cn(
-              "pointer-events-auto relative flex items-end gap-1 px-3 pt-3 pb-2 rounded-3xl border shadow-2xl shadow-black/30 transition-[backdrop-filter,border-color] duration-300",
+              "pointer-events-auto relative flex items-end gap-0.5 px-2 pt-3 pb-2 rounded-3xl border shadow-2xl shadow-black/30 transition-[backdrop-filter,border-color] duration-300 w-full max-w-[440px]",
               compact ? "backdrop-blur-xl border-white/10" : "backdrop-blur-2xl border-white/20",
             )}
             style={{
