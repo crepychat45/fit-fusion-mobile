@@ -713,7 +713,7 @@ export function MobileNav() {
                   />
                 )}
               </motion.div>
-              <span className="text-[9px] font-semibold tracking-wide text-muted-foreground">
+              <span className="text-[9px] font-semibold tracking-wide text-muted-foreground leading-none">
                 More
               </span>
             </button>
