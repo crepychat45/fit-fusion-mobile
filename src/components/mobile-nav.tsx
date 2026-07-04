@@ -236,7 +236,7 @@ const DockIcon = memo(function DockIcon({
       onMouseUp={cancelLongPress}
       onMouseLeave={cancelLongPress}
       onClick={handleClick}
-      className="flex flex-col items-center justify-end gap-0.5 flex-1 min-w-[44px] min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded-2xl"
+      className="flex flex-col items-center justify-end gap-0.5 flex-1 min-w-0 basis-0 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded-2xl"
       aria-label={item.label}
       aria-current={isActive ? "page" : undefined}
     >
