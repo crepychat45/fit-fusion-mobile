@@ -638,7 +638,7 @@ export function MobileNav() {
             ))}
 
             {/* CENTER LOGO — Dynamic Island expansion trigger */}
-            <div className="flex flex-col items-center justify-end gap-0.5 flex-[1.2] basis-0 min-w-0">
+            <div className="flex flex-col items-center justify-end gap-0.5 flex-none w-12 min-w-0 mx-0.5">
               <motion.button
                 onClick={() => {
                   haptic(12);
@@ -648,13 +648,13 @@ export function MobileNav() {
                 whileHover={{ scale: 1.08 }}
                 animate={pulse ? { scale: [1, 1.15, 1] } : { scale: 1 }}
                 transition={{ duration: 1.2 }}
-                className="relative -mt-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded-full"
+                className="relative -mt-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded-full"
                 aria-label="Open quick launch"
                 aria-expanded={showQuickLaunch}
               >
                 {/* Rotating conic glow — paused when hidden or reduced motion */}
                 <motion.div
-                  className="absolute -inset-2 rounded-full opacity-70 blur-md"
+                  className="absolute -inset-1 rounded-full opacity-70 blur-md pointer-events-none"
                   style={{
                     background:
                       "conic-gradient(from 0deg, hsl(var(--primary)), hsl(var(--accent)), hsl(var(--secondary)), hsl(var(--primary)))",
@@ -665,8 +665,8 @@ export function MobileNav() {
                 />
                 {/* Solid glass ring */}
                 <div className="relative rounded-full p-[2px] bg-gradient-to-br from-white/40 to-white/5 shadow-xl shadow-primary/40">
-                  <div className="rounded-full bg-card/80 backdrop-blur-xl p-1.5">
-                    <FitnessFusionLogo size="sm" variant="glass" animated={pageVisible && !reduceMotion} />
+                  <div className="rounded-full bg-card/80 backdrop-blur-xl p-1">
+                    <FitnessFusionLogo size="sm" variant="minimal" animated={pageVisible && !reduceMotion} />
                   </div>
                 </div>
                 {/* Orbit spark */}
@@ -675,13 +675,13 @@ export function MobileNav() {
                     className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 pointer-events-none"
                     animate={{ rotate: 360 }}
                     transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
-                    style={{ transformOrigin: "50% 28px", willChange: "transform" }}
+                    style={{ transformOrigin: "50% 24px", willChange: "transform" }}
                   >
                     <Sparkles className="h-3 w-3 text-yellow-300 drop-shadow-[0_0_6px_rgba(253,224,71,0.9)]" />
                   </motion.span>
                 )}
               </motion.button>
-              <span className="text-[9px] font-bold tracking-wider bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              <span className="text-[9px] font-bold tracking-wider bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent leading-none">
                 FITX
               </span>
             </div>
