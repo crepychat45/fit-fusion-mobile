@@ -631,7 +631,7 @@ export function MobileNav() {
             ))}
 
             {/* CENTER LOGO — Dynamic Island expansion trigger */}
-            <div className="flex flex-col items-center justify-end gap-0.5 flex-1 min-w-[52px]">
+            <div className="flex flex-col items-center justify-end gap-0.5 flex-[1.2] basis-0 min-w-0">
               <motion.button
                 onClick={() => {
                   haptic(12);
