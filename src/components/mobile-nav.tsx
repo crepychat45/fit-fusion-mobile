@@ -236,7 +236,7 @@ const DockIcon = memo(function DockIcon({
       onMouseUp={cancelLongPress}
       onMouseLeave={cancelLongPress}
       onClick={handleClick}
-      className="flex flex-col items-center justify-end gap-0.5 flex-1 min-w-[44px] min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded-2xl"
+      className="flex flex-col items-center justify-end gap-0.5 flex-1 min-w-0 basis-0 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded-2xl"
       aria-label={item.label}
       aria-current={isActive ? "page" : undefined}
     >
@@ -309,7 +309,7 @@ const DockIcon = memo(function DockIcon({
       </motion.div>
       <span
         className={cn(
-          "text-[9px] font-semibold tracking-wide",
+          "text-[9px] font-semibold tracking-wide max-w-full truncate leading-none",
           isActive ? "text-primary" : "text-muted-foreground",
         )}
       >
@@ -399,17 +399,24 @@ export function MobileNav() {
   useEffect(() => {
     let lastY = window.scrollY;
     let ticking = false;
+    let currentCompact = false;
     const onScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const y = window.scrollY;
-          const goingDown = y > lastY && y > 40;
-          setCompact(goingDown);
-          lastY = y;
-          ticking = false;
-        });
-        ticking = true;
-      }
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        const y = window.scrollY;
+        const goingDown = y > lastY + 4 && y > 60;
+        const goingUp = y < lastY - 4;
+        if (goingDown && !currentCompact) {
+          currentCompact = true;
+          setCompact(true);
+        } else if (goingUp && currentCompact) {
+          currentCompact = false;
+          setCompact(false);
+        }
+        lastY = y;
+        ticking = false;
+      });
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -596,7 +603,7 @@ export function MobileNav() {
           } as React.CSSProperties
         }
       >
-        <div className="flex justify-center px-3 pb-3 pointer-events-none">
+        <div className="flex justify-center px-2 pb-3 pointer-events-none">
           <motion.div
             onMouseMove={enableMagnify ? (e) => mouseX.set(e.pageX) : undefined}
             onMouseLeave={enableMagnify ? () => mouseX.set(Infinity) : undefined}
@@ -605,7 +612,7 @@ export function MobileNav() {
             }}
             transition={{ duration: 0.25 }}
             className={cn(
-              "pointer-events-auto relative flex items-end gap-1 px-3 pt-3 pb-2 rounded-3xl border shadow-2xl shadow-black/30 transition-[backdrop-filter,border-color] duration-300",
+              "pointer-events-auto relative flex items-end gap-0.5 px-2 pt-3 pb-2 rounded-3xl border shadow-2xl shadow-black/30 transition-[backdrop-filter,border-color] duration-300 w-full max-w-[440px]",
               compact ? "backdrop-blur-xl border-white/10" : "backdrop-blur-2xl border-white/20",
             )}
             style={{
@@ -631,7 +638,7 @@ export function MobileNav() {
             ))}
 
             {/* CENTER LOGO — Dynamic Island expansion trigger */}
-            <div className="flex flex-col items-center justify-end gap-0.5 flex-1 min-w-[52px]">
+            <div className="flex flex-col items-center justify-end gap-0.5 flex-[1.2] basis-0 min-w-0">
               <motion.button
                 onClick={() => {
                   haptic(12);
@@ -696,7 +703,7 @@ export function MobileNav() {
                 haptic(8);
                 setShowMore(true);
               }}
-              className="flex flex-col items-center justify-end gap-0.5 flex-1 min-w-[44px] min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded-2xl"
+              className="flex flex-col items-center justify-end gap-0.5 flex-1 min-w-0 basis-0 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded-2xl"
               aria-label="More options"
             >
               <motion.div
@@ -713,7 +720,7 @@ export function MobileNav() {
                   />
                 )}
               </motion.div>
-              <span className="text-[9px] font-semibold tracking-wide text-muted-foreground">
+              <span className="text-[9px] font-semibold tracking-wide text-muted-foreground leading-none">
                 More
               </span>
             </button>
