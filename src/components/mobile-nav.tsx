@@ -399,17 +399,24 @@ export function MobileNav() {
   useEffect(() => {
     let lastY = window.scrollY;
     let ticking = false;
+    let currentCompact = false;
     const onScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const y = window.scrollY;
-          const goingDown = y > lastY && y > 40;
-          setCompact(goingDown);
-          lastY = y;
-          ticking = false;
-        });
-        ticking = true;
-      }
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        const y = window.scrollY;
+        const goingDown = y > lastY + 4 && y > 60;
+        const goingUp = y < lastY - 4;
+        if (goingDown && !currentCompact) {
+          currentCompact = true;
+          setCompact(true);
+        } else if (goingUp && currentCompact) {
+          currentCompact = false;
+          setCompact(false);
+        }
+        lastY = y;
+        ticking = false;
+      });
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
