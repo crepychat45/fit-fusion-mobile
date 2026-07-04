@@ -208,16 +208,18 @@ export const FitnessFusionLogo: React.FC<FitnessFusionLogoProps> = ({
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5, type: "spring" }}
       >
-        {variant === "glass" && <GlassLogo />}
-        {variant !== "minimal" && <LogoText />}
+        {(variant === "glass" || variant === "minimal") && <GlassLogo />}
+        {variant === "default" && <LogoText />}
+        {variant === "glass" && <LogoText />}
       </motion.div>
     );
   }
 
   return (
     <div className="flex items-center gap-3">
-      {variant === "glass" && <GlassLogo />}
-      {variant !== "minimal" && <LogoText />}
+      {(variant === "glass" || variant === "minimal") && <GlassLogo />}
+      {variant === "default" && <LogoText />}
+      {variant === "glass" && <LogoText />}
     </div>
   );
 };
