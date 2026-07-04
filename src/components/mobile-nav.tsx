@@ -309,7 +309,7 @@ const DockIcon = memo(function DockIcon({
       </motion.div>
       <span
         className={cn(
-          "text-[9px] font-semibold tracking-wide",
+          "text-[9px] font-semibold tracking-wide max-w-full truncate leading-none",
           isActive ? "text-primary" : "text-muted-foreground",
         )}
       >
