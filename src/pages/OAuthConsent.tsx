@@ -27,15 +27,13 @@ export default function OAuthConsent() {
         window.location.href = "/auth?next=" + encodeURIComponent(next);
         return;
       }
-      // @ts-expect-error supabase.auth.oauth is beta and not in the types yet
       const { data, error } = await supabase.auth.oauth.getAuthorizationDetails(
         authorizationId,
       );
       if (!active) return;
       if (error) return setError(error.message);
-      const immediate = data?.redirect_url ?? data?.redirect_to;
-      if (immediate && !data?.client) {
-        window.location.href = immediate;
+      if (data && "redirect_url" in data && !("client" in data)) {
+        window.location.href = data.redirect_url;
         return;
       }
       setDetails(data);
@@ -48,16 +46,14 @@ export default function OAuthConsent() {
   async function decide(approve: boolean) {
     setBusy(true);
     const { data, error } = approve
-      ? // @ts-expect-error supabase.auth.oauth is beta
-        await supabase.auth.oauth.approveAuthorization(authorizationId)
-      : // @ts-expect-error supabase.auth.oauth is beta
-        await supabase.auth.oauth.denyAuthorization(authorizationId);
+      ? await supabase.auth.oauth.approveAuthorization(authorizationId)
+      : await supabase.auth.oauth.denyAuthorization(authorizationId);
     if (error) {
       setBusy(false);
       setError(error.message);
       return;
     }
-    const target = data?.redirect_url ?? data?.redirect_to;
+    const target = data && "redirect_url" in data ? data.redirect_url : undefined;
     if (!target) {
       setBusy(false);
       setError("No redirect returned by the authorization server.");
