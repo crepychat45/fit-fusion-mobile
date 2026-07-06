@@ -1,24 +1,35 @@
 import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { EnhancedAuthForm } from "./enhanced-auth-form";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
 import { EnhancedErrorBoundary } from "@/components/enhanced-error-handling";
 import { Activity, Shield, Zap, Heart, Dumbbell, TrendingUp } from "lucide-react";
 
+// Validate that `next` is a same-origin relative path we can safely redirect
+// to. Prevents open-redirect via `?next=https://evil.example`.
+function safeNext(next: string | null): string | null {
+  if (!next) return null;
+  if (!next.startsWith("/") || next.startsWith("//")) return null;
+  return next;
+}
+
 export default function AuthPage() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const next = safeNext(params.get("next"));
   const { user, loading } = useEnhancedAuth();
 
   useEffect(() => {
     if (user && !loading) {
-      navigate("/");
+      navigate(next ?? "/");
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, next]);
 
   const handleAuthSuccess = () => {
-    navigate("/");
+    navigate(next ?? "/");
   };
+
 
   if (loading) {
     return (
