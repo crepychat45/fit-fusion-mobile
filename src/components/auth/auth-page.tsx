@@ -4,10 +4,9 @@ import { motion } from "framer-motion";
 import { EnhancedAuthForm } from "./enhanced-auth-form";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
 import { EnhancedErrorBoundary } from "@/components/enhanced-error-handling";
-import { Activity, Shield, Zap, Heart, Dumbbell, TrendingUp } from "lucide-react";
+import { Activity, Shield, Zap, Heart, TrendingUp, Sparkles } from "lucide-react";
 
-// Validate that `next` is a same-origin relative path we can safely redirect
-// to. Prevents open-redirect via `?next=https://evil.example`.
+// Guard against open-redirect via ?next=https://evil.example
 function safeNext(next: string | null): string | null {
   if (!next) return null;
   if (!next.startsWith("/") || next.startsWith("//")) return null;
@@ -21,23 +20,18 @@ export default function AuthPage() {
   const { user, loading } = useEnhancedAuth();
 
   useEffect(() => {
-    if (user && !loading) {
-      navigate(next ?? "/");
-    }
+    if (user && !loading) navigate(next ?? "/");
   }, [user, loading, navigate, next]);
 
-  const handleAuthSuccess = () => {
-    navigate(next ?? "/");
-  };
-
+  const handleAuthSuccess = () => navigate(next ?? "/");
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-secondary/20 to-background">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="h-10 w-10 rounded-full border-3 border-primary border-t-transparent"
+          className="h-10 w-10 rounded-full border-[3px] border-primary border-t-transparent"
         />
       </div>
     );
@@ -47,130 +41,184 @@ export default function AuthPage() {
 
   return (
     <EnhancedErrorBoundary>
-      <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-secondary/10 to-background relative overflow-hidden">
-        {/* Animated background blobs */}
+      <div className="min-h-screen relative overflow-hidden bg-background">
+        {/* ── Liquid Glass Aurora Backdrop ──────────────────────────── */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {/* Deep gradient wash */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.18),transparent_55%),radial-gradient(ellipse_at_bottom_right,hsl(var(--accent)/0.15),transparent_55%),radial-gradient(ellipse_at_bottom_left,hsl(var(--secondary)/0.12),transparent_55%)]" />
+
+          {/* Aurora ribbons */}
           <motion.div
-            animate={{ x: [0, 30, 0], y: [0, -20, 0], scale: [1, 1.1, 1] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -top-32 -right-32 w-64 h-64 bg-primary/10 rounded-full blur-3xl"
+            aria-hidden
+            animate={{ x: [0, 60, -30, 0], y: [0, -40, 20, 0], rotate: [0, 8, -6, 0] }}
+            transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -top-40 -left-20 w-[560px] h-[420px] rounded-[50%] blur-[90px] opacity-70"
+            style={{ background: "conic-gradient(from 90deg at 50% 50%, hsl(var(--primary)/0.45), hsl(var(--accent)/0.35), hsl(var(--primary)/0.45))" }}
           />
           <motion.div
-            animate={{ x: [0, -20, 0], y: [0, 30, 0], scale: [1, 1.15, 1] }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -bottom-32 -left-32 w-80 h-80 bg-accent/10 rounded-full blur-3xl"
+            aria-hidden
+            animate={{ x: [0, -50, 30, 0], y: [0, 30, -20, 0], rotate: [0, -10, 6, 0] }}
+            transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -bottom-40 -right-24 w-[600px] h-[440px] rounded-[50%] blur-[100px] opacity-60"
+            style={{ background: "conic-gradient(from 210deg at 50% 50%, hsl(var(--accent)/0.4), hsl(var(--primary)/0.35), hsl(var(--accent)/0.4))" }}
           />
-          <motion.div
-            animate={{ x: [0, 15, 0], y: [0, -15, 0] }}
-            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-secondary/10 rounded-full blur-3xl"
+
+          {/* Floating particles */}
+          {Array.from({ length: 14 }).map((_, i) => (
+            <motion.span
+              key={i}
+              aria-hidden
+              className="absolute rounded-full bg-primary/40"
+              style={{
+                width: 3 + (i % 4),
+                height: 3 + (i % 4),
+                left: `${(i * 73) % 100}%`,
+                top: `${(i * 41) % 100}%`,
+                filter: "blur(0.5px)",
+              }}
+              animate={{ y: [0, -30, 0], opacity: [0.2, 0.9, 0.2] }}
+              transition={{
+                duration: 6 + (i % 5),
+                repeat: Infinity,
+                delay: i * 0.4,
+                ease: "easeInOut",
+              }}
+            />
+          ))}
+
+          {/* Subtle grid */}
+          <div
+            className="absolute inset-0 opacity-[0.04]"
+            style={{
+              backgroundImage:
+                "linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)",
+              backgroundSize: "56px 56px",
+            }}
           />
         </div>
 
-        {/* Mobile Header */}
+        {/* ── Mobile Brand Header ───────────────────────────────────── */}
         <motion.header
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -16 }}
           animate={{ opacity: 1, y: 0 }}
-          className="md:hidden p-4 pt-8 text-center relative z-10"
+          className="md:hidden pt-8 pb-2 text-center relative z-10"
         >
-          <div className="flex items-center justify-center gap-2 mb-2">
+          <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_-8px_hsl(var(--primary)/0.35)]">
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", delay: 0.2 }}
-              className="p-2.5 bg-primary/90 backdrop-blur-md rounded-xl border border-primary/30 shadow-lg"
+              initial={{ scale: 0, rotate: -90 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: "spring", stiffness: 180, delay: 0.15 }}
+              className="p-2 rounded-xl bg-gradient-to-br from-primary to-accent shadow-lg"
             >
-              <Activity className="h-6 w-6 text-primary-foreground" />
+              <Activity className="h-5 w-5 text-primary-foreground" />
             </motion.div>
-            <h1 className="text-2xl font-bold text-foreground">FitFusion</h1>
+            <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+              FitFusion
+            </span>
           </div>
-          <p className="text-sm text-muted-foreground">Your Personal Fitness Journey</p>
         </motion.header>
 
-        {/* Main Content */}
-        <div className="flex-1 flex items-center justify-center p-4 relative z-10">
-          <div className="w-full max-w-5xl flex flex-col md:flex-row gap-8 items-center">
-            {/* Desktop Left Side - Branding */}
+        {/* ── Main ──────────────────────────────────────────────────── */}
+        <div className="flex-1 flex items-center justify-center p-4 sm:p-6 relative z-10 min-h-[calc(100vh-4rem)]">
+          <div className="w-full max-w-6xl grid md:grid-cols-2 gap-8 items-center">
+            {/* Desktop branding */}
             <motion.div
-              initial={{ opacity: 0, x: -30 }}
+              initial={{ opacity: 0, x: -24 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-              className="hidden md:flex flex-col flex-1 space-y-8"
+              transition={{ delay: 0.15, duration: 0.5 }}
+              className="hidden md:flex flex-col space-y-8"
             >
-              <div className="space-y-4">
+              <div className="space-y-5">
                 <div className="flex items-center gap-3">
                   <motion.div
                     initial={{ scale: 0, rotate: -180 }}
                     animate={{ scale: 1, rotate: 0 }}
-                    transition={{ type: "spring", delay: 0.3 }}
-                    className="p-3.5 bg-primary/90 backdrop-blur-xl rounded-2xl shadow-xl border border-primary/30"
+                    transition={{ type: "spring", delay: 0.25, stiffness: 160 }}
+                    className="relative p-4 rounded-2xl bg-gradient-to-br from-primary via-primary to-accent shadow-2xl"
                   >
                     <Activity className="h-10 w-10 text-primary-foreground" />
+                    <motion.div
+                      className="absolute inset-0 rounded-2xl border-2 border-primary/40"
+                      animate={{ scale: [1, 1.25, 1], opacity: [0.6, 0, 0.6] }}
+                      transition={{ duration: 2.4, repeat: Infinity, ease: "easeOut" }}
+                    />
                   </motion.div>
                   <div>
-                    <h1 className="text-4xl font-bold text-foreground">FitFusion</h1>
-                    <p className="text-sm text-muted-foreground">AI-Powered Fitness</p>
+                    <h1 className="text-4xl font-black tracking-tight bg-gradient-to-r from-foreground via-foreground to-foreground/60 bg-clip-text text-transparent">
+                      FitFusion
+                    </h1>
+                    <div className="inline-flex items-center gap-1.5 text-xs font-medium text-primary mt-1">
+                      <Sparkles className="h-3 w-3" />
+                      AI-Powered Fitness
+                    </div>
                   </div>
                 </div>
                 <p className="text-lg text-muted-foreground max-w-md leading-relaxed">
-                  Transform your fitness journey with AI-powered workouts, smart tracking, and personalized coaching.
+                  Transform your journey with adaptive workouts, smart tracking, and a coach that learns you.
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 {[
-                  { icon: Shield, title: "Secure", desc: "256-bit encryption", color: "from-blue-500/20 to-blue-600/10" },
-                  { icon: Zap, title: "Smart AI", desc: "Personalized plans", color: "from-amber-500/20 to-orange-600/10" },
-                  { icon: Heart, title: "Health", desc: "Complete tracking", color: "from-rose-500/20 to-pink-600/10" },
-                  { icon: TrendingUp, title: "Progress", desc: "Real-time sync", color: "from-emerald-500/20 to-green-600/10" },
-                ].map((feature, index) => (
+                  { icon: Shield, title: "Secure", desc: "256-bit encrypted" },
+                  { icon: Zap, title: "Smart AI", desc: "Adaptive plans" },
+                  { icon: Heart, title: "Wellness", desc: "Full tracking" },
+                  { icon: TrendingUp, title: "Progress", desc: "Live insights" },
+                ].map((f, i) => (
                   <motion.div
-                    key={feature.title}
-                    initial={{ opacity: 0, y: 20 }}
+                    key={f.title}
+                    initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 + index * 0.1 }}
-                    whileHover={{ scale: 1.03, y: -2 }}
-                    className={`p-4 rounded-xl bg-gradient-to-br ${feature.color} backdrop-blur-xl border border-border/30 shadow-sm hover:shadow-md transition-shadow`}
+                    transition={{ delay: 0.35 + i * 0.08 }}
+                    whileHover={{ y: -3, scale: 1.02 }}
+                    className="group relative p-4 rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10 overflow-hidden"
                   >
-                    <feature.icon className="h-6 w-6 text-primary mb-2" />
-                    <h3 className="font-semibold text-foreground">{feature.title}</h3>
-                    <p className="text-sm text-muted-foreground">{feature.desc}</p>
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-primary/10 to-accent/10" />
+                    <f.icon className="h-6 w-6 text-primary mb-2 relative" />
+                    <h3 className="font-semibold text-foreground relative">{f.title}</h3>
+                    <p className="text-xs text-muted-foreground relative">{f.desc}</p>
                   </motion.div>
                 ))}
               </div>
 
-              {/* Stats bar */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
-                className="flex items-center gap-6 p-4 rounded-xl bg-card/50 backdrop-blur-xl border border-border/30"
+                transition={{ delay: 0.75 }}
+                className="flex items-center gap-6 p-4 rounded-2xl bg-white/5 backdrop-blur-2xl border border-white/10"
               >
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">50K+</div>
-                  <div className="text-xs text-muted-foreground">Active Users</div>
-                </div>
-                <div className="w-px h-8 bg-border/50" />
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">500+</div>
-                  <div className="text-xs text-muted-foreground">Workouts</div>
-                </div>
-                <div className="w-px h-8 bg-border/50" />
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">4.9★</div>
-                  <div className="text-xs text-muted-foreground">Rating</div>
-                </div>
+                {[
+                  { v: "50K+", l: "Active users" },
+                  { v: "500+", l: "Workouts" },
+                  { v: "4.9★", l: "Rated" },
+                ].map((s, i) => (
+                  <React.Fragment key={s.l}>
+                    {i > 0 && <div className="w-px h-8 bg-border/40" />}
+                    <div className="text-center flex-1">
+                      <div className="text-2xl font-bold bg-gradient-to-br from-primary to-accent bg-clip-text text-transparent">
+                        {s.v}
+                      </div>
+                      <div className="text-xs text-muted-foreground">{s.l}</div>
+                    </div>
+                  </React.Fragment>
+                ))}
               </motion.div>
             </motion.div>
 
-            {/* Auth Form */}
+            {/* Auth Form — liquid glass container */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4 }}
-              className="w-full md:flex-1"
+              initial={{ opacity: 0, y: 24, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="w-full relative"
             >
-              <EnhancedAuthForm onSuccess={handleAuthSuccess} />
+              {/* Glow ring */}
+              <div className="absolute -inset-px rounded-3xl bg-gradient-to-br from-primary/40 via-accent/30 to-primary/40 opacity-60 blur-md" />
+              <div className="relative rounded-3xl bg-background/60 backdrop-blur-2xl border border-white/15 shadow-[0_20px_60px_-20px_hsl(var(--primary)/0.5)] p-1">
+                <div className="rounded-[calc(1.5rem-4px)] bg-background/40 backdrop-blur-xl">
+                  <EnhancedAuthForm onSuccess={handleAuthSuccess} />
+                </div>
+              </div>
             </motion.div>
           </div>
         </div>
@@ -179,7 +227,7 @@ export default function AuthPage() {
         <motion.footer
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
+          transition={{ delay: 0.6 }}
           className="p-4 text-center text-xs text-muted-foreground relative z-10"
         >
           <p>© 2026 FitFusion. All rights reserved.</p>
