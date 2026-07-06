@@ -63,6 +63,7 @@ const ToolsPage = lazyWithRetry(() => import("./pages/tools"));
 const ProgressTrackerPage = lazyWithRetry(() => import("./pages/progress-tracker"));
 const NutritionPage = lazyWithRetry(() => import("./pages/nutrition"));
 const VaultPage = lazyWithRetry(() => import("./pages/vault"));
+const OAuthConsent = lazyWithRetry(() => import("./pages/OAuthConsent"));
 const FitAssistant = lazyWithRetry(() => import("./components/fit-assistant").then(m => ({ default: m.FitAssistant })));
 const PerfDiagnosticsPanel = lazy(() => import("./components/perf-diagnostics-panel"));
 
@@ -99,6 +100,7 @@ const AppContent: React.FC = () => {
           <Route path="/terms-of-service" element={<P><TermsOfService /></P>} />
           <Route path="/privacy-policy" element={<P><PrivacyPolicy /></P>} />
           <Route path="/onboarding" element={<P><Onboarding /></P>} />
+          <Route path="/.lovable/oauth/consent" element={<P><OAuthConsent /></P>} />
 
           {/* Protected */}
           <Route path="/workouts" element={<ProtectedRoute><P><Workouts /></P></ProtectedRoute>} />
