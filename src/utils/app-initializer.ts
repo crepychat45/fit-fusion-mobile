@@ -1,9 +1,9 @@
 /**
-import { APP_VERSION } from '@/lib/app-version';
- * App Initializer v6.2.5
+ * App Initializer
  * Initializes all enhancements on app startup
  */
 
+import { APP_VERSION } from '@/lib/app-version';
 import { performanceEnhancer } from './performance-enhancer';
 import { mobileOptimizationEnhancer } from './mobile-optimization-enhancer';
 import { securityEnhancer } from './security-enhancer';
