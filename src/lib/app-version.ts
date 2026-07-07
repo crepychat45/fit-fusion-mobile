@@ -74,7 +74,7 @@ export const RELEASE_NOTES: ReleaseNote[] = [
       },
     ],
   },
-
+  {
     version: "6.9.0",
     date: "2026-07-03",
     type: "Major Release",
