@@ -189,8 +189,13 @@ const Profile = () => {
                 {/* Body Metrics & Goals */}
                 <BodyMetricsWidget />
 
+                {/* Weekly Pulse — new in v7.0 */}
+                <WeeklyPulseWidget />
+
                 {/* Year-in-review activity heatmap */}
                 <ActivityHeatmap />
+
+
 
 
                 {/* Fitness Score Dashboard */}
