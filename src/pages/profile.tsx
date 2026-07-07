@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BodyMetricsWidget } from "@/components/profile/body-metrics-widget";
 import { ActivityHeatmap } from "@/components/profile/activity-heatmap";
+import { WeeklyPulseWidget } from "@/components/profile/weekly-pulse-widget";
 import { APP_VERSION, getInstalledVersion } from "@/lib/app-version";
 
 const Profile = () => {
@@ -188,8 +189,13 @@ const Profile = () => {
                 {/* Body Metrics & Goals */}
                 <BodyMetricsWidget />
 
+                {/* Weekly Pulse — new in v7.0 */}
+                <WeeklyPulseWidget />
+
                 {/* Year-in-review activity heatmap */}
                 <ActivityHeatmap />
+
+
 
 
                 {/* Fitness Score Dashboard */}
