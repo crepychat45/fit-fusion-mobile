@@ -137,6 +137,13 @@ const Index = () => {
             </div>
           </motion.div>
 
+          {/* Vitality Index — new in v7.0 */}
+          <motion.div variants={fadeUp} className="px-4">
+            <Suspense fallback={<HomeSectionFallback />}>
+              <VitalityIndexWidget />
+            </Suspense>
+          </motion.div>
+
           {/* Daily Challenge — claim XP for daily targets */}
           <motion.div variants={fadeUp} className="px-4">
             <Suspense fallback={<HomeSectionFallback />}>
