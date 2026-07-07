@@ -1,4 +1,5 @@
 /**
+import { APP_VERSION } from '@/lib/app-version';
  * App Initializer v6.2.5
  * Initializes all enhancements on app startup
  */
@@ -21,7 +22,7 @@ export class AppInitializer {
     }
 
     try {
-      console.log('🚀 Initializing FitFusion v6.2.5...');
+      console.log(`🚀 Initializing FitFusion v${APP_VERSION}...`);
 
       // 1. Initialize Performance Enhancements
       this.initializePerformance();
@@ -46,7 +47,7 @@ export class AppInitializer {
 
       this.initialized = true;
 
-      console.log('✅ FitFusion v6.2.5 initialized successfully!');
+      console.log(`✅ FitFusion v${APP_VERSION} initialized successfully!`);
       console.log('📊 Features enabled:');
       console.log('   - ⚡ Performance optimization');
       console.log('   - 📱 Mobile optimization');
