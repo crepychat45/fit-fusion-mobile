@@ -1,7 +1,7 @@
-// Enhanced Service Worker for FitFusion
-const CACHE_NAME = "fitfusion-v3";
-const STATIC_CACHE = "fitfusion-static-v3";
-const DYNAMIC_CACHE = "fitfusion-dynamic-v3";
+// Enhanced Service Worker for FitFusion (v7.0.0 — cache-bust)
+const CACHE_NAME = "fitfusion-v7";
+const STATIC_CACHE = "fitfusion-static-v7";
+const DYNAMIC_CACHE = "fitfusion-dynamic-v7";
 
 const STATIC_ASSETS = [
   "/",
