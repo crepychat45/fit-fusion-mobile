@@ -25,6 +25,56 @@ export interface ReleaseNote {
 
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: "7.0.0",
+    date: "2026-07-07",
+    type: "Major Release",
+    highlight:
+      "Fresh liquid-glass Sign in / Sign up with a rotating aurora ring, a new Vitality Index on Home, a Weekly Pulse card on Profile, refreshed Premium perks on Subscription, and an updated About page — all tied to the v7.0.0 signed release channel.",
+    sections: [
+      {
+        title: "New Features",
+        icon: "sparkles",
+        items: [
+          "Auth: redesigned Sign in / Sign up with rotating aurora ring and shine sweep",
+          "Home: new Vitality Index widget with animated readiness ring and daily insight",
+          "Profile → Stats: new Weekly Pulse card with 7-day trend sparkline",
+          "Subscription: refreshed Premium Perks strip with unlockable AI benefits",
+          "Settings → About: v7.0.0 build info, live changelog and updated team credits",
+          "Settings → Updates: v7.0 signed manifest channel with resume-safe install",
+        ],
+      },
+      {
+        title: "Improvements",
+        icon: "zap",
+        items: [
+          "Smoother auth transitions with GPU-only transforms (60fps on low-end phones)",
+          "Home widgets stream in with reduced layout shift on cold start",
+          "Profile stats tab uses cached body metrics before background refresh",
+          "Subscription page card motion polished for reduced-motion users",
+          "About page reads the single-source APP_VERSION for zero-drift badges",
+        ],
+      },
+      {
+        title: "Bug Fixes",
+        icon: "bug",
+        items: [
+          "Fixed occasional flash of stale v6.9 badge in Profile header on first paint",
+          "Fixed auth page focus ring on iOS Safari after autofill",
+          "Fixed subscription CTA overlap on very narrow phones",
+        ],
+      },
+      {
+        title: "Security",
+        icon: "shield",
+        items: [
+          "Update package pinned to v7.0 signed manifest hash",
+          "Continuous AES-256-GCM integrity check for cached bundles",
+          "Hardened redirect guard on auth ?next= parameter",
+        ],
+      },
+    ],
+  },
+
     version: "6.9.0",
     date: "2026-07-03",
     type: "Major Release",
