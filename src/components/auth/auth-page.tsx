@@ -212,10 +212,32 @@ export default function AuthPage() {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="w-full relative"
             >
+              {/* Rotating aurora ring (new in v7.0) */}
+              <motion.div
+                aria-hidden
+                className="absolute -inset-4 rounded-[2rem] opacity-70 blur-2xl pointer-events-none"
+                style={{
+                  background:
+                    "conic-gradient(from 0deg, hsl(var(--primary)/0.5), hsl(var(--accent)/0.4), transparent 40%, hsl(var(--primary)/0.5))",
+                }}
+                animate={{ rotate: 360 }}
+                transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
+              />
               {/* Glow ring */}
               <div className="absolute -inset-px rounded-3xl bg-gradient-to-br from-primary/40 via-accent/30 to-primary/40 opacity-60 blur-md" />
-              <div className="relative rounded-3xl bg-background/60 backdrop-blur-2xl border border-white/15 shadow-[0_20px_60px_-20px_hsl(var(--primary)/0.5)] p-1">
-                <div className="rounded-[calc(1.5rem-4px)] bg-background/40 backdrop-blur-xl">
+              <div className="relative rounded-3xl bg-background/60 backdrop-blur-2xl border border-white/15 shadow-[0_20px_60px_-20px_hsl(var(--primary)/0.5)] p-1 overflow-hidden">
+                {/* Shine sweep */}
+                <motion.div
+                  aria-hidden
+                  className="absolute inset-y-0 -left-1/3 w-1/3 pointer-events-none"
+                  style={{
+                    background:
+                      "linear-gradient(90deg, transparent, hsl(var(--foreground)/0.08), transparent)",
+                  }}
+                  animate={{ x: ["0%", "500%"] }}
+                  transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", repeatDelay: 2 }}
+                />
+                <div className="relative rounded-[calc(1.5rem-4px)] bg-background/40 backdrop-blur-xl">
                   <EnhancedAuthForm onSuccess={handleAuthSuccess} />
                 </div>
               </div>
