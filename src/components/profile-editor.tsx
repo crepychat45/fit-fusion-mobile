@@ -98,6 +98,10 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
     [form, initial],
   );
 
+  // Keep refs in sync so the hydration effect can consult them synchronously.
+  useEffect(() => { isDirtyRef.current = hasUnsavedChanges; }, [hasUnsavedChanges]);
+  useEffect(() => { isSavingRef.current = isSaving || saveStatus === "saving"; }, [isSaving, saveStatus]);
+
   const handleFieldChange = (field: keyof FormState, value: string) => {
     if (field === "name" && value.length > 0) {
       const v = validateInput(nameSchema, value);
