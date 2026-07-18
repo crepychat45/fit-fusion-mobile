@@ -193,6 +193,38 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
     }
   };
 
+  if (pendingVerificationEmail) {
+    return (
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md mx-auto px-4">
+        <Card className="bg-background/95 backdrop-blur-xl border-border/50 shadow-2xl">
+          <CardHeader className="text-center space-y-4 pb-4">
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}
+              className="mx-auto w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-primary to-primary/70 rounded-2xl flex items-center justify-center">
+              <Mail className="h-7 w-7 md:h-8 md:w-8 text-primary-foreground" />
+            </motion.div>
+            <div>
+              <CardTitle className="text-xl md:text-2xl font-bold text-foreground">Verify your email</CardTitle>
+              <p className="text-sm text-muted-foreground mt-2">
+                We sent a verification link to <span className="font-medium text-foreground">{pendingVerificationEmail}</span>. Click it to activate your account — no code needed.
+              </p>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3 px-4 md:px-6">
+            <Button type="button" className="w-full h-12" onClick={handleResend} disabled={loading || resendCooldown > 0}>
+              {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend verification email"}
+            </Button>
+            <Button type="button" variant="ghost" className="w-full" onClick={() => { setPendingVerificationEmail(null); setIsSignUp(false); }}>
+              Back to Sign In
+            </Button>
+            <p className="text-xs text-center text-muted-foreground">
+              Didn't get it? Check spam, or try a different email address.
+            </p>
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
+  }
+
   if (showForgotPassword) {
     return (
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md mx-auto px-4">
