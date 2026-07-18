@@ -14,6 +14,7 @@ import { BodyMetricsWidget } from "@/components/profile/body-metrics-widget";
 import { ActivityHeatmap } from "@/components/profile/activity-heatmap";
 import { WeeklyPulseWidget } from "@/components/profile/weekly-pulse-widget";
 import { APP_VERSION, getInstalledVersion } from "@/lib/app-version";
+import { ProfilePhotoUpload } from "@/components/profile-photo-upload";
 
 const Profile = () => {
   const { toast } = useToast();
