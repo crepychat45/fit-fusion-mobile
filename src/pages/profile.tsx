@@ -20,12 +20,15 @@ import { AdminAabDownloadCard } from "@/components/profile/admin-aab-download-ca
 import { APP_VERSION, getInstalledVersion } from "@/lib/app-version";
 import { ProfilePhotoUpload } from "@/components/profile-photo-upload";
 import { useProfile } from "@/hooks/use-profile";
+import { FitnessIDCard } from "@/components/profile/fitness-id-card";
+import { supabase } from "@/integrations/supabase/client";
 
 const Profile = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
   const [currentVersion, setCurrentVersion] = useState(() => getInstalledVersion());
+  const [userEmail, setUserEmail] = useState<string>("");
   // Read-only stats fallback from local activity data — never treated as identity
   const [localStats, setLocalStats] = useState(userProfile.stats);
   const { profile: cloudProfile, updateProfile } = useProfile();
@@ -42,6 +45,7 @@ const Profile = () => {
         if (parsed?.stats) setLocalStats((s: typeof userProfile.stats) => ({ ...s, ...parsed.stats }));
       }
     } catch {}
+    supabase.auth.getUser().then(({ data }) => setUserEmail(data.user?.email || ""));
     return () => window.removeEventListener("versionUpdated", syncVersion);
   }, []);
 
@@ -134,6 +138,18 @@ const Profile = () => {
             <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
 
               <TabsContent value="profile" className="space-y-4 mt-0">
+                <FitnessIDCard
+                  name={displayName}
+                  email={userEmail || undefined}
+                  avatarUrl={displayAvatar}
+                  memberSince={cloudProfile?.created_at ? new Date(cloudProfile.created_at).getFullYear().toString() : undefined}
+                  level={Math.max(1, Math.floor((localStats.workoutsCompleted || 0) / 10) + 1)}
+                  workouts={localStats.workoutsCompleted || 0}
+                  streak={localStats.streakDays || 0}
+                  calories={localStats.caloriesBurned || 0}
+                  fitnessScore={78}
+                  goal={cloudProfile?.fitness_goals?.[0] || "Stay Fit"}
+                />
                 <ProfileEditor onSave={() => toast({ title: "✅ Profile Updated" })} />
                 <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
                   <CardHeader className="pb-3">
