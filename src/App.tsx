@@ -102,6 +102,7 @@ const AppContent: React.FC = () => {
           <Route path="/" element={<P><Index /></P>} />
           <Route path="/auth" element={<P><AuthPage /></P>} />
           <Route path="/reset-password" element={<P><ResetPassword /></P>} />
+          <Route path="/auth/callback" element={<P><AuthCallback /></P>} />
           <Route path="/terms-of-service" element={<P><TermsOfService /></P>} />
           <Route path="/privacy-policy" element={<P><PrivacyPolicy /></P>} />
           <Route path="/onboarding" element={<P><Onboarding /></P>} />
