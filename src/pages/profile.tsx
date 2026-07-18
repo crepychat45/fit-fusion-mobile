@@ -20,6 +20,8 @@ import { AdminAabDownloadCard } from "@/components/profile/admin-aab-download-ca
 import { APP_VERSION, getInstalledVersion } from "@/lib/app-version";
 import { ProfilePhotoUpload } from "@/components/profile-photo-upload";
 import { useProfile } from "@/hooks/use-profile";
+import { FitnessIDCard } from "@/components/profile/fitness-id-card";
+import { supabase } from "@/integrations/supabase/client";
 
 const Profile = () => {
   const { toast } = useToast();
