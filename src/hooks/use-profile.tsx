@@ -134,7 +134,7 @@ export const useProfile = (userId?: string, options: { enabled?: boolean } = {})
       // Race-safe insert: if another mount created the row first, re-select.
       const { data: created, error: createError } = await supabase
         .from('profiles')
-        .insert({ user_id: targetUserId, ...seed })
+        .insert({ user_id: targetUserId, ...(seed as Record<string, unknown>) } as never)
         .select()
         .maybeSingle();
 
