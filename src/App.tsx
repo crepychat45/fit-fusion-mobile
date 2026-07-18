@@ -52,6 +52,7 @@ const NotificationsPage = lazyWithRetry(() => import("./pages/notifications"));
 const Privacy = lazyWithRetry(() => import("./pages/privacy"));
 const Help = lazyWithRetry(() => import("./pages/help"));
 const Wearables = lazyWithRetry(() => import("./pages/wearables"));
+const SmartwatchSettings = lazyWithRetry(() => import("./pages/smartwatch-settings"));
 const ExportData = lazyWithRetry(() => import("./pages/export-data"));
 const Subscription = lazyWithRetry(() => import("./pages/subscription"));
 const ChatPage = lazyWithRetry(() => import("./pages/chat"));
