@@ -65,6 +65,7 @@ const ProgressTrackerPage = lazyWithRetry(() => import("./pages/progress-tracker
 const NutritionPage = lazyWithRetry(() => import("./pages/nutrition"));
 const VaultPage = lazyWithRetry(() => import("./pages/vault"));
 const OAuthConsent = lazyWithRetry(() => import("./pages/OAuthConsent"));
+const AIWorkoutGenerator = lazyWithRetry(() => import("./pages/ai-workout-generator"));
 const FitAssistant = lazyWithRetry(() => import("./components/fit-assistant").then(m => ({ default: m.FitAssistant })));
 const PerfDiagnosticsPanel = lazy(() => import("./components/perf-diagnostics-panel"));
 
