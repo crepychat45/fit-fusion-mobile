@@ -22,28 +22,32 @@ const Profile = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
   const [currentVersion, setCurrentVersion] = useState(() => getInstalledVersion());
-  const [profileData, setProfileData] = useState(userProfile);
-  const { profile: cloudProfile } = useProfile();
+  // Read-only stats fallback from local activity data — never treated as identity
+  const [localStats, setLocalStats] = useState(userProfile.stats);
+  const { profile: cloudProfile, updateProfile } = useProfile();
 
+  // Refetch fresh profile on every mount / route entry
   useEffect(() => {
-    const saved = localStorage.getItem("fitfusion-profile");
-    if (saved) {
-      try { setProfileData((prev) => ({ ...prev, ...JSON.parse(saved) })); } catch {}
-    }
     const syncVersion = () => setCurrentVersion(getInstalledVersion());
     window.addEventListener("versionUpdated", syncVersion);
+    // Pull local activity stats only (workouts count etc.) — not identity
+    try {
+      const saved = localStorage.getItem("fitfusion-profile");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.stats) setLocalStats((s: typeof userProfile.stats) => ({ ...s, ...parsed.stats }));
+      }
+    } catch {}
     return () => window.removeEventListener("versionUpdated", syncVersion);
   }, []);
 
-  // Prefer cloud avatar_url when available so it persists across devices
-  useEffect(() => {
-    if (cloudProfile?.avatar_url && cloudProfile.avatar_url !== profileData?.avatar) {
-      const next = { ...profileData, avatar: cloudProfile.avatar_url };
-      setProfileData(next);
-      try { localStorage.setItem("fitfusion-profile", JSON.stringify(next)); } catch {}
-      window.dispatchEvent(new Event("profileUpdated"));
-    }
-  }, [cloudProfile?.avatar_url]);
+  const displayName = cloudProfile?.name || "User";
+  const displayAvatar = cloudProfile?.avatar_url || null;
+
+  const handleAvatarUpdate = (url: string | null) => {
+    updateProfile.mutate({ avatar_url: url || null } as never);
+    window.dispatchEvent(new Event("profileUpdated"));
+  };
 
   const handleShare = async () => {
     const shareData = {
