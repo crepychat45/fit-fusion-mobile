@@ -34,14 +34,12 @@ export function AdminAabDownloadCard() {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { if (mounted) setIsAdmin(false); return; }
-      const { data, error } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", user.id)
-        .eq("role", "admin")
-        .maybeSingle();
+      const { data, error } = await (supabase.rpc as any)("has_role", {
+        _user_id: user.id,
+        _role: "admin",
+      });
       if (!mounted) return;
-      setIsAdmin(!error && !!data);
+      setIsAdmin(!error && data === true);
     })();
     return () => { mounted = false; };
   }, []);
