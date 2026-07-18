@@ -15,6 +15,7 @@ import { ActivityHeatmap } from "@/components/profile/activity-heatmap";
 import { WeeklyPulseWidget } from "@/components/profile/weekly-pulse-widget";
 import { VitalityRingsWidget } from "@/components/profile/vitality-rings-widget";
 import { ProfileTabExtras } from "@/components/profile/profile-tab-extras";
+import { ProfileHub } from "@/components/profile/profile-hub";
 import { MobileAppDownloadCard } from "@/components/profile/mobile-app-download-card";
 import { AdminAabDownloadCard } from "@/components/profile/admin-aab-download-card";
 import { APP_VERSION, getInstalledVersion } from "@/lib/app-version";
@@ -209,6 +210,8 @@ const Profile = () => {
                   fitnessScore={78}
                   goal={cloudProfile?.fitness_goals?.[0] || "Stay Fit"}
                 />
+                <ProfileHub email={userEmail} displayName={displayName} />
+                <div id="profile-editor" />
                 <ProfileEditor onSave={() => toast({ title: "✅ Profile Updated" })} />
                 <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
                   <CardHeader className="pb-3">
