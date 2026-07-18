@@ -11,7 +11,7 @@ export interface WorkoutVideoData {
   exerciseId?: string;
 }
 
-// Public-domain sample videos (Google GTV bucket) — used for AI-generated demo playback.
+// Public HD demo videos — multiple CDNs for redundancy.
 const SAMPLE_VIDEO_POOL = [
   "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
   "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
@@ -23,6 +23,13 @@ const SAMPLE_VIDEO_POOL = [
   "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4",
   "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
   "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4",
+];
+
+// Guaranteed-working fallbacks (small, fast MP4s on multiple CDNs).
+export const FALLBACK_VIDEO_URLS = [
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+  "https://download.samplelib.com/mp4/sample-5s.mp4",
+  "https://www.w3schools.com/html/mov_bbb.mp4",
 ];
 
 // Unsplash fitness thumbnails
