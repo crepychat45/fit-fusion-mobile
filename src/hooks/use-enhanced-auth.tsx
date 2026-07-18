@@ -196,5 +196,44 @@ export function useEnhancedAuth(): AuthState & AuthActions {
     }
   }, []);
 
-  return { ...authState, signIn, signUp, signOut, resetPassword };
+  const resendVerification = useCallback(async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      });
+      if (error) {
+        toastRef.current({ title: "Resend failed", description: error.message, variant: "destructive" });
+        return { error: error.message };
+      }
+      toastRef.current({ title: "Verification email sent", description: "Check your inbox for the confirmation link." });
+      return { error: null };
+    } catch (e: any) {
+      const msg = e?.message ?? "Unable to resend verification email.";
+      toastRef.current({ title: "Resend failed", description: msg, variant: "destructive" });
+      return { error: msg };
+    }
+  }, []);
+
+  const signInWithMagicLink = useCallback(async (email: string) => {
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback`, shouldCreateUser: true },
+      });
+      if (error) {
+        toastRef.current({ title: "Magic link failed", description: error.message, variant: "destructive" });
+        return { error: error.message };
+      }
+      toastRef.current({ title: "Magic link sent", description: "Check your email to sign in instantly." });
+      return { error: null };
+    } catch (e: any) {
+      const msg = e?.message ?? "Unable to send magic link.";
+      toastRef.current({ title: "Magic link failed", description: msg, variant: "destructive" });
+      return { error: msg };
+    }
+  }, []);
+
+  return { ...authState, signIn, signUp, signOut, resetPassword, resendVerification, signInWithMagicLink };
 }
