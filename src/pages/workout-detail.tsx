@@ -349,31 +349,34 @@ const WorkoutDetail = () => {
       </div>
 
       <Dialog open={showVideo} onOpenChange={setShowVideo}>
-        <DialogContent className="sm:max-w-md p-0">
-          <DialogHeader className="p-4 absolute z-10 w-full bg-gradient-to-b from-black/80 to-transparent">
-            <div className="flex items-center justify-between">
-              <DialogTitle className="text-white">Exercise Video</DialogTitle>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-white"
-                onClick={() => setShowVideo(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+        <DialogContent className="sm:max-w-2xl p-0 overflow-hidden border-border/40">
+          <DialogHeader className="p-4 pb-2 flex flex-row items-center justify-between space-y-0">
+            <DialogTitle>Exercise Demo</DialogTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setShowVideo(false)}
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </DialogHeader>
 
           {selectedVideo && (
-            <div className="aspect-video w-full">
-              <WorkoutVideo
-                videoUrl={selectedVideo}
-                title="Exercise Demo"
-                thumbnailUrl="/placeholder.svg"
-                duration="2:30"
-              />
-            </div>
+            <WorkoutVideo
+              inline
+              autoPlay
+              loop
+              videoUrl={selectedVideo}
+              title="Exercise Demo"
+              thumbnailUrl="/placeholder.svg"
+              duration="2:30"
+            />
           )}
+          <div className="p-4 pt-2 text-xs text-muted-foreground">
+            💡 Follow the form shown. Video loops so you can match the pace.
+          </div>
         </DialogContent>
       </Dialog>
 

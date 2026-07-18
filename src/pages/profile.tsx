@@ -4,7 +4,7 @@ import { MobileNav } from "@/components/mobile-nav";
 import { ProfileEditor } from "@/components/profile-editor";
 import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, CreditCard, Settings, User, Bell, Trophy, Activity } from "lucide-react";
+import { Shield, CreditCard, Settings, User, Bell, Trophy, Activity, Share2, Target, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { userProfile } from "@/data/user";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,6 +15,7 @@ import { ActivityHeatmap } from "@/components/profile/activity-heatmap";
 import { WeeklyPulseWidget } from "@/components/profile/weekly-pulse-widget";
 import { APP_VERSION, getInstalledVersion } from "@/lib/app-version";
 import { ProfilePhotoUpload } from "@/components/profile-photo-upload";
+import { useProfile } from "@/hooks/use-profile";
 
 const Profile = () => {
   const { toast } = useToast();
@@ -22,16 +23,45 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [currentVersion, setCurrentVersion] = useState(() => getInstalledVersion());
   const [profileData, setProfileData] = useState(userProfile);
+  const { profile: cloudProfile } = useProfile();
 
   useEffect(() => {
     const saved = localStorage.getItem("fitfusion-profile");
     if (saved) {
-      try { setProfileData({ ...userProfile, ...JSON.parse(saved) }); } catch {}
+      try { setProfileData((prev) => ({ ...prev, ...JSON.parse(saved) })); } catch {}
     }
     const syncVersion = () => setCurrentVersion(getInstalledVersion());
     window.addEventListener("versionUpdated", syncVersion);
     return () => window.removeEventListener("versionUpdated", syncVersion);
   }, []);
+
+  // Prefer cloud avatar_url when available so it persists across devices
+  useEffect(() => {
+    if (cloudProfile?.avatar_url && cloudProfile.avatar_url !== profileData?.avatar) {
+      const next = { ...profileData, avatar: cloudProfile.avatar_url };
+      setProfileData(next);
+      try { localStorage.setItem("fitfusion-profile", JSON.stringify(next)); } catch {}
+      window.dispatchEvent(new Event("profileUpdated"));
+    }
+  }, [cloudProfile?.avatar_url]);
+
+  const handleShare = async () => {
+    const shareData = {
+      title: "My FitFusion Progress",
+      text: `💪 ${profileData?.stats?.workoutsCompleted || 0} workouts • 🔥 ${profileData?.stats?.streakDays || 0}-day streak on FitFusion!`,
+      url: window.location.origin,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
+        toast({ title: "Copied", description: "Progress copied to clipboard" });
+      }
+    } catch {
+      // user cancelled
+    }
+  };
 
   const fadeUp = { hidden: { y: 12, opacity: 0 }, visible: { y: 0, opacity: 1, transition: { duration: 0.4 } } };
 
@@ -46,8 +76,9 @@ const Profile = () => {
             <ProfilePhotoUpload
               name={profileData?.name || "User"}
               initialImage={profileData?.avatar || null}
+              size="lg"
               onImageUpdate={(url) => {
-                const next = { ...profileData, avatar: url };
+                const next = { ...profileData, avatar: url || undefined };
                 setProfileData(next);
                 try { localStorage.setItem("fitfusion-profile", JSON.stringify(next)); } catch {}
                 window.dispatchEvent(new Event("profileUpdated"));
@@ -56,10 +87,20 @@ const Profile = () => {
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-bold truncate">Profile</h1>
               <p className="text-primary-foreground/70 text-sm truncate">Welcome, {profileData?.name || "User"} 👋</p>
+              <div className="flex items-center gap-1.5 mt-1">
+                <Badge className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30 text-[10px] h-5">
+                  v{currentVersion}{currentVersion === APP_VERSION ? "" : " ↑"}
+                </Badge>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-6 px-2 text-[10px] text-primary-foreground/90 hover:bg-primary-foreground/15 hover:text-primary-foreground"
+                  onClick={handleShare}
+                >
+                  <Share2 className="h-3 w-3 mr-1" />Share
+                </Button>
+              </div>
             </div>
-            <Badge className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30 text-xs shrink-0">
-              v{currentVersion}{currentVersion === APP_VERSION ? "" : " ↑"}
-            </Badge>
           </div>
 
           <div className="grid grid-cols-3 gap-2">
