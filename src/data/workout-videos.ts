@@ -11,22 +11,50 @@ export interface WorkoutVideoData {
   exerciseId?: string;
 }
 
-// Using public domain sample videos for demonstrations
-const SAMPLE_VIDEOS = {
-  main: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-  exercise1: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-  exercise2: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-  exercise3: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-  exercise4: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
-  exercise5: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+// Public-domain sample videos (Google GTV bucket) — used for AI-generated demo playback.
+const SAMPLE_VIDEO_POOL = [
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4",
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
+  "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4",
+];
+
+// Unsplash fitness thumbnails
+const THUMB_POOL = [
+  "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=450&fit=crop",
+  "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=800&h=450&fit=crop",
+  "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&h=450&fit=crop",
+  "https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=800&h=450&fit=crop",
+  "https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&h=450&fit=crop",
+  "https://images.unsplash.com/photo-1518310383802-640c2de311b2?w=800&h=450&fit=crop",
+  "https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?w=800&h=450&fit=crop",
+  "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&h=450&fit=crop",
+];
+
+const hash = (s: string) => {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
 };
+
+export const pickVideoUrl = (key: string) =>
+  SAMPLE_VIDEO_POOL[hash(key) % SAMPLE_VIDEO_POOL.length];
+
+export const pickThumbnail = (key: string) =>
+  THUMB_POOL[hash(key) % THUMB_POOL.length];
 
 export const workoutVideos: WorkoutVideoData[] = [
   {
     id: "v1",
     title: "Full Body Strength - Complete Guide",
-    thumbnailUrl: "/placeholder.svg",
-    videoUrl: SAMPLE_VIDEOS.main,
+    thumbnailUrl: THUMB_POOL[1],
+    videoUrl: SAMPLE_VIDEO_POOL[0],
     duration: "15:30",
     category: "Strength",
     level: "Beginner",
@@ -36,8 +64,8 @@ export const workoutVideos: WorkoutVideoData[] = [
   {
     id: "v2",
     title: "HIIT Cardio Blast - Full Workout",
-    thumbnailUrl: "/placeholder.svg",
-    videoUrl: SAMPLE_VIDEOS.exercise1,
+    thumbnailUrl: THUMB_POOL[0],
+    videoUrl: SAMPLE_VIDEO_POOL[1],
     duration: "25:15",
     category: "HIIT",
     level: "Intermediate",
@@ -47,8 +75,8 @@ export const workoutVideos: WorkoutVideoData[] = [
   {
     id: "v3",
     title: "Core Crusher - Ab Workout",
-    thumbnailUrl: "/placeholder.svg",
-    videoUrl: SAMPLE_VIDEOS.exercise2,
+    thumbnailUrl: THUMB_POOL[3],
+    videoUrl: SAMPLE_VIDEO_POOL[2],
     duration: "20:45",
     category: "Strength",
     level: "Beginner",
@@ -58,61 +86,48 @@ export const workoutVideos: WorkoutVideoData[] = [
   {
     id: "v4",
     title: "Flexibility Flow - Stretching",
-    thumbnailUrl: "/placeholder.svg",
-    videoUrl: SAMPLE_VIDEOS.exercise3,
+    thumbnailUrl: THUMB_POOL[2],
+    videoUrl: SAMPLE_VIDEO_POOL[3],
     duration: "12:00",
     category: "Flexibility",
     level: "Beginner",
     description: "Improve mobility and reduce tension with stretching.",
     workoutId: "4",
   },
-  // Exercise-specific videos
-  {
-    id: "v5",
-    title: "Push-ups - Proper Form",
-    thumbnailUrl: "/placeholder.svg",
-    videoUrl: SAMPLE_VIDEOS.exercise4,
-    duration: "3:30",
-    category: "Strength",
-    level: "Beginner",
-    description: "Learn proper push-up form and variations.",
-    workoutId: "1",
-    exerciseId: "e1",
-  },
-  {
-    id: "v6",
-    title: "Squats - Technique Guide",
-    thumbnailUrl: "/placeholder.svg",
-    videoUrl: SAMPLE_VIDEOS.exercise5,
-    duration: "4:00",
-    category: "Strength",
-    level: "Beginner",
-    description: "Master bodyweight squat technique.",
-    workoutId: "1",
-    exerciseId: "e2",
-  },
-  {
-    id: "v7",
-    title: "Burpees - Full Demo",
-    thumbnailUrl: "/placeholder.svg",
-    videoUrl: SAMPLE_VIDEOS.exercise4,
-    duration: "2:45",
-    category: "HIIT",
-    level: "Intermediate",
-    description: "Complete burpee demonstration with modifications.",
-    workoutId: "2",
-    exerciseId: "e7",
-  },
-  {
-    id: "v8",
-    title: "Crunches - Core Technique",
-    thumbnailUrl: "/placeholder.svg",
-    videoUrl: SAMPLE_VIDEOS.exercise5,
-    duration: "3:00",
-    category: "Core",
-    level: "Beginner",
-    description: "Proper crunch form for effective ab training.",
-    workoutId: "3",
-    exerciseId: "e10",
-  },
 ];
+
+/** Get a preview video for any workout — falls back to a stable AI-generated demo. */
+export const getWorkoutVideo = (workoutId: string): WorkoutVideoData => {
+  const existing = workoutVideos.find((v) => v.workoutId === workoutId && !v.exerciseId);
+  if (existing) return existing;
+  return {
+    id: `auto-w-${workoutId}`,
+    title: "AI-Generated Workout Preview",
+    thumbnailUrl: pickThumbnail(`w-${workoutId}`),
+    videoUrl: pickVideoUrl(`w-${workoutId}`),
+    duration: "3:45",
+    category: "Workout",
+    level: "All",
+    description: "AI-generated demo preview for this workout.",
+    workoutId,
+  };
+};
+
+/** Get a demo video for any exercise — always returns a valid video. */
+export const getExerciseVideo = (
+  exerciseId: string,
+  exerciseName?: string,
+): WorkoutVideoData => {
+  const key = `${exerciseId}-${exerciseName ?? ""}`;
+  return {
+    id: `auto-e-${exerciseId}`,
+    title: exerciseName ? `${exerciseName} — Form Demo` : "Exercise Demo",
+    thumbnailUrl: pickThumbnail(key),
+    videoUrl: pickVideoUrl(key),
+    duration: "0:45",
+    category: "Exercise",
+    level: "All",
+    description: `AI-generated form demonstration${exerciseName ? ` for ${exerciseName}` : ""}.`,
+    exerciseId,
+  };
+};

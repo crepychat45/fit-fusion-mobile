@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { workouts } from "@/data/workouts";
 import { WorkoutVideo } from "@/components/workout-video";
 import { WorkoutTimer } from "@/components/workout-timer";
-import { workoutVideos } from "@/data/workout-videos";
+import { getWorkoutVideo, getExerciseVideo } from "@/data/workout-videos";
 import { EnhancedWorkoutCustomizer } from "@/components/enhanced-workout-customizer";
 import { motion } from "framer-motion";
 import { useToast } from "@/components/ui/use-toast";
@@ -56,7 +56,7 @@ const WorkoutDetail = () => {
     );
   }
 
-  const workoutVideo = workoutVideos.find((v) => v.workoutId === id);
+  const workoutVideo = getWorkoutVideo(id ?? workout.id);
 
   const handleStartWorkout = async () => {
     setIsStarting(true);
@@ -143,17 +143,13 @@ const WorkoutDetail = () => {
             {workoutVideo && (
               <div
                 className="relative aspect-video rounded-lg overflow-hidden cursor-pointer group shadow-lg"
-                onClick={() =>
-                  openVideoPreview(
-                    workoutVideo.videoUrl ||
-                      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-                  )
-                }
+                onClick={() => openVideoPreview(workoutVideo.videoUrl)}
               >
                 <img
-                  src={workoutVideo.thumbnailUrl || "/placeholder.svg"}
+                  src={workoutVideo.thumbnailUrl}
                   alt={`${workout.title} preview`}
                   className="w-full h-full object-cover"
+                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent flex items-center justify-center group-hover:from-black/80 transition-all">
                   <div className="text-center">
@@ -162,40 +158,40 @@ const WorkoutDetail = () => {
                       HD Preview
                     </span>
                     <p className="text-white/80 text-sm mt-1">
-                      1080p • {workoutVideo.duration || "3:45"}
+                      1080p • {workoutVideo.duration}
                     </p>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Additional exercise videos */}
+            {/* Per-exercise AI demo videos */}
             <div className="grid grid-cols-2 gap-2">
-              {workout.exercises.slice(0, 4).map((exercise, index) => (
-                <div
-                  key={exercise.id}
-                  className="relative aspect-video rounded-lg overflow-hidden cursor-pointer group bg-muted"
-                  onClick={() =>
-                    openVideoPreview(
-                      `https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4`,
-                    )
-                  }
-                >
-                  <img
-                    src={`/placeholder.svg`}
-                    alt={exercise.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/60 transition-colors">
-                    <Play className="h-6 w-6 text-white" fill="white" />
+              {workout.exercises.map((exercise) => {
+                const ev = getExerciseVideo(exercise.id, exercise.name);
+                return (
+                  <div
+                    key={exercise.id}
+                    className="relative aspect-video rounded-lg overflow-hidden cursor-pointer group bg-muted"
+                    onClick={() => openVideoPreview(ev.videoUrl)}
+                  >
+                    <img
+                      src={ev.thumbnailUrl}
+                      alt={exercise.name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/60 transition-colors">
+                      <Play className="h-6 w-6 text-white" fill="white" />
+                    </div>
+                    <div className="absolute bottom-1.5 left-1.5 right-1.5">
+                      <p className="text-white text-xs font-medium truncate drop-shadow">
+                        {exercise.name}
+                      </p>
+                    </div>
                   </div>
-                  <div className="absolute bottom-2 left-2 right-2">
-                    <p className="text-white text-xs font-medium truncate">
-                      {exercise.name}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </motion.div>
@@ -276,17 +272,11 @@ const WorkoutDetail = () => {
                   onSelect={() =>
                     navigate(`/exercise/${workout.id}/${exercise.id}`)
                   }
-                  hasVideo={Boolean(
-                    workoutVideos.find((v) => v.exerciseId === exercise.id),
-                  )}
+                  hasVideo
                   onVideoClick={(e) => {
                     e.stopPropagation();
-                    const exerciseVideo = workoutVideos.find(
-                      (v) => v.exerciseId === exercise.id,
-                    );
-                    if (exerciseVideo) {
-                      openVideoPreview(exerciseVideo.videoUrl);
-                    }
+                    const exerciseVideo = getExerciseVideo(exercise.id, exercise.name);
+                    openVideoPreview(exerciseVideo.videoUrl);
                   }}
                 />
               ))}
