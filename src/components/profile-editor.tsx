@@ -157,12 +157,14 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
     setTimeout(() => setSaveStatus(null), 3000);
   }, [form, profile, updateProfile, onSave]);
 
-  // Debounced auto-save
+  // Debounced auto-save — restarts on every keystroke; only fires once user
+  // has stopped editing for 2s, and never runs while a save is in-flight.
   useEffect(() => {
     if (!hasUnsavedChanges) return;
-    const t = setTimeout(() => { void persist(); }, 1500);
+    if (isSavingRef.current) return;
+    const t = setTimeout(() => { void persist(); }, 2000);
     return () => clearTimeout(t);
-  }, [hasUnsavedChanges, persist]);
+  }, [hasUnsavedChanges, form, persist]);
 
   const handleManualSave = async () => {
     setIsSaving(true);
