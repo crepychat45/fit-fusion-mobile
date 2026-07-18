@@ -302,11 +302,13 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="name">Full Name *</Label>
-                  <Input id="name" value={form.name} onChange={(e) => handleFieldChange("name", e.target.value)} placeholder="Your full name" className="mt-1" />
+                  <Input id="name" value={form.name} onChange={(e) => handleFieldChange("name", e.target.value)} placeholder="Your full name" maxLength={100} autoComplete="name" className="mt-1" aria-invalid={!!fieldErrors.name} />
+                  {fieldErrors.name && <p className="mt-1 text-xs text-destructive">{fieldErrors.name}</p>}
                 </div>
                 <div>
                   <Label htmlFor="age">Age</Label>
-                  <Input id="age" value={form.age} onChange={(e) => handleFieldChange("age", e.target.value)} type="number" min="13" max="100" className="mt-1" />
+                  <Input id="age" value={form.age} onChange={(e) => handleFieldChange("age", e.target.value)} type="number" min={13} max={120} inputMode="numeric" className="mt-1" aria-invalid={!!fieldErrors.age} />
+                  {fieldErrors.age && <p className="mt-1 text-xs text-destructive">{fieldErrors.age}</p>}
                 </div>
               </div>
 
