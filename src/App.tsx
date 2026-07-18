@@ -122,6 +122,7 @@ const AppContent: React.FC = () => {
           <Route path="/privacy" element={<ProtectedRoute><P><Privacy /></P></ProtectedRoute>} />
           <Route path="/help" element={<ProtectedRoute><P><Help /></P></ProtectedRoute>} />
           <Route path="/wearables" element={<ProtectedRoute><P><Wearables /></P></ProtectedRoute>} />
+          <Route path="/smartwatch-settings" element={<ProtectedRoute><P><SmartwatchSettings /></P></ProtectedRoute>} />
           <Route path="/export-data" element={<ProtectedRoute><P><ExportData /></P></ProtectedRoute>} />
           <Route path="/subscription" element={<ProtectedRoute><P><Subscription /></P></ProtectedRoute>} />
           <Route path="/tools" element={<ProtectedRoute><P><ToolsPage /></P></ProtectedRoute>} />
