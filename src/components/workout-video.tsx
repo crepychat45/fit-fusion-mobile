@@ -41,19 +41,46 @@ function InlineVideoPlayer({
   loop = false,
 }: Pick<WorkoutVideoProps, "title" | "thumbnailUrl" | "videoUrl" | "autoPlay" | "loop">) {
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Build a de-duped source chain: primary URL first, then fallbacks.
+  const sources = useMemo(() => {
+    const list = [videoUrl, ...FALLBACK_VIDEO_URLS].filter(
+      (u, i, a) => u && a.indexOf(u) === i,
+    );
+    return list;
+  }, [videoUrl]);
+
+  const [sourceIdx, setSourceIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [isMuted, setIsMuted] = useState(true);
   const [errored, setErrored] = useState(false);
 
+  // Reset when incoming videoUrl changes
+  useEffect(() => {
+    setSourceIdx(0);
+    setErrored(false);
+  }, [videoUrl]);
+
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !autoPlay) return;
+    if (!video) return;
     video.muted = true;
-    const attempt = video.play();
-    if (attempt && typeof attempt.catch === "function") {
-      attempt.catch(() => setIsPlaying(false));
+    if (autoPlay) {
+      const attempt = video.play();
+      if (attempt && typeof attempt.catch === "function") {
+        attempt.catch(() => setIsPlaying(false));
+      }
     }
-  }, [videoUrl, autoPlay]);
+  }, [sourceIdx, autoPlay]);
+
+  const handleError = () => {
+    // Try next fallback in the chain before giving up.
+    if (sourceIdx < sources.length - 1) {
+      setSourceIdx((i) => i + 1);
+    } else {
+      setErrored(true);
+    }
+  };
 
   const togglePlay = () => {
     const v = videoRef.current;
@@ -89,20 +116,31 @@ function InlineVideoPlayer({
     }
   };
 
+  const retryFromStart = () => {
+    setSourceIdx(0);
+    setErrored(false);
+  };
+
   if (errored) {
     return (
       <div className="w-full aspect-video bg-muted flex flex-col items-center justify-center text-muted-foreground gap-2">
-        <p className="text-sm">Video unavailable</p>
-        <p className="text-xs opacity-60">{title}</p>
+        <p className="text-sm font-medium">Exercise demo temporarily offline</p>
+        <p className="text-xs opacity-60 line-clamp-1">{title}</p>
+        <Button size="sm" variant="secondary" onClick={retryFromStart}>
+          <RotateCcw className="h-3 w-3 mr-1" /> Retry
+        </Button>
       </div>
     );
   }
+
+  const currentSrc = sources[sourceIdx];
 
   return (
     <div className="relative w-full bg-black group">
       <video
         ref={videoRef}
-        src={videoUrl}
+        key={currentSrc}
+        src={currentSrc}
         poster={thumbnailUrl || "/placeholder.svg"}
         className="w-full aspect-video object-contain bg-black"
         autoPlay={autoPlay}
@@ -111,10 +149,11 @@ function InlineVideoPlayer({
         playsInline
         preload="metadata"
         controls
+        crossOrigin="anonymous"
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         onEnded={() => setIsPlaying(false)}
-        onError={() => setErrored(true)}
+        onError={handleError}
       />
       <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         <Button
