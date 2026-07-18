@@ -28,6 +28,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
   const [currentVersion, setCurrentVersion] = useState(() => getInstalledVersion());
+  const [userEmail, setUserEmail] = useState<string>("");
   // Read-only stats fallback from local activity data — never treated as identity
   const [localStats, setLocalStats] = useState(userProfile.stats);
   const { profile: cloudProfile, updateProfile } = useProfile();
