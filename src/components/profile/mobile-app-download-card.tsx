@@ -114,9 +114,9 @@ export function MobileAppDownloadCard() {
       </div>
 
       <div className="relative mt-4 grid gap-2 sm:grid-cols-3">
-        <Button onClick={handleApk} className="w-full gap-2">
-          <Download className="h-4 w-4" />
-          Download APK
+        <Button onClick={handleApk} disabled={checking} className="w-full gap-2">
+          {checking ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+          {checking ? "Checking…" : "Download APK"}
         </Button>
         <Button
           variant="secondary"
