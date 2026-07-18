@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,6 @@ import { Shield, Eye, EyeOff, CheckCircle, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function ResetPassword() {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -19,23 +18,37 @@ export default function ResetPassword() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isValidToken, setIsValidToken] = useState(false);
+  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    // Check if we have a valid reset token
-    const accessToken = searchParams.get("access_token");
-    const refreshToken = searchParams.get("refresh_token");
+    // Supabase auto-parses the recovery hash and emits PASSWORD_RECOVERY.
+    // Also accept an existing session (user already recovered).
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY" || (event === "SIGNED_IN" && session)) {
+        setIsValidToken(true);
+        setChecking(false);
+      }
+    });
 
-    if (accessToken && refreshToken) {
-      setIsValidToken(true);
-    } else {
-      toast({
-        title: "Invalid Reset Link",
-        description: "This password reset link is invalid or has expired.",
-        variant: "destructive",
-      });
-      navigate("/");
-    }
-  }, [searchParams, navigate, toast]);
+    // Check current session as a fallback (hash may already be consumed)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      const hash = window.location.hash;
+      if (session || hash.includes("access_token") || hash.includes("type=recovery")) {
+        setIsValidToken(true);
+      } else {
+        toast({
+          title: "Invalid Reset Link",
+          description: "This password reset link is invalid or has expired.",
+          variant: "destructive",
+        });
+        navigate("/auth");
+      }
+      setChecking(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate, toast]);
+
 
   const validatePassword = (password: string) => {
     const requirements = [
