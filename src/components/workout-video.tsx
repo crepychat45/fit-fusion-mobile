@@ -17,6 +17,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { FALLBACK_VIDEO_URLS } from "@/data/workout-videos";
+import { isYouTubeEmbed } from "@/data/exercise-video-map";
 
 interface WorkoutVideoProps {
   title: string;
