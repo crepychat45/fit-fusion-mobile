@@ -306,32 +306,33 @@ export const FitnessIDCard: React.FC<FitnessIDCardProps> = ({
               <div className="min-w-0 flex-1">
                 <div className="text-sm sm:text-lg font-extrabold truncate">{name || "Athlete"}</div>
                 <div className="text-[10px] sm:text-xs text-white/60 truncate">{email || "FitFusion Member"}</div>
-                <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/25 border border-blue-300/30 text-[9px] sm:text-[10px] font-bold text-blue-100">
-                  <Zap className="h-2.5 w-2.5" />LVL {level} • {goal}
+                <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/25 border border-blue-300/30 text-[9px] sm:text-[10px] font-bold text-blue-100 max-w-full">
+                  <Zap className="h-2.5 w-2.5 shrink-0" />
+                  <span className="truncate">LVL {level} • {goal}</span>
                 </div>
               </div>
             </div>
 
-            <div className="mt-auto grid grid-cols-4 gap-1.5 rounded-xl bg-white/[0.06] border border-white/10 p-2">
+            <div className="mt-auto grid grid-cols-4 gap-1 sm:gap-1.5 rounded-xl bg-white/[0.06] border border-white/10 p-1.5 sm:p-2">
               {[
-                { icon: Dumbbell, label: "Workouts", value: workouts, color: "text-blue-300" },
+                { icon: Dumbbell, label: "Workouts", value: String(workouts), color: "text-blue-300" },
                 { icon: Flame, label: "Streak", value: `${streak}d`, color: "text-amber-300" },
                 { icon: Sparkles, label: "Cal", value: `${Math.round(calories / 1000)}k`, color: "text-orange-300" },
-                { icon: Trophy, label: "Score", value: fitnessScore, color: "text-emerald-300" },
+                { icon: Trophy, label: "Score", value: String(fitnessScore), color: "text-emerald-300" },
               ].map((s) => (
-                <div key={s.label} className="text-center">
-                  <div className={`text-sm sm:text-lg font-black ${s.color}`}>{s.value}</div>
-                  <div className="text-[8px] sm:text-[9px] tracking-widest text-white/50">{s.label.toUpperCase()}</div>
+                <div key={s.label} className="text-center min-w-0 px-0.5">
+                  <div className={`text-[13px] sm:text-lg font-black leading-none truncate ${s.color}`}>{s.value}</div>
+                  <div className="text-[7px] sm:text-[9px] tracking-[0.15em] sm:tracking-widest text-white/50 mt-0.5 truncate">{s.label.toUpperCase()}</div>
                 </div>
               ))}
             </div>
 
-            <div className="mt-2 flex items-end justify-between text-[9px] sm:text-[10px]">
-              <div>
+            <div className="mt-2 flex items-end justify-between gap-2 text-[9px] sm:text-[10px]">
+              <div className="min-w-0">
                 <div className="tracking-[0.25em] text-white/40">MEMBER ID</div>
-                <div className="font-mono font-bold text-white">{id}</div>
+                <div className="font-mono font-bold text-white truncate">{id}</div>
               </div>
-              <div className="text-right">
+              <div className="text-right shrink-0">
                 <div className="tracking-[0.25em] text-white/40">SINCE</div>
                 <div className="font-bold text-white">{since}</div>
               </div>
