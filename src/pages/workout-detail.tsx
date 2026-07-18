@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { workouts } from "@/data/workouts";
 import { WorkoutVideo } from "@/components/workout-video";
 import { WorkoutTimer } from "@/components/workout-timer";
-import { workoutVideos } from "@/data/workout-videos";
+import { getWorkoutVideo, getExerciseVideo } from "@/data/workout-videos";
 import { EnhancedWorkoutCustomizer } from "@/components/enhanced-workout-customizer";
 import { motion } from "framer-motion";
 import { useToast } from "@/components/ui/use-toast";
