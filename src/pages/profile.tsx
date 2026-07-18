@@ -45,6 +45,7 @@ const Profile = () => {
         if (parsed?.stats) setLocalStats((s: typeof userProfile.stats) => ({ ...s, ...parsed.stats }));
       }
     } catch {}
+    supabase.auth.getUser().then(({ data }) => setUserEmail(data.user?.email || ""));
     return () => window.removeEventListener("versionUpdated", syncVersion);
   }, []);
 
