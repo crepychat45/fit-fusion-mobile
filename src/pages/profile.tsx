@@ -45,9 +45,9 @@ const Profile = () => {
           <div className="flex items-center gap-4 mb-5">
             <ProfilePhotoUpload
               name={profileData?.name || "User"}
-              initialImage={profileData?.avatarUrl || null}
+              initialImage={profileData?.avatar || null}
               onImageUpdate={(url) => {
-                const next = { ...profileData, avatarUrl: url };
+                const next = { ...profileData, avatar: url };
                 setProfileData(next);
                 try { localStorage.setItem("fitfusion-profile", JSON.stringify(next)); } catch {}
                 window.dispatchEvent(new Event("profileUpdated"));
