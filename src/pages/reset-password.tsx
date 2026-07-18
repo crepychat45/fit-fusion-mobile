@@ -113,9 +113,15 @@ export default function ResetPassword() {
     }
   };
 
-  if (!isValidToken) {
-    return null; // Will redirect in useEffect
+  if (checking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="h-10 w-10 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+      </div>
+    );
   }
+  if (!isValidToken) return null;
+
 
   const passwordRequirements = validatePassword(password);
 
