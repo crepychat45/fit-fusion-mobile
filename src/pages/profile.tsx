@@ -21,19 +21,29 @@ import { APP_VERSION, getInstalledVersion } from "@/lib/app-version";
 import { ProfilePhotoUpload } from "@/components/profile-photo-upload";
 import { useProfile } from "@/hooks/use-profile";
 import { FitnessIDCard } from "@/components/profile/fitness-id-card";
-import { supabase } from "@/integrations/supabase/client";
+import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
+import { Loader2 } from "lucide-react";
 
 const Profile = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useEnhancedAuth();
   const [activeTab, setActiveTab] = useState("profile");
   const [currentVersion, setCurrentVersion] = useState(() => getInstalledVersion());
-  const [userEmail, setUserEmail] = useState<string>("");
   // Read-only stats fallback from local activity data — never treated as identity
   const [localStats, setLocalStats] = useState(userProfile.stats);
-  const { profile: cloudProfile, updateProfile } = useProfile();
+  const { profile: cloudProfile, isLoading: profileLoading, updateProfile } = useProfile(
+    user?.id,
+    { enabled: !!user?.id },
+  );
 
-  // Refetch fresh profile on every mount / route entry
+  // Redirect unauthenticated users; never render profile UI without a user.
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/auth", { replace: true });
+    }
+  }, [authLoading, user, navigate]);
+
   useEffect(() => {
     const syncVersion = () => setCurrentVersion(getInstalledVersion());
     window.addEventListener("versionUpdated", syncVersion);
@@ -45,9 +55,10 @@ const Profile = () => {
         if (parsed?.stats) setLocalStats((s: typeof userProfile.stats) => ({ ...s, ...parsed.stats }));
       }
     } catch {}
-    supabase.auth.getUser().then(({ data }) => setUserEmail(data.user?.email || ""));
     return () => window.removeEventListener("versionUpdated", syncVersion);
   }, []);
+
+  const userEmail = user?.email ?? "";
 
   const displayName = cloudProfile?.name || "User";
   const displayAvatar = cloudProfile?.avatar_url || null;
