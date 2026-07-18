@@ -48,6 +48,18 @@ export default function AuthPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [testimonialIdx, setTestimonialIdx] = useState(0);
 
+  // Detect low-power conditions once — respect reduced-motion, small screens, and coarse pointers
+  const [lite, setLite] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const small = window.matchMedia("(max-width: 768px)").matches;
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    const lowMem = (navigator as any).deviceMemory && (navigator as any).deviceMemory <= 4;
+    const lowCPU = (navigator as any).hardwareConcurrency && (navigator as any).hardwareConcurrency <= 4;
+    setLite(reduce || (small && coarse) || lowMem || lowCPU);
+  }, []);
+
   useEffect(() => {
     if (user && !loading) navigate(next ?? "/");
   }, [user, loading, navigate, next]);
@@ -58,6 +70,7 @@ export default function AuthPage() {
   }, []);
 
   const handleMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (lite) return;
     const r = containerRef.current?.getBoundingClientRect();
     if (!r) return;
     mx.set((e.clientX - r.left) / r.width);
@@ -68,7 +81,7 @@ export default function AuthPage() {
 
   const particles = useMemo(
     () =>
-      Array.from({ length: 18 }).map((_, i) => ({
+      Array.from({ length: lite ? 0 : 18 }).map((_, i) => ({
         id: i,
         size: 2 + (i % 5),
         left: (i * 53) % 100,
@@ -76,8 +89,9 @@ export default function AuthPage() {
         delay: i * 0.35,
         duration: 6 + (i % 6),
       })),
-    []
+    [lite]
   );
+
 
   if (loading) {
     return (
