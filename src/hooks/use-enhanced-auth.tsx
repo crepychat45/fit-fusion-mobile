@@ -112,11 +112,20 @@ export function useEnhancedAuth(): AuthState & AuthActions {
       }
     };
 
+    const handleAuthError = (event: Event) => {
+      const detail = (event as CustomEvent<{ description: string }>).detail;
+      if (detail?.description) {
+        toastRef.current({ title: "Authentication error", description: detail.description, variant: "destructive" });
+      }
+    };
+
     window.addEventListener("fitfusion-auth-event", handleAuthEvent);
+    window.addEventListener("fitfusion-auth-error", handleAuthError);
 
     return () => {
       authListeners.delete(setAuthState);
       window.removeEventListener("fitfusion-auth-event", handleAuthEvent);
+      window.removeEventListener("fitfusion-auth-error", handleAuthError);
     };
   }, []); // No dependencies - stable effect
 
