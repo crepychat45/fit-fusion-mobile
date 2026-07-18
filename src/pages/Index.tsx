@@ -186,7 +186,7 @@ const Index = () => {
             <div className="rounded-2xl border border-border/20 bg-card/60 backdrop-blur-xl shadow-lg p-4">
               <div className="flex items-center gap-2 mb-3">
                 <TrendingUp className="h-4 w-4 text-primary" />
-                <h3 className="text-sm font-bold text-foreground">This Week</h3>
+                <h2 className="text-sm font-bold text-foreground">This Week</h2>
                 <Badge className="ml-auto bg-accent/20 text-accent-foreground border-accent/30 text-[10px]">+12%</Badge>
               </div>
               <div className="grid grid-cols-3 gap-2">
