@@ -41,7 +41,7 @@ interface PasswordStrength {
 export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { loading, signIn, signUp, resetPassword } = useEnhancedAuth();
+  const { loading, signIn, signUp, resetPassword, resendVerification, signInWithMagicLink } = useEnhancedAuth();
   const { toast } = useToast();
 
   const [email, setEmail] = useState("");
@@ -55,6 +55,15 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState<string | null>(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = window.setInterval(() => setResendCooldown((s) => Math.max(0, s - 1)), 1000);
+    return () => window.clearInterval(t);
+  }, [resendCooldown]);
+
 
   useEffect(() => {
     if ("credentials" in navigator && "create" in navigator.credentials) {
@@ -131,16 +140,39 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
 
     try {
       if (isSignUp) {
-        const { error } = await signUp(email, password);
+        const { error, needsVerification } = await signUp(email, password);
         if (error) throw new Error(error);
+        if (needsVerification) {
+          setPendingVerificationEmail(email);
+          setResendCooldown(30);
+          return;
+        }
       } else {
         const { error } = await signIn(email, password);
         if (error) throw new Error(error);
       }
       if (onSuccess) onSuccess();
     } catch (error: any) {
-      toast({ title: isSignUp ? "Sign Up Failed" : "Sign In Failed", description: error.message, variant: "destructive" });
+      const msg = String(error?.message ?? "");
+      if (/confirm|verif/i.test(msg) && !isSignUp) {
+        setPendingVerificationEmail(email);
+      }
+      toast({ title: isSignUp ? "Sign Up Failed" : "Sign In Failed", description: msg, variant: "destructive" });
     }
+  };
+
+  const handleResend = async () => {
+    if (!pendingVerificationEmail || resendCooldown > 0) return;
+    const { error } = await resendVerification(pendingVerificationEmail);
+    if (!error) setResendCooldown(45);
+  };
+
+  const handleMagicLink = async () => {
+    if (!emailValid) {
+      toast({ title: "Enter your email", description: "We'll send a magic sign-in link.", variant: "destructive" });
+      return;
+    }
+    await signInWithMagicLink(email);
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
@@ -160,6 +192,38 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
       toast({ title: "Reset Failed", description: error.message, variant: "destructive" });
     }
   };
+
+  if (pendingVerificationEmail) {
+    return (
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md mx-auto px-4">
+        <Card className="bg-background/95 backdrop-blur-xl border-border/50 shadow-2xl">
+          <CardHeader className="text-center space-y-4 pb-4">
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}
+              className="mx-auto w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-primary to-primary/70 rounded-2xl flex items-center justify-center">
+              <Mail className="h-7 w-7 md:h-8 md:w-8 text-primary-foreground" />
+            </motion.div>
+            <div>
+              <CardTitle className="text-xl md:text-2xl font-bold text-foreground">Verify your email</CardTitle>
+              <p className="text-sm text-muted-foreground mt-2">
+                We sent a verification link to <span className="font-medium text-foreground">{pendingVerificationEmail}</span>. Click it to activate your account — no code needed.
+              </p>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3 px-4 md:px-6">
+            <Button type="button" className="w-full h-12" onClick={handleResend} disabled={loading || resendCooldown > 0}>
+              {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend verification email"}
+            </Button>
+            <Button type="button" variant="ghost" className="w-full" onClick={() => { setPendingVerificationEmail(null); setIsSignUp(false); }}>
+              Back to Sign In
+            </Button>
+            <p className="text-xs text-center text-muted-foreground">
+              Didn't get it? Check spam, or try a different email address.
+            </p>
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
+  }
 
   if (showForgotPassword) {
     return (
@@ -348,6 +412,17 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
           </div>
 
           <SocialLogin />
+
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full h-11"
+            onClick={handleMagicLink}
+            disabled={loading || !emailValid}
+          >
+            <Mail className="h-4 w-4 mr-2" />
+            Email me a magic link
+          </Button>
 
           <div className="text-center">
             <Button variant="link" className="text-sm" onClick={() => setIsSignUp(!isSignUp)}>

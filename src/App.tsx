@@ -58,6 +58,7 @@ const Subscription = lazyWithRetry(() => import("./pages/subscription"));
 const ChatPage = lazyWithRetry(() => import("./pages/chat"));
 const AuthPage = lazyWithRetry(() => import("./components/auth/auth-page"));
 const ResetPassword = lazyWithRetry(() => import("./pages/reset-password"));
+const AuthCallback = lazyWithRetry(() => import("./pages/auth-callback"));
 const TermsOfService = lazyWithRetry(() => import("./pages/terms-of-service"));
 const PrivacyPolicy = lazyWithRetry(() => import("./pages/privacy-policy"));
 const Onboarding = lazyWithRetry(() => import("./pages/onboarding"));
@@ -101,6 +102,7 @@ const AppContent: React.FC = () => {
           <Route path="/" element={<P><Index /></P>} />
           <Route path="/auth" element={<P><AuthPage /></P>} />
           <Route path="/reset-password" element={<P><ResetPassword /></P>} />
+          <Route path="/auth/callback" element={<P><AuthCallback /></P>} />
           <Route path="/terms-of-service" element={<P><TermsOfService /></P>} />
           <Route path="/privacy-policy" element={<P><PrivacyPolicy /></P>} />
           <Route path="/onboarding" element={<P><Onboarding /></P>} />

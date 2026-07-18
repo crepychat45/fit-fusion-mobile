@@ -12,9 +12,11 @@ interface AuthState {
 
 interface AuthActions {
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
-  signUp: (email: string, password: string) => Promise<{ error: string | null }>;
+  signUp: (email: string, password: string) => Promise<{ error: string | null; needsVerification?: boolean }>;
   signOut: () => Promise<{ error: string | null }>;
   resetPassword: (email: string) => Promise<{ error: string | null }>;
+  resendVerification: (email: string) => Promise<{ error: string | null }>;
+  signInWithMagicLink: (email: string) => Promise<{ error: string | null }>;
 }
 
 let authSnapshot: AuthState = {
@@ -76,6 +78,16 @@ const ensureAuthInitialized = () => {
     window.dispatchEvent(new CustomEvent("fitfusion-auth-event", { detail: { event, userId: session?.user?.id ?? null } }));
   });
 
+  // Surface auth errors returned in the URL hash (e.g. expired links from any page)
+  try {
+    const hash = window.location.hash.replace(/^#/, "");
+    if (hash.includes("error=") || hash.includes("error_description=")) {
+      const params = new URLSearchParams(hash);
+      const description = (params.get("error_description") ?? params.get("error") ?? "Authentication link error").replace(/\+/g, " ");
+      window.dispatchEvent(new CustomEvent("fitfusion-auth-error", { detail: { description } }));
+    }
+  } catch { /* ignore */ }
+
   window.addEventListener("pagehide", () => subscription.unsubscribe(), { once: true });
 };
 
@@ -100,11 +112,20 @@ export function useEnhancedAuth(): AuthState & AuthActions {
       }
     };
 
+    const handleAuthError = (event: Event) => {
+      const detail = (event as CustomEvent<{ description: string }>).detail;
+      if (detail?.description) {
+        toastRef.current({ title: "Authentication error", description: detail.description, variant: "destructive" });
+      }
+    };
+
     window.addEventListener("fitfusion-auth-event", handleAuthEvent);
+    window.addEventListener("fitfusion-auth-error", handleAuthError);
 
     return () => {
       authListeners.delete(setAuthState);
       window.removeEventListener("fitfusion-auth-event", handleAuthEvent);
+      window.removeEventListener("fitfusion-auth-error", handleAuthError);
     };
   }, []); // No dependencies - stable effect
 
@@ -134,7 +155,7 @@ export function useEnhancedAuth(): AuthState & AuthActions {
   const signUp = useCallback(async (email: string, password: string) => {
     setAuthState((prev) => ({ ...prev, loading: true, error: null }));
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = `${window.location.origin}/auth/callback`;
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -148,11 +169,12 @@ export function useEnhancedAuth(): AuthState & AuthActions {
         toastRef.current({ title: "Sign up failed", description: msg, variant: "destructive" });
         return { error: msg };
       }
-      if (data.session === null && data.user !== null) {
-        toastRef.current({ title: "Check your email", description: "We've sent you a confirmation link." });
+      const needsVerification = data.session === null && data.user !== null;
+      if (needsVerification) {
+        toastRef.current({ title: "Verify your email", description: "We've sent you a confirmation link. Click it to activate your account." });
       }
       setAuthState((prev) => ({ ...prev, loading: false, session: data.session, user: data.user }));
-      return { error: null };
+      return { error: null, needsVerification };
     } catch (e) {
       const msg = "An unexpected error occurred during sign up";
       setAuthState((prev) => ({ ...prev, error: msg, loading: false }));
@@ -194,5 +216,44 @@ export function useEnhancedAuth(): AuthState & AuthActions {
     }
   }, []);
 
-  return { ...authState, signIn, signUp, signOut, resetPassword };
+  const resendVerification = useCallback(async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      });
+      if (error) {
+        toastRef.current({ title: "Resend failed", description: error.message, variant: "destructive" });
+        return { error: error.message };
+      }
+      toastRef.current({ title: "Verification email sent", description: "Check your inbox for the confirmation link." });
+      return { error: null };
+    } catch (e: any) {
+      const msg = e?.message ?? "Unable to resend verification email.";
+      toastRef.current({ title: "Resend failed", description: msg, variant: "destructive" });
+      return { error: msg };
+    }
+  }, []);
+
+  const signInWithMagicLink = useCallback(async (email: string) => {
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback`, shouldCreateUser: true },
+      });
+      if (error) {
+        toastRef.current({ title: "Magic link failed", description: error.message, variant: "destructive" });
+        return { error: error.message };
+      }
+      toastRef.current({ title: "Magic link sent", description: "Check your email to sign in instantly." });
+      return { error: null };
+    } catch (e: any) {
+      const msg = e?.message ?? "Unable to send magic link.";
+      toastRef.current({ title: "Magic link failed", description: msg, variant: "destructive" });
+      return { error: msg };
+    }
+  }, []);
+
+  return { ...authState, signIn, signUp, signOut, resetPassword, resendVerification, signInWithMagicLink };
 }
