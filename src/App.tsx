@@ -7,6 +7,7 @@ import { ErrorBoundary } from "@/components/common/error-boundary";
 import { clearAppCaches, isRecoverableResourceError, markAppReady, recoverApp } from "@/utils/app-recovery";
 import { BootLoader } from "@/components/common/boot-loader";
 import { prefetchAllRoutes } from "@/utils/route-prefetch";
+import { SEOManager } from "@/components/seo-manager";
 
 const Loader = BootLoader;
 
@@ -91,6 +92,7 @@ const AppContent: React.FC = () => {
 
   return (
     <>
+      <SEOManager>
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           {/* Public */}
@@ -135,6 +137,7 @@ const AppContent: React.FC = () => {
       <Suspense fallback={null}>
         <PerfDiagnosticsPanel />
       </Suspense>
+      </SEOManager>
     </>
   );
 };

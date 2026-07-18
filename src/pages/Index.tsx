@@ -114,7 +114,7 @@ const Index = () => {
                     <Zap className="h-5 w-5 text-primary-foreground" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-foreground">Quick Start</h3>
+                    <h2 className="text-sm font-bold text-foreground">Quick Start</h2>
                     <p className="text-xs text-muted-foreground">Jump into a recommended workout</p>
                   </div>
                 </div>
@@ -186,7 +186,7 @@ const Index = () => {
             <div className="rounded-2xl border border-border/20 bg-card/60 backdrop-blur-xl shadow-lg p-4">
               <div className="flex items-center gap-2 mb-3">
                 <TrendingUp className="h-4 w-4 text-primary" />
-                <h3 className="text-sm font-bold text-foreground">This Week</h3>
+                <h2 className="text-sm font-bold text-foreground">This Week</h2>
                 <Badge className="ml-auto bg-accent/20 text-accent-foreground border-accent/30 text-[10px]">+12%</Badge>
               </div>
               <div className="grid grid-cols-3 gap-2">
@@ -217,7 +217,7 @@ const Index = () => {
                     AI POWERED
                   </Badge>
                 </div>
-                <h3 className="text-lg font-bold mb-1">Next-Gen Fitness</h3>
+                <h2 className="text-lg font-bold mb-1">Next-Gen Fitness</h2>
                 <p className="text-primary-foreground/80 text-sm mb-3">AI coaching, biometrics & personalized plans</p>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   {[
