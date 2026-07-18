@@ -366,17 +366,23 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
 
           <div>
             <Label htmlFor="bio">Bio & Motivation</Label>
-            <Textarea id="bio" value={form.bio} onChange={(e) => handleFieldChange("bio", e.target.value)} placeholder="Tell us about yourself, your fitness journey, and what motivates you…" rows={4} className="mt-1" />
+            <Textarea id="bio" value={form.bio} onChange={(e) => handleFieldChange("bio", e.target.value)} placeholder="Tell us about yourself, your fitness journey, and what motivates you…" rows={4} maxLength={500} className="mt-1" aria-invalid={!!fieldErrors.bio} />
+            <div className="mt-1 flex items-center justify-between text-xs">
+              <span className="text-destructive">{fieldErrors.bio || ""}</span>
+              <span className="text-muted-foreground">{form.bio.length}/500</span>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="height">Height (cm)</Label>
-              <Input id="height" value={form.height} onChange={(e) => handleFieldChange("height", e.target.value)} type="number" min="80" max="250" placeholder="175" className="mt-1" />
+              <Input id="height" value={form.height} onChange={(e) => handleFieldChange("height", e.target.value)} type="number" min={100} max={250} inputMode="numeric" placeholder="175" className="mt-1" aria-invalid={!!fieldErrors.height} />
+              {fieldErrors.height && <p className="mt-1 text-xs text-destructive">{fieldErrors.height}</p>}
             </div>
             <div>
               <Label htmlFor="weight">Weight (kg)</Label>
-              <Input id="weight" value={form.weight} onChange={(e) => handleFieldChange("weight", e.target.value)} type="number" min="25" max="400" placeholder="70" className="mt-1" />
+              <Input id="weight" value={form.weight} onChange={(e) => handleFieldChange("weight", e.target.value)} type="number" min={30} max={300} inputMode="numeric" placeholder="70" className="mt-1" aria-invalid={!!fieldErrors.weight} />
+              {fieldErrors.weight && <p className="mt-1 text-xs text-destructive">{fieldErrors.weight}</p>}
             </div>
           </div>
         </CardContent>
@@ -384,10 +390,23 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
 
       <div className="flex items-center justify-between pt-4">
         <div className="text-sm text-muted-foreground">
-          {hasUnsavedChanges ? "Changes will be saved automatically" : "All changes saved"}
+          {saveStatus === "error"
+            ? "Save failed — tap Save to retry"
+            : hasUnsavedChanges
+              ? "Changes will be saved automatically"
+              : "All changes saved"}
         </div>
-        <Button size="lg" onClick={handleManualSave} disabled={isSaving || (!hasUnsavedChanges && saveStatus !== "error")} className="min-w-[140px]">
-          {isSaving ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving…</>) : (<><Save className="mr-2 h-4 w-4" />{hasUnsavedChanges ? "Save Now" : "Saved"}</>)}
+        <Button
+          size="lg"
+          onClick={handleManualSave}
+          disabled={isSaving || saveStatus === "saving" || (!hasUnsavedChanges && saveStatus !== "error")}
+          className="min-w-[140px]"
+        >
+          {isSaving || saveStatus === "saving"
+            ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving…</>)
+            : saveStatus === "error"
+              ? (<><AlertCircle className="mr-2 h-4 w-4" />Retry Save</>)
+              : (<><Save className="mr-2 h-4 w-4" />{hasUnsavedChanges ? "Save Now" : "Saved"}</>)}
         </Button>
       </div>
     </div>
