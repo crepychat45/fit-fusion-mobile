@@ -149,7 +149,7 @@ function InlineVideoPlayer({
         playsInline
         preload="metadata"
         controls
-        crossOrigin="anonymous"
+        
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         onEnded={() => setIsPlaying(false)}
