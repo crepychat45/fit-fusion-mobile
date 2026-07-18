@@ -142,44 +142,64 @@ export const FitnessIDCard: React.FC<FitnessIDCardProps> = ({
     </svg>`;
   };
 
-  const renderPNG = async (): Promise<Blob | null> => {
+  const renderPNG = async (scale = 2): Promise<Blob | null> => {
     const svg = await buildSVG();
-    const svgBlob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
-    const url = URL.createObjectURL(svgBlob);
-    try {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      await new Promise<void>((resolve, reject) => {
-        img.onload = () => resolve();
-        img.onerror = () => reject(new Error("svg load failed"));
-        img.src = url;
-      });
-      const canvas = document.createElement("canvas");
-      canvas.width = 1080;
-      canvas.height = 640;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return null;
-      ctx.drawImage(img, 0, 0);
-      return await new Promise<Blob | null>((resolve) => canvas.toBlob((b) => resolve(b), "image/png", 0.95));
-    } finally {
-      URL.revokeObjectURL(url);
-    }
+    const dataUrl = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.decoding = "async";
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error("svg load failed"));
+      img.src = dataUrl;
+    });
+    const W = 1080 * scale;
+    const H = 640 * scale;
+    const canvas = document.createElement("canvas");
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    ctx.imageSmoothingEnabled = true;
+    // @ts-ignore
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(img, 0, 0, W, H);
+    return await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob((b) => resolve(b), "image/png", 1.0)
+    );
+  };
+
+  const buildFilename = () => {
+    const slug =
+      (name || "user")
+        .toLowerCase()
+        .normalize("NFKD")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "") || "user";
+    const date = new Date().toISOString().slice(0, 10);
+    return `fitxfusion-id-${slug}-${date}.png`;
+  };
+
+  const triggerDownload = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.rel = "noopener";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
   };
 
   const handleDownload = async () => {
     setBusy(true);
     try {
-      const blob = await renderPNG();
+      const blob = await renderPNG(2);
       if (!blob) throw new Error("render failed");
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = `fitxfusion-id-${(name || "user").toLowerCase().replace(/\s+/g, "-")}.png`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      setTimeout(() => URL.revokeObjectURL(link.href), 1500);
-      toast({ title: "Downloaded", description: "Fitness ID card saved to your device." });
-    } catch (e) {
+      triggerDownload(blob, buildFilename());
+      toast({ title: "Downloaded HD", description: "Fitness ID (2160×1280) saved to your device." });
+    } catch {
       toast({ title: "Download failed", description: "Please try again.", variant: "destructive" });
     } finally {
       setBusy(false);
@@ -189,29 +209,41 @@ export const FitnessIDCard: React.FC<FitnessIDCardProps> = ({
   const handleShare = async () => {
     setBusy(true);
     try {
-      const blob = await renderPNG();
+      const blob = await renderPNG(2);
       if (!blob) throw new Error("render failed");
-      const file = new File([blob], "fitxfusion-id.png", { type: "image/png" });
-      const shareData: ShareData = {
-        title: "My FitXFusion ID",
-        text: `${name} • Level ${level} • ${workouts} workouts • ${streak}-day streak 🔥`,
-        files: [file],
-      };
+      const filename = buildFilename();
+      const file = new File([blob], filename, { type: "image/png" });
+      const text = `${name} • Level ${level} • ${workouts} workouts • ${streak}-day streak 🔥 — FitXFusion`;
+
       // @ts-ignore
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share(shareData);
-      } else if (navigator.share) {
-        await navigator.share({ title: shareData.title, text: shareData.text, url: window.location.origin });
-      } else {
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "fitxfusion-id.png";
-        link.click();
-        setTimeout(() => URL.revokeObjectURL(link.href), 1500);
+      const canShareFiles = typeof navigator !== "undefined" && navigator.canShare && navigator.canShare({ files: [file] });
+      if (canShareFiles) {
+        try {
+          await navigator.share({ title: "My FitXFusion ID", text, files: [file] });
+          return;
+        } catch (err: any) {
+          if (err?.name === "AbortError") return;
+        }
       }
-      toast({ title: "Shared", description: "Your Fitness ID is ready." });
+
+      if (typeof navigator !== "undefined" && (navigator as any).share) {
+        try {
+          await (navigator as any).share({ title: "My FitXFusion ID", text, url: window.location.origin });
+          triggerDownload(blob, filename);
+          toast({ title: "Image downloaded", description: "Attach it to your share if needed." });
+          return;
+        } catch (err: any) {
+          if (err?.name === "AbortError") return;
+        }
+      }
+
+      try {
+        await navigator.clipboard.writeText(`${text} ${window.location.origin}`);
+      } catch {}
+      triggerDownload(blob, filename);
+      toast({ title: "Ready to share", description: "Image downloaded and caption copied." });
     } catch {
-      // user cancelled or no share support
+      toast({ title: "Share failed", description: "Please try again.", variant: "destructive" });
     } finally {
       setBusy(false);
     }
