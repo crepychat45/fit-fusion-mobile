@@ -137,6 +137,7 @@ const AppContent: React.FC = () => {
       <Suspense fallback={null}>
         <PerfDiagnosticsPanel />
       </Suspense>
+      </SEOManager>
     </>
   );
 };
