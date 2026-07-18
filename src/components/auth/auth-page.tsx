@@ -130,27 +130,32 @@ export default function AuthPage() {
             }}
           />
 
-          {/* Aurora ribbons */}
-          <motion.div
-            aria-hidden
-            animate={{ x: [0, 60, -30, 0], y: [0, -40, 20, 0], rotate: [0, 8, -6, 0] }}
-            transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -top-40 -left-20 w-[560px] h-[420px] rounded-[50%] blur-[90px] opacity-70"
-            style={{
-              background:
-                "conic-gradient(from 90deg at 50% 50%, hsl(var(--primary)/0.45), hsl(var(--accent)/0.35), hsl(var(--primary)/0.45))",
-            }}
-          />
-          <motion.div
-            aria-hidden
-            animate={{ x: [0, -50, 30, 0], y: [0, 30, -20, 0], rotate: [0, -10, 6, 0] }}
-            transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -bottom-40 -right-24 w-[600px] h-[440px] rounded-[50%] blur-[100px] opacity-60"
-            style={{
-              background:
-                "conic-gradient(from 210deg at 50% 50%, hsl(var(--accent)/0.4), hsl(var(--primary)/0.35), hsl(var(--accent)/0.4))",
-            }}
-          />
+          {/* Aurora ribbons — skipped on low-end devices */}
+          {!lite && (
+            <>
+              <motion.div
+                aria-hidden
+                animate={{ x: [0, 60, -30, 0], y: [0, -40, 20, 0], rotate: [0, 8, -6, 0] }}
+                transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute -top-40 -left-20 w-[560px] h-[420px] rounded-[50%] blur-[90px] opacity-70 will-change-transform"
+                style={{
+                  background:
+                    "conic-gradient(from 90deg at 50% 50%, hsl(var(--primary)/0.45), hsl(var(--accent)/0.35), hsl(var(--primary)/0.45))",
+                }}
+              />
+              <motion.div
+                aria-hidden
+                animate={{ x: [0, -50, 30, 0], y: [0, 30, -20, 0], rotate: [0, -10, 6, 0] }}
+                transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute -bottom-40 -right-24 w-[600px] h-[440px] rounded-[50%] blur-[100px] opacity-60 will-change-transform"
+                style={{
+                  background:
+                    "conic-gradient(from 210deg at 50% 50%, hsl(var(--accent)/0.4), hsl(var(--primary)/0.35), hsl(var(--accent)/0.4))",
+                }}
+              />
+            </>
+          )}
+
 
           {/* Floating particles */}
           {particles.map((p) => (
