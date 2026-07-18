@@ -62,7 +62,11 @@ export const FitnessIDCard: React.FC<FitnessIDCardProps> = ({
     .join("")
     .toUpperCase();
 
-  const id = memberId || `FX-${(name || "USER").slice(0, 3).toUpperCase()}-${String(workouts).padStart(4, "0")}`;
+  const truncate = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + "…" : s);
+  const safeName = truncate(name || "Athlete", 20);
+  const safeEmail = truncate(email || "FitFusion Member", 34);
+  const safeGoal = truncate(goal, 18);
+  const id = memberId || `FX-${(name || "USER").replace(/\s+/g, "").slice(0, 3).toUpperCase()}-${String(workouts).padStart(4, "0")}`;
   const since = memberSince || new Date().getFullYear().toString();
 
   const buildSVG = async (): Promise<string> => {
@@ -102,11 +106,11 @@ export const FitnessIDCard: React.FC<FitnessIDCardProps> = ({
         ${avatar}
         <circle cx="140" cy="230" r="86" fill="none" stroke="url(#g2)" stroke-width="4"/>
 
-        <text x="260" y="200" font-size="42" font-weight="800">${escapeXml(name || "Athlete")}</text>
-        <text x="260" y="235" font-size="18" fill="rgba(255,255,255,0.65)">${escapeXml(email || "FitFusion Member")}</text>
+        <text x="260" y="200" font-size="42" font-weight="800">${escapeXml(safeName)}</text>
+        <text x="260" y="235" font-size="18" fill="rgba(255,255,255,0.65)">${escapeXml(safeEmail)}</text>
 
-        <rect x="260" y="255" width="180" height="34" rx="17" fill="rgba(37,99,235,0.25)" stroke="rgba(147,197,253,0.4)"/>
-        <text x="350" y="278" text-anchor="middle" font-size="15" font-weight="700" fill="#dbeafe">⚡ LEVEL ${level} • ${escapeXml(goal)}</text>
+        <rect x="260" y="255" width="260" height="34" rx="17" fill="rgba(37,99,235,0.25)" stroke="rgba(147,197,253,0.4)"/>
+        <text x="390" y="278" text-anchor="middle" font-size="15" font-weight="700" fill="#dbeafe">⚡ LEVEL ${level} • ${escapeXml(safeGoal)}</text>
 
         <g transform="translate(60,360)">
           <rect x="0" y="0" width="960" height="140" rx="20" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.1)"/>
@@ -138,44 +142,64 @@ export const FitnessIDCard: React.FC<FitnessIDCardProps> = ({
     </svg>`;
   };
 
-  const renderPNG = async (): Promise<Blob | null> => {
+  const renderPNG = async (scale = 2): Promise<Blob | null> => {
     const svg = await buildSVG();
-    const svgBlob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
-    const url = URL.createObjectURL(svgBlob);
-    try {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      await new Promise<void>((resolve, reject) => {
-        img.onload = () => resolve();
-        img.onerror = () => reject(new Error("svg load failed"));
-        img.src = url;
-      });
-      const canvas = document.createElement("canvas");
-      canvas.width = 1080;
-      canvas.height = 640;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return null;
-      ctx.drawImage(img, 0, 0);
-      return await new Promise<Blob | null>((resolve) => canvas.toBlob((b) => resolve(b), "image/png", 0.95));
-    } finally {
-      URL.revokeObjectURL(url);
-    }
+    const dataUrl = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.decoding = "async";
+    await new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve();
+      img.onerror = () => reject(new Error("svg load failed"));
+      img.src = dataUrl;
+    });
+    const W = 1080 * scale;
+    const H = 640 * scale;
+    const canvas = document.createElement("canvas");
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    ctx.imageSmoothingEnabled = true;
+    // @ts-ignore
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(img, 0, 0, W, H);
+    return await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob((b) => resolve(b), "image/png", 1.0)
+    );
+  };
+
+  const buildFilename = () => {
+    const slug =
+      (name || "user")
+        .toLowerCase()
+        .normalize("NFKD")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "") || "user";
+    const date = new Date().toISOString().slice(0, 10);
+    return `fitxfusion-id-${slug}-${date}.png`;
+  };
+
+  const triggerDownload = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.rel = "noopener";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
   };
 
   const handleDownload = async () => {
     setBusy(true);
     try {
-      const blob = await renderPNG();
+      const blob = await renderPNG(2);
       if (!blob) throw new Error("render failed");
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = `fitxfusion-id-${(name || "user").toLowerCase().replace(/\s+/g, "-")}.png`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      setTimeout(() => URL.revokeObjectURL(link.href), 1500);
-      toast({ title: "Downloaded", description: "Fitness ID card saved to your device." });
-    } catch (e) {
+      triggerDownload(blob, buildFilename());
+      toast({ title: "Downloaded HD", description: "Fitness ID (2160×1280) saved to your device." });
+    } catch {
       toast({ title: "Download failed", description: "Please try again.", variant: "destructive" });
     } finally {
       setBusy(false);
@@ -185,29 +209,41 @@ export const FitnessIDCard: React.FC<FitnessIDCardProps> = ({
   const handleShare = async () => {
     setBusy(true);
     try {
-      const blob = await renderPNG();
+      const blob = await renderPNG(2);
       if (!blob) throw new Error("render failed");
-      const file = new File([blob], "fitxfusion-id.png", { type: "image/png" });
-      const shareData: ShareData = {
-        title: "My FitXFusion ID",
-        text: `${name} • Level ${level} • ${workouts} workouts • ${streak}-day streak 🔥`,
-        files: [file],
-      };
+      const filename = buildFilename();
+      const file = new File([blob], filename, { type: "image/png" });
+      const text = `${name} • Level ${level} • ${workouts} workouts • ${streak}-day streak 🔥 — FitXFusion`;
+
       // @ts-ignore
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share(shareData);
-      } else if (navigator.share) {
-        await navigator.share({ title: shareData.title, text: shareData.text, url: window.location.origin });
-      } else {
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "fitxfusion-id.png";
-        link.click();
-        setTimeout(() => URL.revokeObjectURL(link.href), 1500);
+      const canShareFiles = typeof navigator !== "undefined" && navigator.canShare && navigator.canShare({ files: [file] });
+      if (canShareFiles) {
+        try {
+          await navigator.share({ title: "My FitXFusion ID", text, files: [file] });
+          return;
+        } catch (err: any) {
+          if (err?.name === "AbortError") return;
+        }
       }
-      toast({ title: "Shared", description: "Your Fitness ID is ready." });
+
+      if (typeof navigator !== "undefined" && (navigator as any).share) {
+        try {
+          await (navigator as any).share({ title: "My FitXFusion ID", text, url: window.location.origin });
+          triggerDownload(blob, filename);
+          toast({ title: "Image downloaded", description: "Attach it to your share if needed." });
+          return;
+        } catch (err: any) {
+          if (err?.name === "AbortError") return;
+        }
+      }
+
+      try {
+        await navigator.clipboard.writeText(`${text} ${window.location.origin}`);
+      } catch {}
+      triggerDownload(blob, filename);
+      toast({ title: "Ready to share", description: "Image downloaded and caption copied." });
     } catch {
-      // user cancelled or no share support
+      toast({ title: "Share failed", description: "Please try again.", variant: "destructive" });
     } finally {
       setBusy(false);
     }
@@ -270,32 +306,33 @@ export const FitnessIDCard: React.FC<FitnessIDCardProps> = ({
               <div className="min-w-0 flex-1">
                 <div className="text-sm sm:text-lg font-extrabold truncate">{name || "Athlete"}</div>
                 <div className="text-[10px] sm:text-xs text-white/60 truncate">{email || "FitFusion Member"}</div>
-                <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/25 border border-blue-300/30 text-[9px] sm:text-[10px] font-bold text-blue-100">
-                  <Zap className="h-2.5 w-2.5" />LVL {level} • {goal}
+                <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/25 border border-blue-300/30 text-[9px] sm:text-[10px] font-bold text-blue-100 max-w-full">
+                  <Zap className="h-2.5 w-2.5 shrink-0" />
+                  <span className="truncate">LVL {level} • {goal}</span>
                 </div>
               </div>
             </div>
 
-            <div className="mt-auto grid grid-cols-4 gap-1.5 rounded-xl bg-white/[0.06] border border-white/10 p-2">
+            <div className="mt-auto grid grid-cols-4 gap-1 sm:gap-1.5 rounded-xl bg-white/[0.06] border border-white/10 p-1.5 sm:p-2">
               {[
-                { icon: Dumbbell, label: "Workouts", value: workouts, color: "text-blue-300" },
+                { icon: Dumbbell, label: "Workouts", value: String(workouts), color: "text-blue-300" },
                 { icon: Flame, label: "Streak", value: `${streak}d`, color: "text-amber-300" },
                 { icon: Sparkles, label: "Cal", value: `${Math.round(calories / 1000)}k`, color: "text-orange-300" },
-                { icon: Trophy, label: "Score", value: fitnessScore, color: "text-emerald-300" },
+                { icon: Trophy, label: "Score", value: String(fitnessScore), color: "text-emerald-300" },
               ].map((s) => (
-                <div key={s.label} className="text-center">
-                  <div className={`text-sm sm:text-lg font-black ${s.color}`}>{s.value}</div>
-                  <div className="text-[8px] sm:text-[9px] tracking-widest text-white/50">{s.label.toUpperCase()}</div>
+                <div key={s.label} className="text-center min-w-0 px-0.5">
+                  <div className={`text-[13px] sm:text-lg font-black leading-none truncate ${s.color}`}>{s.value}</div>
+                  <div className="text-[7px] sm:text-[9px] tracking-[0.15em] sm:tracking-widest text-white/50 mt-0.5 truncate">{s.label.toUpperCase()}</div>
                 </div>
               ))}
             </div>
 
-            <div className="mt-2 flex items-end justify-between text-[9px] sm:text-[10px]">
-              <div>
+            <div className="mt-2 flex items-end justify-between gap-2 text-[9px] sm:text-[10px]">
+              <div className="min-w-0">
                 <div className="tracking-[0.25em] text-white/40">MEMBER ID</div>
-                <div className="font-mono font-bold text-white">{id}</div>
+                <div className="font-mono font-bold text-white truncate">{id}</div>
               </div>
-              <div className="text-right">
+              <div className="text-right shrink-0">
                 <div className="tracking-[0.25em] text-white/40">SINCE</div>
                 <div className="font-bold text-white">{since}</div>
               </div>
