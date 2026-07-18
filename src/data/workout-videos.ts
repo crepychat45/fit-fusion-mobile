@@ -1,3 +1,5 @@
+import { resolveExerciseVideo } from "./exercise-video-map";
+
 export interface WorkoutVideoData {
   id: string;
   title: string;
