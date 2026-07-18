@@ -210,6 +210,8 @@ const Profile = () => {
                   fitnessScore={78}
                   goal={cloudProfile?.fitness_goals?.[0] || "Stay Fit"}
                 />
+                <ProfileHub email={userEmail} displayName={displayName} />
+                <div id="profile-editor" />
                 <ProfileEditor onSave={() => toast({ title: "✅ Profile Updated" })} />
                 <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
                   <CardHeader className="pb-3">
