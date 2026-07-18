@@ -76,8 +76,9 @@ const Profile = () => {
             <ProfilePhotoUpload
               name={profileData?.name || "User"}
               initialImage={profileData?.avatar || null}
+              size="lg"
               onImageUpdate={(url) => {
-                const next = { ...profileData, avatar: url };
+                const next = { ...profileData, avatar: url || undefined };
                 setProfileData(next);
                 try { localStorage.setItem("fitfusion-profile", JSON.stringify(next)); } catch {}
                 window.dispatchEvent(new Event("profileUpdated"));
@@ -86,10 +87,20 @@ const Profile = () => {
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-bold truncate">Profile</h1>
               <p className="text-primary-foreground/70 text-sm truncate">Welcome, {profileData?.name || "User"} 👋</p>
+              <div className="flex items-center gap-1.5 mt-1">
+                <Badge className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30 text-[10px] h-5">
+                  v{currentVersion}{currentVersion === APP_VERSION ? "" : " ↑"}
+                </Badge>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-6 px-2 text-[10px] text-primary-foreground/90 hover:bg-primary-foreground/15 hover:text-primary-foreground"
+                  onClick={handleShare}
+                >
+                  <Share2 className="h-3 w-3 mr-1" />Share
+                </Button>
+              </div>
             </div>
-            <Badge className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30 text-xs shrink-0">
-              v{currentVersion}{currentVersion === APP_VERSION ? "" : " ↑"}
-            </Badge>
           </div>
 
           <div className="grid grid-cols-3 gap-2">
