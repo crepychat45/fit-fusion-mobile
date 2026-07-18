@@ -127,10 +127,6 @@ export const getExerciseVideo = (
   exerciseId: string,
   exerciseName?: string,
 ): WorkoutVideoData => {
-  // Lazy import to avoid circular deps and keep first-paint tiny.
-  // Resolves the exercise name to a curated YouTube demo.
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { resolveExerciseVideo } = require("./exercise-video-map") as typeof import("./exercise-video-map");
   const match = resolveExerciseVideo(exerciseName ?? "");
   return {
     id: `auto-e-${exerciseId}`,
@@ -144,4 +140,5 @@ export const getExerciseVideo = (
     exerciseId,
   };
 };
+
 
