@@ -33,6 +33,7 @@ const QuickBoostWidget = lazy(() => import("@/components/dashboard/quick-boost-w
 const DailyChallengeWidget = lazy(() => import("@/components/dashboard/daily-challenge-widget").then((m) => ({ default: m.DailyChallengeWidget })));
 const MonthlySecurityScanWidget = lazy(() => import("@/components/home/monthly-security-scan-widget").then((m) => ({ default: m.MonthlySecurityScanWidget })));
 const VitalityIndexWidget = lazy(() => import("@/components/dashboard/vitality-index-widget").then((m) => ({ default: m.VitalityIndexWidget })));
+const SmartwatchControlWidget = lazy(() => import("@/components/dashboard/smartwatch-control-widget").then((m) => ({ default: m.SmartwatchControlWidget })));
 const MobileNav = lazy(() => import("@/components/mobile-nav").then((m) => ({ default: m.MobileNav })));
 const MobileFloatingActions = lazy(() => import("@/components/mobile/mobile-floating-actions").then((m) => ({ default: m.MobileFloatingActions })));
 const MobileAIAssistant = lazy(() => import("@/components/mobile/mobile-ai-assistant").then((m) => ({ default: m.MobileAIAssistant })));
@@ -135,6 +136,13 @@ const Index = () => {
                 avgHeartRate={userProfile.stats.avgHeartRate}
               />
             </div>
+          </motion.div>
+
+          {/* Smartwatch Control Hub — v7.1 */}
+          <motion.div variants={fadeUp} className="px-4">
+            <Suspense fallback={<HomeSectionFallback />}>
+              <SmartwatchControlWidget />
+            </Suspense>
           </motion.div>
 
           {/* Vitality Index — new in v7.0 */}
