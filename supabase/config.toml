@@ -1,6 +1,9 @@
 project_id = "einebfmuguagxtpanaek"
-[functions.process-email-queue]
-verify_jwt = true
 
-[functions.public-ai-workout-generator]
-verify_jwt = false
+[functions]
+  [functions.auth-email-hook]
+    verify_jwt = false
+  [functions.process-email-queue]
+    verify_jwt = true
+  [functions.public-ai-workout-generator]
+    verify_jwt = false
