@@ -88,6 +88,19 @@ const Profile = () => {
 
   const fadeUp = { hidden: { y: 12, opacity: 0 }, visible: { y: 0, opacity: 1, transition: { duration: 0.4 } } };
 
+  // Never render identity UI until auth + profile have resolved for this user.
+  // This is what prevents demo/default values from ever flashing on refresh.
+  if (authLoading || (user && profileLoading && !cloudProfile)) {
+    return (
+      <div className="min-h-screen bg-background pb-24 flex items-center justify-center">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading your profile…
+        </div>
+      </div>
+    );
+  }
+  if (!user) return null;
+
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
