@@ -118,17 +118,20 @@ export default function AuthPage() {
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.20),transparent_55%),radial-gradient(ellipse_at_bottom_right,hsl(var(--accent)/0.18),transparent_55%),radial-gradient(ellipse_at_bottom_left,hsl(var(--secondary)/0.14),transparent_55%)]" />
 
-          {/* Cursor-follow orb */}
-          <motion.div
-            aria-hidden
-            className="absolute w-[520px] h-[520px] rounded-full blur-[110px] opacity-60 -translate-x-1/2 -translate-y-1/2"
-            style={{
-              left: orbX,
-              top: orbY,
-              background:
-                "radial-gradient(circle, hsl(var(--primary)/0.55), hsl(var(--accent)/0.35) 40%, transparent 70%)",
-            }}
-          />
+          {/* Cursor-follow orb — desktop / high-end only */}
+          {!lite && (
+            <motion.div
+              aria-hidden
+              className="absolute w-[520px] h-[520px] rounded-full blur-[110px] opacity-60 -translate-x-1/2 -translate-y-1/2 will-change-transform"
+              style={{
+                left: orbX,
+                top: orbY,
+                background:
+                  "radial-gradient(circle, hsl(var(--primary)/0.55), hsl(var(--accent)/0.35) 40%, transparent 70%)",
+              }}
+            />
+          )}
+
 
           {/* Aurora ribbons — skipped on low-end devices */}
           {!lite && (
