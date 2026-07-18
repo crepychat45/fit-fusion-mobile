@@ -160,6 +160,9 @@ const Profile = () => {
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Lots of new features: identity, milestones, prefs, connections, sharing, danger zone */}
+                <ProfileTabExtras />
               </TabsContent>
 
               <TabsContent value="security" className="space-y-3 mt-0">
