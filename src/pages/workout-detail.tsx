@@ -276,17 +276,11 @@ const WorkoutDetail = () => {
                   onSelect={() =>
                     navigate(`/exercise/${workout.id}/${exercise.id}`)
                   }
-                  hasVideo={Boolean(
-                    workoutVideos.find((v) => v.exerciseId === exercise.id),
-                  )}
+                  hasVideo
                   onVideoClick={(e) => {
                     e.stopPropagation();
-                    const exerciseVideo = workoutVideos.find(
-                      (v) => v.exerciseId === exercise.id,
-                    );
-                    if (exerciseVideo) {
-                      openVideoPreview(exerciseVideo.videoUrl);
-                    }
+                    const exerciseVideo = getExerciseVideo(exercise.id, exercise.name);
+                    openVideoPreview(exerciseVideo.videoUrl);
                   }}
                 />
               ))}
