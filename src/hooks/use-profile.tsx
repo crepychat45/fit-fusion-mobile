@@ -29,7 +29,9 @@ export const useProfile = (userId?: string, options: { enabled?: boolean } = {})
     queryKey: ['profile', userId],
     enabled,
     retry: 1,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       const targetUserId = userId || user?.id;
