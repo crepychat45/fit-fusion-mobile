@@ -120,21 +120,26 @@ export const getWorkoutVideo = (workoutId: string): WorkoutVideoData => {
   };
 };
 
-/** Get a demo video for any exercise — always returns a valid video. */
+/** Get a demo video for any exercise — always returns a valid, exercise-specific video. */
 export const getExerciseVideo = (
   exerciseId: string,
   exerciseName?: string,
 ): WorkoutVideoData => {
-  const key = `${exerciseId}-${exerciseName ?? ""}`;
+  // Lazy import to avoid circular deps and keep first-paint tiny.
+  // Resolves the exercise name to a curated YouTube demo.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { resolveExerciseVideo } = require("./exercise-video-map") as typeof import("./exercise-video-map");
+  const match = resolveExerciseVideo(exerciseName ?? "");
   return {
     id: `auto-e-${exerciseId}`,
-    title: exerciseName ? `${exerciseName} — Form Demo` : "Exercise Demo",
-    thumbnailUrl: pickThumbnail(key),
-    videoUrl: pickVideoUrl(key),
+    title: exerciseName ? `${exerciseName} — Form Demo` : match.title,
+    thumbnailUrl: match.thumbnailUrl,
+    videoUrl: match.videoUrl,
     duration: "0:45",
     category: "Exercise",
     level: "All",
-    description: `AI-generated form demonstration${exerciseName ? ` for ${exerciseName}` : ""}.`,
+    description: `Proper-form demonstration${exerciseName ? ` for ${exerciseName}` : ""}.`,
     exerciseId,
   };
 };
+
