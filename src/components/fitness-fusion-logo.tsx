@@ -96,67 +96,59 @@ export const FitnessFusionLogo: React.FC<FitnessFusionLogoProps> = ({
           </>
         )}
 
-        {/* Icon composition */}
+        {/* Bespoke FitFusion mark — fused "F" + pulse wave */}
         <div className="relative flex items-center justify-center h-full">
-          <motion.div
-            animate={animated ? {
-              rotate: [0, 5, -5, 0],
-            } : {}}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
+          <motion.svg
+            viewBox="0 0 48 48"
+            className={`${sizes.icon} relative z-10 drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)]`}
+            animate={animated ? { rotate: [0, 3, -3, 0] } : {}}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
           >
-            <Activity className={`${sizes.icon} text-white drop-shadow-lg`} />
-          </motion.div>
-          
-          {/* Pulse ring */}
+            <defs>
+              <linearGradient id="ff-mark" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#ffffff" />
+                <stop offset="60%" stopColor="#e0e7ff" />
+                <stop offset="100%" stopColor="#fbcfe8" />
+              </linearGradient>
+              <linearGradient id="ff-pulse" x1="0" y1="0.5" x2="1" y2="0.5">
+                <stop offset="0%" stopColor="#fde68a" />
+                <stop offset="100%" stopColor="#f472b6" />
+              </linearGradient>
+            </defs>
+            {/* Stylized F — two fused bars */}
+            <path
+              d="M14 8h22a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H22v6h12a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H22v8a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2Z"
+              fill="url(#ff-mark)"
+              opacity="0.95"
+            />
+            {/* Pulse wave through the F */}
+            <motion.path
+              d="M6 30h6l3-8 6 16 4-10 3 6h14"
+              stroke="url(#ff-pulse)"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+              initial={{ pathLength: 0, opacity: 0.4 }}
+              animate={animated ? { pathLength: [0, 1, 1], opacity: [0.4, 1, 0.6] } : { pathLength: 1, opacity: 0.9 }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </motion.svg>
+
+          {/* Halo pulse */}
           <motion.div
-            className="absolute inset-0 flex items-center justify-center"
-            animate={animated ? {
-              scale: [1, 1.5, 1],
-              opacity: [0.5, 0, 0.5],
-            } : {}}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeOut",
-            }}
-          >
-            <Heart className={`${size === 'sm' ? 'h-6 w-6' : size === 'md' ? 'h-8 w-8' : size === 'lg' ? 'h-10 w-10' : 'h-14 w-14'} text-red-400/30`} />
-          </motion.div>
+            className="absolute inset-2 rounded-xl border border-white/40"
+            animate={animated ? { scale: [1, 1.35, 1], opacity: [0.55, 0, 0.55] } : {}}
+            transition={{ duration: 2.6, repeat: Infinity, ease: "easeOut" }}
+          />
 
           {/* Energy spark */}
           <motion.div
             className="absolute -top-0.5 -right-0.5"
-            animate={animated ? {
-              scale: [1, 1.4, 1],
-              rotate: [0, 15, 0],
-            } : {}}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
+            animate={animated ? { scale: [1, 1.4, 1], rotate: [0, 15, 0] } : {}}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
           >
-            <Zap className={`${size === 'sm' ? 'h-2.5 w-2.5' : size === 'md' ? 'h-3 w-3' : 'h-4 w-4'} text-yellow-300 drop-shadow-[0_0_4px_rgba(253,224,71,0.8)]`} />
-          </motion.div>
-
-          {/* Flame accent */}
-          <motion.div
-            className="absolute -bottom-0.5 -left-0.5"
-            animate={animated ? {
-              scale: [1, 1.2, 1],
-              y: [0, -2, 0],
-            } : {}}
-            transition={{
-              duration: 1,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          >
-            <Flame className={`${size === 'sm' ? 'h-2 w-2' : size === 'md' ? 'h-2.5 w-2.5' : 'h-3 w-3'} text-orange-400 drop-shadow-[0_0_3px_rgba(251,146,60,0.8)]`} />
+            <Zap className={`${size === 'sm' ? 'h-2.5 w-2.5' : size === 'md' ? 'h-3 w-3' : 'h-4 w-4'} text-yellow-300 drop-shadow-[0_0_4px_rgba(253,224,71,0.9)]`} />
           </motion.div>
         </div>
 
