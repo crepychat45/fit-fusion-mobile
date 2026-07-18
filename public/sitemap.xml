@@ -8,6 +8,7 @@
   <url><loc>https://fitxfusion.lovable.app/community</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://fitxfusion.lovable.app/chat</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
   <url><loc>https://fitxfusion.lovable.app/tools</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://fitxfusion.lovable.app/tools/ai-workout-generator</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://fitxfusion.lovable.app/wearables</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://fitxfusion.lovable.app/subscription</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://fitxfusion.lovable.app/help</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>

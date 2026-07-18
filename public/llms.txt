@@ -12,6 +12,7 @@
 - [Community](/community): Join challenges, share transformations, and follow other members.
 - [Chat](/chat): FitX Fusion AI Chat for real-time coaching and form guidance.
 - [Tools](/tools): AI fitness utilities, calculators, and workout generators.
+- [AI Workout Generator](/tools/ai-workout-generator): Free public AI workout planner — personalized routines by goal, equipment, and level.
 - [Wearables](/wearables): Sync data from smartwatches and fitness trackers.
 - [Subscription](/subscription): Premium plans with advanced AI features.
 - [Help](/help): Support and getting-started guides.
