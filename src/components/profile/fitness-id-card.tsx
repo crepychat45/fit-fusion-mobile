@@ -62,7 +62,11 @@ export const FitnessIDCard: React.FC<FitnessIDCardProps> = ({
     .join("")
     .toUpperCase();
 
-  const id = memberId || `FX-${(name || "USER").slice(0, 3).toUpperCase()}-${String(workouts).padStart(4, "0")}`;
+  const truncate = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + "…" : s);
+  const safeName = truncate(name || "Athlete", 20);
+  const safeEmail = truncate(email || "FitFusion Member", 34);
+  const safeGoal = truncate(goal, 18);
+  const id = memberId || `FX-${(name || "USER").replace(/\s+/g, "").slice(0, 3).toUpperCase()}-${String(workouts).padStart(4, "0")}`;
   const since = memberSince || new Date().getFullYear().toString();
 
   const buildSVG = async (): Promise<string> => {
