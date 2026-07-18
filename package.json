@@ -13,6 +13,9 @@
     "test": "echo 'No tests yet' && exit 0"
   },
   "dependencies": {
+    "@capacitor/android": "^8.4.2",
+    "@capacitor/core": "^8.4.2",
+    "@capacitor/ios": "^8.4.2",
     "@hookform/resolvers": "^5.4.0",
     "@lovable.dev/cloud-auth-js": "^1.1.2",
     "@lovable.dev/mcp-js": "^0.20.0",
@@ -75,6 +78,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.4.2",
     "@types/node": "^22.20.0",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
