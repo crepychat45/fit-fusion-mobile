@@ -16,6 +16,7 @@ import { WeeklyPulseWidget } from "@/components/profile/weekly-pulse-widget";
 import { VitalityRingsWidget } from "@/components/profile/vitality-rings-widget";
 import { ProfileTabExtras } from "@/components/profile/profile-tab-extras";
 import { MobileAppDownloadCard } from "@/components/profile/mobile-app-download-card";
+import { AdminAabDownloadCard } from "@/components/profile/admin-aab-download-card";
 import { APP_VERSION, getInstalledVersion } from "@/lib/app-version";
 import { ProfilePhotoUpload } from "@/components/profile-photo-upload";
 import { useProfile } from "@/hooks/use-profile";
@@ -164,6 +165,7 @@ const Profile = () => {
 
                 {/* Lots of new features: identity, milestones, prefs, connections, sharing, danger zone */}
                 <MobileAppDownloadCard />
+                <AdminAabDownloadCard />
                 <ProfileTabExtras />
               </TabsContent>
 
