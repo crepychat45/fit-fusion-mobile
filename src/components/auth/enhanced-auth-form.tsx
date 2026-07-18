@@ -413,6 +413,17 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
 
           <SocialLogin />
 
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full h-11"
+            onClick={handleMagicLink}
+            disabled={loading || !emailValid}
+          >
+            <Mail className="h-4 w-4 mr-2" />
+            Email me a magic link
+          </Button>
+
           <div className="text-center">
             <Button variant="link" className="text-sm" onClick={() => setIsSignUp(!isSignUp)}>
               {isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
