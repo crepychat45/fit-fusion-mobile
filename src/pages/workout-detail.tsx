@@ -329,19 +329,22 @@ const WorkoutDetail = () => {
               <div className="grid grid-cols-1 gap-3">
                 <WorkoutVideo
                   title={`${workout.title} - Full Workout`}
-                  thumbnailUrl="/placeholder.svg"
-                  videoUrl="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-                  duration="25:30"
+                  thumbnailUrl={workoutVideo.thumbnailUrl}
+                  videoUrl={workoutVideo.videoUrl}
+                  duration={workoutVideo.duration}
                 />
-                {workout.exercises.slice(0, 3).map((exercise, index) => (
-                  <WorkoutVideo
-                    key={exercise.id}
-                    title={`${exercise.name} - Technique Guide`}
-                    thumbnailUrl="/placeholder.svg"
-                    videoUrl="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4"
-                    duration="2:45"
-                  />
-                ))}
+                {workout.exercises.slice(0, 3).map((exercise) => {
+                  const ev = getExerciseVideo(exercise.id, exercise.name);
+                  return (
+                    <WorkoutVideo
+                      key={exercise.id}
+                      title={`${exercise.name} — Technique Guide`}
+                      thumbnailUrl={ev.thumbnailUrl}
+                      videoUrl={ev.videoUrl}
+                      duration={ev.duration}
+                    />
+                  );
+                })}
               </div>
             </div>
           </TabsContent>
