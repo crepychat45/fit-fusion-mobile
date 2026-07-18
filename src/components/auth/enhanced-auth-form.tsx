@@ -57,6 +57,8 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
   const [resetEmail, setResetEmail] = useState("");
   const [pendingVerificationEmail, setPendingVerificationEmail] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [capsLock, setCapsLock] = useState(false);
+
 
   useEffect(() => {
     if (resendCooldown <= 0) return;
