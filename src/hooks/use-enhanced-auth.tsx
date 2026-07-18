@@ -78,6 +78,16 @@ const ensureAuthInitialized = () => {
     window.dispatchEvent(new CustomEvent("fitfusion-auth-event", { detail: { event, userId: session?.user?.id ?? null } }));
   });
 
+  // Surface auth errors returned in the URL hash (e.g. expired links from any page)
+  try {
+    const hash = window.location.hash.replace(/^#/, "");
+    if (hash.includes("error=") || hash.includes("error_description=")) {
+      const params = new URLSearchParams(hash);
+      const description = (params.get("error_description") ?? params.get("error") ?? "Authentication link error").replace(/\+/g, " ");
+      window.dispatchEvent(new CustomEvent("fitfusion-auth-error", { detail: { description } }));
+    }
+  } catch { /* ignore */ }
+
   window.addEventListener("pagehide", () => subscription.unsubscribe(), { once: true });
 };
 
