@@ -1,0 +1,22 @@
+# FitFusion
+
+> FitFusion is a personalized AI fitness coaching platform offering adaptive workout plans, progress tracking, nutrition logging, biometric syncing, and a supportive community.
+
+## Pages
+
+- [Home](/): AI-powered fitness dashboard with today's workout, streaks, and personalized insights.
+- [Workouts](/workouts): Browse and start guided workouts filtered by goal, level, and equipment.
+- [Workout Plans](/workout-plans): Multi-week AI-generated training programs tailored to your goals.
+- [Progress](/progress): Track streaks, personal records, body metrics, and long-term trends.
+- [Nutrition](/nutrition): Log meals and monitor macros aligned with your training.
+- [Community](/community): Join challenges, share transformations, and follow other members.
+- [Chat](/chat): FitX Fusion AI Chat for real-time coaching and form guidance.
+- [Tools](/tools): AI fitness utilities, calculators, and workout generators.
+- [Wearables](/wearables): Sync data from smartwatches and fitness trackers.
+- [Subscription](/subscription): Premium plans with advanced AI features.
+- [Help](/help): Support and getting-started guides.
+
+## Optional
+
+- [Privacy Policy](/privacy-policy)
+- [Terms of Service](/terms-of-service)
