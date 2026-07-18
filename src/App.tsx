@@ -58,6 +58,7 @@ const Subscription = lazyWithRetry(() => import("./pages/subscription"));
 const ChatPage = lazyWithRetry(() => import("./pages/chat"));
 const AuthPage = lazyWithRetry(() => import("./components/auth/auth-page"));
 const ResetPassword = lazyWithRetry(() => import("./pages/reset-password"));
+const AuthCallback = lazyWithRetry(() => import("./pages/auth-callback"));
 const TermsOfService = lazyWithRetry(() => import("./pages/terms-of-service"));
 const PrivacyPolicy = lazyWithRetry(() => import("./pages/privacy-policy"));
 const Onboarding = lazyWithRetry(() => import("./pages/onboarding"));
