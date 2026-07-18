@@ -114,7 +114,7 @@ const Index = () => {
                     <Zap className="h-5 w-5 text-primary-foreground" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-foreground">Quick Start</h3>
+                    <h2 className="text-sm font-bold text-foreground">Quick Start</h2>
                     <p className="text-xs text-muted-foreground">Jump into a recommended workout</p>
                   </div>
                 </div>
