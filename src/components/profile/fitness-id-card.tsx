@@ -106,11 +106,11 @@ export const FitnessIDCard: React.FC<FitnessIDCardProps> = ({
         ${avatar}
         <circle cx="140" cy="230" r="86" fill="none" stroke="url(#g2)" stroke-width="4"/>
 
-        <text x="260" y="200" font-size="42" font-weight="800">${escapeXml(name || "Athlete")}</text>
-        <text x="260" y="235" font-size="18" fill="rgba(255,255,255,0.65)">${escapeXml(email || "FitFusion Member")}</text>
+        <text x="260" y="200" font-size="42" font-weight="800">${escapeXml(safeName)}</text>
+        <text x="260" y="235" font-size="18" fill="rgba(255,255,255,0.65)">${escapeXml(safeEmail)}</text>
 
-        <rect x="260" y="255" width="180" height="34" rx="17" fill="rgba(37,99,235,0.25)" stroke="rgba(147,197,253,0.4)"/>
-        <text x="350" y="278" text-anchor="middle" font-size="15" font-weight="700" fill="#dbeafe">⚡ LEVEL ${level} • ${escapeXml(goal)}</text>
+        <rect x="260" y="255" width="260" height="34" rx="17" fill="rgba(37,99,235,0.25)" stroke="rgba(147,197,253,0.4)"/>
+        <text x="390" y="278" text-anchor="middle" font-size="15" font-weight="700" fill="#dbeafe">⚡ LEVEL ${level} • ${escapeXml(safeGoal)}</text>
 
         <g transform="translate(60,360)">
           <rect x="0" y="0" width="960" height="140" rx="20" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.1)"/>
