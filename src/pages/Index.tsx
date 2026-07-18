@@ -138,6 +138,13 @@ const Index = () => {
             </div>
           </motion.div>
 
+          {/* Smartwatch Control Hub — v7.1 */}
+          <motion.div variants={fadeUp} className="px-4">
+            <Suspense fallback={<HomeSectionFallback />}>
+              <SmartwatchControlWidget />
+            </Suspense>
+          </motion.div>
+
           {/* Vitality Index — new in v7.0 */}
           <motion.div variants={fadeUp} className="px-4">
             <Suspense fallback={<HomeSectionFallback />}>
