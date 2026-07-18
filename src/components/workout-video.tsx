@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,12 +11,12 @@ import {
 import {
   Play,
   Pause,
-  X,
   Volume2,
   VolumeX,
   Maximize,
   RotateCcw,
 } from "lucide-react";
+import { FALLBACK_VIDEO_URLS } from "@/data/workout-videos";
 
 interface WorkoutVideoProps {
   title: string;
