@@ -241,10 +241,11 @@ export function WelcomeHeader({
               </div>
 
               <div className="min-w-0 flex-1">
+                <h1 className="sr-only">FitFusion — Personalized AI Fitness Coaching</h1>
                 <div className="flex items-center gap-3 mb-1">
-                  <h1 className="text-2xl font-bold text-white truncate">
+                  <p className="text-2xl font-bold text-white truncate" aria-hidden="true">
                     {getGreeting()}, {displayName}
-                  </h1>
+                  </p>
                   <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white border-0 shadow-lg flex items-center gap-1">
                     <Crown className="w-3 h-3" />
                     Pro
@@ -267,6 +268,7 @@ export function WelcomeHeader({
               <Button
                 variant="ghost"
                 size="icon"
+                aria-label="Open notifications"
                 className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm rounded-full shadow-lg"
                 onClick={() => navigate("/notifications")}
               >
@@ -275,6 +277,7 @@ export function WelcomeHeader({
               <Button
                 variant="ghost"
                 size="icon"
+                aria-label="Open profile"
                 className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm rounded-full shadow-lg"
                 onClick={() => navigate("/profile")}
               >
@@ -283,6 +286,7 @@ export function WelcomeHeader({
               <Button
                 variant="ghost"
                 size="icon"
+                aria-label="Open settings"
                 className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm rounded-full shadow-lg"
                 onClick={() => navigate("/settings")}
               >
