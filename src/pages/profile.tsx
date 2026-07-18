@@ -81,12 +81,7 @@ const Profile = () => {
               name={displayName}
               initialImage={displayAvatar}
               size="lg"
-              onImageUpdate={(url) => {
-                const next = { ...profileData, avatar: url || undefined };
-                setProfileData(next);
-                try { localStorage.setItem("fitfusion-profile", JSON.stringify(next)); } catch {}
-                window.dispatchEvent(new Event("profileUpdated"));
-              }}
+              onImageUpdate={(url) => handleAvatarUpdate(url || null)}
             />
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-bold truncate">Profile</h1>
