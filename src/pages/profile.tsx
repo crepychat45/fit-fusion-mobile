@@ -4,7 +4,7 @@ import { MobileNav } from "@/components/mobile-nav";
 import { ProfileEditor } from "@/components/profile-editor";
 import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, CreditCard, Settings, User, Bell, Trophy, Activity } from "lucide-react";
+import { Shield, CreditCard, Settings, User, Bell, Trophy, Activity, Share2, Target, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { userProfile } from "@/data/user";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,6 +15,7 @@ import { ActivityHeatmap } from "@/components/profile/activity-heatmap";
 import { WeeklyPulseWidget } from "@/components/profile/weekly-pulse-widget";
 import { APP_VERSION, getInstalledVersion } from "@/lib/app-version";
 import { ProfilePhotoUpload } from "@/components/profile-photo-upload";
+import { useProfile } from "@/hooks/use-profile";
 
 const Profile = () => {
   const { toast } = useToast();
@@ -22,16 +23,45 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState("profile");
   const [currentVersion, setCurrentVersion] = useState(() => getInstalledVersion());
   const [profileData, setProfileData] = useState(userProfile);
+  const { profile: cloudProfile } = useProfile();
 
   useEffect(() => {
     const saved = localStorage.getItem("fitfusion-profile");
     if (saved) {
-      try { setProfileData({ ...userProfile, ...JSON.parse(saved) }); } catch {}
+      try { setProfileData((prev) => ({ ...prev, ...JSON.parse(saved) })); } catch {}
     }
     const syncVersion = () => setCurrentVersion(getInstalledVersion());
     window.addEventListener("versionUpdated", syncVersion);
     return () => window.removeEventListener("versionUpdated", syncVersion);
   }, []);
+
+  // Prefer cloud avatar_url when available so it persists across devices
+  useEffect(() => {
+    if (cloudProfile?.avatar_url && cloudProfile.avatar_url !== profileData?.avatar) {
+      const next = { ...profileData, avatar: cloudProfile.avatar_url };
+      setProfileData(next);
+      try { localStorage.setItem("fitfusion-profile", JSON.stringify(next)); } catch {}
+      window.dispatchEvent(new Event("profileUpdated"));
+    }
+  }, [cloudProfile?.avatar_url]);
+
+  const handleShare = async () => {
+    const shareData = {
+      title: "My FitFusion Progress",
+      text: `💪 ${profileData?.stats?.workoutsCompleted || 0} workouts • 🔥 ${profileData?.stats?.streakDays || 0}-day streak on FitFusion!`,
+      url: window.location.origin,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
+        toast({ title: "Copied", description: "Progress copied to clipboard" });
+      }
+    } catch {
+      // user cancelled
+    }
+  };
 
   const fadeUp = { hidden: { y: 12, opacity: 0 }, visible: { y: 0, opacity: 1, transition: { duration: 0.4 } } };
 
