@@ -171,7 +171,7 @@ export const useProfile = (userId?: string, options: { enabled?: boolean } = {})
 
       const { data, error } = await supabase
         .from('profiles')
-        .update(clean)
+        .update(clean as never)
         .eq('user_id', user.id) // scoped strictly to the caller — RLS enforces this too
         .select()
         .maybeSingle();
