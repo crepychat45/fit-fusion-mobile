@@ -48,6 +48,18 @@ export default function AuthPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [testimonialIdx, setTestimonialIdx] = useState(0);
 
+  // Detect low-power conditions once — respect reduced-motion, small screens, and coarse pointers
+  const [lite, setLite] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const small = window.matchMedia("(max-width: 768px)").matches;
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    const lowMem = (navigator as any).deviceMemory && (navigator as any).deviceMemory <= 4;
+    const lowCPU = (navigator as any).hardwareConcurrency && (navigator as any).hardwareConcurrency <= 4;
+    setLite(reduce || (small && coarse) || lowMem || lowCPU);
+  }, []);
+
   useEffect(() => {
     if (user && !loading) navigate(next ?? "/");
   }, [user, loading, navigate, next]);
@@ -58,6 +70,7 @@ export default function AuthPage() {
   }, []);
 
   const handleMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (lite) return;
     const r = containerRef.current?.getBoundingClientRect();
     if (!r) return;
     mx.set((e.clientX - r.left) / r.width);
@@ -68,7 +81,7 @@ export default function AuthPage() {
 
   const particles = useMemo(
     () =>
-      Array.from({ length: 18 }).map((_, i) => ({
+      Array.from({ length: lite ? 0 : 18 }).map((_, i) => ({
         id: i,
         size: 2 + (i % 5),
         left: (i * 53) % 100,
@@ -76,8 +89,9 @@ export default function AuthPage() {
         delay: i * 0.35,
         duration: 6 + (i % 6),
       })),
-    []
+    [lite]
   );
+
 
   if (loading) {
     return (
@@ -104,39 +118,47 @@ export default function AuthPage() {
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.20),transparent_55%),radial-gradient(ellipse_at_bottom_right,hsl(var(--accent)/0.18),transparent_55%),radial-gradient(ellipse_at_bottom_left,hsl(var(--secondary)/0.14),transparent_55%)]" />
 
-          {/* Cursor-follow orb */}
-          <motion.div
-            aria-hidden
-            className="absolute w-[520px] h-[520px] rounded-full blur-[110px] opacity-60 -translate-x-1/2 -translate-y-1/2"
-            style={{
-              left: orbX,
-              top: orbY,
-              background:
-                "radial-gradient(circle, hsl(var(--primary)/0.55), hsl(var(--accent)/0.35) 40%, transparent 70%)",
-            }}
-          />
+          {/* Cursor-follow orb — desktop / high-end only */}
+          {!lite && (
+            <motion.div
+              aria-hidden
+              className="absolute w-[520px] h-[520px] rounded-full blur-[110px] opacity-60 -translate-x-1/2 -translate-y-1/2 will-change-transform"
+              style={{
+                left: orbX,
+                top: orbY,
+                background:
+                  "radial-gradient(circle, hsl(var(--primary)/0.55), hsl(var(--accent)/0.35) 40%, transparent 70%)",
+              }}
+            />
+          )}
 
-          {/* Aurora ribbons */}
-          <motion.div
-            aria-hidden
-            animate={{ x: [0, 60, -30, 0], y: [0, -40, 20, 0], rotate: [0, 8, -6, 0] }}
-            transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -top-40 -left-20 w-[560px] h-[420px] rounded-[50%] blur-[90px] opacity-70"
-            style={{
-              background:
-                "conic-gradient(from 90deg at 50% 50%, hsl(var(--primary)/0.45), hsl(var(--accent)/0.35), hsl(var(--primary)/0.45))",
-            }}
-          />
-          <motion.div
-            aria-hidden
-            animate={{ x: [0, -50, 30, 0], y: [0, 30, -20, 0], rotate: [0, -10, 6, 0] }}
-            transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -bottom-40 -right-24 w-[600px] h-[440px] rounded-[50%] blur-[100px] opacity-60"
-            style={{
-              background:
-                "conic-gradient(from 210deg at 50% 50%, hsl(var(--accent)/0.4), hsl(var(--primary)/0.35), hsl(var(--accent)/0.4))",
-            }}
-          />
+
+          {/* Aurora ribbons — skipped on low-end devices */}
+          {!lite && (
+            <>
+              <motion.div
+                aria-hidden
+                animate={{ x: [0, 60, -30, 0], y: [0, -40, 20, 0], rotate: [0, 8, -6, 0] }}
+                transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute -top-40 -left-20 w-[560px] h-[420px] rounded-[50%] blur-[90px] opacity-70 will-change-transform"
+                style={{
+                  background:
+                    "conic-gradient(from 90deg at 50% 50%, hsl(var(--primary)/0.45), hsl(var(--accent)/0.35), hsl(var(--primary)/0.45))",
+                }}
+              />
+              <motion.div
+                aria-hidden
+                animate={{ x: [0, -50, 30, 0], y: [0, 30, -20, 0], rotate: [0, -10, 6, 0] }}
+                transition={{ duration: 26, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute -bottom-40 -right-24 w-[600px] h-[440px] rounded-[50%] blur-[100px] opacity-60 will-change-transform"
+                style={{
+                  background:
+                    "conic-gradient(from 210deg at 50% 50%, hsl(var(--accent)/0.4), hsl(var(--primary)/0.35), hsl(var(--accent)/0.4))",
+                }}
+              />
+            </>
+          )}
+
 
           {/* Floating particles */}
           {particles.map((p) => (
@@ -324,28 +346,32 @@ export default function AuthPage() {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="w-full relative"
             >
-              {/* Rotating aurora ring */}
-              <motion.div
-                aria-hidden
-                className="absolute -inset-4 rounded-[2rem] opacity-70 blur-2xl pointer-events-none"
-                style={{
-                  background:
-                    "conic-gradient(from 0deg, hsl(var(--primary)/0.55), hsl(var(--accent)/0.45), transparent 40%, hsl(var(--primary)/0.55))",
-                }}
-                animate={{ rotate: 360 }}
-                transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
-              />
-              {/* Counter-rotating inner ring */}
-              <motion.div
-                aria-hidden
-                className="absolute -inset-1 rounded-[1.9rem] opacity-40 blur-md pointer-events-none"
-                style={{
-                  background:
-                    "conic-gradient(from 180deg, hsl(var(--accent)/0.5), transparent 30%, hsl(var(--primary)/0.4), transparent 70%, hsl(var(--accent)/0.5))",
-                }}
-                animate={{ rotate: -360 }}
-                transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-              />
+              {/* Rotating aurora rings — desktop / high-end only */}
+              {!lite && (
+                <>
+                  <motion.div
+                    aria-hidden
+                    className="absolute -inset-4 rounded-[2rem] opacity-70 blur-2xl pointer-events-none will-change-transform"
+                    style={{
+                      background:
+                        "conic-gradient(from 0deg, hsl(var(--primary)/0.55), hsl(var(--accent)/0.45), transparent 40%, hsl(var(--primary)/0.55))",
+                    }}
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
+                  />
+                  <motion.div
+                    aria-hidden
+                    className="absolute -inset-1 rounded-[1.9rem] opacity-40 blur-md pointer-events-none will-change-transform"
+                    style={{
+                      background:
+                        "conic-gradient(from 180deg, hsl(var(--accent)/0.5), transparent 30%, hsl(var(--primary)/0.4), transparent 70%, hsl(var(--accent)/0.5))",
+                    }}
+                    animate={{ rotate: -360 }}
+                    transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+                  />
+                </>
+              )}
+
               {/* Glow ring */}
               <div className="absolute -inset-px rounded-3xl bg-gradient-to-br from-primary/40 via-accent/30 to-primary/40 opacity-60 blur-md" />
 

@@ -57,6 +57,8 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
   const [resetEmail, setResetEmail] = useState("");
   const [pendingVerificationEmail, setPendingVerificationEmail] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [capsLock, setCapsLock] = useState(false);
+
 
   useEffect(() => {
     if (resendCooldown <= 0) return;
@@ -328,13 +330,23 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
               <Label htmlFor="password" className="text-sm">Password</Label>
               <div className="relative">
                 <Input id="password" type={showPassword ? "text" : "password"} placeholder="Enter your password"
-                  value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10 h-12" />
+                  value={password} onChange={(e) => setPassword(e.target.value)}
+                  onKeyUp={(e) => setCapsLock(e.getModifierState && e.getModifierState("CapsLock"))}
+                  onKeyDown={(e) => setCapsLock(e.getModifierState && e.getModifierState("CapsLock"))}
+                  autoComplete={isSignUp ? "new-password" : "current-password"}
+                  className="pl-10 pr-10 h-12" />
                 <Lock className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
                 <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3"
-                  onClick={() => setShowPassword(!showPassword)}>
+                  onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? "Hide password" : "Show password"}>
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
+              {capsLock && (
+                <p className="text-xs text-yellow-500 flex items-center gap-1">
+                  <AlertTriangle className="h-3 w-3" /> Caps Lock is on
+                </p>
+              )}
+
 
               <AnimatePresence>
                 {passwordStrength && isSignUp && (
