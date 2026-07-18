@@ -42,13 +42,23 @@ const Profile = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/80 to-accent-foreground" />
         <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent" />
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative pt-12 pb-8 px-4 text-primary-foreground">
-          <div className="flex items-center justify-between mb-5">
-            <div>
-              <h1 className="text-2xl font-bold">Profile</h1>
-              <p className="text-primary-foreground/70 text-sm">Welcome, {profileData?.name || "User"} 👋</p>
+          <div className="flex items-center gap-4 mb-5">
+            <ProfilePhotoUpload
+              name={profileData?.name || "User"}
+              initialImage={profileData?.avatarUrl || null}
+              onImageUpdate={(url) => {
+                const next = { ...profileData, avatarUrl: url };
+                setProfileData(next);
+                try { localStorage.setItem("fitfusion-profile", JSON.stringify(next)); } catch {}
+                window.dispatchEvent(new Event("profileUpdated"));
+              }}
+            />
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl font-bold truncate">Profile</h1>
+              <p className="text-primary-foreground/70 text-sm truncate">Welcome, {profileData?.name || "User"} 👋</p>
             </div>
-            <Badge className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30 text-xs">
-              v{currentVersion}{currentVersion === APP_VERSION ? " Active" : " Update Ready"}
+            <Badge className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30 text-xs shrink-0">
+              v{currentVersion}{currentVersion === APP_VERSION ? "" : " ↑"}
             </Badge>
           </div>
 
