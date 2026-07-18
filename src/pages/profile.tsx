@@ -52,7 +52,7 @@ const Profile = () => {
   const handleShare = async () => {
     const shareData = {
       title: "My FitFusion Progress",
-      text: `💪 ${profileData?.stats?.workoutsCompleted || 0} workouts • 🔥 ${profileData?.stats?.streakDays || 0}-day streak on FitFusion!`,
+      text: `💪 ${localStats.workoutsCompleted || 0} workouts • 🔥 ${localStats.streakDays || 0}-day streak on FitFusion!`,
       url: window.location.origin,
     };
     try {
@@ -78,8 +78,8 @@ const Profile = () => {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative pt-12 pb-8 px-4 text-primary-foreground">
           <div className="flex items-center gap-4 mb-5">
             <ProfilePhotoUpload
-              name={profileData?.name || "User"}
-              initialImage={profileData?.avatar || null}
+              name={displayName}
+              initialImage={displayAvatar}
               size="lg"
               onImageUpdate={(url) => {
                 const next = { ...profileData, avatar: url || undefined };
@@ -90,7 +90,7 @@ const Profile = () => {
             />
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-bold truncate">Profile</h1>
-              <p className="text-primary-foreground/70 text-sm truncate">Welcome, {profileData?.name || "User"} 👋</p>
+              <p className="text-primary-foreground/70 text-sm truncate">Welcome, {displayName} 👋</p>
               <div className="flex items-center gap-1.5 mt-1">
                 <Badge className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30 text-[10px] h-5">
                   v{currentVersion}{currentVersion === APP_VERSION ? "" : " ↑"}
@@ -109,9 +109,9 @@ const Profile = () => {
 
           <div className="grid grid-cols-3 gap-2">
             {[
-              { value: profileData?.stats?.workoutsCompleted || 0, label: "Workouts" },
-              { value: profileData?.stats?.streakDays || 0, label: "Streak" },
-              { value: `${Math.round((profileData?.stats?.caloriesBurned || 0) / 1000)}k`, label: "Calories" },
+              { value: localStats.workoutsCompleted || 0, label: "Workouts" },
+              { value: localStats.streakDays || 0, label: "Streak" },
+              { value: `${Math.round((localStats.caloriesBurned || 0) / 1000)}k`, label: "Calories" },
             ].map((s) => (
               <div key={s.label} className="bg-primary-foreground/10 backdrop-blur-sm rounded-xl p-3 text-center border border-primary-foreground/10">
                 <div className="text-xl font-bold leading-tight">{s.value}</div>
@@ -299,16 +299,16 @@ const Profile = () => {
                   <CardContent>
                     <div className="grid grid-cols-2 gap-3 mb-3">
                       <div className="p-3 bg-muted/30 rounded-xl">
-                        <div className="text-xl font-bold text-primary">{profileData?.stats?.workoutsCompleted || 0}</div>
+                        <div className="text-xl font-bold text-primary">{localStats.workoutsCompleted || 0}</div>
                         <div className="text-xs text-muted-foreground">Total Workouts</div>
                       </div>
                       <div className="p-3 bg-muted/30 rounded-xl">
-                        <div className="text-xl font-bold text-primary">{profileData?.stats?.streakDays || 0}</div>
+                        <div className="text-xl font-bold text-primary">{localStats.streakDays || 0}</div>
                         <div className="text-xs text-muted-foreground">Current Streak</div>
                       </div>
                     </div>
                     <div className="p-3 bg-gradient-to-r from-primary/5 to-accent/5 rounded-xl">
-                      <div className="text-xl font-bold text-primary">{Math.round((profileData?.stats?.caloriesBurned || 0) / 1000)}k</div>
+                      <div className="text-xl font-bold text-primary">{Math.round((localStats.caloriesBurned || 0) / 1000)}k</div>
                       <div className="text-xs text-muted-foreground">Total Calories Burned</div>
                     </div>
                   </CardContent>
