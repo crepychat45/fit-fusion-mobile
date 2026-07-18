@@ -343,28 +343,32 @@ export default function AuthPage() {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="w-full relative"
             >
-              {/* Rotating aurora ring */}
-              <motion.div
-                aria-hidden
-                className="absolute -inset-4 rounded-[2rem] opacity-70 blur-2xl pointer-events-none"
-                style={{
-                  background:
-                    "conic-gradient(from 0deg, hsl(var(--primary)/0.55), hsl(var(--accent)/0.45), transparent 40%, hsl(var(--primary)/0.55))",
-                }}
-                animate={{ rotate: 360 }}
-                transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
-              />
-              {/* Counter-rotating inner ring */}
-              <motion.div
-                aria-hidden
-                className="absolute -inset-1 rounded-[1.9rem] opacity-40 blur-md pointer-events-none"
-                style={{
-                  background:
-                    "conic-gradient(from 180deg, hsl(var(--accent)/0.5), transparent 30%, hsl(var(--primary)/0.4), transparent 70%, hsl(var(--accent)/0.5))",
-                }}
-                animate={{ rotate: -360 }}
-                transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-              />
+              {/* Rotating aurora rings — desktop / high-end only */}
+              {!lite && (
+                <>
+                  <motion.div
+                    aria-hidden
+                    className="absolute -inset-4 rounded-[2rem] opacity-70 blur-2xl pointer-events-none will-change-transform"
+                    style={{
+                      background:
+                        "conic-gradient(from 0deg, hsl(var(--primary)/0.55), hsl(var(--accent)/0.45), transparent 40%, hsl(var(--primary)/0.55))",
+                    }}
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
+                  />
+                  <motion.div
+                    aria-hidden
+                    className="absolute -inset-1 rounded-[1.9rem] opacity-40 blur-md pointer-events-none will-change-transform"
+                    style={{
+                      background:
+                        "conic-gradient(from 180deg, hsl(var(--accent)/0.5), transparent 30%, hsl(var(--primary)/0.4), transparent 70%, hsl(var(--accent)/0.5))",
+                    }}
+                    animate={{ rotate: -360 }}
+                    transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+                  />
+                </>
+              )}
+
               {/* Glow ring */}
               <div className="absolute -inset-px rounded-3xl bg-gradient-to-br from-primary/40 via-accent/30 to-primary/40 opacity-60 blur-md" />
 
