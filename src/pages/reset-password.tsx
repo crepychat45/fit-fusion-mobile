@@ -100,8 +100,9 @@ export default function ResetPassword() {
         description: "Your password has been successfully updated.",
       });
 
-      // Redirect to sign in
-      navigate("/");
+      // Sign out so user must log in with new password
+      await supabase.auth.signOut();
+      navigate("/auth", { replace: true });
     } catch (error: any) {
       toast({
         title: "Reset Failed",
