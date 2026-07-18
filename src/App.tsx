@@ -7,6 +7,7 @@ import { ErrorBoundary } from "@/components/common/error-boundary";
 import { clearAppCaches, isRecoverableResourceError, markAppReady, recoverApp } from "@/utils/app-recovery";
 import { BootLoader } from "@/components/common/boot-loader";
 import { prefetchAllRoutes } from "@/utils/route-prefetch";
+import { SEOManager } from "@/components/seo-manager";
 
 const Loader = BootLoader;
 
