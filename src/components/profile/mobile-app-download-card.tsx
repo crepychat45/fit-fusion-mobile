@@ -12,7 +12,9 @@ import { toast } from "sonner";
  */
 const APK_URL =
   (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_FITX_APK_URL) ||
-  "https://github.com/fitxfusion/fitxfusion-app/releases/latest/download/fitxfusion.apk";
+  "https://github.com/crepychat45/fit-fusion-mobile/releases/latest/download/fitxfusion.apk";
+
+const REPO_URL = "https://github.com/crepychat45/fit-fusion-mobile";
 
 const PLAY_URL =
   (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_FITX_PLAY_URL) ||
