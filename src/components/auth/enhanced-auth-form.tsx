@@ -140,16 +140,39 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
 
     try {
       if (isSignUp) {
-        const { error } = await signUp(email, password);
+        const { error, needsVerification } = await signUp(email, password);
         if (error) throw new Error(error);
+        if (needsVerification) {
+          setPendingVerificationEmail(email);
+          setResendCooldown(30);
+          return;
+        }
       } else {
         const { error } = await signIn(email, password);
         if (error) throw new Error(error);
       }
       if (onSuccess) onSuccess();
     } catch (error: any) {
-      toast({ title: isSignUp ? "Sign Up Failed" : "Sign In Failed", description: error.message, variant: "destructive" });
+      const msg = String(error?.message ?? "");
+      if (/confirm|verif/i.test(msg) && !isSignUp) {
+        setPendingVerificationEmail(email);
+      }
+      toast({ title: isSignUp ? "Sign Up Failed" : "Sign In Failed", description: msg, variant: "destructive" });
     }
+  };
+
+  const handleResend = async () => {
+    if (!pendingVerificationEmail || resendCooldown > 0) return;
+    const { error } = await resendVerification(pendingVerificationEmail);
+    if (!error) setResendCooldown(45);
+  };
+
+  const handleMagicLink = async () => {
+    if (!emailValid) {
+      toast({ title: "Enter your email", description: "We'll send a magic sign-in link.", variant: "destructive" });
+      return;
+    }
+    await signInWithMagicLink(email);
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
