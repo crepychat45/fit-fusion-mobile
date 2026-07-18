@@ -136,7 +136,7 @@ export function useEnhancedAuth(): AuthState & AuthActions {
   const signUp = useCallback(async (email: string, password: string) => {
     setAuthState((prev) => ({ ...prev, loading: true, error: null }));
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = `${window.location.origin}/auth/callback`;
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -150,11 +150,12 @@ export function useEnhancedAuth(): AuthState & AuthActions {
         toastRef.current({ title: "Sign up failed", description: msg, variant: "destructive" });
         return { error: msg };
       }
-      if (data.session === null && data.user !== null) {
-        toastRef.current({ title: "Check your email", description: "We've sent you a confirmation link." });
+      const needsVerification = data.session === null && data.user !== null;
+      if (needsVerification) {
+        toastRef.current({ title: "Verify your email", description: "We've sent you a confirmation link. Click it to activate your account." });
       }
       setAuthState((prev) => ({ ...prev, loading: false, session: data.session, user: data.user }));
-      return { error: null };
+      return { error: null, needsVerification };
     } catch (e) {
       const msg = "An unexpected error occurred during sign up";
       setAuthState((prev) => ({ ...prev, error: msg, loading: false }));
