@@ -138,6 +138,18 @@ const Profile = () => {
             <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
 
               <TabsContent value="profile" className="space-y-4 mt-0">
+                <FitnessIDCard
+                  name={displayName}
+                  email={userEmail || undefined}
+                  avatarUrl={displayAvatar}
+                  memberSince={cloudProfile?.created_at ? new Date(cloudProfile.created_at).getFullYear().toString() : undefined}
+                  level={Math.max(1, Math.floor((localStats.workoutsCompleted || 0) / 10) + 1)}
+                  workouts={localStats.workoutsCompleted || 0}
+                  streak={localStats.streakDays || 0}
+                  calories={localStats.caloriesBurned || 0}
+                  fitnessScore={78}
+                  goal={cloudProfile?.fitness_goals?.[0] || "Stay Fit"}
+                />
                 <ProfileEditor onSave={() => toast({ title: "✅ Profile Updated" })} />
                 <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
                   <CardHeader className="pb-3">
