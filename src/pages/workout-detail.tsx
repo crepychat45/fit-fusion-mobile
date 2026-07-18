@@ -56,7 +56,7 @@ const WorkoutDetail = () => {
     );
   }
 
-  const workoutVideo = workoutVideos.find((v) => v.workoutId === id);
+  const workoutVideo = getWorkoutVideo(id ?? workout.id);
 
   const handleStartWorkout = async () => {
     setIsStarting(true);
