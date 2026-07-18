@@ -168,7 +168,9 @@ const SmartwatchSettings: React.FC = () => {
   useEffect(() => {
     sensorHub.start();
     const unsub = sensorHub.subscribe(setReading);
-    return () => unsub();
+    return () => {
+      unsub();
+    };
   }, []);
 
   useEffect(() => {
