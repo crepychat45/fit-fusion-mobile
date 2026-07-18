@@ -1,20 +1,17 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Smartphone, Download, Apple, Chrome, ShieldCheck, Sparkles } from "lucide-react";
+import { Smartphone, Download, Apple, Chrome, ShieldCheck, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
-/**
- * Mobile App Download Card
- * Surfaces the FitXFusion native mobile app (built with Capacitor) to users.
- * The APK is generated locally via `npx cap sync android` + Android Studio,
- * and the download URL below can be pointed at any hosted build artifact.
- */
+const REPO_OWNER = "crepychat45";
+const REPO_NAME = "fit-fusion-mobile";
+const REPO_URL = `https://github.com/${REPO_OWNER}/${REPO_NAME}`;
+
 const APK_URL =
   (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_FITX_APK_URL) ||
-  "https://github.com/crepychat45/fit-fusion-mobile/releases/latest/download/fitxfusion.apk";
-
-const REPO_URL = "https://github.com/crepychat45/fit-fusion-mobile";
+  `${REPO_URL}/releases/latest/download/fitxfusion.apk`;
 
 const PLAY_URL =
   (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_FITX_PLAY_URL) ||
@@ -25,11 +22,64 @@ const IOS_URL =
   "https://apps.apple.com/app/fitxfusion";
 
 export function MobileAppDownloadCard() {
-  const handleApk = () => {
-    toast.success("Preparing FitXFusion APK download…", {
-      description: "Allow installs from unknown sources when prompted.",
-    });
-    window.open(APK_URL, "_blank", "noopener,noreferrer");
+  const [checking, setChecking] = useState(false);
+
+  const handleApk = async () => {
+    setChecking(true);
+    try {
+      // Pre-flight: ask GitHub if a release with an APK asset exists.
+      const res = await fetch(
+        `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/releases/latest`,
+        { headers: { Accept: "application/vnd.github+json" } },
+      );
+
+      if (res.status === 404) {
+        toast.error("APK not published yet", {
+          description:
+            "No GitHub Release found. Build & upload fitxfusion.apk to the repo's Releases page, then this button will download it.",
+          action: { label: "Open repo", onClick: () => window.open(REPO_URL, "_blank") },
+          duration: 8000,
+        });
+        return;
+      }
+
+      if (!res.ok) throw new Error(`GitHub ${res.status}`);
+
+      const data = await res.json();
+      const apkAsset = (data.assets || []).find(
+        (a: any) => typeof a.name === "string" && a.name.toLowerCase().endsWith(".apk"),
+      );
+
+      if (!apkAsset) {
+        toast.error("Release exists but no APK attached", {
+          description: `Upload fitxfusion.apk to release ${data.tag_name || "latest"}.`,
+          action: { label: "Open release", onClick: () => window.open(data.html_url, "_blank") },
+          duration: 8000,
+        });
+        return;
+      }
+
+      toast.success(`Downloading FitXFusion ${data.tag_name || ""}`.trim(), {
+        description: "Allow installs from unknown sources when prompted.",
+      });
+
+      // Trigger a direct download rather than a new-tab navigation so mobile
+      // browsers show the download prompt reliably.
+      const a = document.createElement("a");
+      a.href = apkAsset.browser_download_url || APK_URL;
+      a.rel = "noopener noreferrer";
+      a.download = apkAsset.name || "fitxfusion.apk";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (err) {
+      console.error("APK check failed:", err);
+      toast.error("Couldn't reach GitHub", {
+        description: "Check your connection and try again.",
+      });
+    } finally {
+      setChecking(false);
+    }
   };
 
   return (
