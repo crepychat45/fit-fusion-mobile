@@ -34,32 +34,32 @@ interface WorkoutVideoProps {
  * Inline video player – autoplays muted (browser policy safe), shows controls.
  * Handles play/pause, mute, restart, fullscreen, and hides load errors gracefully.
  */
-function InlineVideoPlayer({
+function YouTubePlayer({ videoUrl, title }: { videoUrl: string; title: string }) {
+  return (
+    <div className="relative w-full bg-black">
+      <iframe
+        key={videoUrl}
+        src={videoUrl}
+        title={title}
+        className="w-full aspect-video border-0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
+        loading="lazy"
+        referrerPolicy="strict-origin-when-cross-origin"
+      />
+    </div>
+  );
+}
+
+function InlineVideoPlayerImpl({
   title,
   thumbnailUrl,
   videoUrl,
   autoPlay = true,
   loop = false,
 }: Pick<WorkoutVideoProps, "title" | "thumbnailUrl" | "videoUrl" | "autoPlay" | "loop">) {
-  // YouTube embed path — render an iframe (browsers can't <video src="...youtube..."/>).
-  if (isYouTubeEmbed(videoUrl)) {
-    return (
-      <div className="relative w-full bg-black">
-        <iframe
-          key={videoUrl}
-          src={videoUrl}
-          title={title}
-          className="w-full aspect-video border-0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-          loading="lazy"
-          referrerPolicy="strict-origin-when-cross-origin"
-        />
-      </div>
-    );
-  }
-
   const videoRef = useRef<HTMLVideoElement>(null);
+
 
 
   // Build a de-duped source chain: primary URL first, then fallbacks.
