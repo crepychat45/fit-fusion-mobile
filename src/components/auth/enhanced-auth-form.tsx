@@ -41,7 +41,7 @@ interface PasswordStrength {
 export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { loading, signIn, signUp, resetPassword } = useEnhancedAuth();
+  const { loading, signIn, signUp, resetPassword, resendVerification, signInWithMagicLink } = useEnhancedAuth();
   const { toast } = useToast();
 
   const [email, setEmail] = useState("");
@@ -55,6 +55,15 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
   const [biometricAvailable, setBiometricAvailable] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState<string | null>(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = window.setInterval(() => setResendCooldown((s) => Math.max(0, s - 1)), 1000);
+    return () => window.clearInterval(t);
+  }, [resendCooldown]);
+
 
   useEffect(() => {
     if ("credentials" in navigator && "create" in navigator.credentials) {
