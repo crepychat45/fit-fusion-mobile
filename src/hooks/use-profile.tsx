@@ -26,45 +26,50 @@ export const useProfile = (userId?: string, options: { enabled?: boolean } = {})
   const enabled = options.enabled ?? true;
 
   const { data: profile, isLoading, error } = useQuery({
-    queryKey: ['profile', userId],
+    queryKey: ['profile', userId ?? 'me'],
     enabled,
     retry: 1,
-    staleTime: 30 * 1000,
-    refetchOnMount: 'always',
-    refetchOnWindowFocus: true,
+    // Longer freshness window + disabled focus refetch prevents the editor
+    // form being clobbered while the user is typing.
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError) throw authError;
       const targetUserId = userId || user?.id;
-      
       if (!targetUserId) return null;
 
-      const { data, error } = await supabase
+      // maybeSingle() → no row is a valid state, not an error
+      const { data, error: fetchError } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', targetUserId)
-        .single();
-      
-      // If no profile exists, auto-create one from auth metadata
-      if (error && error.code === 'PGRST116' && user) {
-        const meta = user.user_metadata || {};
-        const newProfile = {
-          user_id: targetUserId,
-          name: meta.full_name || meta.name || null,
-          username: meta.email?.split('@')[0] || null,
-          avatar_url: meta.avatar_url || meta.picture || null,
-          bio: null,
-        };
-        const { data: created, error: createError } = await supabase
-          .from('profiles')
-          .insert(newProfile)
-          .select()
-          .single();
-        if (createError) throw createError;
-        return created as UserProfile;
-      }
-      
-      if (error) throw error;
-      return data as UserProfile;
+        .maybeSingle();
+
+      if (fetchError) throw fetchError;
+      if (data) return data as UserProfile;
+
+      // First-time user: auto-create a profile only for the authenticated user
+      if (!user || user.id !== targetUserId) return null;
+
+      const meta = (user.user_metadata || {}) as Record<string, unknown>;
+      const seed = {
+        user_id: targetUserId,
+        name: (meta.full_name as string) || (meta.name as string) || null,
+        username: user.email ? user.email.split('@')[0] : null,
+        avatar_url: (meta.avatar_url as string) || (meta.picture as string) || null,
+        bio: null,
+      };
+      const { data: created, error: createError } = await supabase
+        .from('profiles')
+        .insert(seed)
+        .select()
+        .maybeSingle();
+      if (createError) throw createError;
+      return (created ?? null) as UserProfile | null;
     },
   });
 

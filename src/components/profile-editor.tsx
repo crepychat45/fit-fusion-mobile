@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -62,10 +62,19 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "error" | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const hydratedKeyRef = useRef<string | null>(null);
+  const isDirtyRef = useRef(false);
+  const isSavingRef = useRef(false);
 
-  // Hydrate form from the authenticated user's database record whenever it (re)loads
+  // Hydrate only when a *different* server record arrives, and never when the
+  // user has unsaved edits or a save is in-flight. This prevents refetches
+  // (window focus, react-query revalidation) from wiping the form.
   useEffect(() => {
     if (!profile) return;
+    const key = `${profile.id}:${profile.updated_at}`;
+    if (hydratedKeyRef.current === key) return;
+    if (isDirtyRef.current || isSavingRef.current) return;
+
     const measurements = (profile.body_measurements || {}) as Record<string, unknown>;
     const next: FormState = {
       name: profile.name ?? "",
@@ -81,12 +90,17 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
     setForm(next);
     setInitial(next);
     setLastSaved(profile.updated_at ? new Date(profile.updated_at) : null);
+    hydratedKeyRef.current = key;
   }, [profile]);
 
   const hasUnsavedChanges = useMemo(
     () => JSON.stringify(form) !== JSON.stringify(initial),
     [form, initial],
   );
+
+  // Keep refs in sync so the hydration effect can consult them synchronously.
+  useEffect(() => { isDirtyRef.current = hasUnsavedChanges; }, [hasUnsavedChanges]);
+  useEffect(() => { isSavingRef.current = isSaving || saveStatus === "saving"; }, [isSaving, saveStatus]);
 
   const handleFieldChange = (field: keyof FormState, value: string) => {
     if (field === "name" && value.length > 0) {
@@ -143,12 +157,14 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
     setTimeout(() => setSaveStatus(null), 3000);
   }, [form, profile, updateProfile, onSave]);
 
-  // Debounced auto-save
+  // Debounced auto-save — restarts on every keystroke; only fires once user
+  // has stopped editing for 2s, and never runs while a save is in-flight.
   useEffect(() => {
     if (!hasUnsavedChanges) return;
-    const t = setTimeout(() => { void persist(); }, 1500);
+    if (isSavingRef.current) return;
+    const t = setTimeout(() => { void persist(); }, 2000);
     return () => clearTimeout(t);
-  }, [hasUnsavedChanges, persist]);
+  }, [hasUnsavedChanges, form, persist]);
 
   const handleManualSave = async () => {
     setIsSaving(true);
