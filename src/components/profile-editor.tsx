@@ -62,10 +62,19 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "error" | null>(null);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const hydratedKeyRef = useRef<string | null>(null);
+  const isDirtyRef = useRef(false);
+  const isSavingRef = useRef(false);
 
-  // Hydrate form from the authenticated user's database record whenever it (re)loads
+  // Hydrate only when a *different* server record arrives, and never when the
+  // user has unsaved edits or a save is in-flight. This prevents refetches
+  // (window focus, react-query revalidation) from wiping the form.
   useEffect(() => {
     if (!profile) return;
+    const key = `${profile.id}:${profile.updated_at}`;
+    if (hydratedKeyRef.current === key) return;
+    if (isDirtyRef.current || isSavingRef.current) return;
+
     const measurements = (profile.body_measurements || {}) as Record<string, unknown>;
     const next: FormState = {
       name: profile.name ?? "",
@@ -81,6 +90,7 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
     setForm(next);
     setInitial(next);
     setLastSaved(profile.updated_at ? new Date(profile.updated_at) : null);
+    hydratedKeyRef.current = key;
   }, [profile]);
 
   const hasUnsavedChanges = useMemo(
