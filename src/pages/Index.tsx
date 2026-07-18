@@ -217,7 +217,7 @@ const Index = () => {
                     AI POWERED
                   </Badge>
                 </div>
-                <h3 className="text-lg font-bold mb-1">Next-Gen Fitness</h3>
+                <h2 className="text-lg font-bold mb-1">Next-Gen Fitness</h2>
                 <p className="text-primary-foreground/80 text-sm mb-3">AI coaching, biometrics & personalized plans</p>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   {[
