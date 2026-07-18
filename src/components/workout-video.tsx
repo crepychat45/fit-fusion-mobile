@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +15,7 @@ import {
   Volume2,
   VolumeX,
   Maximize,
-  Minimize,
+  RotateCcw,
 } from "lucide-react";
 
 interface WorkoutVideoProps {
@@ -23,6 +23,139 @@ interface WorkoutVideoProps {
   thumbnailUrl: string;
   videoUrl: string;
   duration: string;
+  /** Render the player inline (no card/dialog wrapper) with autoplay. */
+  inline?: boolean;
+  autoPlay?: boolean;
+  loop?: boolean;
+}
+
+/**
+ * Inline video player – autoplays muted (browser policy safe), shows controls.
+ * Handles play/pause, mute, restart, fullscreen, and hides load errors gracefully.
+ */
+function InlineVideoPlayer({
+  title,
+  thumbnailUrl,
+  videoUrl,
+  autoPlay = true,
+  loop = false,
+}: Pick<WorkoutVideoProps, "title" | "thumbnailUrl" | "videoUrl" | "autoPlay" | "loop">) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(autoPlay);
+  const [isMuted, setIsMuted] = useState(true);
+  const [errored, setErrored] = useState(false);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !autoPlay) return;
+    video.muted = true;
+    const attempt = video.play();
+    if (attempt && typeof attempt.catch === "function") {
+      attempt.catch(() => setIsPlaying(false));
+    }
+  }, [videoUrl, autoPlay]);
+
+  const togglePlay = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) {
+      v.play().catch(() => setIsPlaying(false));
+    } else {
+      v.pause();
+    }
+  };
+
+  const toggleMute = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = !v.muted;
+    setIsMuted(v.muted);
+  };
+
+  const restart = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.currentTime = 0;
+    v.play().catch(() => {});
+  };
+
+  const goFullscreen = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    } else {
+      v.requestFullscreen?.().catch(() => {});
+    }
+  };
+
+  if (errored) {
+    return (
+      <div className="w-full aspect-video bg-muted flex flex-col items-center justify-center text-muted-foreground gap-2">
+        <p className="text-sm">Video unavailable</p>
+        <p className="text-xs opacity-60">{title}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative w-full bg-black group">
+      <video
+        ref={videoRef}
+        src={videoUrl}
+        poster={thumbnailUrl || "/placeholder.svg"}
+        className="w-full aspect-video object-contain bg-black"
+        autoPlay={autoPlay}
+        muted={isMuted}
+        loop={loop}
+        playsInline
+        preload="metadata"
+        controls
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+        onEnded={() => setIsPlaying(false)}
+        onError={() => setErrored(true)}
+      />
+      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <Button
+          size="icon"
+          variant="secondary"
+          className="h-8 w-8 bg-black/60 hover:bg-black/80 text-white border-0"
+          onClick={togglePlay}
+          aria-label={isPlaying ? "Pause" : "Play"}
+        >
+          {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+        </Button>
+        <Button
+          size="icon"
+          variant="secondary"
+          className="h-8 w-8 bg-black/60 hover:bg-black/80 text-white border-0"
+          onClick={toggleMute}
+          aria-label={isMuted ? "Unmute" : "Mute"}
+        >
+          {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+        </Button>
+        <Button
+          size="icon"
+          variant="secondary"
+          className="h-8 w-8 bg-black/60 hover:bg-black/80 text-white border-0"
+          onClick={restart}
+          aria-label="Restart"
+        >
+          <RotateCcw className="h-4 w-4" />
+        </Button>
+        <Button
+          size="icon"
+          variant="secondary"
+          className="h-8 w-8 bg-black/60 hover:bg-black/80 text-white border-0"
+          onClick={goFullscreen}
+          aria-label="Fullscreen"
+        >
+          <Maximize className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
 }
 
 export function WorkoutVideo({
@@ -30,53 +163,21 @@ export function WorkoutVideo({
   thumbnailUrl,
   videoUrl,
   duration,
+  inline = false,
+  autoPlay = true,
+  loop = false,
 }: WorkoutVideoProps) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showControls, setShowControls] = useState(true);
-  const videoRef = React.useRef<HTMLVideoElement>(null);
-
-  const handlePlayPause = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
-
-  const handleMuteToggle = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-    }
-  };
-
-  const handleFullscreenToggle = () => {
-    if (videoRef.current) {
-      if (!document.fullscreenElement) {
-        videoRef.current.requestFullscreen().catch((err) => {
-          console.error(
-            `Error attempting to enable full-screen mode: ${err.message}`,
-          );
-        });
-      } else {
-        document.exitFullscreen();
-      }
-      setIsFullscreen(!isFullscreen);
-    }
-  };
-
-  const hideControlsTimeout = () => {
-    setTimeout(() => {
-      if (isPlaying) {
-        setShowControls(false);
-      }
-    }, 3000);
-  };
+  if (inline) {
+    return (
+      <InlineVideoPlayer
+        title={title}
+        thumbnailUrl={thumbnailUrl}
+        videoUrl={videoUrl}
+        autoPlay={autoPlay}
+        loop={loop}
+      />
+    );
+  }
 
   return (
     <Dialog>
@@ -87,6 +188,7 @@ export function WorkoutVideo({
               src={thumbnailUrl || "/placeholder.svg"}
               alt={title}
               className="w-full aspect-video object-cover"
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
               <div className="rounded-full bg-primary/90 p-2">
@@ -103,104 +205,17 @@ export function WorkoutVideo({
         </Card>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-[600px] p-0">
-        <div
-          className="relative"
-          onMouseEnter={() => setShowControls(true)}
-          onMouseLeave={() => isPlaying && hideControlsTimeout()}
-          onMouseMove={() => {
-            setShowControls(true);
-            hideControlsTimeout();
-          }}
-        >
-          <video
-            ref={videoRef}
-            src={
-              videoUrl ||
-              "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-            }
-            poster={thumbnailUrl || "/placeholder.svg"}
-            className="w-full aspect-video"
-            onEnded={() => setIsPlaying(false)}
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
-            controls
-            preload="metadata"
-            style={{ maxHeight: "70vh" }}
-          />
-
-          {/* Video overlay controls */}
-          <div
-            className={`absolute inset-0 bg-gradient-to-t from-black/60 to-transparent transition-opacity duration-300 ${
-              showControls ? "opacity-100" : "opacity-0"
-            }`}
-          >
-            <DialogHeader className="absolute top-0 left-0 right-0 p-4">
-              <div className="flex items-center justify-between">
-                <DialogTitle className="text-white text-shadow">
-                  {title}
-                </DialogTitle>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-white hover:bg-black/20"
-                  onClick={() => {
-                    if (videoRef.current) {
-                      videoRef.current.pause();
-                    }
-                  }}
-                >
-                  <X className="h-5 w-5" />
-                </Button>
-              </div>
-            </DialogHeader>
-
-            <div className="absolute bottom-0 left-0 right-0 p-4">
-              <div className="flex items-center justify-between">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-white hover:bg-black/20"
-                  onClick={handlePlayPause}
-                >
-                  {isPlaying ? (
-                    <Pause className="h-6 w-6" fill="white" />
-                  ) : (
-                    <Play className="h-6 w-6" fill="white" />
-                  )}
-                </Button>
-
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-white hover:bg-black/20"
-                    onClick={handleMuteToggle}
-                  >
-                    {isMuted ? (
-                      <VolumeX className="h-5 w-5" />
-                    ) : (
-                      <Volume2 className="h-5 w-5" />
-                    )}
-                  </Button>
-
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-white hover:bg-black/20"
-                    onClick={handleFullscreenToggle}
-                  >
-                    {isFullscreen ? (
-                      <Minimize className="h-5 w-5" />
-                    ) : (
-                      <Maximize className="h-5 w-5" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <DialogContent className="sm:max-w-[720px] p-0 overflow-hidden">
+        <DialogHeader className="p-4 pb-2">
+          <DialogTitle className="text-base">{title}</DialogTitle>
+        </DialogHeader>
+        <InlineVideoPlayer
+          title={title}
+          thumbnailUrl={thumbnailUrl}
+          videoUrl={videoUrl}
+          autoPlay
+          loop={loop}
+        />
       </DialogContent>
     </Dialog>
   );
