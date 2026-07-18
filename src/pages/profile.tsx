@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { MobileNav } from "@/components/mobile-nav";
 import { ProfileEditor } from "@/components/profile-editor";
@@ -32,10 +32,13 @@ const Profile = () => {
   const [currentVersion, setCurrentVersion] = useState(() => getInstalledVersion());
   // Read-only stats fallback from local activity data — never treated as identity
   const [localStats, setLocalStats] = useState(userProfile.stats);
-  const { profile: cloudProfile, isLoading: profileLoading, updateProfile } = useProfile(
-    user?.id,
-    { enabled: !!user?.id },
-  );
+  const {
+    profile: cloudProfile,
+    isLoading: profileLoading,
+    error: profileError,
+    refetch: refetchProfile,
+    updateProfile,
+  } = useProfile(user?.id, { enabled: !!user?.id });
 
   // Redirect unauthenticated users; never render profile UI without a user.
   useEffect(() => {
@@ -59,16 +62,16 @@ const Profile = () => {
   }, []);
 
   const userEmail = user?.email ?? "";
-
-  const displayName = cloudProfile?.name || "User";
+  const displayName = cloudProfile?.name || user?.user_metadata?.name || user?.email?.split("@")[0] || "User";
   const displayAvatar = cloudProfile?.avatar_url || null;
 
-  const handleAvatarUpdate = (url: string | null) => {
+  const handleAvatarUpdate = useCallback((url: string | null) => {
+    if (!user) return;
     updateProfile.mutate({ avatar_url: url || null } as never);
     window.dispatchEvent(new Event("profileUpdated"));
-  };
+  }, [updateProfile, user]);
 
-  const handleShare = async () => {
+  const handleShare = useCallback(async () => {
     const shareData = {
       title: "My FitFusion Progress",
       text: `💪 ${localStats.workoutsCompleted || 0} workouts • 🔥 ${localStats.streakDays || 0}-day streak on FitFusion!`,
@@ -84,22 +87,54 @@ const Profile = () => {
     } catch {
       // user cancelled
     }
-  };
+  }, [localStats, toast]);
 
-  const fadeUp = { hidden: { y: 12, opacity: 0 }, visible: { y: 0, opacity: 1, transition: { duration: 0.4 } } };
-
-  // Never render identity UI until auth + profile have resolved for this user.
-  // This is what prevents demo/default values from ever flashing on refresh.
+  // Skeleton loader — prevents flicker and demo-value flash on refresh.
   if (authLoading || (user && profileLoading && !cloudProfile)) {
     return (
-      <div className="min-h-screen bg-background pb-24 flex items-center justify-center">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" /> Loading your profile…
+      <div className="min-h-screen bg-background pb-24">
+        <div className="pt-12 pb-8 px-4 bg-gradient-to-br from-primary/80 via-primary/60 to-accent-foreground/60">
+          <div className="flex items-center gap-4 mb-5">
+            <div className="h-28 w-28 rounded-full bg-primary-foreground/20 animate-pulse" />
+            <div className="flex-1 space-y-2">
+              <div className="h-6 w-32 bg-primary-foreground/20 rounded animate-pulse" />
+              <div className="h-4 w-48 bg-primary-foreground/15 rounded animate-pulse" />
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-16 rounded-xl bg-primary-foreground/10 animate-pulse" />
+            ))}
+          </div>
+        </div>
+        <div className="px-4 py-5 space-y-3">
+          <div className="h-10 rounded-xl bg-muted/40 animate-pulse" />
+          <div className="h-48 rounded-xl bg-muted/30 animate-pulse" />
+          <div className="h-64 rounded-xl bg-muted/30 animate-pulse" />
         </div>
       </div>
     );
   }
   if (!user) return null;
+
+  // If the profile failed to load (network etc.), show a retry surface.
+  if (profileError && !cloudProfile) {
+    return (
+      <div className="min-h-screen bg-background pb-24 flex items-center justify-center px-4">
+        <Card className="max-w-md w-full border-destructive/30">
+          <CardHeader>
+            <CardTitle className="text-base">Couldn't load your profile</CardTitle>
+            <CardDescription>
+              {(profileError as Error)?.message || "Please check your connection and try again."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={() => refetchProfile()} className="w-full">Retry</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-24">

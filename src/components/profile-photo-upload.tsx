@@ -47,21 +47,29 @@ export function ProfilePhotoUpload({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Whitelist explicit safe image mime types
+    const allowed = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+    if (!allowed.has(file.type)) {
+      toast({
+        title: "Unsupported image",
+        description: "Please use a JPG, PNG, WEBP or GIF file.",
+        variant: "destructive",
+      });
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
+    if (file.size <= 0) {
+      toast({ title: "Empty file", description: "That image appears to be empty.", variant: "destructive" });
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
     if (file.size > 5 * 1024 * 1024) {
       toast({
         title: "File too large",
-        description: "Please upload an image smaller than 5MB",
+        description: "Please upload an image smaller than 5MB.",
         variant: "destructive",
       });
-      return;
-    }
-
-    if (!file.type.startsWith("image/")) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload an image file (jpg, png, etc.)",
-        variant: "destructive",
-      });
+      if (inputRef.current) inputRef.current.value = "";
       return;
     }
 
@@ -74,7 +82,8 @@ export function ProfilePhotoUpload({
       onImageUpdate?.(uploadedUrl);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 2000);
-    } catch (error) {
+    } catch {
+      // Toast already emitted from the mutation
       setImage(initialImage || null);
     } finally {
       URL.revokeObjectURL(previewUrl);

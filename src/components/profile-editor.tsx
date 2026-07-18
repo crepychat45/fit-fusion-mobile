@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { validateInput, nameSchema, bioSchema } from "@/utils/validation";
+import { nameSchema, bioSchema, ageSchema, heightSchema, weightSchema, validateInput } from "@/utils/validation";
 import {
   Select,
   SelectContent,
@@ -102,22 +102,13 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
   useEffect(() => { isDirtyRef.current = hasUnsavedChanges; }, [hasUnsavedChanges]);
   useEffect(() => { isSavingRef.current = isSaving || saveStatus === "saving"; }, [isSaving, saveStatus]);
 
+  // Allow typing freely; validation happens at save-time so the user is never
+  // blocked mid-keystroke. Field-level errors are surfaced below each input.
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof FormState, string>>>({});
+
   const handleFieldChange = (field: keyof FormState, value: string) => {
-    if (field === "name" && value.length > 0) {
-      const v = validateInput(nameSchema, value);
-      if (!v.success) {
-        toast({ title: "Invalid name", description: v.error, variant: "destructive" });
-        return;
-      }
-    }
-    if (field === "bio" && value.length > 0) {
-      const v = validateInput(bioSchema, value);
-      if (!v.success) {
-        toast({ title: "Invalid bio", description: v.error, variant: "destructive" });
-        return;
-      }
-    }
     setForm((prev) => ({ ...prev, [field]: value }));
+    setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
     setSaveStatus(null);
   };
 
@@ -125,40 +116,94 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
     setForm((prev) => ({ ...prev, avatar: image || null }));
   };
 
+  // Validate everything before persisting. Returns cleaned values or errors.
+  const validateAll = useCallback(() => {
+    const errs: Partial<Record<keyof FormState, string>> = {};
+    const trimmed = {
+      name: form.name.trim(),
+      goal: form.goal.trim(),
+      bio: form.bio.trim(),
+      level: form.level.trim(),
+      age: form.age.trim(),
+      gender: form.gender.trim(),
+      height: form.height.trim(),
+      weight: form.weight.trim(),
+      avatar: form.avatar,
+    };
+
+    if (trimmed.name) {
+      const r = validateInput(nameSchema, trimmed.name);
+      if (!r.success) errs.name = r.error;
+    }
+    if (trimmed.bio) {
+      const r = validateInput(bioSchema, trimmed.bio);
+      if (!r.success) errs.bio = r.error;
+    }
+    if (trimmed.age) {
+      const n = Number(trimmed.age);
+      const r = validateInput(ageSchema, n);
+      if (!r.success) errs.age = r.error;
+    }
+    if (trimmed.height) {
+      const n = Number(trimmed.height);
+      const r = validateInput(heightSchema, n);
+      if (!r.success) errs.height = r.error;
+    }
+    if (trimmed.weight) {
+      const n = Number(trimmed.weight);
+      const r = validateInput(weightSchema, n);
+      if (!r.success) errs.weight = r.error;
+    }
+
+    return { errs, trimmed };
+  }, [form]);
+
   const persist = useCallback(async () => {
+    const { errs, trimmed } = validateAll();
+    if (Object.keys(errs).length) {
+      setFieldErrors(errs);
+      setSaveStatus("error");
+      toast({
+        title: "Please fix the highlighted fields",
+        description: Object.values(errs)[0],
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSaveStatus("saving");
     const measurements = {
       ...((profile?.body_measurements as Record<string, unknown>) || {}),
-      gender: form.gender || null,
+      gender: trimmed.gender || null,
     };
     const updates = {
-      name: form.name || null,
-      bio: form.bio || null,
-      fitness_level: form.level || null,
-      fitness_goals: form.goal ? [form.goal] : [],
-      age: form.age ? Number(form.age) : null,
-      height_cm: form.height ? Number(form.height) : null,
-      weight_kg: form.weight ? Number(form.weight) : null,
-      avatar_url: form.avatar || null,
+      name: trimmed.name || null,
+      bio: trimmed.bio || null,
+      fitness_level: trimmed.level || null,
+      fitness_goals: trimmed.goal ? [trimmed.goal] : [],
+      age: trimmed.age ? Number(trimmed.age) : null,
+      height_cm: trimmed.height ? Number(trimmed.height) : null,
+      weight_kg: trimmed.weight ? Number(trimmed.weight) : null,
+      avatar_url: trimmed.avatar || null,
       body_measurements: measurements,
     };
     try {
       await updateProfile.mutateAsync(updates as never);
       setSaveStatus("saved");
       setInitial(form);
+      setFieldErrors({});
       setLastSaved(new Date());
-      // Homepage welcome message
-      if (form.name) localStorage.setItem("user_display_name", form.name);
+      if (trimmed.name) localStorage.setItem("user_display_name", trimmed.name);
       window.dispatchEvent(new Event("profileUpdated"));
       onSave?.();
     } catch {
+      // toast is emitted by the mutation itself
       setSaveStatus("error");
     }
-    setTimeout(() => setSaveStatus(null), 3000);
-  }, [form, profile, updateProfile, onSave]);
+    setTimeout(() => setSaveStatus((s) => (s === "saved" ? null : s)), 3000);
+  }, [validateAll, profile, updateProfile, onSave, form, toast]);
 
-  // Debounced auto-save — restarts on every keystroke; only fires once user
-  // has stopped editing for 2s, and never runs while a save is in-flight.
+  // Debounced auto-save — only runs when the form is valid and idle.
   useEffect(() => {
     if (!hasUnsavedChanges) return;
     if (isSavingRef.current) return;
@@ -167,10 +212,13 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
   }, [hasUnsavedChanges, form, persist]);
 
   const handleManualSave = async () => {
+    if (isSaving || saveStatus === "saving") return;
     setIsSaving(true);
-    await persist();
-    setIsSaving(false);
-    toast({ title: "✅ Profile Saved", description: "Your profile has been saved to your account." });
+    try {
+      await persist();
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const statusIndicator = () => {
@@ -254,11 +302,13 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="name">Full Name *</Label>
-                  <Input id="name" value={form.name} onChange={(e) => handleFieldChange("name", e.target.value)} placeholder="Your full name" className="mt-1" />
+                  <Input id="name" value={form.name} onChange={(e) => handleFieldChange("name", e.target.value)} placeholder="Your full name" maxLength={100} autoComplete="name" className="mt-1" aria-invalid={!!fieldErrors.name} />
+                  {fieldErrors.name && <p className="mt-1 text-xs text-destructive">{fieldErrors.name}</p>}
                 </div>
                 <div>
                   <Label htmlFor="age">Age</Label>
-                  <Input id="age" value={form.age} onChange={(e) => handleFieldChange("age", e.target.value)} type="number" min="13" max="100" className="mt-1" />
+                  <Input id="age" value={form.age} onChange={(e) => handleFieldChange("age", e.target.value)} type="number" min={13} max={120} inputMode="numeric" className="mt-1" aria-invalid={!!fieldErrors.age} />
+                  {fieldErrors.age && <p className="mt-1 text-xs text-destructive">{fieldErrors.age}</p>}
                 </div>
               </div>
 
@@ -316,17 +366,23 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
 
           <div>
             <Label htmlFor="bio">Bio & Motivation</Label>
-            <Textarea id="bio" value={form.bio} onChange={(e) => handleFieldChange("bio", e.target.value)} placeholder="Tell us about yourself, your fitness journey, and what motivates you…" rows={4} className="mt-1" />
+            <Textarea id="bio" value={form.bio} onChange={(e) => handleFieldChange("bio", e.target.value)} placeholder="Tell us about yourself, your fitness journey, and what motivates you…" rows={4} maxLength={500} className="mt-1" aria-invalid={!!fieldErrors.bio} />
+            <div className="mt-1 flex items-center justify-between text-xs">
+              <span className="text-destructive">{fieldErrors.bio || ""}</span>
+              <span className="text-muted-foreground">{form.bio.length}/500</span>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="height">Height (cm)</Label>
-              <Input id="height" value={form.height} onChange={(e) => handleFieldChange("height", e.target.value)} type="number" min="80" max="250" placeholder="175" className="mt-1" />
+              <Input id="height" value={form.height} onChange={(e) => handleFieldChange("height", e.target.value)} type="number" min={100} max={250} inputMode="numeric" placeholder="175" className="mt-1" aria-invalid={!!fieldErrors.height} />
+              {fieldErrors.height && <p className="mt-1 text-xs text-destructive">{fieldErrors.height}</p>}
             </div>
             <div>
               <Label htmlFor="weight">Weight (kg)</Label>
-              <Input id="weight" value={form.weight} onChange={(e) => handleFieldChange("weight", e.target.value)} type="number" min="25" max="400" placeholder="70" className="mt-1" />
+              <Input id="weight" value={form.weight} onChange={(e) => handleFieldChange("weight", e.target.value)} type="number" min={30} max={300} inputMode="numeric" placeholder="70" className="mt-1" aria-invalid={!!fieldErrors.weight} />
+              {fieldErrors.weight && <p className="mt-1 text-xs text-destructive">{fieldErrors.weight}</p>}
             </div>
           </div>
         </CardContent>
@@ -334,10 +390,23 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
 
       <div className="flex items-center justify-between pt-4">
         <div className="text-sm text-muted-foreground">
-          {hasUnsavedChanges ? "Changes will be saved automatically" : "All changes saved"}
+          {saveStatus === "error"
+            ? "Save failed — tap Save to retry"
+            : hasUnsavedChanges
+              ? "Changes will be saved automatically"
+              : "All changes saved"}
         </div>
-        <Button size="lg" onClick={handleManualSave} disabled={isSaving || (!hasUnsavedChanges && saveStatus !== "error")} className="min-w-[140px]">
-          {isSaving ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving…</>) : (<><Save className="mr-2 h-4 w-4" />{hasUnsavedChanges ? "Save Now" : "Saved"}</>)}
+        <Button
+          size="lg"
+          onClick={handleManualSave}
+          disabled={isSaving || saveStatus === "saving" || (!hasUnsavedChanges && saveStatus !== "error")}
+          className="min-w-[140px]"
+        >
+          {isSaving || saveStatus === "saving"
+            ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving…</>)
+            : saveStatus === "error"
+              ? (<><AlertCircle className="mr-2 h-4 w-4" />Retry Save</>)
+              : (<><Save className="mr-2 h-4 w-4" />{hasUnsavedChanges ? "Save Now" : "Saved"}</>)}
         </Button>
       </div>
     </div>
