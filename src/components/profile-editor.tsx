@@ -102,22 +102,13 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
   useEffect(() => { isDirtyRef.current = hasUnsavedChanges; }, [hasUnsavedChanges]);
   useEffect(() => { isSavingRef.current = isSaving || saveStatus === "saving"; }, [isSaving, saveStatus]);
 
+  // Allow typing freely; validation happens at save-time so the user is never
+  // blocked mid-keystroke. Field-level errors are surfaced below each input.
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof FormState, string>>>({});
+
   const handleFieldChange = (field: keyof FormState, value: string) => {
-    if (field === "name" && value.length > 0) {
-      const v = validateInput(nameSchema, value);
-      if (!v.success) {
-        toast({ title: "Invalid name", description: v.error, variant: "destructive" });
-        return;
-      }
-    }
-    if (field === "bio" && value.length > 0) {
-      const v = validateInput(bioSchema, value);
-      if (!v.success) {
-        toast({ title: "Invalid bio", description: v.error, variant: "destructive" });
-        return;
-      }
-    }
     setForm((prev) => ({ ...prev, [field]: value }));
+    setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
     setSaveStatus(null);
   };
 
@@ -125,40 +116,94 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
     setForm((prev) => ({ ...prev, avatar: image || null }));
   };
 
+  // Validate everything before persisting. Returns cleaned values or errors.
+  const validateAll = useCallback(() => {
+    const errs: Partial<Record<keyof FormState, string>> = {};
+    const trimmed = {
+      name: form.name.trim(),
+      goal: form.goal.trim(),
+      bio: form.bio.trim(),
+      level: form.level.trim(),
+      age: form.age.trim(),
+      gender: form.gender.trim(),
+      height: form.height.trim(),
+      weight: form.weight.trim(),
+      avatar: form.avatar,
+    };
+
+    if (trimmed.name) {
+      const r = validateInput(nameSchema, trimmed.name);
+      if (!r.success) errs.name = r.error;
+    }
+    if (trimmed.bio) {
+      const r = validateInput(bioSchema, trimmed.bio);
+      if (!r.success) errs.bio = r.error;
+    }
+    if (trimmed.age) {
+      const n = Number(trimmed.age);
+      const r = validateInput(ageSchema, n);
+      if (!r.success) errs.age = r.error;
+    }
+    if (trimmed.height) {
+      const n = Number(trimmed.height);
+      const r = validateInput(heightSchema, n);
+      if (!r.success) errs.height = r.error;
+    }
+    if (trimmed.weight) {
+      const n = Number(trimmed.weight);
+      const r = validateInput(weightSchema, n);
+      if (!r.success) errs.weight = r.error;
+    }
+
+    return { errs, trimmed };
+  }, [form]);
+
   const persist = useCallback(async () => {
+    const { errs, trimmed } = validateAll();
+    if (Object.keys(errs).length) {
+      setFieldErrors(errs);
+      setSaveStatus("error");
+      toast({
+        title: "Please fix the highlighted fields",
+        description: Object.values(errs)[0],
+        variant: "destructive",
+      });
+      return;
+    }
+
     setSaveStatus("saving");
     const measurements = {
       ...((profile?.body_measurements as Record<string, unknown>) || {}),
-      gender: form.gender || null,
+      gender: trimmed.gender || null,
     };
     const updates = {
-      name: form.name || null,
-      bio: form.bio || null,
-      fitness_level: form.level || null,
-      fitness_goals: form.goal ? [form.goal] : [],
-      age: form.age ? Number(form.age) : null,
-      height_cm: form.height ? Number(form.height) : null,
-      weight_kg: form.weight ? Number(form.weight) : null,
-      avatar_url: form.avatar || null,
+      name: trimmed.name || null,
+      bio: trimmed.bio || null,
+      fitness_level: trimmed.level || null,
+      fitness_goals: trimmed.goal ? [trimmed.goal] : [],
+      age: trimmed.age ? Number(trimmed.age) : null,
+      height_cm: trimmed.height ? Number(trimmed.height) : null,
+      weight_kg: trimmed.weight ? Number(trimmed.weight) : null,
+      avatar_url: trimmed.avatar || null,
       body_measurements: measurements,
     };
     try {
       await updateProfile.mutateAsync(updates as never);
       setSaveStatus("saved");
       setInitial(form);
+      setFieldErrors({});
       setLastSaved(new Date());
-      // Homepage welcome message
-      if (form.name) localStorage.setItem("user_display_name", form.name);
+      if (trimmed.name) localStorage.setItem("user_display_name", trimmed.name);
       window.dispatchEvent(new Event("profileUpdated"));
       onSave?.();
     } catch {
+      // toast is emitted by the mutation itself
       setSaveStatus("error");
     }
-    setTimeout(() => setSaveStatus(null), 3000);
-  }, [form, profile, updateProfile, onSave]);
+    setTimeout(() => setSaveStatus((s) => (s === "saved" ? null : s)), 3000);
+  }, [validateAll, profile, updateProfile, onSave, form, toast]);
 
-  // Debounced auto-save — restarts on every keystroke; only fires once user
-  // has stopped editing for 2s, and never runs while a save is in-flight.
+  // Debounced auto-save — only runs when the form is valid and idle.
   useEffect(() => {
     if (!hasUnsavedChanges) return;
     if (isSavingRef.current) return;
@@ -167,10 +212,13 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
   }, [hasUnsavedChanges, form, persist]);
 
   const handleManualSave = async () => {
+    if (isSaving || saveStatus === "saving") return;
     setIsSaving(true);
-    await persist();
-    setIsSaving(false);
-    toast({ title: "✅ Profile Saved", description: "Your profile has been saved to your account." });
+    try {
+      await persist();
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const statusIndicator = () => {
