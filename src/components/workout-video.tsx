@@ -216,6 +216,15 @@ function InlineVideoPlayerImpl({
     </div>
   );
 }
+function InlineVideoPlayer(
+  props: Pick<WorkoutVideoProps, "title" | "thumbnailUrl" | "videoUrl" | "autoPlay" | "loop">,
+) {
+  if (isYouTubeEmbed(props.videoUrl)) {
+    return <YouTubePlayer videoUrl={props.videoUrl} title={props.title} />;
+  }
+  return <InlineVideoPlayerImpl {...props} />;
+}
+
 
 export function WorkoutVideo({
   title,
