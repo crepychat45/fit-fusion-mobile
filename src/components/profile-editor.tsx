@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { validateInput, nameSchema, bioSchema } from "@/utils/validation";
+import { nameSchema, bioSchema, ageSchema, heightSchema, weightSchema, validateInput } from "@/utils/validation";
 import {
   Select,
   SelectContent,
