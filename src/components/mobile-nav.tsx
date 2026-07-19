@@ -344,6 +344,7 @@ export function MobileNav() {
   const [showSecurity, setShowSecurity] = useState(false);
   const [showQuickLaunch, setShowQuickLaunch] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [showInstall, setShowInstall] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [longPressMenu, setLongPressMenu] = useState<{
     item: NavItem;
