@@ -14,11 +14,13 @@ import {
   User, IdCard, GraduationCap, Heart, Shield, Lock, Palette, Bell,
   Sparkles, BarChart3, Trophy, Wallet, HardDriveDownload, Link2,
   Terminal, LifeBuoy, Copy, QrCode, Share2, Download, UserPlus,
-  Trash2, CheckCircle2, Loader2, Zap, RefreshCw, LogOut,
+  Trash2, CheckCircle2, Loader2, Zap, RefreshCw, LogOut, Phone, Plus, X, Webhook, KeyRound,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/use-profile";
+import { applyAppearance, applyAccent } from "@/utils/appearance";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 // ---------- persistence helpers ----------
 const KEY = "fitfusion-profile-hub";
