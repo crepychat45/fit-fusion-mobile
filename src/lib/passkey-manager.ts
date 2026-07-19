@@ -76,7 +76,7 @@ async function getDeviceKey(): Promise<CryptoKey> {
   if (existing) {
     try {
       const raw = b64urlDecode(existing);
-      return await crypto.subtle.importKey("raw", raw, { name: "AES-GCM" }, false, [
+      return await crypto.subtle.importKey("raw", toBuf(raw), { name: "AES-GCM" }, false, [
         "encrypt",
         "decrypt",
       ]);
