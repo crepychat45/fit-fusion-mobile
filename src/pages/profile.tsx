@@ -218,7 +218,7 @@ const Profile = () => {
                   streak={localStats.streakDays || 0}
                   calories={localStats.caloriesBurned || 0}
                 />
-                <ProfileHub email={userEmail} displayName={displayName} />
+                <ProfileHub email={userEmail} displayName={displayName} userId={user?.id ?? null} />
                 <div id="profile-editor" />
                 <ProfileEditor onSave={() => toast({ title: "✅ Profile Updated" })} />
                 <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
