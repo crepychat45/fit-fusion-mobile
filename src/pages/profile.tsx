@@ -310,6 +310,7 @@ const Profile = () => {
               </TabsContent>
 
               <TabsContent value="stats" className="space-y-3 mt-0">
+                <StatsExtras />
                 {/* Liquid Glass Vitality Rings — new */}
                 <VitalityRingsWidget />
 
