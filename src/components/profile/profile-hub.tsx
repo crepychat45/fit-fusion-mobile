@@ -134,7 +134,7 @@ export const ProfileHub: React.FC<{ email?: string | null; displayName?: string;
   const [saving, setSaving] = useState(false);
   const [aiBusy, setAiBusy] = useState<null | "bio" | "username" | "review" | "insights" | "recs">(null);
   const [aiOutput, setAiOutput] = useState<{ kind: string; text: string } | null>(null);
-  const { profile, updateProfile } = useProfile();
+  const { profile, updateProfile } = useProfile(userId ?? undefined, { enabled: !!userId });
 
   // Reload state when the signed-in user changes so each account has its own hub prefs
   useEffect(() => {
