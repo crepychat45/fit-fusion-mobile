@@ -26,6 +26,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
 import { SocialLogin } from "./social-login";
+import { getDefaultPasskey, verifyPasskey, listPasskeys, PasskeyError } from "@/lib/passkey-manager";
 
 interface EnhancedAuthFormProps {
   onSuccess?: () => void;
@@ -72,61 +73,53 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
   useEffect(() => {
     const hasWebAuthn = typeof window !== "undefined" && !!(window as any).PublicKeyCredential;
     setBiometricAvailable(hasWebAuthn);
-    try {
-      const credId = localStorage.getItem("ff.security.biometric.credId");
-      const savedEmail = localStorage.getItem("ff.security.biometric.email");
-      if (credId && savedEmail) {
-        setPasskeyEnrolled(true);
-        if (!email) setEmail(savedEmail);
-      }
-    } catch {}
+    (async () => {
+      try {
+        const list = await listPasskeys();
+        if (list.length > 0) {
+          setPasskeyEnrolled(true);
+          const def = list.find((p) => p.isDefault) || list[0];
+          if (def?.email && !email) setEmail(def.email);
+        }
+      } catch { /* noop */ }
+    })();
   }, []);
 
   const handlePasskeySignIn = async () => {
-    const credId = localStorage.getItem("ff.security.biometric.credId");
-    const savedEmail = localStorage.getItem("ff.security.biometric.email");
-    if (!credId || !savedEmail) {
-      toast({
-        title: "No passkey on this device",
-        description: "Sign in once with your password, then enrol a passkey from Profile → Security.",
-        variant: "destructive",
-      });
-      return;
-    }
     setPasskeyLoading(true);
     try {
-      const challenge = new Uint8Array(32);
-      crypto.getRandomValues(challenge);
-      const idBytes = Uint8Array.from(
-        atob(credId.replace(/-/g, "+").replace(/_/g, "/")),
-        (c) => c.charCodeAt(0),
-      );
-      await navigator.credentials.get({
-        publicKey: {
-          challenge,
-          allowCredentials: [{ id: idBytes, type: "public-key" }],
-          userVerification: "required",
-          timeout: 60000,
-          rpId: window.location.hostname,
-        },
-      });
-      // WebAuthn verified locally. Complete Supabase session via magic link.
-      const { error } = await signInWithMagicLink(savedEmail);
+      const def = await getDefaultPasskey();
+      if (!def) {
+        toast({
+          title: "No passkey on this device",
+          description: "Sign in once, then enrol a passkey from Profile → Security.",
+          variant: "destructive",
+        });
+        return;
+      }
+      const rec = await verifyPasskey(def.id);
+      if (!rec) throw new Error("Verification cancelled");
+      // WebAuthn verified locally → complete Supabase session via magic link.
+      const { error } = await signInWithMagicLink(rec.email);
       if (error) throw new Error(error);
       toast({
         title: "Passkey verified ✓",
-        description: `Check ${savedEmail} for a one-tap sign-in link to finish.`,
+        description: `Check ${rec.email} for a one-tap sign-in link to finish.`,
       });
     } catch (e: any) {
+      const isPk = e instanceof PasskeyError;
       toast({
-        title: "Passkey sign-in cancelled",
-        description: e?.message || "Biometric prompt was dismissed.",
+        title: isPk ? e.message : "Passkey sign-in failed",
+        description: isPk
+          ? e.suggestion
+          : e?.message || "Try email magic link or password instead.",
         variant: "destructive",
       });
     } finally {
       setPasskeyLoading(false);
     }
   };
+
 
   useEffect(() => {
     validateEmail(email);
