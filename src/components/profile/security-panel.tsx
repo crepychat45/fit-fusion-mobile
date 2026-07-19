@@ -252,43 +252,8 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
         </CardContent>
       </Card>
 
-      {/* Biometric */}
-      <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-base"><Fingerprint className="h-4 w-4 text-primary" /> Biometric Authentication</CardTitle>
-          <CardDescription>
-            {webAuthnSupported
-              ? platformAuth
-                ? "Use your fingerprint, Face ID, or Windows Hello."
-                : "WebAuthn supported. No platform authenticator detected on this device."
-              : "Not supported on this browser."}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-center justify-between rounded-xl border border-border/20 bg-muted/20 p-3">
-            <div className="flex items-center gap-2.5">
-              <Smartphone className="h-4 w-4 text-primary" />
-              <div>
-                <div className="text-sm font-medium">Platform authenticator</div>
-                <div className="text-[11px] text-muted-foreground">{platformAuth ? "Available on this device" : "Unavailable"}</div>
-              </div>
-            </div>
-            <Badge variant={platformAuth ? "default" : "outline"} className="text-[10px]">{platformAuth ? "READY" : "N/A"}</Badge>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {!biometricEnabled ? (
-              <Button size="sm" onClick={enrollBiometric} disabled={!webAuthnSupported || !platformAuth}>
-                <Fingerprint className="h-3.5 w-3.5 mr-1.5" />Enable Biometric
-              </Button>
-            ) : (
-              <>
-                <Button size="sm" variant="outline" onClick={testBiometric}><ShieldCheck className="h-3.5 w-3.5 mr-1.5" />Test</Button>
-                <Button size="sm" variant="outline" onClick={removeBiometric}><ShieldAlert className="h-3.5 w-3.5 mr-1.5" />Remove</Button>
-              </>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Passkeys */}
+      <PasskeyManagementPanel userEmail={userEmail} />
 
       {/* 2FA */}
       <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
