@@ -32,7 +32,22 @@ export function prefetchAllRoutes() {
     (window as any).requestIdleCallback ||
     ((cb: any, opts?: { timeout?: number }) => window.setTimeout(cb, opts?.timeout ?? 3000));
   const priorityRoutes = ["/workouts", "/progress", "/profile", "/settings"];
+  // Sequential (not parallel) — avoids saturating the network on cold start,
+  // which was inflating resource durations and triggering slow-op warnings.
+  let chain: Promise<any> = Promise.resolve();
   priorityRoutes.forEach((path, i) => {
-    idle(() => prefetchRoute(path), { timeout: 3500 + i * 900 });
+    idle(
+      () => {
+        chain = chain.then(
+          () => new Promise<void>((res) => {
+            const importer = routes[path];
+            if (!importer || prefetched.has(path)) return res();
+            prefetched.add(path);
+            importer().catch(() => prefetched.delete(path)).finally(() => res());
+          })
+        );
+      },
+      { timeout: 6000 + i * 1500 }
+    );
   });
 }
