@@ -68,6 +68,17 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
   const isDirtyRef = useRef(false);
   const isSavingRef = useRef(false);
 
+  // When the signed-in user changes, discard any prior hydration/form state so
+  // we never carry values from one account into another.
+  useEffect(() => {
+    hydratedKeyRef.current = null;
+    isDirtyRef.current = false;
+    setForm(EMPTY_FORM);
+    setInitial(EMPTY_FORM);
+    setFieldErrors({});
+    setSaveStatus(null);
+  }, [user?.id]);
+
   // Hydrate only when a *different* server record arrives, and never when the
   // user has unsaved edits or a save is in-flight. This prevents refetches
   // (window focus, react-query revalidation) from wiping the form.
