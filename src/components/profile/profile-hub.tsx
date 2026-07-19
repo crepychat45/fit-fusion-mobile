@@ -662,9 +662,9 @@ export const ProfileHub: React.FC<{ email?: string | null; displayName?: string;
             <AccordionContent className="px-6 pb-5 flex flex-wrap gap-2">
               <Button size="sm" variant="outline" onClick={exportJSON}><Download className="h-3 w-3 mr-1" />Export JSON</Button>
               <Button size="sm" variant="outline" onClick={() => window.print()}><Download className="h-3 w-3 mr-1" />Export PDF</Button>
-              <Button size="sm" variant="outline" onClick={() => { localStorage.setItem(KEY + "-backup", JSON.stringify(state)); toast({ title: "Backup saved" }); }}>Backup</Button>
+              <Button size="sm" variant="outline" onClick={() => { localStorage.setItem(keyFor(userId) + "-backup", JSON.stringify(state)); toast({ title: "Backup saved" }); }}>Backup</Button>
               <Button size="sm" variant="outline" onClick={() => {
-                const raw = localStorage.getItem(KEY + "-backup");
+                const raw = localStorage.getItem(keyFor(userId) + "-backup");
                 if (!raw) { toast({ title: "No backup" }); return; }
                 setState(JSON.parse(raw));
                 toast({ title: "Restored" });
