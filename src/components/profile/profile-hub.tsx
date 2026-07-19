@@ -556,7 +556,14 @@ export const ProfileHub: React.FC<{ email?: string | null; displayName?: string;
                   {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : "Send reset email"}
                 </Button>
               </Row>
-              <Row label="Phone verification"><Button size="sm" variant="outline" onClick={() => toast({ title: "Coming soon" })}>Verify</Button></Row>
+              <Row label="Phone verification">
+                <div className="flex items-center gap-2">
+                  {profile?.phone_number ? <Badge variant="outline" className="text-[10px]">{profile.phone_number}</Badge> : null}
+                  <Button size="sm" variant="outline" onClick={() => { setPhoneOpen(true); setPhoneStep("enter"); }}>
+                    <Phone className="h-3 w-3 mr-1" />Verify now
+                  </Button>
+                </div>
+              </Row>
               <Row label="Email verification"><Badge variant="outline" className="text-[10px]">Verified</Badge></Row>
               <Row label="Two-factor auth"><Button size="sm" variant="outline" onClick={() => toast({ title: "Enable in Settings → Security" })}>Enable</Button></Row>
               <Row label="Backup codes"><Button size="sm" variant="outline" onClick={() => {
