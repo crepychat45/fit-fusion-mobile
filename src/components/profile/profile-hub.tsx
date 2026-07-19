@@ -839,9 +839,21 @@ export const ProfileHub: React.FC<{ email?: string | null; displayName?: string;
             </AccordionTrigger>
             <AccordionContent className="px-6 pb-5 space-y-2">
               <Row label="Developer mode"><Switch checked={state.developer.mode} onCheckedChange={(v) => patch("developer", { mode: v })} /></Row>
-              <Row label="API keys"><Button size="sm" variant="outline" onClick={() => toast({ title: "No keys yet" })}>Manage</Button></Row>
-              <Row label="OAuth apps"><Button size="sm" variant="outline" onClick={() => toast({ title: "None registered" })}>Manage</Button></Row>
-              <Row label="Webhooks"><Button size="sm" variant="outline" onClick={() => toast({ title: "None configured" })}>Manage</Button></Row>
+              <Row label={`API keys (${dev.apiKeys.length})`}>
+                <Button size="sm" variant="outline" onClick={() => { setDevOpen("apiKeys"); setDevLabel(""); setDevValue(""); }}>
+                  <KeyRound className="h-3 w-3 mr-1" />Manage
+                </Button>
+              </Row>
+              <Row label={`OAuth apps (${dev.oauthApps.length})`}>
+                <Button size="sm" variant="outline" onClick={() => { setDevOpen("oauthApps"); setDevLabel(""); setDevValue(""); }}>
+                  <Terminal className="h-3 w-3 mr-1" />Manage
+                </Button>
+              </Row>
+              <Row label={`Webhooks (${dev.webhooks.length})`}>
+                <Button size="sm" variant="outline" onClick={() => { setDevOpen("webhooks"); setDevLabel(""); setDevValue(""); }}>
+                  <Webhook className="h-3 w-3 mr-1" />Manage
+                </Button>
+              </Row>
             </AccordionContent>
           </GlassCard>
         </AccordionItem>
