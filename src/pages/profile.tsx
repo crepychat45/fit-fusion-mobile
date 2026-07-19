@@ -22,6 +22,9 @@ import { APP_VERSION, getInstalledVersion } from "@/lib/app-version";
 import { ProfilePhotoUpload } from "@/components/profile-photo-upload";
 import { useProfile } from "@/hooks/use-profile";
 import { FitnessIDCard } from "@/components/profile/fitness-id-card";
+import { SecurityPanel } from "@/components/profile/security-panel";
+import { AwardsExtras } from "@/components/profile/awards-extras";
+import { StatsExtras } from "@/components/profile/stats-extras";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
 import { Loader2 } from "lucide-react";
 
