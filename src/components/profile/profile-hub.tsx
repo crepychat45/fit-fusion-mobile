@@ -619,8 +619,20 @@ export const ProfileHub: React.FC<{ email?: string | null; displayName?: string;
               </Row>
               <Row label="Glassmorphism"><Switch checked={state.appearance.glass} onCheckedChange={(v) => patchNested("appearance", { glass: v })} /></Row>
               <Row label="Compact mode"><Switch checked={state.appearance.compact} onCheckedChange={(v) => patchNested("appearance", { compact: v })} /></Row>
-              <div><Label className="text-xs">Accent color</Label>
-                <Input type="color" value={state.appearance.accent} onChange={(e) => patchNested("appearance", { accent: e.target.value })} className="mt-1 h-9 w-16 p-1" />
+              <div>
+                <Label className="text-xs">Accent palette</Label>
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  {["#3B82F6","#8B5CF6","#EC4899","#F97316","#10B981","#06B6D4","#EF4444","#F59E0B","#14B8A6","#6366F1"].map((c) => (
+                    <button key={c} type="button" aria-label={`Accent ${c}`}
+                      onClick={() => { patchNested("appearance", { accent: c }); applyAccent(c); }}
+                      className={`h-7 w-7 rounded-full ring-offset-2 ring-offset-background transition ${state.appearance.accent.toLowerCase()===c.toLowerCase() ? "ring-2 ring-foreground scale-110" : "ring-1 ring-border/60 hover:scale-105"}`}
+                      style={{ backgroundColor: c }} />
+                  ))}
+                  <Input type="color" value={state.appearance.accent}
+                    onChange={(e) => { patchNested("appearance", { accent: e.target.value }); applyAccent(e.target.value); }}
+                    className="h-8 w-10 p-1 cursor-pointer" aria-label="Custom accent color" />
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-1">Applied live across buttons, links, and rings.</p>
               </div>
               <div><Label className="text-xs">Font size ({state.appearance.fontSize}px)</Label>
                 <input type="range" min={12} max={22} value={state.appearance.fontSize} onChange={(e) => patchNested("appearance", { fontSize: Number(e.target.value) })} className="w-full accent-primary" />
