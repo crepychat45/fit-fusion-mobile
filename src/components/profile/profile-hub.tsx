@@ -284,6 +284,113 @@ export const ProfileHub: React.FC<{ email?: string | null; displayName?: string;
     toast({ title: "Requested", description: "Account deletion request submitted. Our team will confirm via email." });
   };
 
+  // ---------- Connected accounts (real OAuth linking) ----------
+  const [identities, setIdentities] = useState<Array<{ provider: string; id: string; identity_id?: string }>>([]);
+  const refreshIdentities = useCallback(async () => {
+    try {
+      const anyAuth = supabase.auth as unknown as { getUserIdentities?: () => Promise<{ data: { identities: any[] } | null }> };
+      if (typeof anyAuth.getUserIdentities === "function") {
+        const { data } = await anyAuth.getUserIdentities();
+        setIdentities(data?.identities ?? []);
+      } else {
+        const { data } = await supabase.auth.getUser();
+        setIdentities((data.user?.identities as any) ?? []);
+      }
+    } catch { /* ignore */ }
+  }, []);
+  useEffect(() => { if (userId) refreshIdentities(); }, [userId, refreshIdentities]);
+
+  const linkProvider = async (provider: "google" | "apple" | "github" | "azure" | "discord" | "facebook") => {
+    try {
+      const anyAuth = supabase.auth as unknown as { linkIdentity?: (opts: { provider: string; options?: any }) => Promise<{ error: any }> };
+      if (typeof anyAuth.linkIdentity !== "function") {
+        toast({ title: "Not supported", description: "Provider linking is unavailable on this account.", variant: "destructive" });
+        return;
+      }
+      const { error } = await anyAuth.linkIdentity({ provider, options: { redirectTo: `${window.location.origin}/auth/callback` } });
+      if (error) throw error;
+      toast({ title: "Redirecting", description: `Connecting ${provider}…` });
+    } catch (e: any) {
+      toast({ title: "Link failed", description: e?.message ?? "Provider not enabled.", variant: "destructive" });
+    }
+  };
+  const unlinkProvider = async (identity: any) => {
+    try {
+      const anyAuth = supabase.auth as unknown as { unlinkIdentity?: (i: any) => Promise<{ error: any }> };
+      if (typeof anyAuth.unlinkIdentity !== "function") return;
+      const { error } = await anyAuth.unlinkIdentity(identity);
+      if (error) throw error;
+      toast({ title: "Disconnected", description: identity.provider });
+      refreshIdentities();
+    } catch (e: any) {
+      toast({ title: "Unlink failed", description: e?.message ?? "", variant: "destructive" });
+    }
+  };
+
+  // ---------- Phone verification ----------
+  const [phoneOpen, setPhoneOpen] = useState(false);
+  const [phoneStep, setPhoneStep] = useState<"enter" | "verify">("enter");
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [phoneBusy, setPhoneBusy] = useState(false);
+  const sendPhoneOtp = async () => {
+    if (!/^\+\d{7,15}$/.test(phone)) {
+      toast({ title: "Invalid number", description: "Use full international format, e.g. +919876543210.", variant: "destructive" });
+      return;
+    }
+    setPhoneBusy(true);
+    const { error } = await supabase.auth.updateUser({ phone });
+    setPhoneBusy(false);
+    if (error) return toast({ title: "Failed", description: error.message, variant: "destructive" });
+    setPhoneStep("verify");
+    toast({ title: "Code sent", description: `SMS sent to ${phone}` });
+  };
+  const verifyPhoneOtp = async () => {
+    setPhoneBusy(true);
+    const { error } = await supabase.auth.verifyOtp({ phone, token: otp, type: "phone_change" });
+    setPhoneBusy(false);
+    if (error) return toast({ title: "Verification failed", description: error.message, variant: "destructive" });
+    toast({ title: "Phone verified ✓" });
+    setPhoneOpen(false); setPhoneStep("enter"); setPhone(""); setOtp("");
+  };
+
+  // ---------- Developer: API keys / OAuth apps / Webhooks (local, per-user) ----------
+  type DevItem = { id: string; label: string; value: string; createdAt: number };
+  const DEV_KEY = `ff.dev.${userId ?? "anon"}`;
+  const [dev, setDev] = useState<{ apiKeys: DevItem[]; oauthApps: DevItem[]; webhooks: DevItem[] }>(() => {
+    try { return JSON.parse(localStorage.getItem(DEV_KEY) || "") || { apiKeys: [], oauthApps: [], webhooks: [] }; }
+    catch { return { apiKeys: [], oauthApps: [], webhooks: [] }; }
+  });
+  useEffect(() => {
+    try { setDev(JSON.parse(localStorage.getItem(DEV_KEY) || "") || { apiKeys: [], oauthApps: [], webhooks: [] }); } catch { /* keep */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
+  useEffect(() => { try { localStorage.setItem(DEV_KEY, JSON.stringify(dev)); } catch {} }, [dev, DEV_KEY]);
+  const [devOpen, setDevOpen] = useState<null | "apiKeys" | "oauthApps" | "webhooks">(null);
+  const devLabels = { apiKeys: "API Keys", oauthApps: "OAuth Apps", webhooks: "Webhooks" } as const;
+  const [devLabel, setDevLabel] = useState("");
+  const [devValue, setDevValue] = useState("");
+  const addDevItem = () => {
+    if (!devOpen) return;
+    if (!devLabel.trim()) return toast({ title: "Name required", variant: "destructive" });
+    let value = devValue.trim();
+    if (devOpen === "apiKeys") {
+      const bytes = new Uint8Array(24); crypto.getRandomValues(bytes);
+      value = "ff_" + Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+    } else if (!value) {
+      return toast({ title: "URL required", variant: "destructive" });
+    }
+    const item: DevItem = { id: crypto.randomUUID(), label: devLabel.trim(), value, createdAt: Date.now() };
+    setDev((d) => ({ ...d, [devOpen]: [item, ...d[devOpen]] }));
+    setDevLabel(""); setDevValue("");
+    if (devOpen === "apiKeys") { navigator.clipboard.writeText(value).catch(()=>{}); toast({ title: "Key created & copied" }); }
+    else toast({ title: `${devLabels[devOpen]} added` });
+  };
+  const removeDevItem = (kind: "apiKeys" | "oauthApps" | "webhooks", id: string) => {
+    setDev((d) => ({ ...d, [kind]: d[kind].filter((i) => i.id !== id) }));
+  };
+
+
   return (
     <div className="space-y-4">
       {/* Cover + status */}
