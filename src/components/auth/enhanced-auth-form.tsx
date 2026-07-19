@@ -53,11 +53,13 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
   const [passwordStrength, setPasswordStrength] = useState<PasswordStrength | null>(null);
   const [formValid, setFormValid] = useState(false);
   const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [passkeyEnrolled, setPasskeyEnrolled] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [pendingVerificationEmail, setPendingVerificationEmail] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [capsLock, setCapsLock] = useState(false);
+  const [passkeyLoading, setPasskeyLoading] = useState(false);
 
 
   useEffect(() => {
@@ -68,10 +70,63 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
 
 
   useEffect(() => {
-    if ("credentials" in navigator && "create" in navigator.credentials) {
-      setBiometricAvailable(true);
-    }
+    const hasWebAuthn = typeof window !== "undefined" && !!(window as any).PublicKeyCredential;
+    setBiometricAvailable(hasWebAuthn);
+    try {
+      const credId = localStorage.getItem("ff.security.biometric.credId");
+      const savedEmail = localStorage.getItem("ff.security.biometric.email");
+      if (credId && savedEmail) {
+        setPasskeyEnrolled(true);
+        if (!email) setEmail(savedEmail);
+      }
+    } catch {}
   }, []);
+
+  const handlePasskeySignIn = async () => {
+    const credId = localStorage.getItem("ff.security.biometric.credId");
+    const savedEmail = localStorage.getItem("ff.security.biometric.email");
+    if (!credId || !savedEmail) {
+      toast({
+        title: "No passkey on this device",
+        description: "Sign in once with your password, then enrol a passkey from Profile → Security.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setPasskeyLoading(true);
+    try {
+      const challenge = new Uint8Array(32);
+      crypto.getRandomValues(challenge);
+      const idBytes = Uint8Array.from(
+        atob(credId.replace(/-/g, "+").replace(/_/g, "/")),
+        (c) => c.charCodeAt(0),
+      );
+      await navigator.credentials.get({
+        publicKey: {
+          challenge,
+          allowCredentials: [{ id: idBytes, type: "public-key" }],
+          userVerification: "required",
+          timeout: 60000,
+          rpId: window.location.hostname,
+        },
+      });
+      // WebAuthn verified locally. Complete Supabase session via magic link.
+      const { error } = await signInWithMagicLink(savedEmail);
+      if (error) throw new Error(error);
+      toast({
+        title: "Passkey verified ✓",
+        description: `Check ${savedEmail} for a one-tap sign-in link to finish.`,
+      });
+    } catch (e: any) {
+      toast({
+        title: "Passkey sign-in cancelled",
+        description: e?.message || "Biometric prompt was dismissed.",
+        variant: "destructive",
+      });
+    } finally {
+      setPasskeyLoading(false);
+    }
+  };
 
   useEffect(() => {
     validateEmail(email);
@@ -424,6 +479,23 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
           </div>
 
           <SocialLogin />
+
+          {biometricAvailable && !isSignUp && (
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full h-11 border-primary/40 hover:border-primary hover:bg-primary/5"
+              onClick={handlePasskeySignIn}
+              disabled={passkeyLoading || loading}
+            >
+              {passkeyLoading ? (
+                <div className="h-4 w-4 rounded-full border-2 border-primary border-t-transparent animate-spin mr-2" />
+              ) : (
+                <Fingerprint className="h-4 w-4 mr-2 text-primary" />
+              )}
+              {passkeyEnrolled ? "Sign in with Passkey" : "Set up Passkey after sign-in"}
+            </Button>
+          )}
 
           <Button
             type="button"

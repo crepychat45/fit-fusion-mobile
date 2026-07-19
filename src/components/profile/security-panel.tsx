@@ -140,8 +140,9 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
       })) as PublicKeyCredential | null;
       if (!cred) throw new Error("No credential returned");
       localStorage.setItem(LS_BIOMETRIC_CRED, b64urlEncode(cred.rawId));
+      if (userEmail) localStorage.setItem("ff.security.biometric.email", userEmail);
       setBiometricEnabled(true);
-      toast({ title: "Biometric enabled", description: "You can now sign in with your fingerprint or face." });
+      toast({ title: "Biometric enabled", description: "You can now sign in with your fingerprint or face on this device." });
     } catch (e: any) {
       toast({ title: "Setup failed", description: e?.message || "Biometric enrollment cancelled.", variant: "destructive" });
     }
