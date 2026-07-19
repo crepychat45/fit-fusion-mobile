@@ -22,6 +22,9 @@ import { APP_VERSION, getInstalledVersion } from "@/lib/app-version";
 import { ProfilePhotoUpload } from "@/components/profile-photo-upload";
 import { useProfile } from "@/hooks/use-profile";
 import { FitnessIDCard } from "@/components/profile/fitness-id-card";
+import { SecurityPanel } from "@/components/profile/security-panel";
+import { AwardsExtras } from "@/components/profile/awards-extras";
+import { StatsExtras } from "@/components/profile/stats-extras";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
 import { Loader2 } from "lucide-react";
 
@@ -248,27 +251,9 @@ const Profile = () => {
               </TabsContent>
 
               <TabsContent value="security" className="space-y-3 mt-0">
-                <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base">Security Settings</CardTitle>
-                    <CardDescription className="text-sm">Manage account security</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {[
-                      { title: "Two-Factor Auth", desc: "Extra security layer", action: "Enable" },
-                      { title: "Biometric Auth", desc: "Fingerprint or face recognition", action: "Setup" },
-                    ].map((item) => (
-                      <div key={item.title} className="flex items-center justify-between p-3 rounded-xl border border-border/20 bg-muted/20">
-                        <div>
-                          <h4 className="text-sm font-medium text-foreground">{item.title}</h4>
-                          <p className="text-xs text-muted-foreground">{item.desc}</p>
-                        </div>
-                        <Button variant="outline" size="sm" className="rounded-lg h-8 text-xs border-border/30">{item.action}</Button>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
+                <SecurityPanel userEmail={userEmail} />
               </TabsContent>
+
 
               <TabsContent value="achievements" className="space-y-3 mt-0">
                 {/* Level & Badges */}
@@ -321,9 +306,11 @@ const Profile = () => {
                     </div>
                   </CardContent>
                 </Card>
+                <AwardsExtras xp={1240} />
               </TabsContent>
 
               <TabsContent value="stats" className="space-y-3 mt-0">
+                <StatsExtras />
                 {/* Liquid Glass Vitality Rings — new */}
                 <VitalityRingsWidget />
 

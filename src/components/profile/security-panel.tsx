@@ -1,0 +1,407 @@
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
+import {
+  Shield, Fingerprint, KeyRound, Smartphone, Wifi, Compass, Activity,
+  Camera, Mic, MapPin, Lock, ShieldCheck, ShieldAlert, RefreshCw, Copy, LogOut, CheckCircle2, XCircle,
+} from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { randomBase32Secret, buildOtpAuthUrl, verifyTOTP, generateTOTP } from "@/lib/totp";
+
+const LS_2FA_ENABLED = "ff.security.2fa.enabled";
+const LS_2FA_SECRET = "ff.security.2fa.secret";
+const LS_BIOMETRIC_CRED = "ff.security.biometric.credId";
+const LS_TRUSTED_DEVICES = "ff.security.trustedDevices";
+
+type SensorStatus = { name: string; icon: React.ElementType; ok: boolean; note: string };
+
+async function detectSensors(): Promise<SensorStatus[]> {
+  const list: SensorStatus[] = [];
+  // Motion / Orientation
+  list.push({
+    name: "Motion Sensor",
+    icon: Activity,
+    ok: typeof (window as any).DeviceMotionEvent !== "undefined",
+    note: typeof (window as any).DeviceMotionEvent !== "undefined" ? "Available" : "Not available",
+  });
+  list.push({
+    name: "Orientation",
+    icon: Compass,
+    ok: typeof (window as any).DeviceOrientationEvent !== "undefined",
+    note: typeof (window as any).DeviceOrientationEvent !== "undefined" ? "Available" : "Not available",
+  });
+  // Network
+  const conn = (navigator as any).connection;
+  list.push({
+    name: "Network",
+    icon: Wifi,
+    ok: !!navigator.onLine,
+    note: conn?.effectiveType ? `${conn.effectiveType} • online` : navigator.onLine ? "Online" : "Offline",
+  });
+  // Camera
+  let cam = false, mic = false;
+  try {
+    const devices = await navigator.mediaDevices?.enumerateDevices?.();
+    cam = !!devices?.some((d) => d.kind === "videoinput");
+    mic = !!devices?.some((d) => d.kind === "audioinput");
+  } catch { /* denied */ }
+  list.push({ name: "Camera", icon: Camera, ok: cam, note: cam ? "Detected" : "Unavailable" });
+  list.push({ name: "Microphone", icon: Mic, ok: mic, note: mic ? "Detected" : "Unavailable" });
+  // Geolocation
+  list.push({
+    name: "Geolocation",
+    icon: MapPin,
+    ok: "geolocation" in navigator,
+    note: "geolocation" in navigator ? "Supported" : "Unsupported",
+  });
+  return list;
+}
+
+function b64urlEncode(buf: ArrayBuffer) {
+  const bytes = new Uint8Array(buf);
+  let s = "";
+  bytes.forEach((b) => (s += String.fromCharCode(b)));
+  return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+export function SecurityPanel({ userEmail }: { userEmail?: string }) {
+  const { toast } = useToast();
+  const [sensors, setSensors] = useState<SensorStatus[]>([]);
+  const [webAuthnSupported, setWebAuthnSupported] = useState(false);
+  const [platformAuth, setPlatformAuth] = useState(false);
+  const [biometricEnabled, setBiometricEnabled] = useState(() => !!localStorage.getItem(LS_BIOMETRIC_CRED));
+  const [twoFAEnabled, setTwoFAEnabled] = useState(() => localStorage.getItem(LS_2FA_ENABLED) === "1");
+  const [setupSecret, setSetupSecret] = useState<string | null>(null);
+  const [code, setCode] = useState("");
+  const [verifying, setVerifying] = useState(false);
+  const [liveCode, setLiveCode] = useState<string>("------");
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    detectSensors().then(setSensors);
+    (async () => {
+      const supported = typeof window !== "undefined" && !!(window as any).PublicKeyCredential;
+      setWebAuthnSupported(supported);
+      if (supported) {
+        try {
+          const avail = await (window as any).PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable?.();
+          setPlatformAuth(!!avail);
+        } catch { setPlatformAuth(false); }
+      }
+    })();
+    const t = setInterval(() => setTick((v) => v + 1), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const secret = twoFAEnabled ? localStorage.getItem(LS_2FA_SECRET) : setupSecret;
+      if (!secret) return setLiveCode("------");
+      setLiveCode(await generateTOTP(secret));
+    })();
+  }, [tick, twoFAEnabled, setupSecret]);
+
+  const otpauthUrl = useMemo(
+    () => (setupSecret ? buildOtpAuthUrl(userEmail || "user", "FitFusion", setupSecret) : ""),
+    [setupSecret, userEmail],
+  );
+  const qrSrc = useMemo(
+    () => (otpauthUrl ? `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(otpauthUrl)}` : ""),
+    [otpauthUrl],
+  );
+
+  const secondsLeft = 30 - (Math.floor(Date.now() / 1000) % 30);
+
+  // ---- Biometric (WebAuthn) ----
+  async function enrollBiometric() {
+    if (!webAuthnSupported) {
+      toast({ title: "Unsupported", description: "This device does not support WebAuthn.", variant: "destructive" });
+      return;
+    }
+    try {
+      const challenge = new Uint8Array(32);
+      crypto.getRandomValues(challenge);
+      const userId = new TextEncoder().encode(userEmail || "fitfusion-user");
+      const cred = (await navigator.credentials.create({
+        publicKey: {
+          challenge,
+          rp: { name: "FitFusion", id: window.location.hostname },
+          user: { id: userId, name: userEmail || "user", displayName: userEmail || "FitFusion User" },
+          pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
+          authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required", residentKey: "preferred" },
+          timeout: 60000,
+          attestation: "none",
+        },
+      })) as PublicKeyCredential | null;
+      if (!cred) throw new Error("No credential returned");
+      localStorage.setItem(LS_BIOMETRIC_CRED, b64urlEncode(cred.rawId));
+      setBiometricEnabled(true);
+      toast({ title: "Biometric enabled", description: "You can now sign in with your fingerprint or face." });
+    } catch (e: any) {
+      toast({ title: "Setup failed", description: e?.message || "Biometric enrollment cancelled.", variant: "destructive" });
+    }
+  }
+
+  async function testBiometric() {
+    const credId = localStorage.getItem(LS_BIOMETRIC_CRED);
+    if (!credId) return;
+    try {
+      const challenge = new Uint8Array(32);
+      crypto.getRandomValues(challenge);
+      const idBytes = Uint8Array.from(atob(credId.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
+      await navigator.credentials.get({
+        publicKey: {
+          challenge,
+          allowCredentials: [{ id: idBytes, type: "public-key" }],
+          userVerification: "required",
+          timeout: 60000,
+          rpId: window.location.hostname,
+        },
+      });
+      toast({ title: "Verified ✓", description: "Biometric authentication works on this device." });
+    } catch (e: any) {
+      toast({ title: "Verification failed", description: e?.message || "Cancelled", variant: "destructive" });
+    }
+  }
+
+  function removeBiometric() {
+    localStorage.removeItem(LS_BIOMETRIC_CRED);
+    setBiometricEnabled(false);
+    toast({ title: "Biometric removed" });
+  }
+
+  // ---- 2FA ----
+  function begin2FA() {
+    setSetupSecret(randomBase32Secret(20));
+    setCode("");
+  }
+  async function confirm2FA() {
+    if (!setupSecret) return;
+    setVerifying(true);
+    try {
+      const ok = await verifyTOTP(setupSecret, code, 1);
+      if (!ok) return toast({ title: "Invalid code", description: "Try the current 6-digit code.", variant: "destructive" });
+      localStorage.setItem(LS_2FA_SECRET, setupSecret);
+      localStorage.setItem(LS_2FA_ENABLED, "1");
+      setTwoFAEnabled(true);
+      setSetupSecret(null);
+      setCode("");
+      toast({ title: "Two-factor enabled 🔐", description: "Codes will be required at sign-in." });
+    } finally { setVerifying(false); }
+  }
+  function disable2FA() {
+    localStorage.removeItem(LS_2FA_ENABLED);
+    localStorage.removeItem(LS_2FA_SECRET);
+    setTwoFAEnabled(false);
+    toast({ title: "Two-factor disabled" });
+  }
+
+  const trustedDevices: { id: string; label: string; lastSeen: string }[] = useMemo(() => {
+    try { return JSON.parse(localStorage.getItem(LS_TRUSTED_DEVICES) || "[]"); } catch { return []; }
+  }, []);
+
+  async function sendPasswordReset() {
+    if (!userEmail) return;
+    const { error } = await supabase.auth.resetPasswordForEmail(userEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) return toast({ title: "Failed", description: error.message, variant: "destructive" });
+    toast({ title: "Reset link sent", description: `Check ${userEmail}` });
+  }
+
+  async function signOutAll() {
+    await supabase.auth.signOut({ scope: "global" as any });
+    toast({ title: "Signed out of all devices" });
+  }
+
+  const secureScore = (biometricEnabled ? 40 : 0) + (twoFAEnabled ? 40 : 0) + (userEmail ? 20 : 0);
+
+  return (
+    <div className="space-y-3">
+      {/* Security score */}
+      <Card className="border-primary/20 bg-gradient-to-br from-primary/10 via-card/60 to-accent/5 backdrop-blur-xl">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <ShieldCheck className="h-4 w-4 text-primary" /> Security Score
+          </CardTitle>
+          <CardDescription>Strength of your account protection</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-4">
+            <div className="relative w-16 h-16 shrink-0">
+              <svg className="w-16 h-16 -rotate-90" viewBox="0 0 64 64">
+                <circle cx="32" cy="32" r="28" fill="none" className="stroke-muted/30" strokeWidth="6" />
+                <circle cx="32" cy="32" r="28" fill="none" className="stroke-primary" strokeWidth="6" strokeLinecap="round"
+                  strokeDasharray={`${(secureScore / 100) * 175.9} 175.9`} />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center text-lg font-black">{secureScore}</div>
+            </div>
+            <div className="text-xs space-y-1 flex-1">
+              <div className="flex items-center gap-2">{biometricEnabled ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> : <XCircle className="h-3.5 w-3.5 text-muted-foreground" />} Biometric login</div>
+              <div className="flex items-center gap-2">{twoFAEnabled ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> : <XCircle className="h-3.5 w-3.5 text-muted-foreground" />} Two-factor auth</div>
+              <div className="flex items-center gap-2"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Verified email</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Biometric */}
+      <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base"><Fingerprint className="h-4 w-4 text-primary" /> Biometric Authentication</CardTitle>
+          <CardDescription>
+            {webAuthnSupported
+              ? platformAuth
+                ? "Use your fingerprint, Face ID, or Windows Hello."
+                : "WebAuthn supported. No platform authenticator detected on this device."
+              : "Not supported on this browser."}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex items-center justify-between rounded-xl border border-border/20 bg-muted/20 p-3">
+            <div className="flex items-center gap-2.5">
+              <Smartphone className="h-4 w-4 text-primary" />
+              <div>
+                <div className="text-sm font-medium">Platform authenticator</div>
+                <div className="text-[11px] text-muted-foreground">{platformAuth ? "Available on this device" : "Unavailable"}</div>
+              </div>
+            </div>
+            <Badge variant={platformAuth ? "default" : "outline"} className="text-[10px]">{platformAuth ? "READY" : "N/A"}</Badge>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {!biometricEnabled ? (
+              <Button size="sm" onClick={enrollBiometric} disabled={!webAuthnSupported || !platformAuth}>
+                <Fingerprint className="h-3.5 w-3.5 mr-1.5" />Enable Biometric
+              </Button>
+            ) : (
+              <>
+                <Button size="sm" variant="outline" onClick={testBiometric}><ShieldCheck className="h-3.5 w-3.5 mr-1.5" />Test</Button>
+                <Button size="sm" variant="outline" onClick={removeBiometric}><ShieldAlert className="h-3.5 w-3.5 mr-1.5" />Remove</Button>
+              </>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 2FA */}
+      <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base"><KeyRound className="h-4 w-4 text-primary" /> Two-Factor Authentication</CardTitle>
+          <CardDescription>Time-based codes (TOTP) via any authenticator app.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="text-sm">Status</div>
+            <div className="flex items-center gap-2">
+              <Badge variant={twoFAEnabled ? "default" : "outline"}>{twoFAEnabled ? "Enabled" : "Disabled"}</Badge>
+              <Switch checked={twoFAEnabled} onCheckedChange={(v) => (v ? begin2FA() : disable2FA())} />
+            </div>
+          </div>
+
+          {twoFAEnabled && (
+            <div className="rounded-xl border border-border/20 bg-muted/20 p-3">
+              <div className="text-[11px] text-muted-foreground">Current code</div>
+              <div className="text-2xl font-mono tracking-widest font-bold">{liveCode}</div>
+              <div className="text-[10px] text-muted-foreground">Refreshes in {secondsLeft}s</div>
+            </div>
+          )}
+
+          {setupSecret && (
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 space-y-3">
+              <div className="text-xs font-medium">Scan with Google Authenticator, 1Password, Authy…</div>
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                {qrSrc && <img src={qrSrc} alt="TOTP QR" className="w-40 h-40 bg-white p-1 rounded-lg" loading="lazy" />}
+                <div className="flex-1 w-full space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Input readOnly value={setupSecret} className="font-mono text-xs h-8" />
+                    <Button size="icon" variant="outline" className="h-8 w-8"
+                      onClick={() => { navigator.clipboard.writeText(setupSecret); toast({ title: "Copied" }); }}>
+                      <Copy className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                  <div className="text-[11px] text-muted-foreground">Preview: <span className="font-mono">{liveCode}</span></div>
+                  <Input placeholder="Enter 6-digit code" inputMode="numeric" maxLength={6} value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} className="h-9" />
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={confirm2FA} disabled={code.length !== 6 || verifying}>Verify & Enable</Button>
+                    <Button size="sm" variant="ghost" onClick={() => { setSetupSecret(null); setCode(""); }}>Cancel</Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Password & sessions */}
+      <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base"><Lock className="h-4 w-4 text-primary" /> Password & Sessions</CardTitle>
+          <CardDescription>Change password or sign out everywhere.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <Button size="sm" variant="outline" className="w-full justify-between" onClick={sendPasswordReset}>
+            <span className="flex items-center gap-2"><RefreshCw className="h-3.5 w-3.5" />Send password reset email</span>
+            <span className="text-[10px] text-muted-foreground truncate max-w-[45%]">{userEmail}</span>
+          </Button>
+          <Button size="sm" variant="outline" className="w-full justify-start" onClick={signOutAll}>
+            <LogOut className="h-3.5 w-3.5 mr-2" />Sign out of all devices
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Device sensors */}
+      <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base"><Activity className="h-4 w-4 text-primary" /> Device Sensors</CardTitle>
+          <CardDescription>Capabilities available for secure features.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-2">
+            {sensors.map((s) => (
+              <div key={s.name} className="flex items-center gap-2 rounded-xl border border-border/20 bg-muted/20 p-2.5">
+                <s.icon className={`h-4 w-4 ${s.ok ? "text-emerald-500" : "text-muted-foreground"}`} />
+                <div className="min-w-0">
+                  <div className="text-xs font-medium truncate">{s.name}</div>
+                  <div className="text-[10px] text-muted-foreground truncate">{s.note}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Trusted devices */}
+      <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base"><Shield className="h-4 w-4 text-primary" /> Trusted Devices</CardTitle>
+          <CardDescription>Devices you've logged in from.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-xl border border-border/20 bg-muted/20 p-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm font-medium">This device</div>
+                <div className="text-[10px] text-muted-foreground truncate max-w-[240px]">{navigator.userAgent.split(") ")[0].slice(0, 70)}…</div>
+              </div>
+              <Badge>Current</Badge>
+            </div>
+            {trustedDevices.length > 0 && <Separator className="my-2" />}
+            {trustedDevices.map((d) => (
+              <div key={d.id} className="flex items-center justify-between py-1.5">
+                <div className="text-xs">{d.label}</div>
+                <div className="text-[10px] text-muted-foreground">{d.lastSeen}</div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+export default SecurityPanel;
