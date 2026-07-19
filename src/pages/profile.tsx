@@ -306,6 +306,7 @@ const Profile = () => {
                     </div>
                   </CardContent>
                 </Card>
+                <AwardsExtras xp={1240} />
               </TabsContent>
 
               <TabsContent value="stats" className="space-y-3 mt-0">
