@@ -874,6 +874,85 @@ export const ProfileHub: React.FC<{ email?: string | null; displayName?: string;
           </GlassCard>
         </AccordionItem>
       </Accordion>
+
+      {/* Phone verification dialog */}
+      <Dialog open={phoneOpen} onOpenChange={(o) => { setPhoneOpen(o); if (!o) { setPhoneStep("enter"); setOtp(""); } }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Verify your phone</DialogTitle>
+            <DialogDescription>
+              {phoneStep === "enter" ? "We'll send a one-time code by SMS." : `Enter the 6-digit code sent to ${phone}.`}
+            </DialogDescription>
+          </DialogHeader>
+          {phoneStep === "enter" ? (
+            <div className="space-y-2">
+              <Label className="text-xs">Phone number (E.164)</Label>
+              <Input placeholder="+919876543210" value={phone} onChange={(e) => setPhone(e.target.value.trim())} inputMode="tel" />
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Label className="text-xs">Verification code</Label>
+              <Input placeholder="123456" value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0,6))} inputMode="numeric" />
+            </div>
+          )}
+          <DialogFooter>
+            {phoneStep === "enter" ? (
+              <Button onClick={sendPhoneOtp} disabled={phoneBusy}>
+                {phoneBusy ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Phone className="h-4 w-4 mr-1" />}Send code
+              </Button>
+            ) : (
+              <div className="flex gap-2 w-full sm:w-auto sm:ml-auto">
+                <Button variant="outline" onClick={() => setPhoneStep("enter")}>Back</Button>
+                <Button onClick={verifyPhoneOtp} disabled={phoneBusy || otp.length !== 6}>
+                  {phoneBusy ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-1" />}Verify
+                </Button>
+              </div>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Developer manager dialog */}
+      <Dialog open={!!devOpen} onOpenChange={(o) => { if (!o) setDevOpen(null); }}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{devOpen ? devLabels[devOpen] : ""}</DialogTitle>
+            <DialogDescription>
+              {devOpen === "apiKeys" && "Personal API keys. Shown once — copy them immediately."}
+              {devOpen === "oauthApps" && "Register callback URLs for OAuth apps that will use your account."}
+              {devOpen === "webhooks" && "HTTPS endpoints notified when your activity events fire."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2">
+              <Input placeholder="Name / label" value={devLabel} onChange={(e) => setDevLabel(e.target.value)} />
+              {devOpen !== "apiKeys" && (
+                <Input placeholder={devOpen === "webhooks" ? "https://example.com/webhook" : "https://app.example.com/callback"} value={devValue} onChange={(e) => setDevValue(e.target.value)} />
+              )}
+              <Button onClick={addDevItem}><Plus className="h-4 w-4 mr-1" />Add</Button>
+            </div>
+            <div className="max-h-64 overflow-auto space-y-2">
+              {devOpen && dev[devOpen].length === 0 && <p className="text-xs text-muted-foreground text-center py-4">Nothing yet.</p>}
+              {devOpen && dev[devOpen].map((item) => (
+                <div key={item.id} className="flex items-center justify-between gap-2 rounded-lg border border-border/60 p-2">
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium truncate">{item.label}</div>
+                    <div className="text-[10px] text-muted-foreground font-mono truncate">{item.value}</div>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Button size="icon" variant="ghost" onClick={() => { navigator.clipboard.writeText(item.value).catch(()=>{}); toast({ title: "Copied" }); }}>
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button size="icon" variant="ghost" onClick={() => removeDevItem(devOpen, item.id)}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
