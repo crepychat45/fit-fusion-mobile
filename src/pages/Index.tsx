@@ -34,6 +34,7 @@ const DailyChallengeWidget = lazy(() => import("@/components/dashboard/daily-cha
 const MonthlySecurityScanWidget = lazy(() => import("@/components/home/monthly-security-scan-widget").then((m) => ({ default: m.MonthlySecurityScanWidget })));
 const VitalityIndexWidget = lazy(() => import("@/components/dashboard/vitality-index-widget").then((m) => ({ default: m.VitalityIndexWidget })));
 const SmartwatchControlWidget = lazy(() => import("@/components/dashboard/smartwatch-control-widget").then((m) => ({ default: m.SmartwatchControlWidget })));
+const MindfulMinuteWidget = lazy(() => import("@/components/dashboard/mindful-minute-widget").then((m) => ({ default: m.MindfulMinuteWidget })));
 const MobileNav = lazy(() => import("@/components/mobile-nav").then((m) => ({ default: m.MobileNav })));
 const MobileFloatingActions = lazy(() => import("@/components/mobile/mobile-floating-actions").then((m) => ({ default: m.MobileFloatingActions })));
 const MobileAIAssistant = lazy(() => import("@/components/mobile/mobile-ai-assistant").then((m) => ({ default: m.MobileAIAssistant })));
@@ -284,6 +285,11 @@ const Index = () => {
               <HealthMetricsPanel />
               <MotivationalQuotes />
             </div>
+          </motion.div>
+
+          {/* Mindful Minute - Breathing */}
+          <motion.div variants={fadeUp} className="px-4">
+            <MindfulMinuteWidget />
           </motion.div>
 
           {/* Notifications */}

@@ -183,17 +183,23 @@ export class AppInitializer {
     console.log('📊 Setting up monitoring...');
 
     // Only monitor slow ops in production; dev pre-bundling & HMR create false positives.
-    if (import.meta.env.PROD && 'PerformanceObserver' in window) {
+    // Only observe long tasks & navigation; resource entries are noisy on slow networks
+    // and cached/prefetched requests report inflated durations. Suppress unless explicitly enabled.
+    const perfDebug = (() => {
+      try { return localStorage.getItem('fitfusion:perf-debug') === '1'; } catch { return false; }
+    })();
+    if (import.meta.env.PROD && perfDebug && 'PerformanceObserver' in window) {
       try {
         const observer = new PerformanceObserver((list) => {
           for (const entry of list.getEntries()) {
+            // Ignore resource entries — they include queued prefetches with misleading durations.
+            if (entry.entryType === 'resource') continue;
             if (entry.duration > 3000) {
               console.warn(`⚠️ Slow operation detected: ${entry.name} (${entry.duration.toFixed(0)}ms)`);
             }
           }
         });
-
-        observer.observe({ entryTypes: ['measure', 'navigation', 'resource'] });
+        observer.observe({ entryTypes: ['measure', 'navigation', 'longtask'] as any });
       } catch {
         // no-op
       }
