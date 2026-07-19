@@ -23,7 +23,8 @@ import { applyAppearance, applyAccent } from "@/utils/appearance";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 // ---------- persistence helpers ----------
-const KEY = "fitfusion-profile-hub";
+const BASE_KEY = "fitfusion-profile-hub";
+const keyFor = (uid?: string | null) => (uid ? `${BASE_KEY}:${uid}` : BASE_KEY);
 
 type HubState = {
   cover?: string | null;
