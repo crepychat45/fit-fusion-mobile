@@ -159,6 +159,10 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
   }, [form]);
 
   const persist = useCallback(async () => {
+    // Never persist before the server profile has hydrated the form — otherwise
+    // an early auto-save would overwrite real DB values with EMPTY_FORM nulls.
+    if (hydratedKeyRef.current === null) return;
+
     const { errs, trimmed } = validateAll();
     if (Object.keys(errs).length) {
       setFieldErrors(errs);
@@ -171,22 +175,32 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
       return;
     }
 
+    // Build a DIFF against `initial`, so unchanged fields are never re-sent
+    // (prevents accidental null-wipes of data we didn't touch this edit).
+    const updates: Record<string, unknown> = {};
+    if (trimmed.name !== initial.name.trim()) updates.name = trimmed.name || null;
+    if (trimmed.bio !== initial.bio.trim()) updates.bio = trimmed.bio || null;
+    if (trimmed.level !== initial.level.trim()) updates.fitness_level = trimmed.level || null;
+    if (trimmed.goal !== initial.goal.trim()) updates.fitness_goals = trimmed.goal ? [trimmed.goal] : [];
+    if (trimmed.age !== initial.age.trim()) updates.age = trimmed.age ? Number(trimmed.age) : null;
+    if (trimmed.height !== initial.height.trim()) updates.height_cm = trimmed.height ? Number(trimmed.height) : null;
+    if (trimmed.weight !== initial.weight.trim()) updates.weight_kg = trimmed.weight ? Number(trimmed.weight) : null;
+    if ((trimmed.avatar ?? null) !== (initial.avatar ?? null)) updates.avatar_url = trimmed.avatar || null;
+    if (trimmed.gender !== initial.gender.trim()) {
+      const measurements = {
+        ...((profile?.body_measurements as Record<string, unknown>) || {}),
+        gender: trimmed.gender || null,
+      };
+      updates.body_measurements = measurements;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      setSaveStatus("saved");
+      setTimeout(() => setSaveStatus((s) => (s === "saved" ? null : s)), 1500);
+      return;
+    }
+
     setSaveStatus("saving");
-    const measurements = {
-      ...((profile?.body_measurements as Record<string, unknown>) || {}),
-      gender: trimmed.gender || null,
-    };
-    const updates = {
-      name: trimmed.name || null,
-      bio: trimmed.bio || null,
-      fitness_level: trimmed.level || null,
-      fitness_goals: trimmed.goal ? [trimmed.goal] : [],
-      age: trimmed.age ? Number(trimmed.age) : null,
-      height_cm: trimmed.height ? Number(trimmed.height) : null,
-      weight_kg: trimmed.weight ? Number(trimmed.weight) : null,
-      avatar_url: trimmed.avatar || null,
-      body_measurements: measurements,
-    };
     try {
       await updateProfile.mutateAsync(updates as never);
       setSaveStatus("saved");
@@ -201,15 +215,17 @@ export function ProfileEditor({ onSave }: ProfileEditorProps) {
       setSaveStatus("error");
     }
     setTimeout(() => setSaveStatus((s) => (s === "saved" ? null : s)), 3000);
-  }, [validateAll, profile, updateProfile, onSave, form, toast]);
+  }, [validateAll, profile, updateProfile, onSave, form, initial, toast]);
 
-  // Debounced auto-save — only runs when the form is valid and idle.
+  // Debounced auto-save — only after hydration, only when there are real edits.
   useEffect(() => {
+    if (hydratedKeyRef.current === null) return;
     if (!hasUnsavedChanges) return;
     if (isSavingRef.current) return;
     const t = setTimeout(() => { void persist(); }, 2000);
     return () => clearTimeout(t);
   }, [hasUnsavedChanges, form, persist]);
+
 
   const handleManualSave = async () => {
     if (isSaving || saveStatus === "saving") return;
