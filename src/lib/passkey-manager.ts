@@ -294,8 +294,8 @@ export async function verifyPasskey(preferredId?: string): Promise<PasskeyRecord
       publicKey: {
         challenge,
         allowCredentials: candidates.map((c) => ({
-          id: b64urlDecode(c.id),
-          type: "public-key",
+          id: toBuf(b64urlDecode(c.id)),
+          type: "public-key" as const,
         })),
         userVerification: "required",
         timeout: 60000,
