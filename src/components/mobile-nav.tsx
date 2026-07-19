@@ -56,6 +56,7 @@ import { MobileAIAssistant } from "@/components/mobile/mobile-ai-assistant";
 import { MobileSecurityCenter } from "@/components/mobile/mobile-security-center";
 import { FitnessFusionLogo } from "@/components/fitness-fusion-logo";
 import { prefetchRoute } from "@/utils/route-prefetch";
+import { PwaInstallDialog } from "@/components/pwa/pwa-install-dialog";
 
 /* ------------------------------------------------------------------ */
 /*  Utilities                                                          */
