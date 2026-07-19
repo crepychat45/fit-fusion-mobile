@@ -480,6 +480,23 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
 
           <SocialLogin />
 
+          {biometricAvailable && !isSignUp && (
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full h-11 border-primary/40 hover:border-primary hover:bg-primary/5"
+              onClick={handlePasskeySignIn}
+              disabled={passkeyLoading || loading}
+            >
+              {passkeyLoading ? (
+                <div className="h-4 w-4 rounded-full border-2 border-primary border-t-transparent animate-spin mr-2" />
+              ) : (
+                <Fingerprint className="h-4 w-4 mr-2 text-primary" />
+              )}
+              {passkeyEnrolled ? "Sign in with Passkey" : "Set up Passkey after sign-in"}
+            </Button>
+          )}
+
           <Button
             type="button"
             variant="outline"
