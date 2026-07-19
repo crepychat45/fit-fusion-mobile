@@ -1031,6 +1031,7 @@ export function MobileNav() {
         isOpen={showSecurity}
         onClose={() => setShowSecurity(false)}
       />
+      <PwaInstallDialog open={showInstall} onOpenChange={setShowInstall} />
     </>
   );
 }
