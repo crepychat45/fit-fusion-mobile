@@ -25,8 +25,8 @@ import { FitnessIDCard } from "@/components/profile/fitness-id-card";
 import { SecurityPanel } from "@/components/profile/security-panel";
 import { AwardsExtras } from "@/components/profile/awards-extras";
 import { StatsExtras } from "@/components/profile/stats-extras";
+import { ProfileInsightsWidget } from "@/components/profile/profile-insights-widget";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
-import { Loader2 } from "lucide-react";
 
 const Profile = () => {
   const { toast } = useToast();
@@ -212,6 +212,11 @@ const Profile = () => {
                   calories={localStats.caloriesBurned || 0}
                   fitnessScore={78}
                   goal={cloudProfile?.fitness_goals?.[0] || "Stay Fit"}
+                />
+                <ProfileInsightsWidget
+                  workouts={localStats.workoutsCompleted || 0}
+                  streak={localStats.streakDays || 0}
+                  calories={localStats.caloriesBurned || 0}
                 />
                 <ProfileHub email={userEmail} displayName={displayName} />
                 <div id="profile-editor" />
