@@ -287,6 +287,11 @@ const Index = () => {
             </div>
           </motion.div>
 
+          {/* Mindful Minute - Breathing */}
+          <motion.div variants={fadeUp} className="px-4">
+            <MindfulMinuteWidget />
+          </motion.div>
+
           {/* Notifications */}
           <motion.div variants={fadeUp} className="px-4">
             <EnhancedNotifications />
