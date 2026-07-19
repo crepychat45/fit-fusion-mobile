@@ -805,12 +805,28 @@ export const ProfileHub: React.FC<{ email?: string | null; displayName?: string;
             <AccordionTrigger className="px-6 py-3 hover:no-underline">
               <span className="flex items-center gap-2 text-sm font-semibold"><Link2 className="h-4 w-4 text-primary" />Connected accounts</span>
             </AccordionTrigger>
-            <AccordionContent className="px-6 pb-5">
-              {["google", "apple", "github", "microsoft", "discord", "facebook", "linkedin"].map((p) => (
-                <Row key={p} label={p.charAt(0).toUpperCase() + p.slice(1)}>
-                  <Switch checked={!!state.connections[p]} onCheckedChange={(v) => patch("connections", { ...state.connections, [p]: v })} />
-                </Row>
-              ))}
+            <AccordionContent className="px-6 pb-5 space-y-2">
+              {(["google","apple","github","azure","discord","facebook"] as const).map((p) => {
+                const linked = identities.find((i) => i.provider === p);
+                const displayName = p === "azure" ? "Microsoft" : p.charAt(0).toUpperCase() + p.slice(1);
+                return (
+                  <Row key={p} label={displayName}>
+                    <div className="flex items-center gap-2">
+                      {linked && <Badge variant="outline" className="text-[10px]"><CheckCircle2 className="h-3 w-3 mr-1 text-emerald-500" />Connected</Badge>}
+                      {linked ? (
+                        <Button size="sm" variant="outline" onClick={() => unlinkProvider(linked)} disabled={identities.length <= 1}>
+                          <X className="h-3 w-3 mr-1" />Disconnect
+                        </Button>
+                      ) : (
+                        <Button size="sm" variant="outline" onClick={() => linkProvider(p)}>
+                          <Plus className="h-3 w-3 mr-1" />Connect
+                        </Button>
+                      )}
+                    </div>
+                  </Row>
+                );
+              })}
+              <p className="text-[10px] text-muted-foreground pt-1">You must keep at least one sign-in method connected.</p>
             </AccordionContent>
           </GlassCard>
         </AccordionItem>
