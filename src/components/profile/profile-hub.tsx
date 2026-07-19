@@ -14,14 +14,17 @@ import {
   User, IdCard, GraduationCap, Heart, Shield, Lock, Palette, Bell,
   Sparkles, BarChart3, Trophy, Wallet, HardDriveDownload, Link2,
   Terminal, LifeBuoy, Copy, QrCode, Share2, Download, UserPlus,
-  Trash2, CheckCircle2, Loader2, Zap, RefreshCw, LogOut,
+  Trash2, CheckCircle2, Loader2, Zap, RefreshCw, LogOut, Phone, Plus, X, Webhook, KeyRound,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/use-profile";
+import { applyAppearance, applyAccent } from "@/utils/appearance";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 // ---------- persistence helpers ----------
-const KEY = "fitfusion-profile-hub";
+const BASE_KEY = "fitfusion-profile-hub";
+const keyFor = (uid?: string | null) => (uid ? `${BASE_KEY}:${uid}` : BASE_KEY);
 
 type HubState = {
   cover?: string | null;
@@ -102,9 +105,9 @@ const DEFAULT: HubState = {
   wallet: { coins: 240, referrals: 3 },
 };
 
-const loadHub = (): HubState => {
+const loadHub = (uid?: string | null): HubState => {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(keyFor(uid)) || (uid ? localStorage.getItem(BASE_KEY) : null);
     if (!raw) return DEFAULT;
     return { ...DEFAULT, ...(JSON.parse(raw) as HubState) };
   } catch { return DEFAULT; }
@@ -125,21 +128,31 @@ const GlassCard: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, 
 );
 
 // ---------- hub ----------
-export const ProfileHub: React.FC<{ email?: string | null; displayName?: string }> = ({ email, displayName }) => {
+export const ProfileHub: React.FC<{ email?: string | null; displayName?: string; userId?: string | null }> = ({ email, displayName, userId }) => {
   const { toast } = useToast();
-  const [state, setState] = useState<HubState>(() => loadHub());
+  const [state, setState] = useState<HubState>(() => loadHub(userId));
   const [saving, setSaving] = useState(false);
   const [aiBusy, setAiBusy] = useState<null | "bio" | "username" | "review" | "insights" | "recs">(null);
   const [aiOutput, setAiOutput] = useState<{ kind: string; text: string } | null>(null);
   const { profile, updateProfile } = useProfile();
 
-  // Autosave hub state
+  // Reload state when the signed-in user changes so each account has its own hub prefs
+  useEffect(() => {
+    setState(loadHub(userId));
+  }, [userId]);
+
+  // Autosave hub state — namespaced by user id
   useEffect(() => {
     const t = setTimeout(() => {
-      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {}
+      try { localStorage.setItem(keyFor(userId), JSON.stringify(state)); } catch {}
     }, 400);
     return () => clearTimeout(t);
-  }, [state]);
+  }, [state, userId]);
+
+  // Apply appearance (accent, dark mode, font size) live + on mount
+  useEffect(() => {
+    applyAppearance(state.appearance);
+  }, [state.appearance.accent, state.appearance.darkMode, state.appearance.fontSize]);
 
   const patch = useCallback(<K extends keyof HubState>(key: K, value: HubState[K]) => {
     setState((s) => ({ ...s, [key]: value }));
@@ -270,6 +283,113 @@ export const ProfileHub: React.FC<{ email?: string | null; displayName?: string 
     if (!confirm("This will permanently delete your account. Continue?")) return;
     toast({ title: "Requested", description: "Account deletion request submitted. Our team will confirm via email." });
   };
+
+  // ---------- Connected accounts (real OAuth linking) ----------
+  const [identities, setIdentities] = useState<Array<{ provider: string; id: string; identity_id?: string }>>([]);
+  const refreshIdentities = useCallback(async () => {
+    try {
+      const anyAuth = supabase.auth as unknown as { getUserIdentities?: () => Promise<{ data: { identities: any[] } | null }> };
+      if (typeof anyAuth.getUserIdentities === "function") {
+        const { data } = await anyAuth.getUserIdentities();
+        setIdentities(data?.identities ?? []);
+      } else {
+        const { data } = await supabase.auth.getUser();
+        setIdentities((data.user?.identities as any) ?? []);
+      }
+    } catch { /* ignore */ }
+  }, []);
+  useEffect(() => { if (userId) refreshIdentities(); }, [userId, refreshIdentities]);
+
+  const linkProvider = async (provider: "google" | "apple" | "github" | "azure" | "discord" | "facebook") => {
+    try {
+      const anyAuth = supabase.auth as unknown as { linkIdentity?: (opts: { provider: string; options?: any }) => Promise<{ error: any }> };
+      if (typeof anyAuth.linkIdentity !== "function") {
+        toast({ title: "Not supported", description: "Provider linking is unavailable on this account.", variant: "destructive" });
+        return;
+      }
+      const { error } = await anyAuth.linkIdentity({ provider, options: { redirectTo: `${window.location.origin}/auth/callback` } });
+      if (error) throw error;
+      toast({ title: "Redirecting", description: `Connecting ${provider}…` });
+    } catch (e: any) {
+      toast({ title: "Link failed", description: e?.message ?? "Provider not enabled.", variant: "destructive" });
+    }
+  };
+  const unlinkProvider = async (identity: any) => {
+    try {
+      const anyAuth = supabase.auth as unknown as { unlinkIdentity?: (i: any) => Promise<{ error: any }> };
+      if (typeof anyAuth.unlinkIdentity !== "function") return;
+      const { error } = await anyAuth.unlinkIdentity(identity);
+      if (error) throw error;
+      toast({ title: "Disconnected", description: identity.provider });
+      refreshIdentities();
+    } catch (e: any) {
+      toast({ title: "Unlink failed", description: e?.message ?? "", variant: "destructive" });
+    }
+  };
+
+  // ---------- Phone verification ----------
+  const [phoneOpen, setPhoneOpen] = useState(false);
+  const [phoneStep, setPhoneStep] = useState<"enter" | "verify">("enter");
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [phoneBusy, setPhoneBusy] = useState(false);
+  const sendPhoneOtp = async () => {
+    if (!/^\+\d{7,15}$/.test(phone)) {
+      toast({ title: "Invalid number", description: "Use full international format, e.g. +919876543210.", variant: "destructive" });
+      return;
+    }
+    setPhoneBusy(true);
+    const { error } = await supabase.auth.updateUser({ phone });
+    setPhoneBusy(false);
+    if (error) return toast({ title: "Failed", description: error.message, variant: "destructive" });
+    setPhoneStep("verify");
+    toast({ title: "Code sent", description: `SMS sent to ${phone}` });
+  };
+  const verifyPhoneOtp = async () => {
+    setPhoneBusy(true);
+    const { error } = await supabase.auth.verifyOtp({ phone, token: otp, type: "phone_change" });
+    setPhoneBusy(false);
+    if (error) return toast({ title: "Verification failed", description: error.message, variant: "destructive" });
+    toast({ title: "Phone verified ✓" });
+    setPhoneOpen(false); setPhoneStep("enter"); setPhone(""); setOtp("");
+  };
+
+  // ---------- Developer: API keys / OAuth apps / Webhooks (local, per-user) ----------
+  type DevItem = { id: string; label: string; value: string; createdAt: number };
+  const DEV_KEY = `ff.dev.${userId ?? "anon"}`;
+  const [dev, setDev] = useState<{ apiKeys: DevItem[]; oauthApps: DevItem[]; webhooks: DevItem[] }>(() => {
+    try { return JSON.parse(localStorage.getItem(DEV_KEY) || "") || { apiKeys: [], oauthApps: [], webhooks: [] }; }
+    catch { return { apiKeys: [], oauthApps: [], webhooks: [] }; }
+  });
+  useEffect(() => {
+    try { setDev(JSON.parse(localStorage.getItem(DEV_KEY) || "") || { apiKeys: [], oauthApps: [], webhooks: [] }); } catch { /* keep */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
+  useEffect(() => { try { localStorage.setItem(DEV_KEY, JSON.stringify(dev)); } catch {} }, [dev, DEV_KEY]);
+  const [devOpen, setDevOpen] = useState<null | "apiKeys" | "oauthApps" | "webhooks">(null);
+  const devLabels = { apiKeys: "API Keys", oauthApps: "OAuth Apps", webhooks: "Webhooks" } as const;
+  const [devLabel, setDevLabel] = useState("");
+  const [devValue, setDevValue] = useState("");
+  const addDevItem = () => {
+    if (!devOpen) return;
+    if (!devLabel.trim()) return toast({ title: "Name required", variant: "destructive" });
+    let value = devValue.trim();
+    if (devOpen === "apiKeys") {
+      const bytes = new Uint8Array(24); crypto.getRandomValues(bytes);
+      value = "ff_" + Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+    } else if (!value) {
+      return toast({ title: "URL required", variant: "destructive" });
+    }
+    const item: DevItem = { id: crypto.randomUUID(), label: devLabel.trim(), value, createdAt: Date.now() };
+    setDev((d) => ({ ...d, [devOpen]: [item, ...d[devOpen]] }));
+    setDevLabel(""); setDevValue("");
+    if (devOpen === "apiKeys") { navigator.clipboard.writeText(value).catch(()=>{}); toast({ title: "Key created & copied" }); }
+    else toast({ title: `${devLabels[devOpen]} added` });
+  };
+  const removeDevItem = (kind: "apiKeys" | "oauthApps" | "webhooks", id: string) => {
+    setDev((d) => ({ ...d, [kind]: d[kind].filter((i) => i.id !== id) }));
+  };
+
 
   return (
     <div className="space-y-4">
@@ -436,7 +556,14 @@ export const ProfileHub: React.FC<{ email?: string | null; displayName?: string 
                   {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : "Send reset email"}
                 </Button>
               </Row>
-              <Row label="Phone verification"><Button size="sm" variant="outline" onClick={() => toast({ title: "Coming soon" })}>Verify</Button></Row>
+              <Row label="Phone verification">
+                <div className="flex items-center gap-2">
+                  {(profile as any)?.phone_number ? <Badge variant="outline" className="text-[10px]">{(profile as any).phone_number}</Badge> : null}
+                  <Button size="sm" variant="outline" onClick={() => { setPhoneOpen(true); setPhoneStep("enter"); }}>
+                    <Phone className="h-3 w-3 mr-1" />Verify now
+                  </Button>
+                </div>
+              </Row>
               <Row label="Email verification"><Badge variant="outline" className="text-[10px]">Verified</Badge></Row>
               <Row label="Two-factor auth"><Button size="sm" variant="outline" onClick={() => toast({ title: "Enable in Settings → Security" })}>Enable</Button></Row>
               <Row label="Backup codes"><Button size="sm" variant="outline" onClick={() => {
@@ -492,8 +619,20 @@ export const ProfileHub: React.FC<{ email?: string | null; displayName?: string 
               </Row>
               <Row label="Glassmorphism"><Switch checked={state.appearance.glass} onCheckedChange={(v) => patchNested("appearance", { glass: v })} /></Row>
               <Row label="Compact mode"><Switch checked={state.appearance.compact} onCheckedChange={(v) => patchNested("appearance", { compact: v })} /></Row>
-              <div><Label className="text-xs">Accent color</Label>
-                <Input type="color" value={state.appearance.accent} onChange={(e) => patchNested("appearance", { accent: e.target.value })} className="mt-1 h-9 w-16 p-1" />
+              <div>
+                <Label className="text-xs">Accent palette</Label>
+                <div className="mt-1 flex flex-wrap items-center gap-2">
+                  {["#3B82F6","#8B5CF6","#EC4899","#F97316","#10B981","#06B6D4","#EF4444","#F59E0B","#14B8A6","#6366F1"].map((c) => (
+                    <button key={c} type="button" aria-label={`Accent ${c}`}
+                      onClick={() => { patchNested("appearance", { accent: c }); applyAccent(c); }}
+                      className={`h-7 w-7 rounded-full ring-offset-2 ring-offset-background transition ${state.appearance.accent.toLowerCase()===c.toLowerCase() ? "ring-2 ring-foreground scale-110" : "ring-1 ring-border/60 hover:scale-105"}`}
+                      style={{ backgroundColor: c }} />
+                  ))}
+                  <Input type="color" value={state.appearance.accent}
+                    onChange={(e) => { patchNested("appearance", { accent: e.target.value }); applyAccent(e.target.value); }}
+                    className="h-8 w-10 p-1 cursor-pointer" aria-label="Custom accent color" />
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-1">Applied live across buttons, links, and rings.</p>
               </div>
               <div><Label className="text-xs">Font size ({state.appearance.fontSize}px)</Label>
                 <input type="range" min={12} max={22} value={state.appearance.fontSize} onChange={(e) => patchNested("appearance", { fontSize: Number(e.target.value) })} className="w-full accent-primary" />
@@ -649,9 +788,9 @@ export const ProfileHub: React.FC<{ email?: string | null; displayName?: string 
             <AccordionContent className="px-6 pb-5 flex flex-wrap gap-2">
               <Button size="sm" variant="outline" onClick={exportJSON}><Download className="h-3 w-3 mr-1" />Export JSON</Button>
               <Button size="sm" variant="outline" onClick={() => window.print()}><Download className="h-3 w-3 mr-1" />Export PDF</Button>
-              <Button size="sm" variant="outline" onClick={() => { localStorage.setItem(KEY + "-backup", JSON.stringify(state)); toast({ title: "Backup saved" }); }}>Backup</Button>
+              <Button size="sm" variant="outline" onClick={() => { localStorage.setItem(keyFor(userId) + "-backup", JSON.stringify(state)); toast({ title: "Backup saved" }); }}>Backup</Button>
               <Button size="sm" variant="outline" onClick={() => {
-                const raw = localStorage.getItem(KEY + "-backup");
+                const raw = localStorage.getItem(keyFor(userId) + "-backup");
                 if (!raw) { toast({ title: "No backup" }); return; }
                 setState(JSON.parse(raw));
                 toast({ title: "Restored" });
@@ -666,12 +805,28 @@ export const ProfileHub: React.FC<{ email?: string | null; displayName?: string 
             <AccordionTrigger className="px-6 py-3 hover:no-underline">
               <span className="flex items-center gap-2 text-sm font-semibold"><Link2 className="h-4 w-4 text-primary" />Connected accounts</span>
             </AccordionTrigger>
-            <AccordionContent className="px-6 pb-5">
-              {["google", "apple", "github", "microsoft", "discord", "facebook", "linkedin"].map((p) => (
-                <Row key={p} label={p.charAt(0).toUpperCase() + p.slice(1)}>
-                  <Switch checked={!!state.connections[p]} onCheckedChange={(v) => patch("connections", { ...state.connections, [p]: v })} />
-                </Row>
-              ))}
+            <AccordionContent className="px-6 pb-5 space-y-2">
+              {(["google","apple","github","azure","discord","facebook"] as const).map((p) => {
+                const linked = identities.find((i) => i.provider === p);
+                const displayName = p === "azure" ? "Microsoft" : p.charAt(0).toUpperCase() + p.slice(1);
+                return (
+                  <Row key={p} label={displayName}>
+                    <div className="flex items-center gap-2">
+                      {linked && <Badge variant="outline" className="text-[10px]"><CheckCircle2 className="h-3 w-3 mr-1 text-emerald-500" />Connected</Badge>}
+                      {linked ? (
+                        <Button size="sm" variant="outline" onClick={() => unlinkProvider(linked)} disabled={identities.length <= 1}>
+                          <X className="h-3 w-3 mr-1" />Disconnect
+                        </Button>
+                      ) : (
+                        <Button size="sm" variant="outline" onClick={() => linkProvider(p)}>
+                          <Plus className="h-3 w-3 mr-1" />Connect
+                        </Button>
+                      )}
+                    </div>
+                  </Row>
+                );
+              })}
+              <p className="text-[10px] text-muted-foreground pt-1">You must keep at least one sign-in method connected.</p>
             </AccordionContent>
           </GlassCard>
         </AccordionItem>
@@ -684,9 +839,21 @@ export const ProfileHub: React.FC<{ email?: string | null; displayName?: string 
             </AccordionTrigger>
             <AccordionContent className="px-6 pb-5 space-y-2">
               <Row label="Developer mode"><Switch checked={state.developer.mode} onCheckedChange={(v) => patch("developer", { mode: v })} /></Row>
-              <Row label="API keys"><Button size="sm" variant="outline" onClick={() => toast({ title: "No keys yet" })}>Manage</Button></Row>
-              <Row label="OAuth apps"><Button size="sm" variant="outline" onClick={() => toast({ title: "None registered" })}>Manage</Button></Row>
-              <Row label="Webhooks"><Button size="sm" variant="outline" onClick={() => toast({ title: "None configured" })}>Manage</Button></Row>
+              <Row label={`API keys (${dev.apiKeys.length})`}>
+                <Button size="sm" variant="outline" onClick={() => { setDevOpen("apiKeys"); setDevLabel(""); setDevValue(""); }}>
+                  <KeyRound className="h-3 w-3 mr-1" />Manage
+                </Button>
+              </Row>
+              <Row label={`OAuth apps (${dev.oauthApps.length})`}>
+                <Button size="sm" variant="outline" onClick={() => { setDevOpen("oauthApps"); setDevLabel(""); setDevValue(""); }}>
+                  <Terminal className="h-3 w-3 mr-1" />Manage
+                </Button>
+              </Row>
+              <Row label={`Webhooks (${dev.webhooks.length})`}>
+                <Button size="sm" variant="outline" onClick={() => { setDevOpen("webhooks"); setDevLabel(""); setDevValue(""); }}>
+                  <Webhook className="h-3 w-3 mr-1" />Manage
+                </Button>
+              </Row>
             </AccordionContent>
           </GlassCard>
         </AccordionItem>
@@ -707,6 +874,85 @@ export const ProfileHub: React.FC<{ email?: string | null; displayName?: string 
           </GlassCard>
         </AccordionItem>
       </Accordion>
+
+      {/* Phone verification dialog */}
+      <Dialog open={phoneOpen} onOpenChange={(o) => { setPhoneOpen(o); if (!o) { setPhoneStep("enter"); setOtp(""); } }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Verify your phone</DialogTitle>
+            <DialogDescription>
+              {phoneStep === "enter" ? "We'll send a one-time code by SMS." : `Enter the 6-digit code sent to ${phone}.`}
+            </DialogDescription>
+          </DialogHeader>
+          {phoneStep === "enter" ? (
+            <div className="space-y-2">
+              <Label className="text-xs">Phone number (E.164)</Label>
+              <Input placeholder="+919876543210" value={phone} onChange={(e) => setPhone(e.target.value.trim())} inputMode="tel" />
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Label className="text-xs">Verification code</Label>
+              <Input placeholder="123456" value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0,6))} inputMode="numeric" />
+            </div>
+          )}
+          <DialogFooter>
+            {phoneStep === "enter" ? (
+              <Button onClick={sendPhoneOtp} disabled={phoneBusy}>
+                {phoneBusy ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Phone className="h-4 w-4 mr-1" />}Send code
+              </Button>
+            ) : (
+              <div className="flex gap-2 w-full sm:w-auto sm:ml-auto">
+                <Button variant="outline" onClick={() => setPhoneStep("enter")}>Back</Button>
+                <Button onClick={verifyPhoneOtp} disabled={phoneBusy || otp.length !== 6}>
+                  {phoneBusy ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-1" />}Verify
+                </Button>
+              </div>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Developer manager dialog */}
+      <Dialog open={!!devOpen} onOpenChange={(o) => { if (!o) setDevOpen(null); }}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{devOpen ? devLabels[devOpen] : ""}</DialogTitle>
+            <DialogDescription>
+              {devOpen === "apiKeys" && "Personal API keys. Shown once — copy them immediately."}
+              {devOpen === "oauthApps" && "Register callback URLs for OAuth apps that will use your account."}
+              {devOpen === "webhooks" && "HTTPS endpoints notified when your activity events fire."}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2">
+              <Input placeholder="Name / label" value={devLabel} onChange={(e) => setDevLabel(e.target.value)} />
+              {devOpen !== "apiKeys" && (
+                <Input placeholder={devOpen === "webhooks" ? "https://example.com/webhook" : "https://app.example.com/callback"} value={devValue} onChange={(e) => setDevValue(e.target.value)} />
+              )}
+              <Button onClick={addDevItem}><Plus className="h-4 w-4 mr-1" />Add</Button>
+            </div>
+            <div className="max-h-64 overflow-auto space-y-2">
+              {devOpen && dev[devOpen].length === 0 && <p className="text-xs text-muted-foreground text-center py-4">Nothing yet.</p>}
+              {devOpen && dev[devOpen].map((item) => (
+                <div key={item.id} className="flex items-center justify-between gap-2 rounded-lg border border-border/60 p-2">
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium truncate">{item.label}</div>
+                    <div className="text-[10px] text-muted-foreground font-mono truncate">{item.value}</div>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Button size="icon" variant="ghost" onClick={() => { navigator.clipboard.writeText(item.value).catch(()=>{}); toast({ title: "Copied" }); }}>
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button size="icon" variant="ghost" onClick={() => removeDevItem(devOpen, item.id)}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
