@@ -12,6 +12,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { randomBase32Secret, buildOtpAuthUrl, verifyTOTP, generateTOTP } from "@/lib/totp";
+import { PasskeyManagementPanel } from "./passkey-management-panel";
 
 const LS_2FA_ENABLED = "ff.security.2fa.enabled";
 const LS_2FA_SECRET = "ff.security.2fa.secret";
