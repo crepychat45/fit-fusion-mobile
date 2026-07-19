@@ -26,6 +26,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
 import { SocialLogin } from "./social-login";
+import { getDefaultPasskey, verifyPasskey, listPasskeys, PasskeyError } from "@/lib/passkey-manager";
 
 interface EnhancedAuthFormProps {
   onSuccess?: () => void;
