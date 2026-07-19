@@ -128,21 +128,31 @@ const GlassCard: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className, 
 );
 
 // ---------- hub ----------
-export const ProfileHub: React.FC<{ email?: string | null; displayName?: string }> = ({ email, displayName }) => {
+export const ProfileHub: React.FC<{ email?: string | null; displayName?: string; userId?: string | null }> = ({ email, displayName, userId }) => {
   const { toast } = useToast();
-  const [state, setState] = useState<HubState>(() => loadHub());
+  const [state, setState] = useState<HubState>(() => loadHub(userId));
   const [saving, setSaving] = useState(false);
   const [aiBusy, setAiBusy] = useState<null | "bio" | "username" | "review" | "insights" | "recs">(null);
   const [aiOutput, setAiOutput] = useState<{ kind: string; text: string } | null>(null);
   const { profile, updateProfile } = useProfile();
 
-  // Autosave hub state
+  // Reload state when the signed-in user changes so each account has its own hub prefs
+  useEffect(() => {
+    setState(loadHub(userId));
+  }, [userId]);
+
+  // Autosave hub state — namespaced by user id
   useEffect(() => {
     const t = setTimeout(() => {
-      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {}
+      try { localStorage.setItem(keyFor(userId), JSON.stringify(state)); } catch {}
     }, 400);
     return () => clearTimeout(t);
-  }, [state]);
+  }, [state, userId]);
+
+  // Apply appearance (accent, dark mode, font size) live + on mount
+  useEffect(() => {
+    applyAppearance(state.appearance);
+  }, [state.appearance.accent, state.appearance.darkMode, state.appearance.fontSize]);
 
   const patch = useCallback(<K extends keyof HubState>(key: K, value: HubState[K]) => {
     setState((s) => ({ ...s, [key]: value }));
