@@ -22,6 +22,7 @@ import { ProfilePhotoUpload } from "@/components/profile-photo-upload";
 import { Loader2, Save, CheckCircle, AlertCircle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useProfile } from "@/hooks/use-profile";
+import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
 
