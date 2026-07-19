@@ -53,11 +53,13 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
   const [passwordStrength, setPasswordStrength] = useState<PasswordStrength | null>(null);
   const [formValid, setFormValid] = useState(false);
   const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [passkeyEnrolled, setPasskeyEnrolled] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
   const [pendingVerificationEmail, setPendingVerificationEmail] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [capsLock, setCapsLock] = useState(false);
+  const [passkeyLoading, setPasskeyLoading] = useState(false);
 
 
   useEffect(() => {
