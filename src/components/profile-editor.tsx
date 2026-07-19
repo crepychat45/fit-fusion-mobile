@@ -55,7 +55,8 @@ const EMPTY_FORM: FormState = {
 };
 
 export function ProfileEditor({ onSave }: ProfileEditorProps) {
-  const { profile, isLoading, updateProfile } = useProfile();
+  const { user } = useEnhancedAuth();
+  const { profile, isLoading, updateProfile } = useProfile(user?.id, { enabled: !!user?.id });
   const { toast } = useToast();
 
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
