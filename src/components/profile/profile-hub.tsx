@@ -105,9 +105,9 @@ const DEFAULT: HubState = {
   wallet: { coins: 240, referrals: 3 },
 };
 
-const loadHub = (): HubState => {
+const loadHub = (uid?: string | null): HubState => {
   try {
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(keyFor(uid)) || (uid ? localStorage.getItem(BASE_KEY) : null);
     if (!raw) return DEFAULT;
     return { ...DEFAULT, ...(JSON.parse(raw) as HubState) };
   } catch { return DEFAULT; }
