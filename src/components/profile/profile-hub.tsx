@@ -558,7 +558,7 @@ export const ProfileHub: React.FC<{ email?: string | null; displayName?: string;
               </Row>
               <Row label="Phone verification">
                 <div className="flex items-center gap-2">
-                  {profile?.phone_number ? <Badge variant="outline" className="text-[10px]">{profile.phone_number}</Badge> : null}
+                  {(profile as any)?.phone_number ? <Badge variant="outline" className="text-[10px]">{(profile as any).phone_number}</Badge> : null}
                   <Button size="sm" variant="outline" onClick={() => { setPhoneOpen(true); setPhoneStep("enter"); }}>
                     <Phone className="h-3 w-3 mr-1" />Verify now
                   </Button>
