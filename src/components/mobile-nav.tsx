@@ -542,6 +542,7 @@ export function MobileNav() {
 
   const moreActions = useMemo(
     () => [
+      { id: "install-app", icon: Download, label: "Install App", action: () => { setShowMore(false); setShowInstall(true); }, badge: "PWA" as string | null },
       { id: "ai-assistant", icon: Brain, label: "AI Coach", action: openAI, badge: showAiNew ? "NEW" : null },
       { id: "security", icon: Shield, label: "Security", action: () => setShowSecurity(true), badge: null as string | null },
       { id: "voice", icon: Mic, label: "Voice", action: openVoice, badge: null },
