@@ -56,7 +56,17 @@ export function b64urlEncode(buf: ArrayBuffer | Uint8Array): string {
 export function b64urlDecode(str: string): Uint8Array {
   const s = str.replace(/-/g, "+").replace(/_/g, "/");
   const pad = s.length % 4 ? "=".repeat(4 - (s.length % 4)) : "";
-  return Uint8Array.from(atob(s + pad), (c) => c.charCodeAt(0));
+  const bin = atob(s + pad);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+
+function toBuf(u: Uint8Array): ArrayBuffer {
+  // Copy into a fresh ArrayBuffer so TS/DOM types accept it as BufferSource
+  const buf = new ArrayBuffer(u.byteLength);
+  new Uint8Array(buf).set(u);
+  return buf;
 }
 
 /* -------------------- device key management -------------------- */
