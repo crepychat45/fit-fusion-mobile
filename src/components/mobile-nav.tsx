@@ -46,6 +46,7 @@ import {
   Timer,
   Activity,
   Leaf,
+  Download,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -55,6 +56,7 @@ import { MobileAIAssistant } from "@/components/mobile/mobile-ai-assistant";
 import { MobileSecurityCenter } from "@/components/mobile/mobile-security-center";
 import { FitnessFusionLogo } from "@/components/fitness-fusion-logo";
 import { prefetchRoute } from "@/utils/route-prefetch";
+import { PwaInstallDialog } from "@/components/pwa/pwa-install-dialog";
 
 /* ------------------------------------------------------------------ */
 /*  Utilities                                                          */
@@ -342,6 +344,7 @@ export function MobileNav() {
   const [showSecurity, setShowSecurity] = useState(false);
   const [showQuickLaunch, setShowQuickLaunch] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [showInstall, setShowInstall] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [longPressMenu, setLongPressMenu] = useState<{
     item: NavItem;
@@ -539,6 +542,7 @@ export function MobileNav() {
 
   const moreActions = useMemo(
     () => [
+      { id: "install-app", icon: Download, label: "Install App", action: () => { setShowMore(false); setShowInstall(true); }, badge: "PWA" as string | null },
       { id: "ai-assistant", icon: Brain, label: "AI Coach", action: openAI, badge: showAiNew ? "NEW" : null },
       { id: "security", icon: Shield, label: "Security", action: () => setShowSecurity(true), badge: null as string | null },
       { id: "voice", icon: Mic, label: "Voice", action: openVoice, badge: null },
@@ -1027,6 +1031,7 @@ export function MobileNav() {
         isOpen={showSecurity}
         onClose={() => setShowSecurity(false)}
       />
+      <PwaInstallDialog open={showInstall} onOpenChange={setShowInstall} />
     </>
   );
 }
