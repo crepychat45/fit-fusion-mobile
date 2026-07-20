@@ -312,11 +312,20 @@ const Profile = () => {
                     </div>
                   </CardContent>
                 </Card>
-                <AwardsExtras xp={1240} />
+                <AwardsExtras
+                  xp={(localStats.workoutsCompleted || 0) * 50 + (localStats.streakDays || 0) * 20}
+                  workouts={localStats.workoutsCompleted || 0}
+                  streak={localStats.streakDays || 0}
+                  calories={localStats.caloriesBurned || 0}
+                />
               </TabsContent>
 
               <TabsContent value="stats" className="space-y-3 mt-0">
-                <StatsExtras />
+                <StatsExtras
+                  workouts={localStats.workoutsCompleted || 0}
+                  streak={localStats.streakDays || 0}
+                  calories={localStats.caloriesBurned || 0}
+                />
                 {/* Liquid Glass Vitality Rings — new */}
                 <VitalityRingsWidget />
 
