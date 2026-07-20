@@ -236,13 +236,42 @@ export function AdvancedChatInterface({
 
     const messageChannel = supabase
       .channel(`chat-messages-${currentUser.id}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "chat_messages" }, (payload) => {
-        const next = payload.new as ChatMessageRow | null;
-        const old = payload.old as ChatMessageRow | null;
-        const threadId = next?.thread_id ?? old?.thread_id;
-        if (threadId === activeThreadId) {
-          listChatMessages(threadId).then(setMessages).catch(console.error);
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages" }, (payload) => {
+        const row = payload.new as ChatMessageRow;
+        if (!row) return;
+        // Append instantly if it belongs to the open thread
+        if (row.thread_id === activeThreadId) {
+          setMessages((prev) => (prev.some((m) => m.id === row.id) ? prev : [...prev, row]));
         }
+        // Fire browser notification for incoming (not from me, not streamed placeholder)
+        const fromOther = row.sender_id && row.sender_id !== currentUser.id;
+        const isAssistant = row.sender_role === "assistant";
+        if ((fromOther || (isAssistant && row.thread_id !== activeThreadId)) && !notifiedIdsRef.current.has(row.id)) {
+          notifiedIdsRef.current.add(row.id);
+          const shouldNotify = document.hidden || row.thread_id !== activeThreadId;
+          if (shouldNotify && typeof Notification !== "undefined" && Notification.permission === "granted") {
+            try {
+              const senderName = isAssistant ? "FitX AI Coach" : "New message";
+              new Notification(senderName, {
+                body: (row.content || "New chat activity").slice(0, 140),
+                icon: "/manifest-icon-192.png",
+                tag: `chat-${row.thread_id}`,
+              });
+            } catch {
+              /* ignore */
+            }
+          }
+        }
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "chat_messages" }, (payload) => {
+        const row = payload.new as ChatMessageRow;
+        if (!row || row.thread_id !== activeThreadId) return;
+        setMessages((prev) => prev.map((m) => (m.id === row.id ? row : m)));
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "chat_messages" }, (payload) => {
+        const row = payload.old as ChatMessageRow;
+        if (!row || row.thread_id !== activeThreadId) return;
+        setMessages((prev) => prev.filter((m) => m.id !== row.id));
       })
       .subscribe();
 
@@ -251,6 +280,14 @@ export function AdvancedChatInterface({
       supabase.removeChannel(messageChannel);
     };
   }, [activeThreadId, currentUser, loadThreads]);
+
+  // Request notification permission once
+  useEffect(() => {
+    if (typeof Notification === "undefined") return;
+    if (Notification.permission === "default") {
+      Notification.requestPermission().catch(() => undefined);
+    }
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
