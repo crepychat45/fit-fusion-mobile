@@ -450,6 +450,37 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Recent security activity */}
+      <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <ShieldAlert className="h-4 w-4 text-primary" /> Recent Security Activity
+          </CardTitle>
+          <CardDescription>Synced to your account · last 20 events</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {events.length === 0 ? (
+            <div className="text-xs text-muted-foreground text-center py-4">
+              No security events yet. Enable 2FA or biometrics to start logging activity.
+            </div>
+          ) : (
+            <div className="space-y-1.5 max-h-64 overflow-auto">
+              {events.map((e) => (
+                <div key={e.id} className="flex items-start gap-2 rounded-lg border border-border/20 bg-muted/20 p-2">
+                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs font-medium truncate">{e.label}</div>
+                    <div className="text-[10px] text-muted-foreground">
+                      {new Date(e.at).toLocaleString()} · {e.type}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
