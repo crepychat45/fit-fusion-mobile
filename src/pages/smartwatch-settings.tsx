@@ -66,6 +66,7 @@ import {
   type WorkoutSession,
   type WorkoutType,
 } from "@/lib/smartwatch";
+import { SmartwatchSettingsExtras } from "@/components/smartwatch/smartwatch-settings-extras";
 
 type Settings = {
   face: string;
@@ -732,6 +733,9 @@ const SmartwatchSettings: React.FC = () => {
               Reset Watch to Defaults
             </Button>
           </Section>
+
+          {/* NEW: Dialer, Security, SOS, Medical ID, Advanced Health, Complications, Alarms, Apps */}
+          <SmartwatchSettingsExtras />
         </div>
       </div>
 
