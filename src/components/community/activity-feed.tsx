@@ -27,10 +27,11 @@ export function ActivityFeed({ filter = "all" }: { filter?: "all" | "mine" }) {
         .from("post_likes")
         .select("post_id")
         .eq("user_id", user.id)
-        .in("post_id", posts.map((p) => p.id));
-      if (data) setLikedIds(new Set(data.map((r: any) => r.post_id)));
+        .in("post_id", posts.map((p) => p.id) as any);
+      if (data) setLikedIds(new Set((data as any[]).map((r) => r.post_id)));
     })();
   }, [user?.id, posts]);
+
 
   // Load profiles for authors
   React.useEffect(() => {
