@@ -323,3 +323,300 @@ export const stopWorkout = (w: WorkoutSession): WorkoutSession => {
   saveWorkout(null);
   return ended;
 };
+
+/* ---------- Dialer, Contacts, Security, Alarms, Complications ---------- */
+// These keys use the fitfusion- prefix so they auto-mirror to Supabase via local-storage-sync.
+
+const DIALER_KEY = "fitfusion-watch-dialer";
+const SECURITY_KEY = "fitfusion-watch-security";
+const ALARMS_KEY = "fitfusion-watch-alarms";
+const COMPLICATIONS_KEY = "fitfusion-watch-complications";
+const ADVANCED_KEY = "fitfusion-watch-advanced";
+
+export type WatchContact = {
+  id: string;
+  name: string;
+  number: string;
+  favorite: boolean;
+  emoji?: string;
+};
+
+export type CallLogEntry = {
+  id: string;
+  name: string;
+  number: string;
+  type: "incoming" | "outgoing" | "missed";
+  timestamp: number;
+  duration: number;
+};
+
+export type DialerState = {
+  contacts: WatchContact[];
+  callLog: CallLogEntry[];
+  emergencyNumber: string;
+  quickDialEnabled: boolean;
+  voiceAssistEnabled: boolean;
+  showCallerPhoto: boolean;
+};
+
+export const DEFAULT_DIALER: DialerState = {
+  contacts: [
+    { id: "c1", name: "Emergency Services", number: "112", favorite: true, emoji: "🚨" },
+    { id: "c2", name: "Home", number: "+91 98765 43210", favorite: true, emoji: "🏠" },
+    { id: "c3", name: "Coach", number: "+91 87654 32109", favorite: false, emoji: "🏋️" },
+    { id: "c4", name: "Doctor", number: "+91 76543 21098", favorite: true, emoji: "🩺" },
+  ],
+  callLog: [],
+  emergencyNumber: "112",
+  quickDialEnabled: true,
+  voiceAssistEnabled: false,
+  showCallerPhoto: true,
+};
+
+export const loadDialer = (): DialerState => {
+  try {
+    const raw = localStorage.getItem(DIALER_KEY);
+    return raw ? { ...DEFAULT_DIALER, ...JSON.parse(raw) } : DEFAULT_DIALER;
+  } catch {
+    return DEFAULT_DIALER;
+  }
+};
+
+export const saveDialer = (d: DialerState) => {
+  localStorage.setItem(DIALER_KEY, JSON.stringify(d));
+  window.dispatchEvent(new Event(EVT));
+};
+
+export type SecurityConfig = {
+  passcodeEnabled: boolean;
+  passcode: string; // hashed
+  autoLockMinutes: number;
+  biometricUnlock: boolean;
+  wristDetection: boolean;
+  encryptionEnabled: boolean;
+  appLock: boolean;
+  lockOnRemoval: boolean;
+  findMyWatchEnabled: boolean;
+  remoteWipeEnabled: boolean;
+  sosCountdown: number;
+  fallDetection: boolean;
+  crashDetection: boolean;
+  emergencyContacts: string[];
+  shareLocationOnSOS: boolean;
+  medicalId: {
+    bloodType: string;
+    allergies: string;
+    conditions: string;
+    medications: string;
+    organDonor: boolean;
+  };
+  hidePreviewsWhenLocked: boolean;
+  panicWipeSequence: boolean;
+};
+
+export const DEFAULT_SECURITY: SecurityConfig = {
+  passcodeEnabled: false,
+  passcode: "",
+  autoLockMinutes: 5,
+  biometricUnlock: true,
+  wristDetection: true,
+  encryptionEnabled: true,
+  appLock: false,
+  lockOnRemoval: true,
+  findMyWatchEnabled: true,
+  remoteWipeEnabled: false,
+  sosCountdown: 5,
+  fallDetection: true,
+  crashDetection: true,
+  emergencyContacts: [],
+  shareLocationOnSOS: true,
+  medicalId: {
+    bloodType: "",
+    allergies: "",
+    conditions: "",
+    medications: "",
+    organDonor: false,
+  },
+  hidePreviewsWhenLocked: true,
+  panicWipeSequence: false,
+};
+
+export const loadSecurity = (): SecurityConfig => {
+  try {
+    const raw = localStorage.getItem(SECURITY_KEY);
+    return raw ? { ...DEFAULT_SECURITY, ...JSON.parse(raw) } : DEFAULT_SECURITY;
+  } catch {
+    return DEFAULT_SECURITY;
+  }
+};
+
+export const saveSecurity = (s: SecurityConfig) => {
+  localStorage.setItem(SECURITY_KEY, JSON.stringify(s));
+  window.dispatchEvent(new Event(EVT));
+};
+
+// Simple non-cryptographic passcode hash (client-side obfuscation only).
+export const hashPasscode = (code: string) => {
+  let h = 0;
+  for (let i = 0; i < code.length; i++) {
+    h = ((h << 5) - h + code.charCodeAt(i)) | 0;
+  }
+  return `ff_${Math.abs(h).toString(36)}`;
+};
+
+export type WatchAlarm = {
+  id: string;
+  label: string;
+  time: string; // HH:MM
+  days: number[]; // 0-6, Sun-Sat
+  enabled: boolean;
+  vibrate: boolean;
+  sound: string;
+  smartWake: boolean;
+};
+
+export const loadAlarms = (): WatchAlarm[] => {
+  try {
+    const raw = localStorage.getItem(ALARMS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+};
+
+export const saveAlarms = (a: WatchAlarm[]) => {
+  localStorage.setItem(ALARMS_KEY, JSON.stringify(a));
+  window.dispatchEvent(new Event(EVT));
+};
+
+export type ComplicationSlot = "top" | "bottom" | "left" | "right";
+export type ComplicationType =
+  | "heart"
+  | "steps"
+  | "calories"
+  | "battery"
+  | "weather"
+  | "date"
+  | "timer"
+  | "music"
+  | "workout"
+  | "spo2"
+  | "sleep"
+  | "stress";
+
+export const COMPLICATION_LIBRARY: { id: ComplicationType; label: string }[] = [
+  { id: "heart", label: "Heart Rate" },
+  { id: "steps", label: "Steps" },
+  { id: "calories", label: "Calories" },
+  { id: "battery", label: "Battery" },
+  { id: "weather", label: "Weather" },
+  { id: "date", label: "Date" },
+  { id: "timer", label: "Timer" },
+  { id: "music", label: "Music" },
+  { id: "workout", label: "Workout" },
+  { id: "spo2", label: "SpO₂" },
+  { id: "sleep", label: "Sleep" },
+  { id: "stress", label: "Stress" },
+];
+
+export type Complications = Record<ComplicationSlot, ComplicationType>;
+
+export const DEFAULT_COMPLICATIONS: Complications = {
+  top: "date",
+  bottom: "steps",
+  left: "heart",
+  right: "battery",
+};
+
+export const loadComplications = (): Complications => {
+  try {
+    const raw = localStorage.getItem(COMPLICATIONS_KEY);
+    return raw ? { ...DEFAULT_COMPLICATIONS, ...JSON.parse(raw) } : DEFAULT_COMPLICATIONS;
+  } catch {
+    return DEFAULT_COMPLICATIONS;
+  }
+};
+
+export const saveComplications = (c: Complications) => {
+  localStorage.setItem(COMPLICATIONS_KEY, JSON.stringify(c));
+  window.dispatchEvent(new Event(EVT));
+};
+
+export type AdvancedSettings = {
+  ecgEnabled: boolean;
+  bloodPressureEnabled: boolean;
+  skinTemperatureEnabled: boolean;
+  menstrualTracking: boolean;
+  hydrationTracking: boolean;
+  hydrationGoalMl: number;
+  breathingReminders: boolean;
+  mindfulnessMinutes: number;
+  noiseAlerts: boolean;
+  noiseThresholdDb: number;
+  handwashDetection: boolean;
+  bedtimeMode: boolean;
+  altitudeAlerts: boolean;
+  uvAlerts: boolean;
+  weatherLocation: string;
+  weatherUnits: "metric" | "imperial";
+  mediaControls: boolean;
+  cameraRemote: boolean;
+  flashlight: boolean;
+  walkieTalkie: boolean;
+  cardWallet: boolean;
+  contactlessPayments: boolean;
+};
+
+export const DEFAULT_ADVANCED: AdvancedSettings = {
+  ecgEnabled: true,
+  bloodPressureEnabled: true,
+  skinTemperatureEnabled: true,
+  menstrualTracking: false,
+  hydrationTracking: true,
+  hydrationGoalMl: 2500,
+  breathingReminders: true,
+  mindfulnessMinutes: 5,
+  noiseAlerts: true,
+  noiseThresholdDb: 85,
+  handwashDetection: false,
+  bedtimeMode: true,
+  altitudeAlerts: false,
+  uvAlerts: true,
+  weatherLocation: "Auto",
+  weatherUnits: "metric",
+  mediaControls: true,
+  cameraRemote: true,
+  flashlight: true,
+  walkieTalkie: false,
+  cardWallet: true,
+  contactlessPayments: true,
+};
+
+export const loadAdvanced = (): AdvancedSettings => {
+  try {
+    const raw = localStorage.getItem(ADVANCED_KEY);
+    return raw ? { ...DEFAULT_ADVANCED, ...JSON.parse(raw) } : DEFAULT_ADVANCED;
+  } catch {
+    return DEFAULT_ADVANCED;
+  }
+};
+
+export const saveAdvanced = (a: AdvancedSettings) => {
+  localStorage.setItem(ADVANCED_KEY, JSON.stringify(a));
+  window.dispatchEvent(new Event(EVT));
+};
+
+export const triggerEmergencySOS = (config: SecurityConfig): Promise<void> => {
+  return new Promise((resolve) => {
+    // Simulated SOS trigger; would dispatch to native/emergency APIs on real device.
+    const payload = {
+      number: config.emergencyContacts[0] || "112",
+      shareLocation: config.shareLocationOnSOS,
+      medicalId: config.medicalId,
+      timestamp: Date.now(),
+    };
+    console.info("[FitFusion SOS] Triggered", payload);
+    setTimeout(resolve, 500);
+  });
+};
+
