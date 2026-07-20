@@ -1,6 +1,6 @@
 // Single source of truth for app version + changelog
-export const APP_VERSION = "7.1.0";
-export const APP_RELEASE_DATE = "2026-07-20";
+export const APP_VERSION = "7.2.0";
+export const APP_RELEASE_DATE = "2026-07-21";
 
 export const VERSION_STORAGE_KEYS = ["fitfusion-app-version", "app-version"] as const;
 export const FEATURE_UNLOCK_KEY = "fitfusion-active-feature-release";
@@ -24,6 +24,59 @@ export interface ReleaseNote {
 }
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "7.2.0",
+    date: "2026-07-21",
+    type: "Major Release",
+    highlight:
+      "Every Settings tab gains a Power Extras card: Account command center, live Security posture score, accessibility & color-vision assist, quiet-hours scheduling, locale live preview, chat personality tuner, update channel picker, self-diagnostics, feature flags, storage intelligence, and system snapshot.",
+    sections: [
+      {
+        title: "New Features",
+        icon: "sparkles",
+        items: [
+          "Account: auto-lock timer, sign-in alerts, backup recovery email",
+          "Security: live posture score with 5 controls + instant audit",
+          "Display: reduce motion, high contrast, color-blind filters, UI scale",
+          "Privacy: telemetry / analytics / tracker / DNT toggles + cookie flush",
+          "Notifications: quiet hours schedule and 4 priority modes",
+          "Units & Format: locale, currency, time-format live preview",
+          "Chat: tone slider, memory + safe mode, wipe conversation memory",
+          "Updates: stable / beta / canary channel and rollout bucket",
+          "Enhanced Validation: 6-step self-diagnostic with timings",
+          "Developer: 5 client-side feature flags (Liquid Glass v2, MCP, etc.)",
+          "Data: live storage quota + top localStorage keys breakdown",
+          "About: copyable system snapshot for support reports",
+        ],
+      },
+      {
+        title: "Improvements",
+        icon: "zap",
+        items: [
+          "Every Settings tab now has a dedicated Liquid Glass power card",
+          "Extras panels are lazy-loaded per tab — no cost to first paint",
+          "Preferences persist per-key in localStorage across sessions",
+          "Guarded accent parsing so Display tab never crashes on empty color",
+        ],
+      },
+      {
+        title: "Bug Fixes",
+        icon: "bug",
+        items: [
+          "Fixed `hexToHslTriple` throwing on undefined accent from stale storage",
+          "Prevented Display tab from unmounting when accent was cleared",
+        ],
+      },
+      {
+        title: "Security",
+        icon: "shield",
+        items: [
+          "Live security scoring surfaces missing 2FA/passkeys immediately",
+          "New WebAuthn-only toggle disables password fallback per device",
+        ],
+      },
+    ],
+  },
   {
     version: "7.1.0",
     date: "2026-07-20",
