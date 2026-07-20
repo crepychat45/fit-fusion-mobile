@@ -75,6 +75,31 @@ export function EnhancedProfileDisplay({
   const [displayName, setDisplayName] = useState(userName || userProfile.name);
   const [streakMotivation, setStreakMotivation] = useState("");
   const navigate = useNavigate();
+  const { user } = useEnhancedAuth();
+  const { profile: dbProfile } = useProfile(user?.id, { enabled: Boolean(user?.id) });
+
+  // Live avatar: prefer DB profile → auth metadata → local cache → static
+  const [localAvatar, setLocalAvatar] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("fitfusion-user-profile");
+      if (saved) setLocalAvatar(JSON.parse(saved)?.avatar ?? null);
+    } catch { /* ignore */ }
+    const onUpdate = () => {
+      try {
+        const saved = localStorage.getItem("fitfusion-user-profile");
+        setLocalAvatar(saved ? JSON.parse(saved)?.avatar ?? null : null);
+      } catch { /* ignore */ }
+    };
+    window.addEventListener("profileUpdated", onUpdate);
+    return () => window.removeEventListener("profileUpdated", onUpdate);
+  }, []);
+
+  const avatarSrc =
+    dbProfile?.avatar_url ||
+    (user?.user_metadata as any)?.avatar_url ||
+    localAvatar ||
+    currentProfile.avatar;
 
   // Enhanced user profile loading
   useEffect(() => {
