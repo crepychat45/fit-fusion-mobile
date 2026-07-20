@@ -108,6 +108,19 @@ const quickPrompts = [
   "Build a weekly fat-loss routine",
 ];
 
+const CHAT_BACKGROUNDS: { id: string; label: string; className: string; preview: string }[] = [
+  { id: "default", label: "Default", className: "bg-muted/10", preview: "linear-gradient(135deg,hsl(var(--muted)),hsl(var(--background)))" },
+  { id: "aurora", label: "Aurora", className: "bg-gradient-to-br from-indigo-500/20 via-purple-500/10 to-pink-500/20", preview: "linear-gradient(135deg,#6366f1,#a855f7,#ec4899)" },
+  { id: "ocean", label: "Ocean", className: "bg-gradient-to-br from-sky-500/20 via-cyan-400/10 to-blue-600/20", preview: "linear-gradient(135deg,#0ea5e9,#22d3ee,#2563eb)" },
+  { id: "sunset", label: "Sunset", className: "bg-gradient-to-br from-orange-500/25 via-rose-400/15 to-purple-500/20", preview: "linear-gradient(135deg,#f97316,#fb7185,#a855f7)" },
+  { id: "forest", label: "Forest", className: "bg-gradient-to-br from-emerald-500/20 via-teal-400/10 to-lime-500/20", preview: "linear-gradient(135deg,#10b981,#14b8a6,#84cc16)" },
+  { id: "midnight", label: "Midnight", className: "bg-gradient-to-br from-slate-900 via-indigo-900/60 to-slate-900", preview: "linear-gradient(135deg,#0f172a,#312e81,#0f172a)" },
+  { id: "peach", label: "Peach", className: "bg-gradient-to-br from-amber-200/40 via-rose-200/30 to-orange-200/40", preview: "linear-gradient(135deg,#fde68a,#fecdd3,#fed7aa)" },
+  { id: "carbon", label: "Carbon", className: "bg-background bg-[radial-gradient(circle_at_20%_20%,hsl(var(--primary)/0.15),transparent_40%)]", preview: "radial-gradient(circle at 30% 30%,#334155,#0f172a)" },
+];
+const bgClass = (id: string) => CHAT_BACKGROUNDS.find((b) => b.id === id)?.className ?? CHAT_BACKGROUNDS[0].className;
+
+
 const mergeMessage = (rows: ChatMessageRow[], row: ChatMessageRow) => {
   if (rows.some((message) => message.id === row.id)) {
     return rows.map((message) => (message.id === row.id ? row : message));
