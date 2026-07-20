@@ -1036,3 +1036,29 @@ button#lovable-badge-close {
   height: 0 !important;
   pointer-events: none !important;
 }
+/* Display Lab: density & reading ruler (v7.1.0) */
+html[data-density="cozy"] { --density-scale: 1.15; }
+html[data-density="comfortable"] { --density-scale: 1; }
+html[data-density="compact"] { --density-scale: 0.88; }
+html[data-density="compact"] .p-6 { padding: 1rem; }
+html[data-density="compact"] .p-4 { padding: 0.75rem; }
+html[data-density="compact"] .gap-6 { gap: 1rem; }
+html[data-density="cozy"] .p-4 { padding: 1.25rem; }
+html[data-density="cozy"] .gap-4 { gap: 1.25rem; }
+
+html.reading-ruler body::after {
+  content: "";
+  position: fixed;
+  left: 0; right: 0;
+  height: 28px;
+  background: linear-gradient(to bottom,
+    transparent,
+    hsl(var(--primary) / 0.10) 45%,
+    hsl(var(--primary) / 0.14) 55%,
+    transparent);
+  pointer-events: none;
+  z-index: 60;
+  transform: translateY(var(--ruler-y, -100px));
+  transition: transform 60ms linear;
+  mix-blend-mode: multiply;
+}

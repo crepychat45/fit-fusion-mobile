@@ -1,6 +1,6 @@
 // Single source of truth for app version + changelog
-export const APP_VERSION = "7.0.0";
-export const APP_RELEASE_DATE = "2026-07-07";
+export const APP_VERSION = "7.1.0";
+export const APP_RELEASE_DATE = "2026-07-20";
 
 export const VERSION_STORAGE_KEYS = ["fitfusion-app-version", "app-version"] as const;
 export const FEATURE_UNLOCK_KEY = "fitfusion-active-feature-release";
@@ -24,6 +24,54 @@ export interface ReleaseNote {
 }
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "7.1.0",
+    date: "2026-07-20",
+    type: "Major Release",
+    highlight:
+      "Settings gets a full refresh: new Display Lab (interface density, reading ruler, live font), cleaner Display tab with no duplicated theme controls, and safer Display persistence tied to the v7.1.0 signed release channel.",
+    sections: [
+      {
+        title: "New Features",
+        icon: "sparkles",
+        items: [
+          "Settings → Display: new Display Lab card with Cozy / Comfortable / Compact density",
+          "Settings → Display: Reading Ruler that follows your cursor to reduce fatigue",
+          "Settings → Display: Preferred Font Family with live preview and persistence",
+          "Settings → Updates: v7.1.0 signed release channel with resume-safe install",
+          "Settings → About: v7.1.0 build badge and refreshed release notes",
+        ],
+      },
+      {
+        title: "Improvements",
+        icon: "zap",
+        items: [
+          "Display tab no longer duplicates Theme / Font Size controls from Appearance",
+          "Display Lab preferences restored at boot before first paint (no flicker)",
+          "Reading Ruler uses a passive mousemove listener for 60fps smoothness",
+          "Interface density is applied via CSS custom properties across all tabs",
+        ],
+      },
+      {
+        title: "Bug Fixes",
+        icon: "bug",
+        items: [
+          "Fixed Display tab showing two App Theme sections at once",
+          "Fixed Font Family control appearing twice in Display settings",
+          "Fixed stale font-family after refresh when saved to localStorage",
+        ],
+      },
+      {
+        title: "Security",
+        icon: "shield",
+        items: [
+          "Update package pinned to v7.1 signed manifest hash",
+          "Continuous AES-256-GCM integrity check for cached bundles",
+          "Display Lab preferences stored locally only — no data leaves the device",
+        ],
+      },
+    ],
+  },
   {
     version: "7.0.0",
     date: "2026-07-07",

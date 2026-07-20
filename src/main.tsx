@@ -20,6 +20,22 @@ if (typeof window !== "undefined") {
   }
 }
 
+// Restore Display Lab preferences early and wire reading-ruler cursor tracking.
+if (typeof window !== "undefined") {
+  try {
+    const density = localStorage.getItem("fitfusion-density");
+    if (density) document.documentElement.dataset.density = density;
+    const ruler = localStorage.getItem("fitfusion-reading-ruler") === "1";
+    if (ruler) document.documentElement.classList.add("reading-ruler");
+    const font = localStorage.getItem("fitfusion-font-family");
+    if (font) document.documentElement.style.setProperty("--font-family", font);
+  } catch { /* storage disabled */ }
+  window.addEventListener("mousemove", (e) => {
+    if (!document.documentElement.classList.contains("reading-ruler")) return;
+    document.documentElement.style.setProperty("--ruler-y", `${e.clientY - 14}px`);
+  }, { passive: true });
+}
+
 installAppRecovery({ startupTimeoutMs: 14_000 });
 
 const StartupErrorFallback = ({ onRetry }: { onRetry: () => void }) => (
