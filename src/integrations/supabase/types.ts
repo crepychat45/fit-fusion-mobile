@@ -38,6 +38,149 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_messages: {
+        Row: {
+          attachments: Json
+          client_message_id: string | null
+          content: string
+          created_at: string
+          encrypted_payload: Json | null
+          id: string
+          is_read: boolean
+          metadata: Json
+          reactions: Json
+          recipient_id: string | null
+          sender_id: string | null
+          sender_role: string
+          thread_id: string
+          updated_at: string
+        }
+        Insert: {
+          attachments?: Json
+          client_message_id?: string | null
+          content?: string
+          created_at?: string
+          encrypted_payload?: Json | null
+          id?: string
+          is_read?: boolean
+          metadata?: Json
+          reactions?: Json
+          recipient_id?: string | null
+          sender_id?: string | null
+          sender_role?: string
+          thread_id: string
+          updated_at?: string
+        }
+        Update: {
+          attachments?: Json
+          client_message_id?: string | null
+          content?: string
+          created_at?: string
+          encrypted_payload?: Json | null
+          id?: string
+          is_read?: boolean
+          metadata?: Json
+          reactions?: Json
+          recipient_id?: string | null
+          sender_id?: string | null
+          sender_role?: string
+          thread_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "chat_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_threads: {
+        Row: {
+          created_at: string
+          encryption_enabled: boolean
+          id: string
+          is_archived: boolean
+          is_muted: boolean
+          is_pinned: boolean
+          last_message_at: string
+          last_message_preview: string | null
+          owner_id: string
+          participant_ids: string[]
+          participant_snapshot: Json
+          thread_type: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          encryption_enabled?: boolean
+          id?: string
+          is_archived?: boolean
+          is_muted?: boolean
+          is_pinned?: boolean
+          last_message_at?: string
+          last_message_preview?: string | null
+          owner_id?: string
+          participant_ids?: string[]
+          participant_snapshot?: Json
+          thread_type?: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          encryption_enabled?: boolean
+          id?: string
+          is_archived?: boolean
+          is_muted?: boolean
+          is_pinned?: boolean
+          last_message_at?: string
+          last_message_preview?: string | null
+          owner_id?: string
+          participant_ids?: string[]
+          participant_snapshot?: Json
+          thread_type?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      chat_user_directory: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string
+          last_seen: string
+          status: string
+          updated_at: string
+          user_id: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string
+          last_seen?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string
+          last_seen?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
