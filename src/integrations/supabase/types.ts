@@ -360,6 +360,54 @@ export type Database = {
         }
         Relationships: []
       }
+      user_settings: {
+        Row: {
+          accessibility_settings: Json
+          account_settings: Json
+          chat_settings: Json
+          created_at: string
+          developer_settings: Json
+          display_settings: Json
+          notification_settings: Json
+          privacy_settings: Json
+          security_settings: Json
+          sound_settings: Json
+          update_settings: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accessibility_settings?: Json
+          account_settings?: Json
+          chat_settings?: Json
+          created_at?: string
+          developer_settings?: Json
+          display_settings?: Json
+          notification_settings?: Json
+          privacy_settings?: Json
+          security_settings?: Json
+          sound_settings?: Json
+          update_settings?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accessibility_settings?: Json
+          account_settings?: Json
+          chat_settings?: Json
+          created_at?: string
+          developer_settings?: Json
+          display_settings?: Json
+          notification_settings?: Json
+          privacy_settings?: Json
+          security_settings?: Json
+          sound_settings?: Json
+          update_settings?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       workout_plans: {
         Row: {
           created_at: string
