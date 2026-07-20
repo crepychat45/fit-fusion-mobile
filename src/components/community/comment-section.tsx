@@ -1,146 +1,123 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, AlertCircle } from "lucide-react";
+import { Send, AlertCircle, Loader2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { validateInput, commentSchema, containsMaliciousContent } from "@/utils/validation";
 import { toast } from "sonner";
-
-interface Comment {
-  id: string;
-  user: {
-    name: string;
-    avatar?: string;
-    initials: string;
-  };
-  content: string;
-  timestamp: Date;
-}
+import { useComments } from "@/hooks/use-social";
+import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CommentSectionProps {
   activityId: string;
-  comments?: Comment[];
 }
 
-const SAMPLE_COMMENTS: Comment[] = [
-  {
-    id: "c1",
-    user: { name: "Jordan Lee", initials: "JL" },
-    content: "Great job! Keep it up! 💪",
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-  },
-  {
-    id: "c2",
-    user: { name: "Sam Rivera", initials: "SR" },
-    content: "Inspiring! What's your workout routine?",
-    timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000),
-  },
-];
-
-export function CommentSection({ activityId, comments = SAMPLE_COMMENTS }: CommentSectionProps) {
+export function CommentSection({ activityId }: CommentSectionProps) {
+  const { user } = useEnhancedAuth();
+  const { comments, isLoading, addComment } = useComments(activityId);
   const [newComment, setNewComment] = useState("");
-  const [displayComments, setDisplayComments] = useState(comments);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [authors, setAuthors] = useState<Record<string, { display_name?: string | null; avatar_url?: string | null }>>({});
 
-  const handleCommentChange = (value: string) => {
-    setNewComment(value);
-    setValidationError(null);
+  useEffect(() => {
+    if (!comments?.length) return;
+    const ids = Array.from(new Set(comments.map((c) => c.user_id))).filter((id) => !authors[id]);
+    if (!ids.length) return;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, display_name, avatar_url")
+        .in("id", ids as any);
+      if (data) {
+        const next = { ...authors };
+        (data as any[]).forEach((p) => (next[p.id] = p));
+        setAuthors(next);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [comments]);
 
-    // Real-time validation
-    if (containsMaliciousContent(value)) {
-      setValidationError("Comment contains unsafe characters");
-    }
+  const handleChange = (v: string) => {
+    setNewComment(v);
+    setValidationError(containsMaliciousContent(v) ? "Comment contains unsafe characters" : null);
   };
 
-  const handleSubmitComment = () => {
-    // Validate comment
+  const submit = async () => {
+    if (!user) { toast.error("Sign in to comment"); return; }
     const validation = validateInput(commentSchema, newComment);
-    
     if (!validation.success) {
       toast.error(validation.error || "Invalid comment");
       setValidationError(validation.error || null);
       return;
     }
-
-    // Additional security check
-    if (containsMaliciousContent(newComment)) {
-      toast.error("Comment contains unsafe content");
-      setValidationError("Comment contains unsafe characters");
-      return;
-    }
-
-    // Use sanitized data
-    const sanitizedComment = validation.data;
-
-    const comment: Comment = {
-      id: `c${Date.now()}`,
-      user: { name: "You", initials: "Y" },
-      content: sanitizedComment,
-      timestamp: new Date(),
-    };
-
-    setDisplayComments([...displayComments, comment]);
-    setNewComment("");
-    setValidationError(null);
+    if (containsMaliciousContent(newComment)) { setValidationError("Content unsafe"); return; }
+    try {
+      await addComment.mutateAsync(validation.data as string);
+      setNewComment("");
+      setValidationError(null);
+    } catch {}
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmitComment();
-    }
+  const keyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(); }
   };
 
   return (
     <div className="space-y-4 pt-4 border-t">
-      <div className="space-y-3">
-        {displayComments.map((comment) => (
-          <div key={comment.id} className="flex gap-2">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={comment.user.avatar} />
-              <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white text-xs">
-                {comment.user.initials}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-              <div className="bg-muted rounded-lg p-2">
-                <p className="font-semibold text-sm">{comment.user.name}</p>
-                <p className="text-sm">{comment.content}</p>
+      {isLoading ? (
+        <div className="flex items-center justify-center py-4 text-muted-foreground text-sm">
+          <Loader2 className="h-4 w-4 mr-2 animate-spin" />Loading comments…
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {comments?.map((c) => {
+            const a = authors[c.user_id];
+            const name = a?.display_name || (c.user_id === user?.id ? "You" : "Athlete");
+            const initials = name.split(" ").map((s) => s[0]).slice(0, 2).join("").toUpperCase() || "FF";
+            return (
+              <div key={c.id} className="flex gap-2">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={a?.avatar_url || undefined} />
+                  <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground text-xs">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <div className="bg-muted rounded-lg p-2">
+                    <p className="font-semibold text-sm">{name}</p>
+                    <p className="text-sm whitespace-pre-wrap">{c.content}</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1 ml-2">
+                    {formatDistanceToNow(new Date(c.created_at), { addSuffix: true })}
+                  </p>
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground mt-1 ml-2">
-                {formatDistanceToNow(comment.timestamp, { addSuffix: true })}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
+            );
+          })}
+          {comments && comments.length === 0 && (
+            <p className="text-xs text-muted-foreground text-center py-2">No comments yet — be the first!</p>
+          )}
+        </div>
+      )}
 
       <div className="flex gap-2 flex-col">
         <div className="flex gap-2">
           <Avatar className="h-8 w-8">
-            <AvatarImage src="" />
-            <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white text-xs">
-              Y
-            </AvatarFallback>
+            <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground text-xs">Y</AvatarFallback>
           </Avatar>
           <div className="flex-1 flex gap-2">
-            <div className="flex-1">
-              <Input
-                placeholder="Write a comment..."
-                value={newComment}
-                onChange={(e) => handleCommentChange(e.target.value)}
-                onKeyPress={handleKeyPress}
-                className={validationError ? "border-red-500" : ""}
-                maxLength={1000}
-              />
-            </div>
-            <Button
-              size="sm"
-              onClick={handleSubmitComment}
-              disabled={!newComment.trim() || !!validationError}
-            >
-              <Send className="h-4 w-4" />
+            <Input
+              placeholder="Write a comment..."
+              value={newComment}
+              onChange={(e) => handleChange(e.target.value)}
+              onKeyPress={keyPress}
+              className={validationError ? "border-red-500" : ""}
+              maxLength={1000}
+            />
+            <Button size="sm" onClick={submit} disabled={!newComment.trim() || !!validationError || addComment.isPending}>
+              {addComment.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </Button>
           </div>
         </div>
