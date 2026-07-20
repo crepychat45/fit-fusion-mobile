@@ -366,7 +366,9 @@ export function SettingsContainer() {
         onMobileMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
       />
 
-      <div className="max-w-screen-xl mx-auto py-6 px-4">
+      <div className="max-w-screen-xl mx-auto py-6 px-4 space-y-4">
+        <L><NetworkAdaptiveBanner /></L>
+        <L><SettingsCopilot /></L>
         <motion.div
           key={activeTab}
           initial={{ opacity: 0, x: 20 }}
@@ -412,7 +414,10 @@ export function SettingsContainer() {
             </TabsContent>
 
             <TabsContent value="display" className="mt-0">
-              <L><DisplaySettings /></L>
+              <div className="space-y-6">
+                <L><AppearancePanel /></L>
+                <L><DisplaySettings /></L>
+              </div>
             </TabsContent>
 
             <TabsContent value="privacy" className="mt-0">
@@ -420,7 +425,10 @@ export function SettingsContainer() {
             </TabsContent>
 
             <TabsContent value="notifications" className="mt-0">
-              <L><NotificationSettings /></L>
+              <div className="space-y-6">
+                <L><NotificationPreferences /></L>
+                <L><NotificationSettings /></L>
+              </div>
             </TabsContent>
 
             <TabsContent value="units" className="mt-0">
@@ -432,8 +440,14 @@ export function SettingsContainer() {
             </TabsContent>
 
             <TabsContent value="updates" className="mt-0">
-              <L><UnifiedUpdateManager /></L>
+              <div className="space-y-6">
+                <L><VersionControlPanel /></L>
+                <L><PwaVaultPanel /></L>
+                <L><UnifiedUpdateManager /></L>
+              </div>
             </TabsContent>
+
+
 
 
             <TabsContent value="enhanced" className="mt-0">
