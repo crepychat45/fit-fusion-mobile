@@ -141,6 +141,8 @@ export function AdvancedChatInterface({
   const [uploading, setUploading] = useState(false);
   const [showUserDetails, setShowUserDetails] = useState(false);
   const [userDetails, setUserDetails] = useState<any>(null);
+  const [showBgPicker, setShowBgPicker] = useState(false);
+  const [threadBg, setThreadBg] = useState<string>("default");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const notifiedIdsRef = useRef<Set<string>>(new Set());
