@@ -70,8 +70,34 @@ function b64urlEncode(buf: ArrayBuffer) {
   return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
+type SecurityEvent = { id: string; type: string; label: string; at: string };
+
+async function pushSecurityEvent(userId: string | null, event: Omit<SecurityEvent, "id" | "at">) {
+  if (!userId) return;
+  try {
+    const { data } = await supabase
+      .from("user_settings")
+      .select("security_settings")
+      .eq("user_id", userId)
+      .maybeSingle();
+    const current = (data?.security_settings as any) || {};
+    const events: SecurityEvent[] = Array.isArray(current.events) ? current.events : [];
+    const next = [
+      { id: crypto.randomUUID(), at: new Date().toISOString(), ...event },
+      ...events,
+    ].slice(0, 20);
+    await supabase
+      .from("user_settings")
+      .upsert(
+        { user_id: userId, security_settings: { ...current, events: next } },
+        { onConflict: "user_id" },
+      );
+  } catch { /* non-fatal */ }
+}
+
 export function SecurityPanel({ userEmail }: { userEmail?: string }) {
   const { toast } = useToast();
+  const [userId, setUserId] = useState<string | null>(null);
   const [sensors, setSensors] = useState<SensorStatus[]>([]);
   const [webAuthnSupported, setWebAuthnSupported] = useState(false);
   const [platformAuth, setPlatformAuth] = useState(false);
@@ -82,6 +108,7 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
   const [verifying, setVerifying] = useState(false);
   const [liveCode, setLiveCode] = useState<string>("------");
   const [tick, setTick] = useState(0);
+  const [events, setEvents] = useState<SecurityEvent[]>([]);
 
   useEffect(() => {
     detectSensors().then(setSensors);
@@ -94,10 +121,56 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
           setPlatformAuth(!!avail);
         } catch { setPlatformAuth(false); }
       }
+      // Hydrate from backend
+      try {
+        const { data: auth } = await supabase.auth.getUser();
+        const uid = auth?.user?.id ?? null;
+        setUserId(uid);
+        if (uid) {
+          const { data } = await supabase
+            .from("user_settings")
+            .select("security_settings")
+            .eq("user_id", uid)
+            .maybeSingle();
+          const s: any = data?.security_settings ?? {};
+          if (typeof s.twoFAEnabled === "boolean") {
+            setTwoFAEnabled(s.twoFAEnabled);
+            localStorage.setItem(LS_2FA_ENABLED, s.twoFAEnabled ? "1" : "0");
+          }
+          if (typeof s.biometricEnabled === "boolean") {
+            setBiometricEnabled(s.biometricEnabled && !!localStorage.getItem(LS_BIOMETRIC_CRED));
+          }
+          if (Array.isArray(s.events)) setEvents(s.events);
+        }
+      } catch { /* offline */ }
     })();
     const t = setInterval(() => setTick((v) => v + 1), 1000);
     return () => clearInterval(t);
   }, []);
+
+  const persistFlag = async (patch: Record<string, unknown>) => {
+    if (!userId) return;
+    try {
+      const { data } = await supabase
+        .from("user_settings")
+        .select("security_settings")
+        .eq("user_id", userId)
+        .maybeSingle();
+      const current = (data?.security_settings as any) || {};
+      await supabase
+        .from("user_settings")
+        .upsert(
+          { user_id: userId, security_settings: { ...current, ...patch } },
+          { onConflict: "user_id" },
+        );
+    } catch { /* offline */ }
+  };
+
+  const logEvent = async (type: string, label: string) => {
+    const ev = { id: crypto.randomUUID(), type, label, at: new Date().toISOString() };
+    setEvents((prev) => [ev, ...prev].slice(0, 20));
+    await pushSecurityEvent(userId, { type, label });
+  };
 
   useEffect(() => {
     (async () => {
@@ -127,12 +200,12 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
     try {
       const challenge = new Uint8Array(32);
       crypto.getRandomValues(challenge);
-      const userId = new TextEncoder().encode(userEmail || "fitfusion-user");
+      const userHandle = new TextEncoder().encode(userEmail || "fitfusion-user");
       const cred = (await navigator.credentials.create({
         publicKey: {
           challenge,
           rp: { name: "FitFusion", id: window.location.hostname },
-          user: { id: userId, name: userEmail || "user", displayName: userEmail || "FitFusion User" },
+          user: { id: userHandle, name: userEmail || "user", displayName: userEmail || "FitFusion User" },
           pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
           authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required", residentKey: "preferred" },
           timeout: 60000,
@@ -143,6 +216,8 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
       localStorage.setItem(LS_BIOMETRIC_CRED, b64urlEncode(cred.rawId));
       if (userEmail) localStorage.setItem("ff.security.biometric.email", userEmail);
       setBiometricEnabled(true);
+      await persistFlag({ biometricEnabled: true });
+      await logEvent("biometric.enrolled", "Biometric authentication enrolled on this device");
       toast({ title: "Biometric enabled", description: "You can now sign in with your fingerprint or face on this device." });
     } catch (e: any) {
       toast({ title: "Setup failed", description: e?.message || "Biometric enrollment cancelled.", variant: "destructive" });
@@ -171,9 +246,11 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
     }
   }
 
-  function removeBiometric() {
+  async function removeBiometric() {
     localStorage.removeItem(LS_BIOMETRIC_CRED);
     setBiometricEnabled(false);
+    await persistFlag({ biometricEnabled: false });
+    await logEvent("biometric.removed", "Biometric authentication removed");
     toast({ title: "Biometric removed" });
   }
 
@@ -193,13 +270,17 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
       setTwoFAEnabled(true);
       setSetupSecret(null);
       setCode("");
+      await persistFlag({ twoFAEnabled: true, twoFAEnrolledAt: new Date().toISOString() });
+      await logEvent("2fa.enabled", "Two-factor authentication enabled");
       toast({ title: "Two-factor enabled 🔐", description: "Codes will be required at sign-in." });
     } finally { setVerifying(false); }
   }
-  function disable2FA() {
+  async function disable2FA() {
     localStorage.removeItem(LS_2FA_ENABLED);
     localStorage.removeItem(LS_2FA_SECRET);
     setTwoFAEnabled(false);
+    await persistFlag({ twoFAEnabled: false });
+    await logEvent("2fa.disabled", "Two-factor authentication disabled");
     toast({ title: "Two-factor disabled" });
   }
 
@@ -213,10 +294,12 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
       redirectTo: `${window.location.origin}/reset-password`,
     });
     if (error) return toast({ title: "Failed", description: error.message, variant: "destructive" });
+    await logEvent("password.reset_sent", `Password reset email sent to ${userEmail}`);
     toast({ title: "Reset link sent", description: `Check ${userEmail}` });
   }
 
   async function signOutAll() {
+    await logEvent("session.signout_all", "Signed out of all devices");
     await supabase.auth.signOut({ scope: "global" as any });
     toast({ title: "Signed out of all devices" });
   }
@@ -365,6 +448,37 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
               </div>
             ))}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Recent security activity */}
+      <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <ShieldAlert className="h-4 w-4 text-primary" /> Recent Security Activity
+          </CardTitle>
+          <CardDescription>Synced to your account · last 20 events</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {events.length === 0 ? (
+            <div className="text-xs text-muted-foreground text-center py-4">
+              No security events yet. Enable 2FA or biometrics to start logging activity.
+            </div>
+          ) : (
+            <div className="space-y-1.5 max-h-64 overflow-auto">
+              {events.map((e) => (
+                <div key={e.id} className="flex items-start gap-2 rounded-lg border border-border/20 bg-muted/20 p-2">
+                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs font-medium truncate">{e.label}</div>
+                    <div className="text-[10px] text-muted-foreground">
+                      {new Date(e.at).toLocaleString()} · {e.type}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
