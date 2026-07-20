@@ -715,7 +715,7 @@ const ChatPage = () => {
         </Dialog>
       )}
 
-      <MobileNav />
+      {isMobile && <MobileNav />}
     </div>
   );
 };
