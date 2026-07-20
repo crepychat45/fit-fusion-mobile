@@ -141,6 +141,11 @@ const ProgressPage = () => {
                   <ProgressChart title="Monthly Summary" data={monthlyData} color="hsl(var(--accent-foreground))" />
                 </div>
 
+                {/* Live Session History */}
+                <SessionHistory />
+
+
+
                 {/* Personal Records Board */}
                 <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
                   <CardHeader className="pb-3">
