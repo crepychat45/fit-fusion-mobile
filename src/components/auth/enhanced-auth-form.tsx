@@ -1,304 +1,339 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
-import { motion } from "framer-motion";
+import { Progress } from "@/components/ui/progress";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  Shield,
-  Fingerprint,
-  Activity,
-  Loader2,
-  Chrome,
-  Apple,
-  Sparkles,
-  Mail,
-  Lock,
   Eye,
   EyeOff,
-  KeyRound,
+  ArrowRight,
+  Mail,
+  Lock,
+  UserPlus,
+  LogIn,
+  Shield,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Fingerprint,
+  Smartphone,
+  Activity,
 } from "lucide-react";
-import { lovable } from "@/integrations/lovable";
-import {
-  getDefaultPasskey,
-  verifyPasskey,
-  listPasskeys,
-  probePasskeySupport,
-  PasskeyError,
-} from "@/lib/passkey-manager";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { SocialLogin } from "./social-login";
+import { getDefaultPasskey, verifyPasskey, listPasskeys, PasskeyError } from "@/lib/passkey-manager";
 
 interface EnhancedAuthFormProps {
   onSuccess?: () => void;
 }
 
-type ProviderLoading =
-  | null
-  | "google"
-  | "apple"
-  | "passkey"
-  | "signin"
-  | "signup"
-  | "reset"
-  | "magic";
+interface PasswordStrength {
+  score: number;
+  feedback: string[];
+  color: string;
+  label: string;
+}
 
 export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const { loading, signIn, signUp, resetPassword, resendVerification, signInWithMagicLink } = useEnhancedAuth();
   const { toast } = useToast();
-  const { signIn, signUp, resetPassword, signInWithMagicLink } = useEnhancedAuth();
 
-  const [loadingProvider, setLoadingProvider] = useState<ProviderLoading>(null);
-  const [biometricAvailable, setBiometricAvailable] = useState(false);
-  const [passkeyEnrolled, setPasskeyEnrolled] = useState(false);
-  const [defaultPasskeyEmail, setDefaultPasskeyEmail] = useState<string | null>(null);
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
-
-  // form state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [name, setName] = useState("");
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [emailValid, setEmailValid] = useState<boolean | null>(null);
+  const [passwordStrength, setPasswordStrength] = useState<PasswordStrength | null>(null);
+  const [formValid, setFormValid] = useState(false);
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [passkeyEnrolled, setPasskeyEnrolled] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState<string | null>(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const [capsLock, setCapsLock] = useState(false);
+  const [passkeyLoading, setPasskeyLoading] = useState(false);
 
-  // Magic link dialog (with alternative email support)
-  const [magicOpen, setMagicOpen] = useState(false);
-  const [magicPrimary, setMagicPrimary] = useState<string>(""); // account email (from passkey or form)
-  const [useAltEmail, setUseAltEmail] = useState(false);
-  const [altEmail, setAltEmail] = useState("");
-  const [magicContext, setMagicContext] = useState<"passkey" | "manual">("manual");
 
   useEffect(() => {
-    (async () => {
-      const probe = await probePasskeySupport();
-      setBiometricAvailable(probe.supported && probe.platformAvailable);
+    if (resendCooldown <= 0) return;
+    const t = window.setInterval(() => setResendCooldown((s) => Math.max(0, s - 1)), 1000);
+    return () => window.clearInterval(t);
+  }, [resendCooldown]);
 
+
+  useEffect(() => {
+    const hasWebAuthn = typeof window !== "undefined" && !!(window as any).PublicKeyCredential;
+    setBiometricAvailable(hasWebAuthn);
+    (async () => {
       try {
         const list = await listPasskeys();
         if (list.length > 0) {
           setPasskeyEnrolled(true);
           const def = list.find((p) => p.isDefault) || list[0];
-          setDefaultPasskeyEmail(def?.email ?? null);
+          if (def?.email && !email) setEmail(def.email);
         }
-      } catch {
-        /* noop */
-      }
+      } catch { /* noop */ }
     })();
   }, []);
 
-  const busy = loadingProvider !== null;
-
-  const validEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
-
-  const handleOAuth = async (provider: "google" | "apple") => {
-    setLoadingProvider(provider);
-    try {
-      const result = await lovable.auth.signInWithOAuth(provider, {
-        redirect_uri: window.location.origin,
-      });
-      if (result.error) throw result.error;
-      if (result.redirected) return;
-      if (onSuccess) onSuccess();
-    } catch (error: any) {
-      toast({
-        title: `${provider === "google" ? "Google" : "Apple"} Sign-In Failed`,
-        description: error?.message || "Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoadingProvider(null);
-    }
-  };
-
   const handlePasskeySignIn = async () => {
-    setLoadingProvider("passkey");
+    setPasskeyLoading(true);
     try {
-      const probe = await probePasskeySupport();
-      if (!probe.supported) {
-        throw new PasskeyError(
-          "unsupported",
-          "WebAuthn is not supported in this browser.",
-          "Use a modern browser (Chrome, Safari, Edge) over HTTPS.",
-        );
-      }
-      if (!probe.platformAvailable) {
-        throw new PasskeyError(
-          "no-platform-authenticator",
-          "No fingerprint / Face ID / Windows Hello set up on this device.",
-          "Enable device biometrics, or use email magic link below.",
-        );
-      }
       const def = await getDefaultPasskey();
       if (!def) {
         toast({
           title: "No passkey on this device",
-          description:
-            "Sign in with email or Google once, then enrol a passkey from Profile → Security.",
+          description: "Sign in once, then enrol a passkey from Profile → Security.",
           variant: "destructive",
         });
         return;
       }
       const rec = await verifyPasskey(def.id);
       if (!rec) throw new Error("Verification cancelled");
-
-      // Open dialog so the user can confirm or choose an alternative email
-      setMagicPrimary(rec.email);
-      setAltEmail("");
-      setUseAltEmail(false);
-      setMagicContext("passkey");
-      setMagicOpen(true);
+      // WebAuthn verified locally → complete Supabase session via magic link.
+      const { error } = await signInWithMagicLink(rec.email);
+      if (error) throw new Error(error);
+      toast({
+        title: "Passkey verified ✓",
+        description: `Check ${rec.email} for a one-tap sign-in link to finish.`,
+      });
     } catch (e: any) {
       const isPk = e instanceof PasskeyError;
       toast({
         title: isPk ? e.message : "Passkey sign-in failed",
         description: isPk
           ? e.suggestion
-          : e?.message || "Try email or Google sign-in instead.",
+          : e?.message || "Try email magic link or password instead.",
         variant: "destructive",
       });
     } finally {
-      setLoadingProvider(null);
+      setPasskeyLoading(false);
     }
   };
 
-  const sendMagicLinkTo = async (target: string) => {
-    setLoadingProvider("magic");
-    const { error } = await signInWithMagicLink(target);
-    setLoadingProvider(null);
-    if (!error) {
-      setMagicOpen(false);
-      toast({
-        title: "Magic link sent ✓",
-        description: `Check ${target} for a one-tap sign-in link.`,
-      });
+
+  useEffect(() => {
+    validateEmail(email);
+  }, [email]);
+
+  useEffect(() => {
+    if (password) {
+      setPasswordStrength(checkPasswordStrength(password));
+    } else {
+      setPasswordStrength(null);
     }
+  }, [password]);
+
+  useEffect(() => {
+    let isValid = false;
+    if (isSignUp) {
+      isValid = !!(emailValid && password.length >= 6 && (passwordStrength?.score ?? 0) >= 3 && password === confirmPassword && acceptTerms && name.length >= 2);
+    } else {
+      isValid = !!(emailValid && password.length >= 1);
+    }
+    setFormValid(isValid);
+  }, [emailValid, passwordStrength, password, confirmPassword, acceptTerms, name, isSignUp]);
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const isValid = emailRegex.test(email);
+    setEmailValid(email.length > 0 ? isValid : null);
+    return isValid;
   };
 
-  const confirmMagicSend = async () => {
-    const target = useAltEmail ? altEmail.trim() : magicPrimary.trim();
-    if (!validEmail(target)) {
-      toast({
-        title: "Invalid email",
-        description: "Enter a valid email address to receive the link.",
-        variant: "destructive",
-      });
-      return;
-    }
-    await sendMagicLinkTo(target);
+  const checkPasswordStrength = (password: string): PasswordStrength => {
+    let score = 0;
+    const feedback: string[] = [];
+
+    if (password.length >= 8) score++;
+    else feedback.push("At least 8 characters");
+
+    if (/[a-z]/.test(password)) score++;
+    else feedback.push("Include lowercase letters");
+
+    if (/[A-Z]/.test(password)) score++;
+    else feedback.push("Include uppercase letters");
+
+    if (/\d/.test(password)) score++;
+    else feedback.push("Include numbers");
+
+    if (/[^a-zA-Z\d]/.test(password)) score++;
+    else feedback.push("Include special characters");
+
+    const strengthMap: Record<number, { color: string; label: string }> = {
+      0: { color: "text-destructive", label: "Very Weak" },
+      1: { color: "text-destructive", label: "Weak" },
+      2: { color: "text-yellow-500", label: "Fair" },
+      3: { color: "text-primary", label: "Good" },
+      4: { color: "text-green-500", label: "Strong" },
+      5: { color: "text-green-600", label: "Very Strong" },
+    };
+
+    return { score, feedback, ...strengthMap[score as keyof typeof strengthMap] };
   };
 
-  const handleSignIn = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validEmail(email)) {
-      toast({ title: "Invalid email", description: "Enter a valid email address.", variant: "destructive" });
+    if (!formValid) {
+      toast({ title: "Form Invalid", description: "Please check all fields.", variant: "destructive" });
       return;
     }
-    if (password.length < 6) {
-      toast({ title: "Password too short", description: "Password must be at least 6 characters.", variant: "destructive" });
-      return;
+
+    try {
+      if (isSignUp) {
+        const { error, needsVerification } = await signUp(email, password);
+        if (error) throw new Error(error);
+        if (needsVerification) {
+          setPendingVerificationEmail(email);
+          setResendCooldown(30);
+          return;
+        }
+      } else {
+        const { error } = await signIn(email, password);
+        if (error) throw new Error(error);
+      }
+      if (onSuccess) onSuccess();
+    } catch (error: any) {
+      const msg = String(error?.message ?? "");
+      if (/confirm|verif/i.test(msg) && !isSignUp) {
+        setPendingVerificationEmail(email);
+      }
+      toast({ title: isSignUp ? "Sign Up Failed" : "Sign In Failed", description: msg, variant: "destructive" });
     }
-    setLoadingProvider("signin");
-    const { error } = await signIn(email.trim(), password);
-    setLoadingProvider(null);
-    if (!error && onSuccess) onSuccess();
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleResend = async () => {
+    if (!pendingVerificationEmail || resendCooldown > 0) return;
+    const { error } = await resendVerification(pendingVerificationEmail);
+    if (!error) setResendCooldown(45);
+  };
+
+  const handleMagicLink = async () => {
+    if (!emailValid) {
+      toast({ title: "Enter your email", description: "We'll send a magic sign-in link.", variant: "destructive" });
+      return;
+    }
+    await signInWithMagicLink(email);
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validEmail(email)) {
-      toast({ title: "Invalid email", description: "Enter a valid email address.", variant: "destructive" });
+    if (!resetEmail || !validateEmail(resetEmail)) {
+      toast({ title: "Invalid Email", description: "Please enter a valid email.", variant: "destructive" });
       return;
     }
-    if (password.length < 8) {
-      toast({ title: "Weak password", description: "Use at least 8 characters for a new account.", variant: "destructive" });
-      return;
-    }
-    if (password !== confirmPassword) {
-      toast({ title: "Passwords do not match", description: "Please confirm your password.", variant: "destructive" });
-      return;
-    }
-    setLoadingProvider("signup");
-    const { error, needsVerification } = await signUp(email.trim(), password);
-    setLoadingProvider(null);
-    if (!error && !needsVerification && onSuccess) onSuccess();
-    if (!error && needsVerification) {
-      setMode("signin");
+
+    try {
+      const { error } = await resetPassword(resetEmail);
+      if (error) throw new Error(error);
+      toast({ title: "Reset Email Sent", description: "Check your email for the reset link." });
+      setShowForgotPassword(false);
+      setResetEmail("");
+    } catch (error: any) {
+      toast({ title: "Reset Failed", description: error.message, variant: "destructive" });
     }
   };
 
-  const handleReset = async () => {
-    if (!validEmail(email)) {
-      toast({
-        title: "Enter your email",
-        description: "Type your email above, then tap Forgot password.",
-        variant: "destructive",
-      });
-      return;
-    }
-    setLoadingProvider("reset");
-    await resetPassword(email.trim());
-    setLoadingProvider(null);
-  };
+  if (pendingVerificationEmail) {
+    return (
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md mx-auto px-4">
+        <Card className="bg-background/95 backdrop-blur-xl border-border/50 shadow-2xl">
+          <CardHeader className="text-center space-y-4 pb-4">
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}
+              className="mx-auto w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-primary to-primary/70 rounded-2xl flex items-center justify-center">
+              <Mail className="h-7 w-7 md:h-8 md:w-8 text-primary-foreground" />
+            </motion.div>
+            <div>
+              <CardTitle className="text-xl md:text-2xl font-bold text-foreground">Verify your email</CardTitle>
+              <p className="text-sm text-muted-foreground mt-2">
+                We sent a verification link to <span className="font-medium text-foreground">{pendingVerificationEmail}</span>. Click it to activate your account — no code needed.
+              </p>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3 px-4 md:px-6">
+            <Button type="button" className="w-full h-12" onClick={handleResend} disabled={loading || resendCooldown > 0}>
+              {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend verification email"}
+            </Button>
+            <Button type="button" variant="ghost" className="w-full" onClick={() => { setPendingVerificationEmail(null); setIsSignUp(false); }}>
+              Back to Sign In
+            </Button>
+            <p className="text-xs text-center text-muted-foreground">
+              Didn't get it? Check spam, or try a different email address.
+            </p>
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
+  }
 
-  const handleMagic = async () => {
-    if (!validEmail(email)) {
-      toast({
-        title: "Enter your email",
-        description: "Type your email above to receive a magic sign-in link.",
-        variant: "destructive",
-      });
-      return;
-    }
-    setMagicPrimary(email.trim());
-    setAltEmail("");
-    setUseAltEmail(false);
-    setMagicContext("manual");
-    setMagicOpen(true);
-  };
-
-  const detectCaps = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    setCapsLock(e.getModifierState && e.getModifierState("CapsLock"));
-  };
+  if (showForgotPassword) {
+    return (
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md mx-auto px-4">
+        <Card className="bg-background/95 backdrop-blur-xl border-border/50 shadow-2xl">
+          <CardHeader className="text-center space-y-4 pb-4">
+            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}
+              className="mx-auto w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-primary to-primary/70 rounded-2xl flex items-center justify-center">
+              <Lock className="h-7 w-7 md:h-8 md:w-8 text-primary-foreground" />
+            </motion.div>
+            <div>
+              <CardTitle className="text-xl md:text-2xl font-bold text-foreground">Reset Password</CardTitle>
+              <p className="text-sm text-muted-foreground mt-2">Enter your email to receive a reset link</p>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4 px-4 md:px-6">
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="resetEmail" className="text-sm">Email Address</Label>
+                <div className="relative">
+                  <Input id="resetEmail" type="email" placeholder="Enter your email" value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)} className="pl-10 h-12" />
+                  <Mail className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
+                </div>
+              </div>
+              <Button type="submit" className="w-full h-12 bg-primary hover:bg-primary/90" disabled={loading}>
+                {loading ? <div className="h-5 w-5 rounded-full border-2 border-primary-foreground border-t-transparent animate-spin" /> : "Send Reset Link"}
+              </Button>
+              <Button type="button" variant="ghost" className="w-full" onClick={() => setShowForgotPassword(false)}>
+                Back to Sign In
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
+  }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="w-full max-w-md mx-auto px-4"
-    >
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md mx-auto px-4">
       <Card className="bg-background/95 backdrop-blur-xl border-border/50 shadow-2xl">
         <CardHeader className="text-center space-y-4 pb-4">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring" }}
-            className="mx-auto w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-primary to-primary/70 rounded-2xl flex items-center justify-center"
-          >
+          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}
+            className="mx-auto w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-primary to-primary/70 rounded-2xl flex items-center justify-center">
             <Activity className="h-7 w-7 md:h-8 md:w-8 text-primary-foreground" />
           </motion.div>
 
           <div>
             <CardTitle className="text-xl md:text-2xl font-bold text-foreground">
-              Welcome to FitFusion
+              {isSignUp ? "Join FitFusion" : "Welcome Back"}
             </CardTitle>
             <p className="text-sm text-muted-foreground mt-2">
-              Sign in with email, Google, Apple, or a passkey.
+              {isSignUp ? "Create your secure account" : "Sign in to continue"}
             </p>
           </div>
 
           <div className="flex justify-center gap-2 flex-wrap">
             <Badge variant="outline" className="text-xs bg-secondary/50">
               <Shield className="h-3 w-3 mr-1" />
-              End-to-End Encrypted
+              256-bit Encryption
             </Badge>
             {biometricAvailable && (
               <Badge variant="outline" className="text-xs bg-secondary/50">
@@ -309,342 +344,170 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-4 px-4 md:px-6 pb-6">
-          {/* Passkey — primary when enrolled */}
-          {biometricAvailable && passkeyEnrolled && (
+        <CardContent className="space-y-5 px-4 md:px-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <AnimatePresence>
+              {isSignUp && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="space-y-2">
+                  <Label htmlFor="name" className="text-sm">Full Name</Label>
+                  <div className="relative">
+                    <Input id="name" type="text" placeholder="Enter your full name" value={name}
+                      onChange={(e) => setName(e.target.value)} className="pl-10 h-12" />
+                    <UserPlus className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm">Email Address</Label>
+              <div className="relative">
+                <Input id="email" type="email" placeholder="Enter your email" value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={`pl-10 pr-10 h-12 ${emailValid === true ? "border-green-500" : emailValid === false ? "border-red-500" : ""}`} />
+                <Mail className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
+                {emailValid !== null && (
+                  <div className="absolute right-3 top-3.5">
+                    {emailValid ? <CheckCircle className="h-5 w-5 text-green-500" /> : <XCircle className="h-5 w-5 text-red-500" />}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm">Password</Label>
+              <div className="relative">
+                <Input id="password" type={showPassword ? "text" : "password"} placeholder="Enter your password"
+                  value={password} onChange={(e) => setPassword(e.target.value)}
+                  onKeyUp={(e) => setCapsLock(e.getModifierState && e.getModifierState("CapsLock"))}
+                  onKeyDown={(e) => setCapsLock(e.getModifierState && e.getModifierState("CapsLock"))}
+                  autoComplete={isSignUp ? "new-password" : "current-password"}
+                  className="pl-10 pr-10 h-12" />
+                <Lock className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
+                <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3"
+                  onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? "Hide password" : "Show password"}>
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+              {capsLock && (
+                <p className="text-xs text-yellow-500 flex items-center gap-1">
+                  <AlertTriangle className="h-3 w-3" /> Caps Lock is on
+                </p>
+              )}
+
+
+              <AnimatePresence>
+                {passwordStrength && isSignUp && (
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">Password Strength</span>
+                      <span className={`text-xs font-medium ${passwordStrength.color}`}>{passwordStrength.label}</span>
+                    </div>
+                    <Progress value={(passwordStrength.score / 5) * 100} className="h-1.5" />
+                    {passwordStrength.feedback.length > 0 && (
+                      <ul className="text-xs text-muted-foreground space-y-0.5">
+                        {passwordStrength.feedback.map((item, index) => (
+                          <li key={index} className="flex items-center gap-1">
+                            <AlertTriangle className="h-3 w-3" />{item}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <AnimatePresence>
+              {isSignUp && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword" className="text-sm">Confirm Password</Label>
+                    <div className="relative">
+                      <Input id="confirmPassword" type="password" placeholder="Confirm your password"
+                        value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
+                        className={`pl-10 pr-10 h-12 ${confirmPassword && password === confirmPassword ? "border-green-500" : confirmPassword && password !== confirmPassword ? "border-red-500" : ""}`} />
+                      <Lock className="absolute left-3 top-3.5 h-5 w-5 text-muted-foreground" />
+                      {confirmPassword && (
+                        <div className="absolute right-3 top-3.5">
+                          {password === confirmPassword ? <CheckCircle className="h-5 w-5 text-green-500" /> : <XCircle className="h-5 w-5 text-red-500" />}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-start space-x-2">
+                    <Checkbox id="terms" checked={acceptTerms} onCheckedChange={(checked) => setAcceptTerms(checked as boolean)} className="mt-1" />
+                    <Label htmlFor="terms" className="text-xs leading-relaxed">
+                      I agree to the <a href="/terms-of-service" className="text-primary hover:underline">Terms of Service</a> and{" "}
+                      <a href="/privacy-policy" className="text-primary hover:underline">Privacy Policy</a>
+                    </Label>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <Button type="submit" className="w-full h-12 bg-primary hover:bg-primary/90 font-medium" disabled={loading || !formValid}>
+              {loading ? (
+                <div className="h-5 w-5 rounded-full border-2 border-primary-foreground border-t-transparent animate-spin" />
+              ) : isSignUp ? (
+                <>Create Account<ArrowRight className="ml-2 h-4 w-4" /></>
+              ) : (
+                <>Sign In<LogIn className="ml-2 h-4 w-4" /></>
+              )}
+            </Button>
+
+            {!isSignUp && (
+              <Button type="button" variant="link" className="w-full text-sm" onClick={() => setShowForgotPassword(true)}>
+                Forgot your password?
+              </Button>
+            )}
+          </form>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+            </div>
+          </div>
+
+          <SocialLogin />
+
+          {biometricAvailable && !isSignUp && (
             <Button
               type="button"
+              variant="outline"
+              className="w-full h-11 border-primary/40 hover:border-primary hover:bg-primary/5"
               onClick={handlePasskeySignIn}
-              disabled={busy}
-              className="w-full h-12 bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground font-semibold"
+              disabled={passkeyLoading || loading}
             >
-              {loadingProvider === "passkey" ? (
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              {passkeyLoading ? (
+                <div className="h-4 w-4 rounded-full border-2 border-primary border-t-transparent animate-spin mr-2" />
               ) : (
-                <Fingerprint className="mr-2 h-5 w-5" />
+                <Fingerprint className="h-4 w-4 mr-2 text-primary" />
               )}
-              Continue with Passkey
-              {defaultPasskeyEmail && (
-                <span className="ml-2 text-xs opacity-80 truncate max-w-[140px]">
-                  · {defaultPasskeyEmail}
-                </span>
-              )}
+              {passkeyEnrolled ? "Sign in with Passkey" : "Set up Passkey after sign-in"}
             </Button>
           )}
 
-          {/* Email / Password tabs */}
-          <Tabs value={mode} onValueChange={(v) => setMode(v as "signin" | "signup")} className="w-full">
-            <TabsList className="grid grid-cols-2 w-full">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Create Account</TabsTrigger>
-            </TabsList>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full h-11"
+            onClick={handleMagicLink}
+            disabled={loading || !emailValid}
+          >
+            <Mail className="h-4 w-4 mr-2" />
+            Email me a magic link
+          </Button>
 
-            <TabsContent value="signin" className="mt-4">
-              <form onSubmit={handleSignIn} className="space-y-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="signin-email">Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="signin-email"
-                      type="email"
-                      autoComplete="email"
-                      className="pl-9 h-11"
-                      placeholder="you@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      disabled={busy}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="signin-password">Password</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="signin-password"
-                      type={showPassword ? "text" : "password"}
-                      autoComplete="current-password"
-                      className="pl-9 pr-10 h-11"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      onKeyUp={detectCaps}
-                      disabled={busy}
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((s) => !s)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-muted-foreground hover:text-foreground"
-                      tabIndex={-1}
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                  {capsLock && (
-                    <p className="text-[11px] text-amber-500 flex items-center gap-1">
-                      <Shield className="h-3 w-3" /> Caps Lock is on
-                    </p>
-                  )}
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <button
-                    type="button"
-                    onClick={handleReset}
-                    disabled={busy}
-                    className="text-primary hover:underline disabled:opacity-50"
-                  >
-                    Forgot password?
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleMagic}
-                    disabled={busy}
-                    className="text-primary hover:underline disabled:opacity-50 flex items-center gap-1"
-                  >
-                    <KeyRound className="h-3 w-3" /> Magic link
-                  </button>
-                </div>
-                <Button
-                  type="submit"
-                  disabled={busy}
-                  className="w-full h-11 font-semibold"
-                >
-                  {loadingProvider === "signin" ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : null}
-                  Sign In
-                </Button>
-              </form>
-            </TabsContent>
-
-            <TabsContent value="signup" className="mt-4">
-              <form onSubmit={handleSignUp} className="space-y-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      autoComplete="email"
-                      className="pl-9 h-11"
-                      placeholder="you@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      disabled={busy}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="signup-password">Password</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="signup-password"
-                      type={showPassword ? "text" : "password"}
-                      autoComplete="new-password"
-                      className="pl-9 pr-10 h-11"
-                      placeholder="At least 8 characters"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      onKeyUp={detectCaps}
-                      disabled={busy}
-                      required
-                      minLength={8}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((s) => !s)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-muted-foreground hover:text-foreground"
-                      tabIndex={-1}
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="signup-confirm">Confirm password</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="signup-confirm"
-                      type={showPassword ? "text" : "password"}
-                      autoComplete="new-password"
-                      className="pl-9 h-11"
-                      placeholder="Repeat password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      disabled={busy}
-                      required
-                      minLength={8}
-                    />
-                  </div>
-                  {confirmPassword.length > 0 && confirmPassword !== password && (
-                    <p className="text-[11px] text-destructive">Passwords do not match</p>
-                  )}
-                </div>
-                <Button
-                  type="submit"
-                  disabled={busy}
-                  className="w-full h-11 font-semibold"
-                >
-                  {loadingProvider === "signup" ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : null}
-                  Create Account
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
-
-          {/* OAuth divider */}
-          <div className="relative py-1">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-border/60" />
-            </div>
-            <div className="relative flex justify-center text-[11px] uppercase tracking-wider">
-              <span className="bg-background/95 px-2 text-muted-foreground">
-                Or continue with
-              </span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => handleOAuth("google")}
-              disabled={busy}
-              className="h-11"
-            >
-              {loadingProvider === "google" ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Chrome className="mr-2 h-4 w-4" />
-              )}
-              Google
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => handleOAuth("apple")}
-              disabled={busy}
-              className="h-11"
-            >
-              {loadingProvider === "apple" ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Apple className="mr-2 h-4 w-4" />
-              )}
-              Apple
+          <div className="text-center">
+            <Button variant="link" className="text-sm" onClick={() => setIsSignUp(!isSignUp)}>
+              {isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
             </Button>
           </div>
-
-          {biometricAvailable && !passkeyEnrolled && (
-            <div className="mt-2 p-3 rounded-xl bg-primary/5 border border-primary/15 text-xs text-muted-foreground flex items-start gap-2">
-              <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-              <span>
-                After your first sign-in, enrol a passkey in{" "}
-                <span className="font-medium text-foreground">Profile → Security</span>{" "}
-                to unlock one-tap biometric login on this device.
-              </span>
-            </div>
-          )}
-
-          <p className="text-[11px] text-center text-muted-foreground pt-2">
-            By continuing, you agree to our Terms & Privacy Policy.
-          </p>
         </CardContent>
       </Card>
-
-      {/* Magic link — with alternative email support */}
-      <Dialog open={magicOpen} onOpenChange={(o) => !busy && setMagicOpen(o)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <KeyRound className="h-4 w-4 text-primary" />
-              {magicContext === "passkey" ? "Passkey verified — send sign-in link" : "Send magic sign-in link"}
-            </DialogTitle>
-            <DialogDescription>
-              We'll email a one-tap link that finishes your sign-in. You can also send it to an alternative inbox you have access to.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-3 py-2">
-            <div className="rounded-xl border border-border/50 bg-secondary/40 p-3 text-sm">
-              <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1">
-                Account email
-              </div>
-              <div className="font-medium truncate">{magicPrimary || "—"}</div>
-            </div>
-
-            <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
-              <input
-                type="checkbox"
-                className="h-4 w-4 accent-primary"
-                checked={useAltEmail}
-                onChange={(e) => setUseAltEmail(e.target.checked)}
-                disabled={busy}
-              />
-              <span>Send to an alternative email instead</span>
-            </label>
-
-            {useAltEmail && (
-              <div className="space-y-1.5">
-                <Label htmlFor="alt-email" className="text-xs">Alternative email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="alt-email"
-                    type="email"
-                    autoComplete="email"
-                    inputMode="email"
-                    className="pl-9 h-11"
-                    placeholder="backup@example.com"
-                    value={altEmail}
-                    onChange={(e) => setAltEmail(e.target.value)}
-                    disabled={busy}
-                    autoFocus
-                  />
-                </div>
-                <p className="text-[11px] text-muted-foreground">
-                  Use a recovery inbox you can open right now — the link signs in the account above.
-                </p>
-              </div>
-            )}
-          </div>
-
-          <DialogFooter className="gap-2">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setMagicOpen(false)}
-              disabled={busy}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              onClick={confirmMagicSend}
-              disabled={busy}
-              className="min-w-[140px]"
-            >
-              {loadingProvider === "magic" ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Mail className="mr-2 h-4 w-4" />
-              )}
-              Send link
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </motion.div>
   );
 }
