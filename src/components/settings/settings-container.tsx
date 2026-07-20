@@ -34,6 +34,7 @@ const DataManagementPanel = lazy(() => import("./data-management-panel").then(m 
 const PerformanceMetricsPanel = lazy(() => import("./performance-metrics-panel").then(m => ({ default: m.PerformanceMetricsPanel })));
 const AdvancedSettingsReset = lazy(() => import("./advanced-settings-reset").then(m => ({ default: m.AdvancedSettingsReset })));
 const UnifiedUpdateManager = lazy(() => import("./unified-update-manager").then(m => ({ default: m.UnifiedUpdateManager })));
+import { ConfirmDialog } from "./confirm-dialog";
 const VersionControlPanel = lazy(() => import("./version-control-panel").then(m => ({ default: m.VersionControlPanel })));
 const AppearancePanel = lazy(() => import("./appearance-panel").then(m => ({ default: m.AppearancePanel })));
 const NotificationPreferences = lazy(() => import("./notification-preferences").then(m => ({ default: m.NotificationPreferences })));
@@ -63,6 +64,8 @@ export function SettingsContainer() {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isConnected, setIsConnected] = useState(true);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [confirmClearOpen, setConfirmClearOpen] = useState(false);
+  const [confirmLogoutOpen, setConfirmLogoutOpen] = useState(false);
 
   useEffect(() => {
     // Check connection status
@@ -93,11 +96,6 @@ export function SettingsContainer() {
 
   const handleClearLocalData = async () => {
     try {
-      const confirmation = window.confirm(
-        "Are you sure you want to clear all local data? This action cannot be undone.",
-      );
-      if (!confirmation) return;
-
       const keysToPreserve = [
         "auth_token",
         "supabase.auth.token",
@@ -137,10 +135,7 @@ export function SettingsContainer() {
 
   const handleLogout = async () => {
     try {
-      const confirmation = window.confirm("Are you sure you want to log out?");
-      if (!confirmation) return;
-
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: "global" });
       localStorage.removeItem("auth_token");
       setIsLoggedOut(true);
 
