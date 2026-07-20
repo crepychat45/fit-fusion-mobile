@@ -89,11 +89,52 @@ const Glass: React.FC<React.PropsWithChildren<{ className?: string }>> = ({
 );
 
 /* ═══════════════════════════════ ACCOUNT ═══════════════════════════════ */
+const isValidEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim());
+
 export function AccountExtras() {
   const { toast } = useToast();
-  const [autoLock, setAutoLock] = useLocal("ff-account-autolock", 15);
-  const [signInAlerts, setSignInAlerts] = useLocal("ff-account-signin-alerts", true);
-  const [recovery, setRecovery] = useLocal("ff-account-recovery-email", "");
+  // fitfusion-* keys are mirrored to Supabase user_settings.local_kv automatically.
+  const [autoLock, setAutoLock] = useLocal("fitfusion-account-autolock", 15);
+  const [signInAlerts, setSignInAlerts] = useLocal("fitfusion-account-signin-alerts", true);
+  const [recovery, setRecovery] = useLocal("fitfusion-account-recovery-email", "");
+  const [recoveryDraft, setRecoveryDraft] = useState(recovery);
+  const [saving, setSaving] = useState(false);
+
+  // Re-sync draft when cloud hydration replaces the value.
+  useEffect(() => {
+    setRecoveryDraft(recovery);
+  }, [recovery]);
+
+  const saveRecovery = async () => {
+    const trimmed = recoveryDraft.trim();
+    if (trimmed && !isValidEmail(trimmed)) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid recovery email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setSaving(true);
+    try {
+      setRecovery(trimmed);
+      // Also mirror onto the auth user metadata so it survives across devices even
+      // without settings hydration.
+      try {
+        await supabase.auth.updateUser({ data: { recovery_email: trimmed || null } });
+      } catch {
+        /* metadata write is best-effort; local + cloud-mirror already succeeded */
+      }
+      toast({
+        title: trimmed ? "Recovery contact saved" : "Recovery contact cleared",
+        description: trimmed
+          ? `We'll use ${trimmed} to help you regain access.`
+          : "No backup recovery email on file.",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const device = useMemo(() => {
     const ua = navigator.userAgent;
@@ -161,23 +202,28 @@ export function AccountExtras() {
         <div>
           <Label className="text-sm">Backup recovery email</Label>
           <Input
-            value={recovery}
-            onChange={(e) => setRecovery(e.target.value)}
+            type="email"
+            value={recoveryDraft}
+            onChange={(e) => setRecoveryDraft(e.target.value)}
             placeholder="recovery@example.com"
             className="mt-1"
+            autoComplete="email"
           />
-          <Button
-            size="sm"
-            className="mt-2"
-            onClick={() =>
-              toast({
-                title: "Recovery contact saved",
-                description: recovery || "Cleared recovery contact.",
-              })
-            }
-          >
-            Save recovery contact
-          </Button>
+          <div className="flex items-center gap-2 mt-2">
+            <Button size="sm" onClick={saveRecovery} disabled={saving || recoveryDraft === recovery}>
+              {saving ? "Saving…" : "Save recovery contact"}
+            </Button>
+            {recovery ? (
+              <Badge variant="secondary" className="text-[10px] gap-1">
+                <CheckCircle2 className="h-3 w-3" /> Synced
+              </Badge>
+            ) : null}
+          </div>
+          {recovery ? (
+            <p className="mt-1 text-xs text-muted-foreground">
+              On file: <span className="font-mono">{recovery}</span>
+            </p>
+          ) : null}
         </div>
       </CardContent>
     </Glass>
