@@ -41,7 +41,7 @@ export const usePosts = () => {
   // Set up real-time subscription
   useEffect(() => {
     const channel = supabase
-      .channel('posts-channel')
+      .channel(`posts-channel-${Math.random().toString(36).slice(2)}`)
       .on(
         'postgres_changes',
         {
@@ -59,6 +59,7 @@ export const usePosts = () => {
       supabase.removeChannel(channel);
     };
   }, [queryClient]);
+
 
   const createPost = useMutation({
     mutationFn: async (post: { content: string; image_url?: string }) => {
