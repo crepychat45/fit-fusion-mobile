@@ -525,6 +525,75 @@ export function AdvancedChatInterface({
     return null;
   };
 
+  const handleFileUpload = async (files: FileList | null) => {
+    if (!files?.length || !currentUser || !activeThread) return;
+    setUploading(true);
+    try {
+      const attachments: Array<{ url: string; name: string; type: string; size: number; kind: "image" | "video" | "file" }> = [];
+      for (const file of Array.from(files).slice(0, 6)) {
+        if (file.size > 25 * 1024 * 1024) {
+          toast({ title: "File too large", description: `${file.name} exceeds 25MB`, variant: "destructive" });
+          continue;
+        }
+        const ext = file.name.split(".").pop() || "bin";
+        const path = `chat/${currentUser.id}/${activeThread.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const { error: upErr } = await supabase.storage.from("fitusion.data").upload(path, file, {
+          cacheControl: "3600",
+          upsert: false,
+          contentType: file.type || undefined,
+        });
+        if (upErr) throw upErr;
+        const { data: pub } = supabase.storage.from("fitusion.data").getPublicUrl(path);
+        const kind: "image" | "video" | "file" = file.type.startsWith("image/") ? "image" : file.type.startsWith("video/") ? "video" : "file";
+        attachments.push({ url: pub.publicUrl, name: file.name, type: file.type, size: file.size, kind });
+      }
+      if (!attachments.length) return;
+      const recipientId = activeThread.participant_ids.find((id) => id !== currentUser.id) ?? null;
+      const saved = await addChatMessage({
+        threadId: activeThread.id,
+        content: attachments.map((a) => `📎 ${a.name}`).join("\n"),
+        senderRole: "user",
+        senderId: currentUser.id,
+        recipientId: activeThread.thread_type === "direct" ? recipientId : null,
+        attachments: attachments as any,
+        metadata: { hasAttachments: true, securityLevel },
+      });
+      setMessages((prev) => mergeMessage(prev, saved));
+      await loadThreads(activeThread.id);
+      toast({ title: "Uploaded", description: `${attachments.length} file(s) attached.` });
+    } catch (error) {
+      console.error("Upload failed", error);
+      toast({ title: "Upload failed", description: error instanceof Error ? error.message : "Try a smaller file.", variant: "destructive" });
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const openUserDetails = async () => {
+    if (!activeThread || activeThread.thread_type === "ai") {
+      setUserDetails({ ai: true });
+      setShowUserDetails(true);
+      return;
+    }
+    const people = jsonArray<Record<string, any>>(activeThread.participant_snapshot);
+    const other = people.find((p) => String(p.id) !== currentUser?.id);
+    setUserDetails(other ?? null);
+    setShowUserDetails(true);
+    // Enrich with profile/directory info
+    if (other?.id) {
+      try {
+        const [{ data: directory }, { data: profile }] = await Promise.all([
+          supabase.from("chat_user_directory").select("*").eq("user_id", other.id).maybeSingle(),
+          supabase.from("profiles").select("*").eq("user_id", other.id).maybeSingle(),
+        ]);
+        setUserDetails((prev: any) => ({ ...(prev ?? {}), ...directory, ...profile, id: other.id, name: other.name }));
+      } catch (error) {
+        console.error("User details fetch failed", error);
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className={cn("flex h-full min-h-[520px] items-center justify-center rounded-lg border bg-card/70", className)}>
