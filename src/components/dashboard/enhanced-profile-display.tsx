@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 import { userProfile } from "@/data/user";
 import { useNavigate } from "react-router-dom";
+import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
+import { useProfile } from "@/hooks/use-profile";
 
 interface Achievement {
   id: string;
@@ -73,6 +75,31 @@ export function EnhancedProfileDisplay({
   const [displayName, setDisplayName] = useState(userName || userProfile.name);
   const [streakMotivation, setStreakMotivation] = useState("");
   const navigate = useNavigate();
+  const { user } = useEnhancedAuth();
+  const { profile: dbProfile } = useProfile(user?.id, { enabled: Boolean(user?.id) });
+
+  // Live avatar: prefer DB profile → auth metadata → local cache → static
+  const [localAvatar, setLocalAvatar] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("fitfusion-user-profile");
+      if (saved) setLocalAvatar(JSON.parse(saved)?.avatar ?? null);
+    } catch { /* ignore */ }
+    const onUpdate = () => {
+      try {
+        const saved = localStorage.getItem("fitfusion-user-profile");
+        setLocalAvatar(saved ? JSON.parse(saved)?.avatar ?? null : null);
+      } catch { /* ignore */ }
+    };
+    window.addEventListener("profileUpdated", onUpdate);
+    return () => window.removeEventListener("profileUpdated", onUpdate);
+  }, []);
+
+  const avatarSrc =
+    dbProfile?.avatar_url ||
+    (user?.user_metadata as any)?.avatar_url ||
+    localAvatar ||
+    currentProfile.avatar;
 
   // Enhanced user profile loading
   useEffect(() => {
@@ -156,7 +183,7 @@ export function EnhancedProfileDisplay({
             <div className="flex items-start gap-6">
               <motion.div whileHover={{ scale: 1.05 }} className="relative">
                 <Avatar className="w-24 h-24 border-4 border-white shadow-xl">
-                  <AvatarImage src={currentProfile.avatar} alt="Profile" />
+                  <AvatarImage src={avatarSrc} alt="Profile" />
                   <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold text-2xl">
                     {getInitials()}
                   </AvatarFallback>
@@ -333,7 +360,7 @@ export function EnhancedProfileDisplay({
   return (
     <div className="flex items-center gap-4 p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
       <Avatar className="w-12 h-12 border-2 border-white/30">
-        <AvatarImage src={currentProfile.avatar} alt="Profile" />
+        <AvatarImage src={avatarSrc} alt="Profile" />
         <AvatarFallback className="bg-white/20 text-white font-bold">
           {getInitials()}
         </AvatarFallback>
