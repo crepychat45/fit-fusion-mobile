@@ -108,6 +108,19 @@ const quickPrompts = [
   "Build a weekly fat-loss routine",
 ];
 
+const CHAT_BACKGROUNDS: { id: string; label: string; className: string; preview: string }[] = [
+  { id: "default", label: "Default", className: "bg-muted/10", preview: "linear-gradient(135deg,hsl(var(--muted)),hsl(var(--background)))" },
+  { id: "aurora", label: "Aurora", className: "bg-gradient-to-br from-indigo-500/20 via-purple-500/10 to-pink-500/20", preview: "linear-gradient(135deg,#6366f1,#a855f7,#ec4899)" },
+  { id: "ocean", label: "Ocean", className: "bg-gradient-to-br from-sky-500/20 via-cyan-400/10 to-blue-600/20", preview: "linear-gradient(135deg,#0ea5e9,#22d3ee,#2563eb)" },
+  { id: "sunset", label: "Sunset", className: "bg-gradient-to-br from-orange-500/25 via-rose-400/15 to-purple-500/20", preview: "linear-gradient(135deg,#f97316,#fb7185,#a855f7)" },
+  { id: "forest", label: "Forest", className: "bg-gradient-to-br from-emerald-500/20 via-teal-400/10 to-lime-500/20", preview: "linear-gradient(135deg,#10b981,#14b8a6,#84cc16)" },
+  { id: "midnight", label: "Midnight", className: "bg-gradient-to-br from-slate-900 via-indigo-900/60 to-slate-900", preview: "linear-gradient(135deg,#0f172a,#312e81,#0f172a)" },
+  { id: "peach", label: "Peach", className: "bg-gradient-to-br from-amber-200/40 via-rose-200/30 to-orange-200/40", preview: "linear-gradient(135deg,#fde68a,#fecdd3,#fed7aa)" },
+  { id: "carbon", label: "Carbon", className: "bg-background bg-[radial-gradient(circle_at_20%_20%,hsl(var(--primary)/0.15),transparent_40%)]", preview: "radial-gradient(circle at 30% 30%,#334155,#0f172a)" },
+];
+const bgClass = (id: string) => CHAT_BACKGROUNDS.find((b) => b.id === id)?.className ?? CHAT_BACKGROUNDS[0].className;
+
+
 const mergeMessage = (rows: ChatMessageRow[], row: ChatMessageRow) => {
   if (rows.some((message) => message.id === row.id)) {
     return rows.map((message) => (message.id === row.id ? row : message));
@@ -141,6 +154,8 @@ export function AdvancedChatInterface({
   const [uploading, setUploading] = useState(false);
   const [showUserDetails, setShowUserDetails] = useState(false);
   const [userDetails, setUserDetails] = useState<any>(null);
+  const [showBgPicker, setShowBgPicker] = useState(false);
+  const [threadBg, setThreadBg] = useState<string>("default");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const notifiedIdsRef = useRef<Set<string>>(new Set());
@@ -225,6 +240,21 @@ export function AdvancedChatInterface({
       mounted = false;
     };
   }, [activeThreadId, toast]);
+
+  useEffect(() => {
+    if (!activeThreadId) return;
+    try {
+      const saved = localStorage.getItem(`fitfusion-chat-bg-${activeThreadId}`);
+      setThreadBg(saved || "default");
+    } catch { setThreadBg("default"); }
+  }, [activeThreadId]);
+
+  const applyBackground = (id: string) => {
+    setThreadBg(id);
+    if (activeThreadId) {
+      try { localStorage.setItem(`fitfusion-chat-bg-${activeThreadId}`, id); } catch { /* ignore */ }
+    }
+  };
 
   useEffect(() => {
     if (!currentUser) return undefined;
@@ -484,15 +514,58 @@ export function AdvancedChatInterface({
     }
   };
 
-  const exportThread = () => {
+  const exportThread = async (format: "json" | "pdf" | "xlsx" = "json") => {
     if (!activeThread) return;
-    const blob = new Blob([JSON.stringify({ thread: activeThread, messages }, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `${activeThread.title.replace(/\W+/g, "-").toLowerCase()}-chat.json`;
-    anchor.click();
-    URL.revokeObjectURL(url);
+    const safeTitle = (activeThread.title || "chat").replace(/\W+/g, "-").toLowerCase();
+    const stamp = new Date().toISOString().slice(0, 10);
+    try {
+      if (format === "json") {
+        const blob = new Blob([JSON.stringify({ thread: activeThread, messages, exportedAt: new Date().toISOString() }, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = `${safeTitle}-${stamp}.json`; a.click();
+        URL.revokeObjectURL(url);
+      } else if (format === "xlsx") {
+        const XLSX = await import("xlsx");
+        const rows = messages.map((m) => ({
+          Time: new Date(m.created_at ?? Date.now()).toLocaleString(),
+          Sender: m.sender_role === "assistant" ? "Fit Bot AI" : m.sender_role === "system" ? "System" : m.sender_id === currentUser?.id ? "You" : "Other",
+          Message: m.content,
+          Attachments: jsonArray<any>(m.attachments as any).map((a) => a.name).join(", "),
+        }));
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(rows);
+        ws["!cols"] = [{ wch: 22 }, { wch: 14 }, { wch: 80 }, { wch: 30 }];
+        XLSX.utils.book_append_sheet(wb, ws, "Chat");
+        XLSX.writeFile(wb, `${safeTitle}-${stamp}.xlsx`);
+      } else if (format === "pdf") {
+        const { default: jsPDF } = await import("jspdf");
+        const { default: autoTable } = await import("jspdf-autotable");
+        const doc = new jsPDF({ unit: "pt", format: "a4" });
+        doc.setFontSize(16);
+        doc.text(activeThread.title || "FitFusion Chat", 40, 40);
+        doc.setFontSize(10);
+        doc.setTextColor(120);
+        doc.text(`Exported ${new Date().toLocaleString()} • ${messages.length} messages`, 40, 58);
+        autoTable(doc, {
+          startY: 80,
+          head: [["Time", "Sender", "Message"]],
+          body: messages.map((m) => [
+            new Date(m.created_at ?? Date.now()).toLocaleString(),
+            m.sender_role === "assistant" ? "Fit Bot AI" : m.sender_role === "system" ? "System" : m.sender_id === currentUser?.id ? "You" : "Other",
+            m.content + (jsonArray<any>(m.attachments as any).length ? `\n📎 ${jsonArray<any>(m.attachments as any).map((a) => a.name).join(", ")}` : ""),
+          ]),
+          styles: { fontSize: 9, cellPadding: 6, overflow: "linebreak" },
+          headStyles: { fillColor: [37, 99, 235] },
+          columnStyles: { 0: { cellWidth: 110 }, 1: { cellWidth: 70 }, 2: { cellWidth: "auto" } },
+        });
+        doc.save(`${safeTitle}-${stamp}.pdf`);
+      }
+      toast({ title: "Chat exported", description: format.toUpperCase() + " file downloaded." });
+    } catch (error) {
+      console.error("Export failed", error);
+      toast({ title: "Export failed", description: error instanceof Error ? error.message : "Try another format.", variant: "destructive" });
+    }
   };
 
   const togglePin = async () => {
@@ -535,8 +608,9 @@ export function AdvancedChatInterface({
           toast({ title: "File too large", description: `${file.name} exceeds 25MB`, variant: "destructive" });
           continue;
         }
-        const ext = file.name.split(".").pop() || "bin";
-        const path = `chat/${currentUser.id}/${activeThread.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const ext = (file.name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "");
+        // IMPORTANT: RLS on storage requires the first folder to equal auth.uid()
+        const path = `${currentUser.id}/chat/${activeThread.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
         const { error: upErr } = await supabase.storage.from("fitusion.data").upload(path, file, {
           cacheControl: "3600",
           upsert: false,
@@ -718,9 +792,13 @@ export function AdvancedChatInterface({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={togglePin}><Pin className="mr-2 h-4 w-4" />{activeThread.is_pinned ? "Unpin" : "Pin"}</DropdownMenuItem>
-                    <DropdownMenuItem onClick={exportThread}><Download className="mr-2 h-4 w-4" />Export chat</DropdownMenuItem>
-                    <DropdownMenuItem onClick={archiveThread}><Archive className="mr-2 h-4 w-4" />Archive</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setShowBgPicker(true)}><ImageIcon className="mr-2 h-4 w-4" />Change background</DropdownMenuItem>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => exportThread("json")}><Download className="mr-2 h-4 w-4" />Export as JSON</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => exportThread("pdf")}><FileText className="mr-2 h-4 w-4" />Export as PDF</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => exportThread("xlsx")}><FileText className="mr-2 h-4 w-4" />Export as Excel</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={archiveThread}><Archive className="mr-2 h-4 w-4" />Archive</DropdownMenuItem>
                     <DropdownMenuItem onClick={clearThread}><Trash2 className="mr-2 h-4 w-4" />Clear messages</DropdownMenuItem>
                     {activeThread.thread_type !== "ai" && <DropdownMenuItem onClick={deleteThread} className="text-destructive"><Trash2 className="mr-2 h-4 w-4" />Delete chat</DropdownMenuItem>}
                   </DropdownMenuContent>
@@ -736,7 +814,7 @@ export function AdvancedChatInterface({
               </div>
             )}
 
-            <ScrollArea className="flex-1 custom-scrollbar bg-muted/10 p-4">
+            <ScrollArea className={cn("flex-1 custom-scrollbar p-4 transition-colors", bgClass(threadBg))}>
               <div className="mx-auto flex max-w-3xl flex-col gap-3">
                 {!filteredMessages.length && activeThread.thread_type === "ai" && (
                   <div className="mx-auto my-8 max-w-xl rounded-2xl border bg-card/80 p-5 text-center shadow-sm backdrop-blur-xl">
@@ -975,6 +1053,33 @@ export function AdvancedChatInterface({
           ) : (
             <p className="p-6 text-center text-sm text-muted-foreground">No details available.</p>
           )}
+        </DialogContent>
+      </Dialog>
+      <Dialog open={showBgPicker} onOpenChange={setShowBgPicker}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Chat background</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {CHAT_BACKGROUNDS.map((bg) => (
+              <button
+                key={bg.id}
+                type="button"
+                onClick={() => { applyBackground(bg.id); setShowBgPicker(false); }}
+                className={cn(
+                  "group relative flex h-24 flex-col items-start justify-end overflow-hidden rounded-xl border p-2 text-left text-xs font-medium transition-all",
+                  threadBg === bg.id ? "ring-2 ring-primary" : "hover:ring-2 hover:ring-primary/40",
+                )}
+                style={{ backgroundImage: bg.preview }}
+              >
+                <span className="rounded-md bg-black/40 px-2 py-0.5 text-white backdrop-blur-sm">{bg.label}</span>
+                {threadBg === bg.id && (
+                  <span className="absolute right-2 top-2 rounded-full bg-primary px-2 py-0.5 text-[10px] text-primary-foreground">Active</span>
+                )}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">Background is saved on this device for this conversation.</p>
         </DialogContent>
       </Dialog>
     </div>
