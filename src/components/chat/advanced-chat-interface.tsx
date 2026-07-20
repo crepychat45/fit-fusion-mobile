@@ -799,7 +799,7 @@ export function AdvancedChatInterface({
               </div>
             )}
 
-            <ScrollArea className="flex-1 custom-scrollbar bg-muted/10 p-4">
+            <ScrollArea className={cn("flex-1 custom-scrollbar p-4 transition-colors", bgClass(threadBg))}>
               <div className="mx-auto flex max-w-3xl flex-col gap-3">
                 {!filteredMessages.length && activeThread.thread_type === "ai" && (
                   <div className="mx-auto my-8 max-w-xl rounded-2xl border bg-card/80 p-5 text-center shadow-sm backdrop-blur-xl">
