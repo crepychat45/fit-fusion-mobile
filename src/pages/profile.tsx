@@ -339,6 +339,11 @@ const Profile = () => {
                   streak={localStats.streakDays || 0}
                   calories={localStats.caloriesBurned || 0}
                 />
+                <PersonalRecordsCard
+                  workouts={localStats.workoutsCompleted || 0}
+                  streak={localStats.streakDays || 0}
+                  calories={localStats.caloriesBurned || 0}
+                />
                 {/* Liquid Glass Vitality Rings — new */}
                 <VitalityRingsWidget />
 
@@ -413,6 +418,18 @@ const Profile = () => {
                     </div>
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              <TabsContent value="nutrition" className="space-y-3 mt-0">
+                <NutritionSummary />
+              </TabsContent>
+
+              <TabsContent value="goals" className="space-y-3 mt-0">
+                <GoalsTracker />
+              </TabsContent>
+
+              <TabsContent value="devices" className="space-y-3 mt-0">
+                <DevicesPanel />
               </TabsContent>
 
             </motion.div>
