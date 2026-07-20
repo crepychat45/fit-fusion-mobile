@@ -26,7 +26,16 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
 import { SocialLogin } from "./social-login";
-import { getDefaultPasskey, verifyPasskey, listPasskeys, PasskeyError } from "@/lib/passkey-manager";
+import {
+  getDefaultPasskey,
+  verifyPasskey,
+  listPasskeys,
+  PasskeyError,
+  getPasskeySession,
+  attachSessionToPasskey,
+  clearPasskeySession,
+} from "@/lib/passkey-manager";
+import { supabase } from "@/integrations/supabase/client";
 
 interface EnhancedAuthFormProps {
   onSuccess?: () => void;
