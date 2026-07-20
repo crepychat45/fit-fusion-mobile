@@ -31,8 +31,8 @@ serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } },
     );
     const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: authError } = await supabase.auth.getClaims(token);
-    if (authError || !claimsData?.claims) {
+    const { data: userData, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !userData?.user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -63,7 +63,8 @@ serve(async (req) => {
     const upstream = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Lovable-API-Key": LOVABLE_API_KEY,
+        "X-Lovable-AIG-SDK": "fitfusion-edge-stream",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({

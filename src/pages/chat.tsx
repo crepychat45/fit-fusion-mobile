@@ -41,8 +41,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { motion, AnimatePresence } from "framer-motion";
-import { AIEnhancedChat } from "@/components/chat/ai-enhanced-chat";
-import { PrivateChat } from "@/components/chat/private-chat";
 import type { Session, User } from "@supabase/supabase-js";
 
 const ChatPage = () => {
@@ -171,10 +169,16 @@ const ChatPage = () => {
             ); // 50 minutes
           }
 
-          // Simulate real-time connection
-          setTimeout(() => {
-            setOnlineUsers(Math.floor(Math.random() * 10) + 1);
-          }, 1000);
+          void (async () => {
+            try {
+              const { count } = await supabase
+                .from("chat_user_directory")
+                .select("user_id", { count: "exact", head: true });
+              setOnlineUsers(Math.max(count ?? 1, 1));
+            } catch {
+              setOnlineUsers(1);
+            }
+          })();
         } else {
           setIsAuthenticated(false);
           setConnectionStatus("disconnected");
@@ -455,7 +459,7 @@ const ChatPage = () => {
                           <Menu className="h-4 w-4" />
                         </Button>
                       </SheetTrigger>
-                      <SheetContent side="right" className="w-80">
+                      <SheetContent side="right" className="w-80 max-h-dvh overflow-hidden p-4">
                         <SheetHeader>
                           <SheetTitle className="flex items-center gap-2">
                             <Settings className="h-5 w-5" />
@@ -479,7 +483,7 @@ const ChatPage = () => {
                               </TabsTrigger>
                             </TabsList>
 
-                            <div className="mt-4 space-y-4">
+                            <div className="mt-4 max-h-[calc(100dvh-9rem)] space-y-4 overflow-y-auto pr-1 custom-scrollbar">
                               <TabsContent value="settings">
                                 <EnhancedChatSettings
                                   onClose={() => setShowMobileMenu(false)}
@@ -567,29 +571,13 @@ const ChatPage = () => {
           isMobile ? (
             <MobileChatInterface />
           ) : (
-            <div className="flex-1 flex gap-4">
-              <div className="flex-1">
-                <Tabs defaultValue="ai-chat" className="h-full">
-                  <TabsList className="grid w-full grid-cols-2 mb-4">
-                    <TabsTrigger value="ai-chat">AI Coach</TabsTrigger>
-                    <TabsTrigger value="private">Private Messages</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="ai-chat" className="h-full">
-                    <AIEnhancedChat user={user} />
-                  </TabsContent>
-                  <TabsContent value="private" className="h-full">
-                    <PrivateChat />
-                  </TabsContent>
-                </Tabs>
-              </div>
-              <div className="w-80">
-                <AdvancedChatInterface
-                  onLogout={handleLogout}
-                  securityLevel={securityLevel}
-                  notificationsEnabled={notificationsEnabled}
-                />
-              </div>
-            </div>
+            <AdvancedChatInterface
+              user={user}
+              onLogout={handleLogout}
+              securityLevel={securityLevel}
+              notificationsEnabled={notificationsEnabled}
+              className="flex-1"
+            />
           )
         ) : (
           <div className="max-w-md mx-auto p-6 flex-1 flex items-center justify-center">
@@ -680,7 +668,7 @@ const ChatPage = () => {
       {/* Desktop Settings Dialog */}
       {!isMobile && (
         <Dialog open={showSettings} onOpenChange={setShowSettings}>
-          <DialogContent className="max-w-4xl h-[80vh]">
+          <DialogContent className="max-w-4xl h-[80vh] overflow-hidden">
             <DialogHeader>
               <DialogTitle className="text-xl flex items-center gap-2">
                 <Settings className="h-5 w-5" />
@@ -691,7 +679,7 @@ const ChatPage = () => {
             <Tabs
               value={activeTab}
               onValueChange={setActiveTab}
-              className="flex-1"
+              className="flex h-full min-h-0 flex-col"
             >
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="settings">Enhanced Settings</TabsTrigger>
@@ -699,7 +687,7 @@ const ChatPage = () => {
                 <TabsTrigger value="notifications">Notifications</TabsTrigger>
               </TabsList>
 
-              <div className="flex-1 mt-4 overflow-hidden">
+              <div className="mt-4 min-h-0 flex-1 overflow-y-auto pr-1 custom-scrollbar">
                 <TabsContent value="settings" className="h-full">
                   <EnhancedChatSettings
                     onClose={() => setShowSettings(false)}
@@ -727,7 +715,7 @@ const ChatPage = () => {
         </Dialog>
       )}
 
-      <MobileNav />
+      {isMobile && <MobileNav />}
     </div>
   );
 };

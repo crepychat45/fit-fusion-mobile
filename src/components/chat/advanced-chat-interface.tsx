@@ -1,961 +1,746 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  addChatMessage,
+  clearChatThreadMessages,
+  createDirectThread,
+  createGroupThread,
+  deleteChatThread,
+  ensureAiThread,
+  ensureChatDirectoryProfile,
+  FITBOT_ID,
+  fitbotSnapshot,
+  listChatMessages,
+  listChatThreads,
+  searchChatContacts,
+  touchChatThread,
+  updateChatThread,
+  type ChatDirectoryUser,
+  type ChatMessageRow,
+  type ChatThreadRow,
+} from "@/utils/chat-db";
+import type { User } from "@supabase/supabase-js";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
+  Archive,
+  Bot,
+  Download,
+  Loader2,
+  MoreVertical,
+  Pin,
+  Plus,
   Search,
   Send,
-  MoreVertical,
-  Users,
-  Shield,
-  Settings,
-  Phone,
-  Video,
-  Paperclip,
-  Smile,
-  X,
-  Plus,
-  Download,
-  Upload,
-  Palette,
-  MessageSquarePlus,
-  Archive,
+  ShieldCheck,
+  Sparkles,
   Trash2,
   UserPlus,
+  Users,
+  X,
 } from "lucide-react";
-import { MediaUpload } from "./media-upload";
-import { EmojiPicker } from "./emoji-picker";
-import { ChatBackgroundSelector } from "./chat-background-selector";
-import { GroupChatCreator } from "./group-chat-creator";
-import { chatStorage } from "@/utils/chat-storage";
-import { ChatConversation, ChatMessage, ChatUser } from "@/types/chat";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface AdvancedChatInterfaceProps {
+  user?: User | null;
   onLogout?: () => void;
   securityLevel?: string;
   notificationsEnabled?: boolean;
+  defaultMode?: "all" | "ai" | "direct";
+  compact?: boolean;
+  className?: string;
 }
 
+type ContactPick = ChatDirectoryUser & { selected?: boolean };
+
+const formatTime = (value?: string | null) => {
+  if (!value) return "now";
+  return new Date(value).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+};
+
+const jsonArray = <T,>(value: unknown): T[] => (Array.isArray(value) ? (value as T[]) : []);
+
+const getThreadAvatar = (thread: ChatThreadRow, currentUserId?: string) => {
+  const people = jsonArray<Record<string, unknown>>(thread.participant_snapshot);
+  const other = people.find((person) => String(person.id) !== currentUserId) ?? people[0];
+  return typeof other?.avatar === "string" ? other.avatar : null;
+};
+
+const getThreadInitial = (thread: ChatThreadRow) => {
+  if (thread.thread_type === "ai") return "AI";
+  if (thread.thread_type === "group") return "G";
+  return (thread.title || "C").slice(0, 1).toUpperCase();
+};
+
+const messageRole = (message: ChatMessageRow, currentUserId?: string) => {
+  if (message.sender_role === "assistant") return "assistant";
+  if (message.sender_role === "system") return "system";
+  return message.sender_id === currentUserId ? "own" : "other";
+};
+
+const quickPrompts = [
+  "Create a 25-minute beginner workout for today",
+  "What should I eat after strength training?",
+  "Make a recovery plan for sore legs",
+  "Build a weekly fat-loss routine",
+];
+
+const mergeMessage = (rows: ChatMessageRow[], row: ChatMessageRow) => {
+  if (rows.some((message) => message.id === row.id)) {
+    return rows.map((message) => (message.id === row.id ? row : message));
+  }
+  return [...rows, row];
+};
+
 export function AdvancedChatInterface({
-  onLogout,
+  user: providedUser,
   securityLevel = "high",
-  notificationsEnabled = true,
+  defaultMode = "all",
+  compact = false,
+  className,
 }: AdvancedChatInterfaceProps) {
   const { toast } = useToast();
-  const [conversations, setConversations] = useState<ChatConversation[]>([]);
-  const [activeConversation, setActiveConversation] = useState<string | null>(
-    null,
-  );
-  const [messages, setMessages] = useState<Record<string, ChatMessage[]>>({});
-  const [newMessage, setNewMessage] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [showMediaUpload, setShowMediaUpload] = useState(false);
-  const [showBackgroundSelector, setShowBackgroundSelector] = useState(false);
-  const [showGroupCreator, setShowGroupCreator] = useState(false);
-  const [showNewChatDialog, setShowNewChatDialog] = useState(false);
-  const [newChatUsername, setNewChatUsername] = useState("");
-  const [chatBackground, setChatBackground] = useState("bg-background");
-  const [isTyping, setIsTyping] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
-
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(providedUser ?? null);
+  const [threads, setThreads] = useState<ChatThreadRow[]>([]);
+  const [messages, setMessages] = useState<ChatMessageRow[]>([]);
+  const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
+  const [input, setInput] = useState("");
+  const [threadSearch, setThreadSearch] = useState("");
+  const [messageSearch, setMessageSearch] = useState("");
+  const [contacts, setContacts] = useState<ContactPick[]>([]);
+  const [contactQuery, setContactQuery] = useState("");
+  const [showContacts, setShowContacts] = useState(false);
+  const [showGroup, setShowGroup] = useState(false);
+  const [groupName, setGroupName] = useState("Fitness Squad");
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const [aiStreaming, setAiStreaming] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load data on component mount
+  const activeThread = useMemo(
+    () => threads.find((thread) => thread.id === activeThreadId) ?? null,
+    [threads, activeThreadId],
+  );
+
+  const filteredThreads = useMemo(() => {
+    const q = threadSearch.trim().toLowerCase();
+    const base = defaultMode === "ai" ? threads.filter((thread) => thread.thread_type === "ai") : threads;
+    if (!q) return base;
+    return base.filter((thread) =>
+      [thread.title, thread.last_message_preview, thread.thread_type]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .includes(q),
+    );
+  }, [defaultMode, threadSearch, threads]);
+
+  const filteredMessages = useMemo(() => {
+    const q = messageSearch.trim().toLowerCase();
+    if (!q) return messages;
+    return messages.filter((message) => message.content.toLowerCase().includes(q));
+  }, [messageSearch, messages]);
+
+  const loadThreads = useCallback(async (preferredThreadId?: string) => {
+    const rows = await listChatThreads();
+    setThreads(rows);
+
+    const preferred = preferredThreadId && rows.some((thread) => thread.id === preferredThreadId) ? preferredThreadId : null;
+    const firstByMode = defaultMode === "ai" ? rows.find((thread) => thread.thread_type === "ai") : rows[0];
+    setActiveThreadId((current) => preferred ?? (current && rows.some((thread) => thread.id === current) ? current : firstByMode?.id ?? null));
+    return rows;
+  }, [defaultMode]);
+
+  const bootstrap = useCallback(async () => {
+    setLoading(true);
+    try {
+      const authUser = providedUser ?? (await supabase.auth.getUser()).data.user;
+      setCurrentUser(authUser ?? null);
+      if (!authUser) {
+        setThreads([]);
+        setMessages([]);
+        setActiveThreadId(null);
+        return;
+      }
+
+      await ensureChatDirectoryProfile(authUser);
+      const aiThread = await ensureAiThread(authUser);
+      const rows = await loadThreads(defaultMode === "ai" ? aiThread.id : undefined);
+      if (!rows.length) setActiveThreadId(aiThread.id);
+    } catch (error) {
+      console.error("Chat bootstrap failed", error);
+      toast({ title: "Chat loading failed", description: "Please refresh or reconnect.", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  }, [defaultMode, loadThreads, providedUser, toast]);
+
   useEffect(() => {
-    loadChatData();
-  }, []);
+    bootstrap();
+  }, [bootstrap]);
 
-  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    if (activeConversation) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages, activeConversation]);
-
-  const loadChatData = () => {
-    const savedConversations = chatStorage.getConversations();
-    const savedSettings = chatStorage.getSettings();
-
-    setConversations(savedConversations);
-    setChatBackground(savedSettings.background || "bg-background");
-
-    // Load initial conversation if exists
-    if (savedConversations.length > 0 && !activeConversation) {
-      const firstConv = savedConversations[0];
-      setActiveConversation(firstConv.id);
-      loadMessages(firstConv.id);
-    }
-
-    // Create default conversation if none exist
-    if (savedConversations.length === 0) {
-      createDefaultConversation();
-    }
-  };
-
-  const createDefaultConversation = () => {
-    const defaultConversation: ChatConversation = {
-      id: "default-fitbot",
-      participants: [
-        { id: "user", name: "You", status: "online" },
-        { id: "fitbot", name: "FitBot", status: "online", isVerified: true },
-      ],
-      unreadCount: 0,
-      updatedAt: new Date(),
-      createdAt: new Date(),
-      name: "FitBot Assistant",
-      isGroupChat: false,
-      metadata: { isSecure: true, encryptionEnabled: true },
-    };
-
-    const defaultMessages: ChatMessage[] = [
-      {
-        id: "welcome-1",
-        senderId: "fitbot",
-        receiverId: "user",
-        content:
-          "Welcome to FitX Fusion Chat! 🎉 How can I help you with your fitness journey today?",
-        timestamp: new Date(Date.now() - 3600000),
-        isRead: true,
-      },
-    ];
-
-    setConversations([defaultConversation]);
-    setMessages({ [defaultConversation.id]: defaultMessages });
-    setActiveConversation(defaultConversation.id);
-
-    chatStorage.saveConversations([defaultConversation]);
-    chatStorage.saveMessages(defaultConversation.id, defaultMessages);
-  };
-
-  const loadMessages = (conversationId: string) => {
-    const conversationMessages = chatStorage.getMessages(conversationId);
-    setMessages((prev) => ({
-      ...prev,
-      [conversationId]: conversationMessages,
-    }));
-  };
-
-  const createNewUserChat = () => {
-    if (!newChatUsername.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a username to start a chat.",
-        variant: "destructive",
-      });
+    if (!activeThreadId) {
+      setMessages([]);
       return;
     }
 
-    const newConversation: ChatConversation = {
-      id: `user-${Date.now()}`,
-      participants: [
-        { id: "user", name: "You", status: "online" },
-        {
-          id: newChatUsername.toLowerCase(),
-          name: newChatUsername,
-          status: "online",
-        },
-      ],
-      unreadCount: 0,
-      updatedAt: new Date(),
-      createdAt: new Date(),
-      name: newChatUsername,
-      isGroupChat: false,
-      metadata: { isSecure: true, encryptionEnabled: true },
+    let mounted = true;
+    listChatMessages(activeThreadId)
+      .then((rows) => mounted && setMessages(rows))
+      .catch((error) => {
+        console.error("Message load failed", error);
+        toast({ title: "Messages failed to load", variant: "destructive" });
+      });
+
+    return () => {
+      mounted = false;
     };
+  }, [activeThreadId, toast]);
 
-    const welcomeMessage: ChatMessage = {
-      id: `welcome-${Date.now()}`,
-      senderId: "system",
-      receiverId: newConversation.id,
-      content: `Chat started with ${newChatUsername}. Say hello! 👋`,
-      timestamp: new Date(),
-      isRead: true,
-    };
+  useEffect(() => {
+    if (!currentUser) return undefined;
 
-    const updatedConversations = [newConversation, ...conversations];
-    setConversations(updatedConversations);
-    setMessages((prev) => ({
-      ...prev,
-      [newConversation.id]: [welcomeMessage],
-    }));
+    const threadChannel = supabase
+      .channel(`chat-threads-${currentUser.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "chat_threads" }, () => loadThreads(activeThreadId ?? undefined))
+      .subscribe();
 
-    chatStorage.saveConversations(updatedConversations);
-    chatStorage.saveMessages(newConversation.id, [welcomeMessage]);
-
-    setActiveConversation(newConversation.id);
-    setShowNewChatDialog(false);
-    setNewChatUsername("");
-
-    toast({
-      title: "New chat created",
-      description: `Started a conversation with ${newChatUsername}`,
-    });
-  };
-
-  const sendMessage = () => {
-    if (!newMessage.trim() || !activeConversation) return;
-
-    const message: ChatMessage = {
-      id: `msg-${Date.now()}`,
-      senderId: "user",
-      receiverId:
-        activeConversation === "default-fitbot" ? "fitbot" : activeConversation,
-      content: newMessage,
-      timestamp: new Date(),
-      isRead: false,
-    };
-
-    const updatedMessages = [...(messages[activeConversation] || []), message];
-    setMessages((prev) => ({
-      ...prev,
-      [activeConversation]: updatedMessages,
-    }));
-
-    chatStorage.saveMessages(activeConversation, updatedMessages);
-    setNewMessage("");
-
-    // Update conversation timestamp
-    updateConversationTimestamp(activeConversation);
-
-    // Simulate bot response for FitBot conversation
-    if (activeConversation === "default-fitbot") {
-      simulateBotResponse(newMessage, activeConversation);
-    } else {
-      // Simulate user response for user-to-user chats
-      simulateUserResponse(newMessage, activeConversation);
-    }
-
-    toast({
-      title: "Message sent",
-      description: "Your message has been delivered securely.",
-    });
-  };
-
-  const simulateUserResponse = (
-    userMessage: string,
-    conversationId: string,
-  ) => {
-    const conv = conversations.find((c) => c.id === conversationId);
-    if (!conv || conv.isGroupChat) return;
-
-    const otherUser = conv.participants.find((p) => p.id !== "user");
-    if (!otherUser) return;
-
-    setIsTyping(true);
-
-    setTimeout(() => {
-      const responses = [
-        "Thanks for the message! 😊",
-        "That sounds great! Let's do it together 💪",
-        "I'm excited about our fitness journey!",
-        "Great idea! When should we start?",
-        "That's awesome! Count me in! 🔥",
-        "Perfect! I'm ready for the challenge 💪",
-      ];
-
-      const randomResponse =
-        responses[Math.floor(Math.random() * responses.length)];
-
-      const userResponse: ChatMessage = {
-        id: `response-${Date.now()}`,
-        senderId: otherUser.id,
-        receiverId: "user",
-        content: randomResponse,
-        timestamp: new Date(),
-        isRead: true,
-      };
-
-      const currentMessages = messages[conversationId] || [];
-      const updatedMessages = [...currentMessages, userResponse];
-
-      setMessages((prev) => ({
-        ...prev,
-        [conversationId]: updatedMessages,
-      }));
-
-      chatStorage.saveMessages(conversationId, updatedMessages);
-      setIsTyping(false);
-      updateConversationTimestamp(conversationId);
-    }, 1500);
-  };
-
-  const simulateBotResponse = (userMessage: string, conversationId: string) => {
-    setIsTyping(true);
-
-    setTimeout(() => {
-      const botResponse: ChatMessage = {
-        id: `bot-${Date.now()}`,
-        senderId: "fitbot",
-        receiverId: "user",
-        content: getBotResponse(userMessage),
-        timestamp: new Date(),
-        isRead: true,
-      };
-
-      const currentMessages = messages[conversationId] || [];
-      const updatedMessages = [...currentMessages, botResponse];
-
-      setMessages((prev) => ({
-        ...prev,
-        [conversationId]: updatedMessages,
-      }));
-
-      chatStorage.saveMessages(conversationId, updatedMessages);
-      setIsTyping(false);
-      updateConversationTimestamp(conversationId);
-    }, 1500);
-  };
-
-  const getBotResponse = (userMessage: string): string => {
-    const message = userMessage.toLowerCase();
-
-    if (message.includes("workout") || message.includes("exercise")) {
-      return "I can help you with personalized workout plans! 💪 What's your fitness level and what are your goals?";
-    } else if (message.includes("diet") || message.includes("nutrition")) {
-      return "Nutrition is key to fitness success! 🥗 Would you like some healthy meal suggestions or information about macro tracking?";
-    } else if (message.includes("progress") || message.includes("track")) {
-      return "Tracking progress is essential! 📊 You can monitor your workouts, weight, and measurements in the Progress section.";
-    } else if (message.includes("group") || message.includes("chat")) {
-      return "You can create group chats to connect with other fitness enthusiasts! 👥 Click the '+' button to start a new conversation.";
-    } else {
-      return "Thanks for your message! I'm here to help with all your fitness questions. Feel free to ask about workouts, nutrition, or tracking your progress. 😊";
-    }
-  };
-
-  const updateConversationTimestamp = (conversationId: string) => {
-    const updatedConversations = conversations.map((conv) =>
-      conv.id === conversationId ? { ...conv, updatedAt: new Date() } : conv,
-    );
-
-    setConversations(updatedConversations);
-    chatStorage.saveConversations(updatedConversations);
-  };
-
-  const handleEmojiSelect = (emoji: string) => {
-    setNewMessage((prev) => prev + emoji);
-    setShowEmojiPicker(false);
-  };
-
-  const handleMediaUpload = (files: any[]) => {
-    if (!activeConversation) return;
-
-    files.forEach((file) => {
-      const message: ChatMessage = {
-        id: `media-${Date.now()}-${Math.random()}`,
-        senderId: "user",
-        receiverId:
-          activeConversation === "default-fitbot"
-            ? "fitbot"
-            : activeConversation,
-        content: `📎 ${file.file.name}`,
-        timestamp: new Date(),
-        isRead: false,
-        attachments: [
-          {
-            id: file.id,
-            type: file.type,
-            url: file.preview || URL.createObjectURL(file.file),
-            name: file.file.name,
-            size: file.file.size,
-          },
-        ],
-      };
-
-      const updatedMessages = [
-        ...(messages[activeConversation] || []),
-        message,
-      ];
-      setMessages((prev) => ({
-        ...prev,
-        [activeConversation]: updatedMessages,
-      }));
-
-      chatStorage.saveMessages(activeConversation, updatedMessages);
-    });
-
-    updateConversationTimestamp(activeConversation);
-    setShowMediaUpload(false);
-
-    toast({
-      title: "Media uploaded",
-      description: `${files.length} file(s) shared successfully.`,
-    });
-  };
-
-  const handleCreateGroup = (groupName: string, selectedUsers: any[]) => {
-    const newGroup: ChatConversation = {
-      id: `group-${Date.now()}`,
-      participants: [
-        { id: "user", name: "You", status: "online" },
-        ...selectedUsers,
-      ],
-      unreadCount: 0,
-      updatedAt: new Date(),
-      createdAt: new Date(),
-      name: groupName,
-      isGroupChat: true,
-      metadata: { isSecure: true, encryptionEnabled: true },
-    };
-
-    const welcomeMessage: ChatMessage = {
-      id: `welcome-${Date.now()}`,
-      senderId: "system",
-      receiverId: newGroup.id,
-      content: `🎉 Group "${groupName}" has been created! Welcome everyone!`,
-      timestamp: new Date(),
-      isRead: true,
-    };
-
-    const updatedConversations = [newGroup, ...conversations];
-    setConversations(updatedConversations);
-    setMessages((prev) => ({
-      ...prev,
-      [newGroup.id]: [welcomeMessage],
-    }));
-
-    chatStorage.saveConversations(updatedConversations);
-    chatStorage.saveMessages(newGroup.id, [welcomeMessage]);
-
-    setActiveConversation(newGroup.id);
-    setShowGroupCreator(false);
-  };
-
-  const handleBackgroundChange = (background: string) => {
-    setChatBackground(background);
-    const settings = chatStorage.getSettings();
-    chatStorage.saveSettings({ ...settings, background });
-    setShowBackgroundSelector(false);
-  };
-
-  const handleSync = async () => {
-    setIsSyncing(true);
-    const success = await chatStorage.syncData();
-    setIsSyncing(false);
-
-    toast({
-      title: success ? "Sync completed" : "Sync failed",
-      description: success
-        ? "Your chat data has been synchronized."
-        : "Failed to sync data. Please try again.",
-      variant: success ? "default" : "destructive",
-    });
-  };
-
-  const handleBackupDownload = () => {
-    chatStorage.downloadBackup();
-    toast({
-      title: "Backup downloaded",
-      description: "Your chat backup has been saved to your device.",
-    });
-  };
-
-  const handleBackupUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const backup = JSON.parse(e.target?.result as string);
-        const success = chatStorage.importBackup(backup);
-
-        if (success) {
-          loadChatData();
-          toast({
-            title: "Backup restored",
-            description: "Your chat data has been successfully restored.",
-          });
-        } else {
-          toast({
-            title: "Restore failed",
-            description: "Invalid backup file format.",
-            variant: "destructive",
-          });
+    const messageChannel = supabase
+      .channel(`chat-messages-${currentUser.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "chat_messages" }, (payload) => {
+        const next = payload.new as ChatMessageRow | null;
+        const old = payload.old as ChatMessageRow | null;
+        const threadId = next?.thread_id ?? old?.thread_id;
+        if (threadId === activeThreadId) {
+          listChatMessages(threadId).then(setMessages).catch(console.error);
         }
-      } catch (error) {
-        toast({
-          title: "Restore failed",
-          description: "Could not read backup file.",
-          variant: "destructive",
-        });
-      }
-    };
-    reader.readAsText(file);
-  };
+      })
+      .subscribe();
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
+    return () => {
+      supabase.removeChannel(threadChannel);
+      supabase.removeChannel(messageChannel);
+    };
+  }, [activeThreadId, currentUser, loadThreads]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages.length, aiStreaming]);
+
+  const loadContacts = useCallback(async (query = contactQuery) => {
+    if (!currentUser) return;
+    try {
+      const rows = await searchChatContacts(query, currentUser.id);
+      setContacts(rows);
+    } catch (error) {
+      console.error("Contact search failed", error);
+      toast({ title: "Could not search users", variant: "destructive" });
+    }
+  }, [contactQuery, currentUser, toast]);
+
+  useEffect(() => {
+    if (!showContacts && !showGroup) return;
+    const id = window.setTimeout(() => loadContacts(), 250);
+    return () => window.clearTimeout(id);
+  }, [contactQuery, loadContacts, showContacts, showGroup]);
+
+  const callAi = async (threadId: string, prompt: string) => {
+    if (!currentUser) return;
+    setAiStreaming(true);
+    try {
+      const history = [...messages, { sender_role: "user", content: prompt }]
+        .slice(-20)
+        .map((message) => ({
+          role: message.sender_role === "assistant" ? "assistant" : "user",
+          content: message.content,
+        }));
+
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) throw new Error("Missing session");
+
+      const endpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fitfusion-chat`;
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ messages: history }),
+      });
+
+      if (!response.ok || !response.body) {
+        const body = await response.json().catch(() => ({}));
+        throw new Error(body.error || "AI response failed");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let assistantText = "";
+      const tempId = `stream-${Date.now()}`;
+      const now = new Date().toISOString();
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: tempId,
+          thread_id: threadId,
+          content: "",
+          sender_role: "assistant",
+          sender_id: null,
+          recipient_id: currentUser.id,
+          client_message_id: tempId,
+          attachments: [],
+          reactions: [],
+          metadata: {},
+          encrypted_payload: null,
+          is_read: true,
+          created_at: now,
+          updated_at: now,
+        },
+      ]);
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+        for (const raw of lines) {
+          const line = raw.trim();
+          if (!line.startsWith("data:")) continue;
+          const data = line.slice(5).trim();
+          if (!data || data === "[DONE]") continue;
+          try {
+            const parsed = JSON.parse(data);
+            const delta = parsed?.choices?.[0]?.delta?.content ?? "";
+            if (delta) {
+              assistantText += delta;
+              setMessages((prev) => prev.map((message) => (message.id === tempId ? { ...message, content: assistantText } : message)));
+            }
+          } catch {
+            // Ignore heartbeat / provider metadata chunks.
+          }
+        }
+      }
+
+      const finalText = assistantText.trim() || "I’m ready — ask me about your next workout, recovery, or nutrition plan.";
+      const savedAssistant = await addChatMessage({
+        threadId,
+        content: finalText,
+        senderRole: "assistant",
+        senderId: null,
+        recipientId: currentUser.id,
+        metadata: { source: "lovable_ai" },
+      });
+      setMessages((prev) => prev.map((message) => (message.id === tempId ? savedAssistant : message)));
+    } catch (error) {
+      console.error("AI chat failed", error);
+      toast({ title: "Fit Bot AI failed", description: error instanceof Error ? error.message : "Try again.", variant: "destructive" });
+      const fallback = await addChatMessage({
+        threadId,
+        content: "I could not connect to Fit Bot AI right now. Please try again in a moment.",
+        senderRole: "assistant",
+        senderId: null,
+        recipientId: currentUser.id,
+      }).catch(console.error);
+      if (fallback) setMessages((prev) => mergeMessage(prev.filter((message) => !message.id.startsWith("stream-")), fallback));
+    } finally {
+      setAiStreaming(false);
+      loadThreads(threadId).catch(console.error);
+      listChatMessages(threadId).then(setMessages).catch(console.error);
     }
   };
 
-  const activeMessages = activeConversation
-    ? messages[activeConversation] || []
-    : [];
-  const activeConv = conversations.find((c) => c.id === activeConversation);
+  const handleSend = async (directContent?: string) => {
+    const content = (directContent ?? input).trim();
+    if (!content || !currentUser || !activeThread || sending) return;
+    setInput("");
+    setSending(true);
+
+    try {
+      const recipientId = activeThread.participant_ids.find((id) => id !== currentUser.id) ?? null;
+      const savedUserMessage = await addChatMessage({
+        threadId: activeThread.id,
+        content,
+        senderRole: "user",
+        senderId: currentUser.id,
+        recipientId: activeThread.thread_type === "direct" ? recipientId : null,
+        metadata: { encrypted: true, securityLevel },
+      });
+      setMessages((prev) => mergeMessage(prev, savedUserMessage));
+      await loadThreads(activeThread.id);
+      if (activeThread.thread_type === "ai") await callAi(activeThread.id, content);
+    } catch (error) {
+      console.error("Send failed", error);
+      toast({ title: "Message not sent", description: "Your message was not saved. Try again.", variant: "destructive" });
+      setInput(content);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const sendPromptNow = async (prompt: string) => {
+    if (!currentUser || !activeThread || sending || aiStreaming) return;
+    await handleSend(prompt);
+  };
+
+  const startDirectChat = async (contact: ChatDirectoryUser) => {
+    if (!currentUser) return;
+    try {
+      const thread = await createDirectThread(currentUser, contact);
+      await loadThreads(thread.id);
+      setShowContacts(false);
+      toast({ title: "Chat ready", description: `Secure chat opened with ${contact.display_name}.` });
+    } catch (error) {
+      console.error("Direct chat failed", error);
+      toast({ title: "Could not start chat", variant: "destructive" });
+    }
+  };
+
+  const createSelectedGroup = async () => {
+    if (!currentUser) return;
+    const selected = contacts.filter((contact) => contact.selected);
+    if (!selected.length) {
+      toast({ title: "Select at least one member", variant: "destructive" });
+      return;
+    }
+    try {
+      const thread = await createGroupThread(currentUser, groupName, selected);
+      await addChatMessage({ threadId: thread.id, content: `Group “${thread.title}” created.`, senderRole: "system" });
+      await loadThreads(thread.id);
+      setShowGroup(false);
+      setContacts((prev) => prev.map((contact) => ({ ...contact, selected: false })));
+    } catch (error) {
+      console.error("Group create failed", error);
+      toast({ title: "Could not create group", variant: "destructive" });
+    }
+  };
+
+  const exportThread = () => {
+    if (!activeThread) return;
+    const blob = new Blob([JSON.stringify({ thread: activeThread, messages }, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `${activeThread.title.replace(/\W+/g, "-").toLowerCase()}-chat.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const togglePin = async () => {
+    if (!activeThread) return;
+    await updateChatThread(activeThread.id, { is_pinned: !activeThread.is_pinned });
+    await loadThreads(activeThread.id);
+  };
+
+  const archiveThread = async () => {
+    if (!activeThread) return;
+    await updateChatThread(activeThread.id, { is_archived: true });
+    await loadThreads();
+  };
+
+  const clearThread = async () => {
+    if (!activeThread) return;
+    await clearChatThreadMessages(activeThread.id);
+    setMessages([]);
+  };
+
+  const deleteThread = async () => {
+    if (!activeThread || activeThread.thread_type === "ai") return;
+    await deleteChatThread(activeThread.id);
+    await loadThreads();
+  };
+
+  const threadIcon = (thread: ChatThreadRow) => {
+    if (thread.thread_type === "ai") return <Bot className="h-4 w-4" />;
+    if (thread.thread_type === "group") return <Users className="h-4 w-4" />;
+    return null;
+  };
+
+  if (loading) {
+    return (
+      <div className={cn("flex h-full min-h-[520px] items-center justify-center rounded-lg border bg-card/70", className)}>
+        <Loader2 className="mr-2 h-5 w-5 animate-spin text-primary" />
+        <span className="text-sm text-muted-foreground">Loading secure chat…</span>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <div className={cn("flex h-full min-h-[420px] items-center justify-center rounded-lg border bg-card/70 p-6 text-center", className)}>
+        <div>
+          <ShieldCheck className="mx-auto mb-3 h-8 w-8 text-primary" />
+          <h3 className="font-semibold">Sign in required</h3>
+          <p className="mt-1 text-sm text-muted-foreground">Open your account to use FitX Fusion Chat.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex h-full w-full bg-background border rounded-lg overflow-hidden">
-      {/* Conversations Sidebar */}
-      <div className="w-80 min-w-80 border-r bg-muted/30 flex flex-col">
-        <div className="p-4 border-b">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold">Conversations</h2>
+    <div className={cn("flex h-full min-h-[560px] w-full overflow-hidden rounded-lg border bg-background/95", compact ? "min-h-[calc(100dvh-12rem)]" : "", className)}>
+      <aside className={cn("flex w-80 min-w-72 flex-col border-r bg-card/80 backdrop-blur-xl", compact && activeThread ? "hidden sm:flex" : "flex")}> 
+        <div className="border-b p-3">
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <div>
+              <h2 className="text-base font-semibold">FitX Fusion Chat</h2>
+              <p className="text-xs text-muted-foreground">Database synced • encrypted metadata</p>
+            </div>
             <div className="flex gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowNewChatDialog(true)}
-                className="h-8 w-8"
-                title="New Chat"
-              >
+              <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => { setShowContacts(true); loadContacts(""); }} title="Add chat">
                 <UserPlus className="h-4 w-4" />
               </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowGroupCreator(true)}
-                className="h-8 w-8"
-                title="Create Group"
-              >
-                <MessageSquarePlus className="h-4 w-4" />
+              <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => { setShowGroup(true); loadContacts(""); }} title="Create group">
+                <Plus className="h-4 w-4" />
               </Button>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-48">
-                  <div className="space-y-2">
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={handleSync}
-                      disabled={isSyncing}
-                    >
-                      <Shield className="h-4 w-4 mr-2" />
-                      {isSyncing ? "Syncing..." : "Sync Data"}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={handleBackupDownload}
-                    >
-                      <Download className="h-4 w-4 mr-2" />
-                      Export Backup
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <Upload className="h-4 w-4 mr-2" />
-                      Import Backup
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => setShowBackgroundSelector(true)}
-                    >
-                      <Palette className="h-4 w-4 mr-2" />
-                      Background
-                    </Button>
-                  </div>
-                </PopoverContent>
-              </Popover>
             </div>
+          </div>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input value={threadSearch} onChange={(event) => setThreadSearch(event.target.value)} placeholder="Search chats…" className="pl-9" />
           </div>
         </div>
 
-        <ScrollArea className="flex-1">
-          <div className="p-2 space-y-1">
-            {conversations.map((conversation) => (
-              <Card
-                key={conversation.id}
-                className={`p-3 cursor-pointer transition-colors hover:bg-muted ${
-                  activeConversation === conversation.id
-                    ? "bg-primary/10 border-primary"
-                    : ""
-                }`}
-                onClick={() => {
-                  setActiveConversation(conversation.id);
-                  loadMessages(conversation.id);
-                }}
+        <ScrollArea className="flex-1 custom-scrollbar">
+          <div className="space-y-1 p-2">
+            {filteredThreads.map((thread) => (
+              <button
+                key={thread.id}
+                type="button"
+                onClick={() => setActiveThreadId(thread.id)}
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-lg p-3 text-left transition hover:bg-muted/70",
+                  activeThreadId === thread.id && "bg-primary/10 ring-1 ring-primary/30",
+                )}
               >
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback>
-                      {conversation.isGroupChat ? (
-                        <Users className="h-5 w-5" />
-                      ) : conversation.id === "default-fitbot" ? (
-                        "🤖"
-                      ) : (
-                        conversation.name?.charAt(0) || "C"
-                      )}
-                    </AvatarFallback>
-                  </Avatar>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <p className="font-medium text-sm truncate">
-                        {conversation.name || "Unnamed Chat"}
-                      </p>
-                      <span className="text-xs text-muted-foreground">
-                        {conversation.updatedAt.toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs text-muted-foreground truncate">
-                        {conversation.isGroupChat
-                          ? `${conversation.participants.length} members`
-                          : conversation.id === "default-fitbot"
-                            ? "AI Assistant"
-                            : "Private chat"}
-                      </p>
-                      {conversation.unreadCount > 0 && (
-                        <Badge variant="default" className="text-xs">
-                          {conversation.unreadCount}
-                        </Badge>
-                      )}
-                    </div>
+                <Avatar className="h-10 w-10 shrink-0">
+                  <AvatarImage src={getThreadAvatar(thread, currentUser.id) ?? undefined} />
+                  <AvatarFallback>{getThreadInitial(thread)}</AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1">
+                    {threadIcon(thread)}
+                    <p className="truncate text-sm font-medium">{thread.title}</p>
+                    {thread.is_pinned && <Pin className="h-3 w-3 text-primary" />}
                   </div>
+                  <p className="truncate text-xs text-muted-foreground">{thread.last_message_preview || "No messages yet"}</p>
                 </div>
-              </Card>
+                <span className="text-[11px] text-muted-foreground">{formatTime(thread.last_message_at)}</span>
+              </button>
             ))}
+            {!filteredThreads.length && (
+              <div className="p-6 text-center text-sm text-muted-foreground">No chats found.</div>
+            )}
           </div>
         </ScrollArea>
+      </aside>
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".json"
-          className="hidden"
-          onChange={handleBackupUpload}
-        />
-      </div>
-
-      {/* Chat Area */}
-      <div className={`flex-1 flex flex-col min-w-0 ${chatBackground}`}>
-        {/* Chat Header */}
-        {activeConv && (
-          <CardHeader className="pb-3 border-b bg-background/80 backdrop-blur shrink-0">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback>
-                    {activeConv.isGroupChat ? (
-                      <Users className="h-4 w-4" />
-                    ) : activeConv.id === "default-fitbot" ? (
-                      "🤖"
-                    ) : (
-                      activeConv.name?.charAt(0) || "C"
-                    )}
-                  </AvatarFallback>
+      <main className={cn("flex min-w-0 flex-1 flex-col", compact && !activeThread ? "hidden sm:flex" : "flex")}> 
+        {activeThread ? (
+          <>
+            <header className="flex items-center justify-between gap-3 border-b bg-card/70 p-3 backdrop-blur-xl">
+              <div className="flex min-w-0 items-center gap-3">
+                {compact && (
+                  <Button size="icon" variant="ghost" className="h-8 w-8 sm:hidden" onClick={() => setActiveThreadId(null)}>
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={getThreadAvatar(activeThread, currentUser.id) ?? undefined} />
+                  <AvatarFallback>{getThreadInitial(activeThread)}</AvatarFallback>
                 </Avatar>
-                <div>
-                  <h3 className="font-semibold text-sm">{activeConv.name}</h3>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-xs text-muted-foreground">
-                      {activeConv.isGroupChat
-                        ? `${activeConv.participants.length} members`
-                        : "Online"}
-                    </span>
-                    <Badge variant="outline" className="text-xs">
-                      <Shield className="h-3 w-3 mr-1" />
-                      {securityLevel.toUpperCase()}
-                    </Badge>
+                <div className="min-w-0">
+                  <h3 className="truncate font-semibold">{activeThread.title}</h3>
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    <span>{activeThread.thread_type === "ai" ? "Fast AI coach" : `${activeThread.participant_ids.length} participant${activeThread.participant_ids.length === 1 ? "" : "s"}`}</span>
+                    <Badge variant="outline" className="h-5 px-1.5 text-[10px]"><ShieldCheck className="mr-1 h-3 w-3" />{securityLevel}</Badge>
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsSearchOpen(true)}
-                  className="h-8 w-8"
-                >
+                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setMessageSearch((value) => (value ? "" : " "))} title="Search messages">
                   <Search className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Phone className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Video className="h-4 w-4" />
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="icon" variant="ghost" className="h-8 w-8" title="Chat actions"><MoreVertical className="h-4 w-4" /></Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={togglePin}><Pin className="mr-2 h-4 w-4" />{activeThread.is_pinned ? "Unpin" : "Pin"}</DropdownMenuItem>
+                    <DropdownMenuItem onClick={exportThread}><Download className="mr-2 h-4 w-4" />Export chat</DropdownMenuItem>
+                    <DropdownMenuItem onClick={archiveThread}><Archive className="mr-2 h-4 w-4" />Archive</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={clearThread}><Trash2 className="mr-2 h-4 w-4" />Clear messages</DropdownMenuItem>
+                    {activeThread.thread_type !== "ai" && <DropdownMenuItem onClick={deleteThread} className="text-destructive"><Trash2 className="mr-2 h-4 w-4" />Delete chat</DropdownMenuItem>}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-            </div>
+            </header>
 
-            {isSearchOpen && (
-              <div className="mt-3 flex items-center gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search messages..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
-                    autoFocus
-                  />
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => {
-                    setIsSearchOpen(false);
-                    setSearchQuery("");
-                  }}
-                  className="h-8 w-8"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+            {messageSearch !== "" && (
+              <div className="flex items-center gap-2 border-b bg-muted/30 p-2">
+                <Search className="h-4 w-4 text-muted-foreground" />
+                <Input autoFocus value={messageSearch.trimStart()} onChange={(event) => setMessageSearch(event.target.value)} placeholder="Search inside this chat…" className="h-9" />
+                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setMessageSearch("")}><X className="h-4 w-4" /></Button>
               </div>
             )}
-          </CardHeader>
-        )}
 
-        {/* Messages Area */}
-        <CardContent className="flex-1 p-0 bg-transparent overflow-hidden">
-          <ScrollArea className="h-full p-4" ref={scrollAreaRef}>
-            <div className="space-y-4 min-h-full">
-              {activeMessages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex gap-3 ${message.senderId === "user" ? "justify-end" : "justify-start"}`}
-                >
-                  {message.senderId !== "user" && (
-                    <Avatar className="h-6 w-6 mt-1">
-                      <AvatarFallback className="text-xs">
-                        {message.senderId === "fitbot"
-                          ? "🤖"
-                          : message.senderId.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  )}
-
-                  <div
-                    className={`max-w-[70%] ${message.senderId === "user" ? "order-first" : ""}`}
-                  >
-                    <div
-                      className={`p-3 rounded-lg ${
-                        message.senderId === "user"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-background/80 backdrop-blur border"
-                      }`}
-                    >
-                      <p className="text-sm break-words">{message.content}</p>
-
-                      {message.attachments &&
-                        message.attachments.map((attachment) => (
-                          <div key={attachment.id} className="mt-2">
-                            {attachment.type === "image" && (
-                              <img
-                                src={attachment.url}
-                                alt={attachment.name}
-                                className="max-w-48 rounded"
-                              />
-                            )}
-                            {attachment.type !== "image" && (
-                              <div className="flex items-center gap-2 p-2 bg-muted rounded">
-                                <Paperclip className="h-4 w-4" />
-                                <span className="text-xs">
-                                  {attachment.name}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        ))}
+            <ScrollArea className="flex-1 custom-scrollbar bg-muted/10 p-4">
+              <div className="mx-auto flex max-w-3xl flex-col gap-3">
+                {!filteredMessages.length && activeThread.thread_type === "ai" && (
+                  <div className="mx-auto my-8 max-w-xl rounded-2xl border bg-card/80 p-5 text-center shadow-sm backdrop-blur-xl">
+                    <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                      <Bot className="h-6 w-6" />
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {message.timestamp.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                    <h3 className="text-lg font-semibold">Fit Bot AI is ready</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Ask for workouts, diet guidance, recovery plans, motivation, or progress help. Replies stream live and save to your backend history.
                     </p>
-                  </div>
-
-                  {message.senderId === "user" && (
-                    <Avatar className="h-6 w-6 mt-1">
-                      <AvatarFallback className="text-xs">You</AvatarFallback>
-                    </Avatar>
-                  )}
-                </div>
-              ))}
-
-              {isTyping && (
-                <div className="flex gap-3 justify-start">
-                  <Avatar className="h-6 w-6 mt-1">
-                    <AvatarFallback className="text-xs">
-                      {activeConv?.id === "default-fitbot"
-                        ? "🤖"
-                        : activeConv?.name?.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="bg-background/80 backdrop-blur border p-3 rounded-lg">
-                    <div className="flex gap-1">
-                      <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
-                      <div
-                        className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"
-                        style={{ animationDelay: "0.1s" }}
-                      ></div>
-                      <div
-                        className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"
-                        style={{ animationDelay: "0.2s" }}
-                      ></div>
+                    <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                      {quickPrompts.map((prompt) => (
+                        <Button
+                          key={prompt}
+                          type="button"
+                          variant="outline"
+                          className="h-auto justify-start whitespace-normal text-left text-xs"
+                          onClick={() => sendPromptNow(prompt)}
+                        >
+                          <Sparkles className="mr-2 h-3.5 w-3.5 shrink-0" />
+                          {prompt}
+                        </Button>
+                      ))}
                     </div>
                   </div>
-                </div>
-              )}
-
-              <div ref={messagesEndRef} />
-            </div>
-          </ScrollArea>
-        </CardContent>
-
-        {/* Message Input */}
-        {activeConversation && (
-          <div className="border-t p-4 bg-background/80 backdrop-blur shrink-0">
-            <div className="flex items-center gap-2">
-              <Popover open={showMediaUpload} onOpenChange={setShowMediaUpload}>
-                <PopoverTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Paperclip className="h-4 w-4" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" side="top">
-                  <MediaUpload onFilesSelected={handleMediaUpload} />
-                </PopoverContent>
-              </Popover>
-
-              <div className="flex-1 relative">
-                <Input
-                  placeholder="Type your message..."
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  className="pr-10"
-                />
-
-                <Popover
-                  open={showEmojiPicker}
-                  onOpenChange={setShowEmojiPicker}
-                >
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6"
-                    >
-                      <Smile className="h-4 w-4" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" side="top">
-                    <EmojiPicker
-                      onEmojiSelect={handleEmojiSelect}
-                      onClose={() => setShowEmojiPicker(false)}
-                    />
-                  </PopoverContent>
-                </Popover>
+                )}
+                {!filteredMessages.length && activeThread.thread_type !== "ai" && (
+                  <div className="mx-auto my-8 max-w-md rounded-2xl border bg-card/80 p-5 text-center shadow-sm">
+                    <Users className="mx-auto mb-3 h-8 w-8 text-primary" />
+                    <h3 className="font-semibold">Secure chat started</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">Send the first message. It will sync to the backend for every participant.</p>
+                  </div>
+                )}
+                {filteredMessages.map((message) => {
+                  const role = messageRole(message, currentUser.id);
+                  return (
+                    <div key={message.id} className={cn("flex gap-2", role === "own" ? "justify-end" : "justify-start")}> 
+                      {role !== "own" && (
+                        <Avatar className="mt-1 h-7 w-7">
+                          <AvatarFallback>{role === "assistant" ? "AI" : "U"}</AvatarFallback>
+                        </Avatar>
+                      )}
+                      <div className={cn("max-w-[82%] rounded-2xl px-3 py-2 text-sm shadow-sm", role === "own" ? "bg-primary text-primary-foreground" : role === "system" ? "border bg-muted text-muted-foreground" : "border bg-card")}> 
+                        {role === "assistant" ? (
+                          <div className="prose prose-sm max-w-none dark:prose-invert prose-p:my-1 prose-ul:my-1 prose-ol:my-1">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content || "Thinking…"}</ReactMarkdown>
+                          </div>
+                        ) : (
+                          <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                        )}
+                        <p className={cn("mt-1 text-[10px]", role === "own" ? "text-primary-foreground/70" : "text-muted-foreground")}>{formatTime(message.created_at)}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+                {aiStreaming && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" /> Fit Bot AI is answering…
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
               </div>
+            </ScrollArea>
 
-              <Button
-                onClick={sendMessage}
-                disabled={!newMessage.trim()}
-                size="icon"
-                className="h-8 w-8"
-              >
-                <Send className="h-4 w-4" />
-              </Button>
+            <footer className="border-t bg-card/80 p-3 backdrop-blur-xl">
+              <div className="mx-auto flex max-w-3xl items-end gap-2">
+                <Textarea
+                  value={input}
+                  onChange={(event) => setInput(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && !event.shiftKey) {
+                      event.preventDefault();
+                      handleSend();
+                    }
+                  }}
+                  placeholder={activeThread.thread_type === "ai" ? "Ask Fit Bot AI for a workout, meal, recovery, or motivation plan…" : "Type a secure message…"}
+                  className="min-h-[44px] resize-none"
+                  rows={1}
+                />
+                <Button onClick={() => handleSend()} disabled={!input.trim() || sending || aiStreaming} className="h-11 px-4">
+                  {sending || aiStreaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                </Button>
+              </div>
+            </footer>
+          </>
+        ) : (
+          <div className="flex flex-1 items-center justify-center p-6 text-center">
+            <div>
+              <Sparkles className="mx-auto mb-3 h-9 w-9 text-primary" />
+              <h3 className="font-semibold">Choose or create a chat</h3>
+              <p className="mt-1 text-sm text-muted-foreground">Your AI and user-to-user messages are saved to the backend.</p>
             </div>
           </div>
         )}
-      </div>
+      </main>
 
-      {/* Dialogs */}
-      <Dialog open={showNewChatDialog} onOpenChange={setShowNewChatDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Start New Chat</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label
-                htmlFor="username"
-                className="block text-sm font-medium mb-2"
-              >
-                Enter username to chat with:
-              </label>
-              <Input
-                id="username"
-                placeholder="e.g. john_doe"
-                value={newChatUsername}
-                onChange={(e) => setNewChatUsername(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && createNewUserChat()}
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowNewChatDialog(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={createNewUserChat}
-                disabled={!newChatUsername.trim()}
-              >
-                Start Chat
-              </Button>
-            </div>
+      <Dialog open={showContacts} onOpenChange={setShowContacts}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Start user-to-user chat</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <Input value={contactQuery} onChange={(event) => setContactQuery(event.target.value)} placeholder="Search by name or username…" />
+            <ScrollArea className="h-72 rounded-md border custom-scrollbar">
+              <div className="space-y-1 p-2">
+                {contacts.map((contact) => (
+                  <button key={contact.user_id} type="button" onClick={() => startDirectChat(contact)} className="flex w-full items-center gap-3 rounded-lg p-2 text-left hover:bg-muted">
+                    <Avatar><AvatarImage src={contact.avatar_url ?? undefined} /><AvatarFallback>{contact.display_name.slice(0, 1)}</AvatarFallback></Avatar>
+                    <div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{contact.display_name}</p><p className="truncate text-xs text-muted-foreground">@{contact.username || "fitfusion"} • {contact.status}</p></div>
+                  </button>
+                ))}
+                {!contacts.length && <p className="p-6 text-center text-sm text-muted-foreground">No users found.</p>}
+              </div>
+            </ScrollArea>
           </div>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showGroupCreator} onOpenChange={setShowGroupCreator}>
-        <DialogContent className="p-0">
-          <GroupChatCreator
-            onCreateGroup={handleCreateGroup}
-            onClose={() => setShowGroupCreator(false)}
-          />
-        </DialogContent>
-      </Dialog>
-
-      <Dialog
-        open={showBackgroundSelector}
-        onOpenChange={setShowBackgroundSelector}
-      >
-        <DialogContent className="p-0">
-          <ChatBackgroundSelector
-            currentBackground={chatBackground}
-            onBackgroundChange={handleBackgroundChange}
-            onClose={() => setShowBackgroundSelector(false)}
-          />
+      <Dialog open={showGroup} onOpenChange={setShowGroup}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Create encrypted group</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <Input value={groupName} onChange={(event) => setGroupName(event.target.value)} placeholder="Group name" />
+            <Input value={contactQuery} onChange={(event) => setContactQuery(event.target.value)} placeholder="Search members…" />
+            <ScrollArea className="h-64 rounded-md border custom-scrollbar">
+              <div className="space-y-1 p-2">
+                {contacts.map((contact) => (
+                  <button key={contact.user_id} type="button" onClick={() => setContacts((prev) => prev.map((item) => item.user_id === contact.user_id ? { ...item, selected: !item.selected } : item))} className={cn("flex w-full items-center gap-3 rounded-lg p-2 text-left hover:bg-muted", contact.selected && "bg-primary/10")}> 
+                    <Avatar><AvatarImage src={contact.avatar_url ?? undefined} /><AvatarFallback>{contact.display_name.slice(0, 1)}</AvatarFallback></Avatar>
+                    <div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{contact.display_name}</p><p className="truncate text-xs text-muted-foreground">@{contact.username || "fitfusion"}</p></div>
+                    {contact.selected && <Badge>Added</Badge>}
+                  </button>
+                ))}
+              </div>
+            </ScrollArea>
+            <Button onClick={createSelectedGroup} className="w-full"><Users className="mr-2 h-4 w-4" />Create group</Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
