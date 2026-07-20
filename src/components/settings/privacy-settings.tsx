@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -45,26 +45,77 @@ import {
 
 import { ConfirmDialog } from "./confirm-dialog";
 
+/**
+ * Persist a value under a `fitfusion-*` key so it flows through the
+ * cloud-mirror (see src/utils/local-storage-sync.ts) into
+ * public.user_settings.local_kv and back on sign-in / cross-device.
+ */
+function usePersistedState<T>(key: string, initial: T): [T, (v: T) => void] {
+  const [value, setValue] = useState<T>(() => {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw === null ? initial : (JSON.parse(raw) as T);
+    } catch {
+      return initial;
+    }
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch {
+      /* quota / private mode — ignore */
+    }
+  }, [key, value]);
+  // React to cloud hydration events dispatched by local-storage-sync.
+  useEffect(() => {
+    const rehydrate = () => {
+      try {
+        const raw = localStorage.getItem(key);
+        if (raw !== null) setValue(JSON.parse(raw) as T);
+      } catch {
+        /* ignore */
+      }
+    };
+    window.addEventListener("fitfusion-settings-hydrated", rehydrate);
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === key && e.newValue !== null) {
+        try {
+          setValue(JSON.parse(e.newValue) as T);
+        } catch {
+          /* ignore */
+        }
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener("fitfusion-settings-hydrated", rehydrate);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, [key]);
+  return [value, setValue];
+}
+
 export function PrivacySettings() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { toast } = useToast();
-  const [profileVisibility, setProfileVisibility] = useState("friends");
-  const [dataCollection, setDataCollection] = useState(true);
-  const [analyticsEnabled, setAnalyticsEnabled] = useState(true);
-  const [locationTracking, setLocationTracking] = useState(false);
-  const [personalization, setPersonalization] = useState(true);
-  const [thirdPartySharing, setThirdPartySharing] = useState(false);
-  const [cookieConsent, setCookieConsent] = useState(true);
-  const [dataRetention, setDataRetention] = useState([365]);
-  const [aiTraining, setAiTraining] = useState(false);
-  const [biometricData, setBiometricData] = useState(true);
-  const [voiceRecording, setVoiceRecording] = useState(false);
-  const [cameraAccess, setCameraAccess] = useState(true);
-  const [notificationTracking, setNotificationTracking] = useState(true);
-  const [socialSharing, setSocialSharing] = useState(false);
-  const [advancedEncryption, setAdvancedEncryption] = useState(true);
-  const [dataMinimization, setDataMinimization] = useState(true);
-  const [consentManagement, setConsentManagement] = useState(true);
+  const [profileVisibility, setProfileVisibility] = usePersistedState<string>("fitfusion-privacy-profile-visibility", "friends");
+  const [dataCollection, setDataCollection] = usePersistedState("fitfusion-privacy-data-collection", true);
+  const [analyticsEnabled, setAnalyticsEnabled] = usePersistedState("fitfusion-privacy-analytics", true);
+  const [locationTracking, setLocationTracking] = usePersistedState("fitfusion-privacy-location", false);
+  const [personalization, setPersonalization] = usePersistedState("fitfusion-privacy-personalization", true);
+  const [thirdPartySharing, setThirdPartySharing] = usePersistedState("fitfusion-privacy-third-party", false);
+  const [cookieConsent, setCookieConsent] = usePersistedState("fitfusion-privacy-cookies", true);
+  const [dataRetention, setDataRetention] = usePersistedState<number[]>("fitfusion-privacy-retention", [365]);
+  const [aiTraining, setAiTraining] = usePersistedState("fitfusion-privacy-ai-training", false);
+  const [biometricData, setBiometricData] = usePersistedState("fitfusion-privacy-biometric", true);
+  const [voiceRecording, setVoiceRecording] = usePersistedState("fitfusion-privacy-voice", false);
+  const [cameraAccess, setCameraAccess] = usePersistedState("fitfusion-privacy-camera", true);
+  const [notificationTracking, setNotificationTracking] = usePersistedState("fitfusion-privacy-notif-tracking", true);
+  const [socialSharing, setSocialSharing] = usePersistedState("fitfusion-privacy-social", false);
+  const [advancedEncryption, setAdvancedEncryption] = usePersistedState("fitfusion-privacy-encryption", true);
+  const [dataMinimization, setDataMinimization] = usePersistedState("fitfusion-privacy-minimization", true);
+  const [consentManagement, setConsentManagement] = usePersistedState("fitfusion-privacy-consent", true);
+
 
   const handleDataExport = async () => {
     toast({

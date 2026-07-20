@@ -376,11 +376,12 @@ export function AccountSettings() {
 
     setUploadingAvatar(true);
     try {
-      const ext = file.name.split(".").pop() || "png";
-      const path = `avatars/${session.user.id}-${Date.now()}.${ext}`;
+      const ext = (file.name.split(".").pop() || "png").toLowerCase();
+      // Storage RLS requires the FIRST folder in the object path to equal auth.uid().
+      const path = `${session.user.id}/avatars/${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage
         .from("fitusion.data")
-        .upload(path, file, { upsert: true, contentType: file.type });
+        .upload(path, file, { upsert: true, contentType: file.type, cacheControl: "3600" });
       if (upErr) throw upErr;
 
       const { data: pub } = supabase.storage.from("fitusion.data").getPublicUrl(path);
