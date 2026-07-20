@@ -465,7 +465,7 @@ export function SettingsContainer() {
                     <Button
                       variant="outline"
                       className="w-full justify-between h-auto p-4"
-                      onClick={handleClearLocalData}
+                      onClick={() => setConfirmClearOpen(true)}
                     >
                       <div className="text-left">
                         <div className="font-medium">Clear Local Data</div>
@@ -479,7 +479,7 @@ export function SettingsContainer() {
                     <Button
                       variant="destructive"
                       className="w-full justify-between h-auto p-4 md:col-span-2"
-                      onClick={handleLogout}
+                      onClick={() => setConfirmLogoutOpen(true)}
                     >
                       <div className="text-left">
                         <div className="font-medium">Log Out</div>
@@ -513,7 +513,7 @@ export function SettingsContainer() {
                     <Button
                       variant="outline"
                       className="w-full justify-between h-auto p-4"
-                      onClick={handleClearLocalData}
+                      onClick={() => setConfirmClearOpen(true)}
                     >
                       <div className="text-left">
                         <div className="font-medium">Clear Local Data</div>
@@ -527,7 +527,7 @@ export function SettingsContainer() {
                     <Button
                       variant="destructive"
                       className="w-full justify-between h-auto p-4 md:col-span-2"
-                      onClick={handleLogout}
+                      onClick={() => setConfirmLogoutOpen(true)}
                     >
                       <div className="text-left">
                         <div className="font-medium">Log Out</div>
