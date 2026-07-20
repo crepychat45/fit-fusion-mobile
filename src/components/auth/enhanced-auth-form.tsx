@@ -562,6 +562,89 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
           </p>
         </CardContent>
       </Card>
+
+      {/* Magic link — with alternative email support */}
+      <Dialog open={magicOpen} onOpenChange={(o) => !busy && setMagicOpen(o)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="h-4 w-4 text-primary" />
+              {magicContext === "passkey" ? "Passkey verified — send sign-in link" : "Send magic sign-in link"}
+            </DialogTitle>
+            <DialogDescription>
+              We'll email a one-tap link that finishes your sign-in. You can also send it to an alternative inbox you have access to.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3 py-2">
+            <div className="rounded-xl border border-border/50 bg-secondary/40 p-3 text-sm">
+              <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1">
+                Account email
+              </div>
+              <div className="font-medium truncate">{magicPrimary || "—"}</div>
+            </div>
+
+            <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+              <input
+                type="checkbox"
+                className="h-4 w-4 accent-primary"
+                checked={useAltEmail}
+                onChange={(e) => setUseAltEmail(e.target.checked)}
+                disabled={busy}
+              />
+              <span>Send to an alternative email instead</span>
+            </label>
+
+            {useAltEmail && (
+              <div className="space-y-1.5">
+                <Label htmlFor="alt-email" className="text-xs">Alternative email</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="alt-email"
+                    type="email"
+                    autoComplete="email"
+                    inputMode="email"
+                    className="pl-9 h-11"
+                    placeholder="backup@example.com"
+                    value={altEmail}
+                    onChange={(e) => setAltEmail(e.target.value)}
+                    disabled={busy}
+                    autoFocus
+                  />
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  Use a recovery inbox you can open right now — the link signs in the account above.
+                </p>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setMagicOpen(false)}
+              disabled={busy}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={confirmMagicSend}
+              disabled={busy}
+              className="min-w-[140px]"
+            >
+              {loadingProvider === "magic" ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Mail className="mr-2 h-4 w-4" />
+              )}
+              Send link
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }
