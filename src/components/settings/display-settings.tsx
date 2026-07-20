@@ -261,36 +261,6 @@ export function DisplaySettings() {
             </Select>
           </div>
 
-
-          <div>
-            <div className="mb-2 text-sm font-medium">Font Family</div>
-            <Select
-              value={fontFamily}
-              onValueChange={(value) => {
-                setFontFamily(value);
-                document.documentElement.style.setProperty(
-                  "--font-family",
-                  value,
-                );
-                toast({
-                  title: "Font Changed",
-                  description: `Font family set to ${value}.`,
-                });
-              }}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select Font" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Inter">Inter</SelectItem>
-                <SelectItem value="Roboto">Roboto</SelectItem>
-                <SelectItem value="Open Sans">Open Sans</SelectItem>
-                <SelectItem value="Montserrat">Montserrat</SelectItem>
-                <SelectItem value="system-ui">System Default</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <LayoutGrid className="h-4 w-4 text-muted-foreground" />
