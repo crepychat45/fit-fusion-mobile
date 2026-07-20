@@ -1,244 +1,189 @@
-// Enhanced Service Worker for FitFusion (v7.0.0 — cache-bust)
-const CACHE_NAME = "fitfusion-v7";
-const STATIC_CACHE = "fitfusion-static-v7";
-const DYNAMIC_CACHE = "fitfusion-dynamic-v7";
+// FitFusion Service Worker v8 (v7.3.0)
+// Strategies:
+//  - Navigations & HTML: network-first with 3s timeout, cache fallback
+//  - Hashed JS/CSS (Vite /assets/): stale-while-revalidate + cache
+//  - Images: cache-first with expiration
+//  - API/Supabase: network-first (no offline replay for auth/mutations)
+// Messages: SKIP_WAITING, CLEAR_CACHES, GET_CACHE_INFO
+const VERSION = "v8-7.3.0";
+const STATIC_CACHE = `fitfusion-static-${VERSION}`;
+const ASSET_CACHE = `fitfusion-assets-${VERSION}`;
+const IMAGE_CACHE = `fitfusion-images-${VERSION}`;
+const RUNTIME_CACHE = `fitfusion-runtime-${VERSION}`;
+const IMAGE_MAX_ENTRIES = 80;
 
-const STATIC_ASSETS = [
-  "/",
-  "/favicon.ico",
-  "/placeholder.svg",
-  "/manifest.json",
-];
+const PRECACHE = ["/", "/favicon.ico", "/placeholder.svg", "/manifest.json"];
 
-const CACHE_STRATEGIES = {
-  images: "cache-first",
-  api: "network-first",
-  static: "cache-first",
-};
-
-// Install event
 self.addEventListener("install", (event) => {
-  console.log("Service Worker installing...");
-
   event.waitUntil(
-    caches
-      .open(STATIC_CACHE)
-      .then((cache) => {
-        console.log("Caching static assets...");
-        return cache.addAll(STATIC_ASSETS);
-      })
-      .then(() => {
-        return self.skipWaiting();
-      }),
+    caches.open(STATIC_CACHE).then((c) => c.addAll(PRECACHE)).then(() => self.skipWaiting()),
   );
 });
 
-// Activate event
 self.addEventListener("activate", (event) => {
-  console.log("Service Worker activating...");
-
   event.waitUntil(
-    caches
-      .keys()
-      .then((cacheNames) => {
-        return Promise.all(
-          cacheNames.map((cacheName) => {
-            if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
-              console.log("Deleting old cache:", cacheName);
-              return caches.delete(cacheName);
-            }
+    (async () => {
+      const keys = await caches.keys();
+      const keep = new Set([STATIC_CACHE, ASSET_CACHE, IMAGE_CACHE, RUNTIME_CACHE]);
+      await Promise.all(keys.filter((k) => !keep.has(k)).map((k) => caches.delete(k)));
+      await self.clients.claim();
+    })(),
+  );
+});
+
+self.addEventListener("message", (event) => {
+  const data = event.data || {};
+  if (data.type === "SKIP_WAITING") self.skipWaiting();
+  if (data.type === "CLEAR_CACHES") {
+    event.waitUntil(
+      (async () => {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+        event.ports[0]?.postMessage({ ok: true, cleared: keys.length });
+      })(),
+    );
+  }
+  if (data.type === "GET_CACHE_INFO") {
+    event.waitUntil(
+      (async () => {
+        const keys = await caches.keys();
+        const stats = await Promise.all(
+          keys.map(async (name) => {
+            const cache = await caches.open(name);
+            const entries = await cache.keys();
+            return { name, entries: entries.length };
           }),
         );
-      })
-      .then(() => {
-        return self.clients.claim();
-      }),
+        event.ports[0]?.postMessage({ ok: true, caches: stats, version: VERSION });
+      })(),
+    );
+  }
+});
+
+const timeout = (p, ms) =>
+  new Promise((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error("network-timeout")), ms);
+    p.then((v) => {
+      clearTimeout(t);
+      resolve(v);
+    }).catch((e) => {
+      clearTimeout(t);
+      reject(e);
+    });
+  });
+
+async function trimCache(name, max) {
+  const cache = await caches.open(name);
+  const keys = await cache.keys();
+  if (keys.length <= max) return;
+  await Promise.all(keys.slice(0, keys.length - max).map((k) => cache.delete(k)));
+}
+
+async function networkFirstNav(request) {
+  try {
+    const res = await timeout(fetch(request), 3500);
+    const cache = await caches.open(STATIC_CACHE);
+    cache.put("/", res.clone()).catch(() => {});
+    return res;
+  } catch {
+    const cached = (await caches.match(request)) || (await caches.match("/"));
+    return cached || new Response("Offline", { status: 503, headers: { "Content-Type": "text/plain" } });
+  }
+}
+
+async function staleWhileRevalidate(request, cacheName) {
+  const cache = await caches.open(cacheName);
+  const cached = await cache.match(request);
+  const network = fetch(request)
+    .then((res) => {
+      if (res.ok) cache.put(request, res.clone()).catch(() => {});
+      return res;
+    })
+    .catch(() => cached);
+  return cached || network;
+}
+
+async function cacheFirstImage(request) {
+  const cache = await caches.open(IMAGE_CACHE);
+  const cached = await cache.match(request);
+  if (cached) return cached;
+  try {
+    const res = await fetch(request);
+    if (res.ok) {
+      cache.put(request, res.clone()).catch(() => {});
+      trimCache(IMAGE_CACHE, IMAGE_MAX_ENTRIES).catch(() => {});
+    }
+    return res;
+  } catch {
+    return (await caches.match("/placeholder.svg")) || new Response("", { status: 404 });
+  }
+}
+
+async function networkFirstApi(request) {
+  try {
+    return await fetch(request);
+  } catch {
+    const cached = await caches.match(request);
+    return cached || new Response(JSON.stringify({ offline: true }), {
+      status: 503,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+}
+
+self.addEventListener("fetch", (event) => {
+  const { request } = event;
+  if (request.method !== "GET") return;
+  const url = new URL(request.url);
+  if (url.protocol === "chrome-extension:") return;
+
+  // Never touch OAuth callbacks or auth endpoints
+  if (url.pathname.startsWith("/~oauth") || url.pathname.startsWith("/auth/")) return;
+
+  if (request.mode === "navigate") {
+    event.respondWith(networkFirstNav(request));
+    return;
+  }
+
+  if (request.destination === "image") {
+    event.respondWith(cacheFirstImage(request));
+    return;
+  }
+
+  if (url.hostname.includes("supabase.co") || url.pathname.startsWith("/api/")) {
+    event.respondWith(networkFirstApi(request));
+    return;
+  }
+
+  if (url.pathname.startsWith("/assets/") || /\.(js|css|woff2?)$/.test(url.pathname)) {
+    event.respondWith(staleWhileRevalidate(request, ASSET_CACHE));
+    return;
+  }
+
+  event.respondWith(staleWhileRevalidate(request, RUNTIME_CACHE));
+});
+
+// Push notifications
+self.addEventListener("push", (event) => {
+  if (!event.data) return;
+  let data;
+  try {
+    data = event.data.json();
+  } catch {
+    data = { title: "FitFusion", body: event.data.text() };
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title || "FitFusion", {
+      body: data.body,
+      icon: "/favicon.ico",
+      badge: "/favicon.ico",
+      vibrate: [180, 90, 180],
+      data,
+    }),
   );
 });
 
-// Fetch event with enhanced caching strategies
-self.addEventListener("fetch", (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
-
-  // Skip non-GET requests
-  if (request.method !== "GET") {
-    return;
-  }
-
-  // Skip Chrome extension requests
-  if (url.protocol === "chrome-extension:") {
-    return;
-  }
-
-  // Handle different types of requests
-  if (request.destination === "image") {
-    event.respondWith(handleImageRequest(request));
-  } else if (
-    url.pathname.startsWith("/api/") ||
-    url.hostname.includes("supabase.co")
-  ) {
-    event.respondWith(handleApiRequest(request));
-  } else {
-    event.respondWith(handleStaticRequest(request));
-  }
-});
-
-// Cache-first strategy for images
-async function handleImageRequest(request) {
-  try {
-    const cache = await caches.open(DYNAMIC_CACHE);
-    const cachedResponse = await cache.match(request);
-
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-
-    const networkResponse = await fetch(request);
-
-    if (networkResponse.ok) {
-      cache.put(request, networkResponse.clone());
-    }
-
-    return networkResponse;
-  } catch (error) {
-    console.log("Image fetch failed:", error);
-    // Return a fallback image if available
-    const fallback = await caches.match("/placeholder.svg");
-    return fallback || new Response("Image not available", { status: 404 });
-  }
-}
-
-// Network-first strategy for API requests
-async function handleApiRequest(request) {
-  try {
-    const networkResponse = await fetch(request);
-
-    if (networkResponse.ok) {
-      const cache = await caches.open(DYNAMIC_CACHE);
-      cache.put(request, networkResponse.clone());
-    }
-
-    return networkResponse;
-  } catch (error) {
-    console.log("API request failed, trying cache:", error);
-    const cachedResponse = await caches.match(request);
-
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-
-    return new Response("API unavailable", { status: 503 });
-  }
-}
-
-// Network-first strategy for app shell, scripts, and styles to avoid stale Vite chunks.
-async function handleStaticRequest(request) {
-  try {
-    const cache = await caches.open(STATIC_CACHE);
-    const networkResponse = await fetch(request);
-
-    if (networkResponse.ok) {
-      cache.put(request, networkResponse.clone());
-    }
-
-    return networkResponse;
-  } catch (error) {
-    console.log("Static request failed:", error);
-
-    const cachedResponse = await caches.match(request);
-    if (cachedResponse) {
-      return cachedResponse;
-    }
-
-    // For navigation requests, return the cached index.html
-    if (request.mode === "navigate") {
-      const indexCache = await caches.match("/");
-      if (indexCache) {
-        return indexCache;
-      }
-    }
-
-    return new Response("Page not available", { status: 404 });
-  }
-}
-
-// Background sync for failed requests
-self.addEventListener("sync", (event) => {
-  console.log("Background sync triggered:", event.tag);
-
-  if (event.tag === "workout-sync") {
-    event.waitUntil(syncWorkoutData());
-  }
-});
-
-async function syncWorkoutData() {
-  try {
-    // Sync any pending workout data when connection is restored
-    const pendingData = await getStoredWorkoutData();
-
-    if (pendingData.length > 0) {
-      for (const data of pendingData) {
-        await fetch("/api/sync-workout", {
-          method: "POST",
-          body: JSON.stringify(data),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-      }
-
-      // Clear stored data after successful sync
-      await clearStoredWorkoutData();
-    }
-  } catch (error) {
-    console.error("Background sync failed:", error);
-  }
-}
-
-// Helper functions for offline data storage
-async function getStoredWorkoutData() {
-  // Implementation would depend on IndexedDB or similar storage
-  return [];
-}
-
-async function clearStoredWorkoutData() {
-  // Implementation would clear the offline storage
-}
-
-// Push notification handling
-self.addEventListener("push", (event) => {
-  if (!event.data) return;
-
-  const data = event.data.json();
-  const options = {
-    body: data.body,
-    icon: "/favicon.ico",
-    badge: "/favicon.ico",
-    vibrate: [200, 100, 200],
-    data: data,
-    actions: [
-      {
-        action: "view",
-        title: "View",
-        icon: "/favicon.ico",
-      },
-      {
-        action: "close",
-        title: "Close",
-        icon: "/favicon.ico",
-      },
-    ],
-  };
-
-  event.waitUntil(self.registration.showNotification(data.title, options));
-});
-
-// Notification click handling
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-
-  if (event.action === "view") {
-    event.waitUntil(clients.openWindow(event.notification.data.url || "/"));
-  }
+  event.waitUntil(self.clients.openWindow(event.notification.data?.url || "/"));
 });
