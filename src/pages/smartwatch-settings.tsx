@@ -353,7 +353,18 @@ const SmartwatchSettings: React.FC = () => {
         {/* Header */}
         <div className="sticky top-0 z-20 backdrop-blur-xl bg-background/70 border-b border-border/20">
           <div className="flex items-center gap-2 px-4 py-3">
-            <Button variant="ghost" size="icon" aria-label="Back" onClick={() => navigate(-1)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Back"
+              onClick={() => {
+                if (window.history.length > 1) {
+                  navigate(-1);
+                } else {
+                  navigate("/more");
+                }
+              }}
+            >
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-2">
