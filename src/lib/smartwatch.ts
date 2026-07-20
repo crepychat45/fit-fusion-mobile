@@ -18,6 +18,22 @@ export const BUILT_IN_FACES: WatchFace[] = [
   { id: "solar", name: "Solar", gradient: "from-amber-400 via-yellow-500 to-orange-500", accent: "#facc15", style: "hybrid" },
   { id: "noir", name: "Noir", gradient: "from-zinc-900 via-zinc-800 to-zinc-900", accent: "#e5e5e5", style: "digital" },
   { id: "rose", name: "Rose Quartz", gradient: "from-rose-300 via-pink-400 to-fuchsia-500", accent: "#f472b6", style: "hybrid" },
+  { id: "midnight", name: "Midnight", gradient: "from-slate-950 via-blue-950 to-indigo-950", accent: "#60a5fa", style: "analog" },
+  { id: "sunset", name: "Sunset", gradient: "from-orange-400 via-pink-500 to-purple-600", accent: "#fb923c", style: "hybrid" },
+  { id: "ocean", name: "Ocean", gradient: "from-blue-600 via-cyan-500 to-teal-400", accent: "#06b6d4", style: "digital" },
+  { id: "carbon", name: "Carbon", gradient: "from-neutral-900 via-neutral-800 to-neutral-900", accent: "#f59e0b", style: "analog" },
+  { id: "neon", name: "Neon Pulse", gradient: "from-lime-400 via-emerald-500 to-cyan-500", accent: "#22c55e", style: "digital" },
+  { id: "royal", name: "Royal", gradient: "from-indigo-700 via-purple-700 to-blue-800", accent: "#c084fc", style: "hybrid" },
+  { id: "cherry", name: "Cherry", gradient: "from-red-500 via-pink-600 to-rose-700", accent: "#fb7185", style: "digital" },
+  { id: "mint", name: "Mint Fresh", gradient: "from-green-300 via-teal-400 to-emerald-500", accent: "#5eead4", style: "hybrid" },
+  { id: "galaxy", name: "Galaxy", gradient: "from-purple-900 via-fuchsia-800 to-indigo-900", accent: "#e879f9", style: "analog" },
+  { id: "titanium", name: "Titanium", gradient: "from-zinc-500 via-zinc-400 to-zinc-600", accent: "#0ea5e9", style: "analog" },
+  { id: "sakura", name: "Sakura", gradient: "from-pink-200 via-rose-300 to-pink-400", accent: "#ec4899", style: "hybrid" },
+  { id: "arctic", name: "Arctic", gradient: "from-white via-sky-100 to-blue-200", accent: "#0284c7", style: "digital" },
+  { id: "lava", name: "Lava", gradient: "from-red-700 via-orange-600 to-yellow-500", accent: "#ef4444", style: "digital" },
+  { id: "matrix", name: "Matrix", gradient: "from-black via-green-950 to-emerald-900", accent: "#22c55e", style: "digital" },
+  { id: "champagne", name: "Champagne", gradient: "from-yellow-100 via-amber-200 to-yellow-300", accent: "#d97706", style: "analog" },
+  { id: "cyberpunk", name: "Cyberpunk", gradient: "from-fuchsia-600 via-cyan-500 to-yellow-400", accent: "#f0abfc", style: "digital" },
 ];
 
 export const FONTS = [
