@@ -34,6 +34,14 @@ const DataManagementPanel = lazy(() => import("./data-management-panel").then(m 
 const PerformanceMetricsPanel = lazy(() => import("./performance-metrics-panel").then(m => ({ default: m.PerformanceMetricsPanel })));
 const AdvancedSettingsReset = lazy(() => import("./advanced-settings-reset").then(m => ({ default: m.AdvancedSettingsReset })));
 const UnifiedUpdateManager = lazy(() => import("./unified-update-manager").then(m => ({ default: m.UnifiedUpdateManager })));
+const VersionControlPanel = lazy(() => import("./version-control-panel").then(m => ({ default: m.VersionControlPanel })));
+const AppearancePanel = lazy(() => import("./appearance-panel").then(m => ({ default: m.AppearancePanel })));
+const NotificationPreferences = lazy(() => import("./notification-preferences").then(m => ({ default: m.NotificationPreferences })));
+const DataBackupPanel = lazy(() => import("./data-backup-panel").then(m => ({ default: m.DataBackupPanel })));
+const SystemHealthPanel = lazy(() => import("./system-health-panel").then(m => ({ default: m.SystemHealthPanel })));
+const PwaVaultPanel = lazy(() => import("./pwa-vault-panel").then(m => ({ default: m.PwaVaultPanel })));
+const NetworkAdaptiveBanner = lazy(() => import("./network-adaptive-banner").then(m => ({ default: m.NetworkAdaptiveBanner })));
+const SettingsCopilot = lazy(() => import("./settings-copilot").then(m => ({ default: m.SettingsCopilot })));
 
 const PanelLoader = () => (
   <div className="flex items-center justify-center py-12">
