@@ -360,8 +360,8 @@ export function AdvancedChatInterface({
     }
   };
 
-  const handleSend = async () => {
-    const content = input.trim();
+  const handleSend = async (directContent?: string) => {
+    const content = (directContent ?? input).trim();
     if (!content || !currentUser || !activeThread || sending) return;
     setInput("");
     setSending(true);
@@ -387,18 +387,9 @@ export function AdvancedChatInterface({
     }
   };
 
-  const sendQuickPrompt = (prompt: string) => {
-    setInput(prompt);
-    window.setTimeout(() => {
-      const event = new KeyboardEvent("keydown", { key: "Enter" });
-      document.dispatchEvent(event);
-    }, 0);
-  };
-
   const sendPromptNow = async (prompt: string) => {
     if (!currentUser || !activeThread || sending || aiStreaming) return;
-    setInput(prompt);
-    window.setTimeout(() => handleSend(), 0);
+    await handleSend(prompt);
   };
 
   const startDirectChat = async (contact: ChatDirectoryUser) => {
