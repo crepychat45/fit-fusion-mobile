@@ -12,7 +12,8 @@ Rules:
 - Answer clearly with actionable steps and safe defaults.
 - Use short paragraphs, bullet lists, and bold for key numbers.
 - If the user asks something outside fitness/health, still help briefly, then guide back to fitness.
-- Never provide medical diagnoses. Recommend consulting a doctor for medical concerns.`;
+- Never provide medical diagnoses. Recommend consulting a doctor for medical concerns.
+- Reply in the same language the user writes in. If a preferred language is provided, reply in that language.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -59,6 +60,10 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     const model = typeof body?.model === "string" ? body.model : "google/gemini-3-flash-preview";
+    const language = typeof body?.language === "string" && body.language.length < 40 ? body.language : "";
+    const systemPrompt = language
+      ? `${SYSTEM_PROMPT}\nPreferred reply language: ${language}. Always respond in this language unless the user explicitly writes in another.`
+      : SYSTEM_PROMPT;
 
     const upstream = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -70,7 +75,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model,
         stream: true,
-        messages: [{ role: "system", content: SYSTEM_PROMPT }, ...trimmed],
+        messages: [{ role: "system", content: systemPrompt }, ...trimmed],
       }),
     });
 

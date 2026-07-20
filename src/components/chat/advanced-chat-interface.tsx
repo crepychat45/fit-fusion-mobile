@@ -40,8 +40,14 @@ import {
   Archive,
   Bot,
   Download,
+  FileText,
+  Image as ImageIcon,
+  Info,
   Loader2,
+  Mail,
   MoreVertical,
+  Paperclip,
+  Phone,
   Pin,
   Plus,
   Search,
@@ -51,10 +57,12 @@ import {
   Trash2,
   UserPlus,
   Users,
+  Video as VideoIcon,
   X,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import fitBotAvatar from "@/assets/fitbot-coach-avatar.png";
 
 interface AdvancedChatInterfaceProps {
   user?: User | null;
@@ -130,7 +138,12 @@ export function AdvancedChatInterface({
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [aiStreaming, setAiStreaming] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [showUserDetails, setShowUserDetails] = useState(false);
+  const [userDetails, setUserDetails] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const notifiedIdsRef = useRef<Set<string>>(new Set());
 
   const activeThread = useMemo(
     () => threads.find((thread) => thread.id === activeThreadId) ?? null,
@@ -223,13 +236,42 @@ export function AdvancedChatInterface({
 
     const messageChannel = supabase
       .channel(`chat-messages-${currentUser.id}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "chat_messages" }, (payload) => {
-        const next = payload.new as ChatMessageRow | null;
-        const old = payload.old as ChatMessageRow | null;
-        const threadId = next?.thread_id ?? old?.thread_id;
-        if (threadId === activeThreadId) {
-          listChatMessages(threadId).then(setMessages).catch(console.error);
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages" }, (payload) => {
+        const row = payload.new as ChatMessageRow;
+        if (!row) return;
+        // Append instantly if it belongs to the open thread
+        if (row.thread_id === activeThreadId) {
+          setMessages((prev) => (prev.some((m) => m.id === row.id) ? prev : [...prev, row]));
         }
+        // Fire browser notification for incoming (not from me, not streamed placeholder)
+        const fromOther = row.sender_id && row.sender_id !== currentUser.id;
+        const isAssistant = row.sender_role === "assistant";
+        if ((fromOther || (isAssistant && row.thread_id !== activeThreadId)) && !notifiedIdsRef.current.has(row.id)) {
+          notifiedIdsRef.current.add(row.id);
+          const shouldNotify = document.hidden || row.thread_id !== activeThreadId;
+          if (shouldNotify && typeof Notification !== "undefined" && Notification.permission === "granted") {
+            try {
+              const senderName = isAssistant ? "FitX AI Coach" : "New message";
+              new Notification(senderName, {
+                body: (row.content || "New chat activity").slice(0, 140),
+                icon: "/manifest-icon-192.png",
+                tag: `chat-${row.thread_id}`,
+              });
+            } catch {
+              /* ignore */
+            }
+          }
+        }
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "chat_messages" }, (payload) => {
+        const row = payload.new as ChatMessageRow;
+        if (!row || row.thread_id !== activeThreadId) return;
+        setMessages((prev) => prev.map((m) => (m.id === row.id ? row : m)));
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "chat_messages" }, (payload) => {
+        const row = payload.old as ChatMessageRow;
+        if (!row || row.thread_id !== activeThreadId) return;
+        setMessages((prev) => prev.filter((m) => m.id !== row.id));
       })
       .subscribe();
 
@@ -238,6 +280,14 @@ export function AdvancedChatInterface({
       supabase.removeChannel(messageChannel);
     };
   }, [activeThreadId, currentUser, loadThreads]);
+
+  // Request notification permission once
+  useEffect(() => {
+    if (typeof Notification === "undefined") return;
+    if (Notification.permission === "default") {
+      Notification.requestPermission().catch(() => undefined);
+    }
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -282,7 +332,7 @@ export function AdvancedChatInterface({
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ messages: history }),
+        body: JSON.stringify({ messages: history, language: (typeof navigator !== "undefined" ? navigator.language : "") || "en" }),
       });
 
       if (!response.ok || !response.body) {
@@ -475,6 +525,75 @@ export function AdvancedChatInterface({
     return null;
   };
 
+  const handleFileUpload = async (files: FileList | null) => {
+    if (!files?.length || !currentUser || !activeThread) return;
+    setUploading(true);
+    try {
+      const attachments: Array<{ url: string; name: string; type: string; size: number; kind: "image" | "video" | "file" }> = [];
+      for (const file of Array.from(files).slice(0, 6)) {
+        if (file.size > 25 * 1024 * 1024) {
+          toast({ title: "File too large", description: `${file.name} exceeds 25MB`, variant: "destructive" });
+          continue;
+        }
+        const ext = file.name.split(".").pop() || "bin";
+        const path = `chat/${currentUser.id}/${activeThread.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const { error: upErr } = await supabase.storage.from("fitusion.data").upload(path, file, {
+          cacheControl: "3600",
+          upsert: false,
+          contentType: file.type || undefined,
+        });
+        if (upErr) throw upErr;
+        const { data: pub } = supabase.storage.from("fitusion.data").getPublicUrl(path);
+        const kind: "image" | "video" | "file" = file.type.startsWith("image/") ? "image" : file.type.startsWith("video/") ? "video" : "file";
+        attachments.push({ url: pub.publicUrl, name: file.name, type: file.type, size: file.size, kind });
+      }
+      if (!attachments.length) return;
+      const recipientId = activeThread.participant_ids.find((id) => id !== currentUser.id) ?? null;
+      const saved = await addChatMessage({
+        threadId: activeThread.id,
+        content: attachments.map((a) => `📎 ${a.name}`).join("\n"),
+        senderRole: "user",
+        senderId: currentUser.id,
+        recipientId: activeThread.thread_type === "direct" ? recipientId : null,
+        attachments: attachments as any,
+        metadata: { hasAttachments: true, securityLevel },
+      });
+      setMessages((prev) => mergeMessage(prev, saved));
+      await loadThreads(activeThread.id);
+      toast({ title: "Uploaded", description: `${attachments.length} file(s) attached.` });
+    } catch (error) {
+      console.error("Upload failed", error);
+      toast({ title: "Upload failed", description: error instanceof Error ? error.message : "Try a smaller file.", variant: "destructive" });
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const openUserDetails = async () => {
+    if (!activeThread || activeThread.thread_type === "ai") {
+      setUserDetails({ ai: true });
+      setShowUserDetails(true);
+      return;
+    }
+    const people = jsonArray<Record<string, any>>(activeThread.participant_snapshot);
+    const other = people.find((p) => String(p.id) !== currentUser?.id);
+    setUserDetails(other ?? null);
+    setShowUserDetails(true);
+    // Enrich with profile/directory info
+    if (other?.id) {
+      try {
+        const [{ data: directory }, { data: profile }] = await Promise.all([
+          supabase.from("chat_user_directory").select("*").eq("user_id", other.id).maybeSingle(),
+          supabase.from("profiles").select("*").eq("user_id", other.id).maybeSingle(),
+        ]);
+        setUserDetails((prev: any) => ({ ...(prev ?? {}), ...directory, ...profile, id: other.id, name: other.name }));
+      } catch (error) {
+        console.error("User details fetch failed", error);
+      }
+    }
+  };
+
   if (loading) {
     return (
       <div className={cn("flex h-full min-h-[520px] items-center justify-center rounded-lg border bg-card/70", className)}>
@@ -564,17 +683,29 @@ export function AdvancedChatInterface({
                     <X className="h-4 w-4" />
                   </Button>
                 )}
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={getThreadAvatar(activeThread, currentUser.id) ?? undefined} />
-                  <AvatarFallback>{getThreadInitial(activeThread)}</AvatarFallback>
-                </Avatar>
-                <div className="min-w-0">
-                  <h3 className="truncate font-semibold">{activeThread.title}</h3>
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                    <span>{activeThread.thread_type === "ai" ? "Fast AI coach" : `${activeThread.participant_ids.length} participant${activeThread.participant_ids.length === 1 ? "" : "s"}`}</span>
-                    <Badge variant="outline" className="h-5 px-1.5 text-[10px]"><ShieldCheck className="mr-1 h-3 w-3" />{securityLevel}</Badge>
+                <button
+                  type="button"
+                  onClick={openUserDetails}
+                  className="flex min-w-0 items-center gap-3 rounded-lg px-1 py-0.5 text-left transition hover:bg-muted/60"
+                  title={activeThread.thread_type === "ai" ? "About FitX AI Coach" : "View user details"}
+                >
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={activeThread.thread_type === "ai" ? fitBotAvatar : (getThreadAvatar(activeThread, currentUser.id) ?? undefined)} />
+                    <AvatarFallback className={activeThread.thread_type === "ai" ? "bg-gradient-to-br from-blue-500 to-purple-600 text-white" : ""}>
+                      {activeThread.thread_type === "ai" ? "AI" : getThreadInitial(activeThread)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <h3 className="truncate font-semibold flex items-center gap-1">
+                      {activeThread.thread_type === "ai" ? "FitX AI Coach" : activeThread.title}
+                      <Info className="h-3 w-3 text-muted-foreground" />
+                    </h3>
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <span>{activeThread.thread_type === "ai" ? "Fast multilingual AI coach" : `${activeThread.participant_ids.length} participant${activeThread.participant_ids.length === 1 ? "" : "s"}`}</span>
+                      <Badge variant="outline" className="h-5 px-1.5 text-[10px]"><ShieldCheck className="mr-1 h-3 w-3" />{securityLevel}</Badge>
+                    </div>
                   </div>
-                </div>
+                </button>
               </div>
 
               <div className="flex items-center gap-1">
@@ -641,14 +772,38 @@ export function AdvancedChatInterface({
                 )}
                 {filteredMessages.map((message) => {
                   const role = messageRole(message, currentUser.id);
+                  const attachments = jsonArray<any>(message.attachments as any);
                   return (
                     <div key={message.id} className={cn("flex gap-2", role === "own" ? "justify-end" : "justify-start")}> 
                       {role !== "own" && (
                         <Avatar className="mt-1 h-7 w-7">
-                          <AvatarFallback>{role === "assistant" ? "AI" : "U"}</AvatarFallback>
+                          {role === "assistant" ? <AvatarImage src={fitBotAvatar} /> : null}
+                          <AvatarFallback className={role === "assistant" ? "bg-gradient-to-br from-blue-500 to-purple-600 text-[10px] text-white" : ""}>
+                            {role === "assistant" ? "AI" : "U"}
+                          </AvatarFallback>
                         </Avatar>
                       )}
                       <div className={cn("max-w-[82%] rounded-2xl px-3 py-2 text-sm shadow-sm", role === "own" ? "bg-primary text-primary-foreground" : role === "system" ? "border bg-muted text-muted-foreground" : "border bg-card")}> 
+                        {attachments.length > 0 && (
+                          <div className="mb-2 grid gap-2">
+                            {attachments.map((att: any, idx: number) => (
+                              <div key={idx}>
+                                {att.kind === "image" ? (
+                                  <a href={att.url} target="_blank" rel="noreferrer">
+                                    <img src={att.url} alt={att.name} loading="lazy" className="max-h-64 rounded-lg object-cover" />
+                                  </a>
+                                ) : att.kind === "video" ? (
+                                  <video src={att.url} controls className="max-h-64 rounded-lg" />
+                                ) : (
+                                  <a href={att.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-lg border bg-background/60 px-2 py-1 text-xs hover:bg-background">
+                                    <FileText className="h-4 w-4" />
+                                    <span className="truncate">{att.name}</span>
+                                  </a>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                         {role === "assistant" ? (
                           <div className="prose prose-sm max-w-none dark:prose-invert prose-p:my-1 prose-ul:my-1 prose-ol:my-1">
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content || "Thinking…"}</ReactMarkdown>
@@ -663,7 +818,7 @@ export function AdvancedChatInterface({
                 })}
                 {aiStreaming && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" /> Fit Bot AI is answering…
+                    <Loader2 className="h-4 w-4 animate-spin" /> FitX AI Coach is answering…
                   </div>
                 )}
                 <div ref={messagesEndRef} />
@@ -672,6 +827,27 @@ export function AdvancedChatInterface({
 
             <footer className="border-t bg-card/80 p-3 backdrop-blur-xl">
               <div className="mx-auto flex max-w-3xl items-end gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  className="hidden"
+                  accept="image/*,video/*,application/pdf,.doc,.docx,.txt,.zip"
+                  onChange={(event) => handleFileUpload(event.target.files)}
+                />
+                {activeThread.thread_type !== "ai" && (
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className="h-11 w-11 shrink-0"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    title="Attach photo, video, or file"
+                  >
+                    {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}
+                  </Button>
+                )}
                 <Textarea
                   value={input}
                   onChange={(event) => setInput(event.target.value)}
@@ -681,7 +857,7 @@ export function AdvancedChatInterface({
                       handleSend();
                     }
                   }}
-                  placeholder={activeThread.thread_type === "ai" ? "Ask Fit Bot AI for a workout, meal, recovery, or motivation plan…" : "Type a secure message…"}
+                  placeholder={activeThread.thread_type === "ai" ? "Ask FitX AI Coach for a workout, meal, recovery, or motivation plan…" : "Type a secure message…"}
                   className="min-h-[44px] resize-none"
                   rows={1}
                 />
@@ -741,6 +917,64 @@ export function AdvancedChatInterface({
             </ScrollArea>
             <Button onClick={createSelectedGroup} className="w-full"><Users className="mr-2 h-4 w-4" />Create group</Button>
           </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={showUserDetails} onOpenChange={setShowUserDetails}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{userDetails?.ai ? "FitX AI Coach" : "User details"}</DialogTitle>
+          </DialogHeader>
+          {userDetails?.ai ? (
+            <div className="flex flex-col items-center gap-3 py-2 text-center">
+              <Avatar className="h-20 w-20">
+                <AvatarImage src={fitBotAvatar} />
+                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">AI</AvatarFallback>
+              </Avatar>
+              <div>
+                <h3 className="text-lg font-semibold">FitX AI Coach</h3>
+                <p className="text-xs text-muted-foreground">Fit Bot AI • Powered by Lovable AI Gateway</p>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Multilingual fitness, nutrition, recovery, and motivation coach. Streams answers securely and saves your history end-to-end.
+              </p>
+              <div className="flex flex-wrap justify-center gap-2 text-xs">
+                <Badge variant="outline"><ShieldCheck className="mr-1 h-3 w-3" />Encrypted</Badge>
+                <Badge variant="outline"><Sparkles className="mr-1 h-3 w-3" />Real-time</Badge>
+                <Badge variant="outline">All languages</Badge>
+              </div>
+            </div>
+          ) : userDetails ? (
+            <div className="flex flex-col items-center gap-3 py-2 text-center">
+              <Avatar className="h-20 w-20">
+                <AvatarImage src={userDetails.avatar_url ?? userDetails.avatar ?? undefined} />
+                <AvatarFallback>{String(userDetails.display_name ?? userDetails.name ?? "U").slice(0, 1).toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <div>
+                <h3 className="text-lg font-semibold">{userDetails.display_name ?? userDetails.name ?? "FitFusion user"}</h3>
+                {userDetails.username && <p className="text-xs text-muted-foreground">@{userDetails.username}</p>}
+                {userDetails.status && <Badge variant="outline" className="mt-1 text-[10px]">{userDetails.status}</Badge>}
+              </div>
+              <div className="w-full space-y-2 text-left text-sm">
+                {userDetails.email && (
+                  <div className="flex items-center gap-2 rounded-lg border bg-muted/30 px-3 py-2">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <span className="truncate">{userDetails.email}</span>
+                  </div>
+                )}
+                {userDetails.phone && (
+                  <div className="flex items-center gap-2 rounded-lg border bg-muted/30 px-3 py-2">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <span className="truncate">{userDetails.phone}</span>
+                  </div>
+                )}
+                {userDetails.bio && (
+                  <p className="rounded-lg border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">{userDetails.bio}</p>
+                )}
+              </div>
+            </div>
+          ) : (
+            <p className="p-6 text-center text-sm text-muted-foreground">No details available.</p>
+          )}
         </DialogContent>
       </Dialog>
     </div>
