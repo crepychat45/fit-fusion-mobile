@@ -919,6 +919,64 @@ export function AdvancedChatInterface({
           </div>
         </DialogContent>
       </Dialog>
+      <Dialog open={showUserDetails} onOpenChange={setShowUserDetails}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{userDetails?.ai ? "FitX AI Coach" : "User details"}</DialogTitle>
+          </DialogHeader>
+          {userDetails?.ai ? (
+            <div className="flex flex-col items-center gap-3 py-2 text-center">
+              <Avatar className="h-20 w-20">
+                <AvatarImage src={fitBotAvatar} />
+                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">AI</AvatarFallback>
+              </Avatar>
+              <div>
+                <h3 className="text-lg font-semibold">FitX AI Coach</h3>
+                <p className="text-xs text-muted-foreground">Fit Bot AI • Powered by Lovable AI Gateway</p>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Multilingual fitness, nutrition, recovery, and motivation coach. Streams answers securely and saves your history end-to-end.
+              </p>
+              <div className="flex flex-wrap justify-center gap-2 text-xs">
+                <Badge variant="outline"><ShieldCheck className="mr-1 h-3 w-3" />Encrypted</Badge>
+                <Badge variant="outline"><Sparkles className="mr-1 h-3 w-3" />Real-time</Badge>
+                <Badge variant="outline">All languages</Badge>
+              </div>
+            </div>
+          ) : userDetails ? (
+            <div className="flex flex-col items-center gap-3 py-2 text-center">
+              <Avatar className="h-20 w-20">
+                <AvatarImage src={userDetails.avatar_url ?? userDetails.avatar ?? undefined} />
+                <AvatarFallback>{String(userDetails.display_name ?? userDetails.name ?? "U").slice(0, 1).toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <div>
+                <h3 className="text-lg font-semibold">{userDetails.display_name ?? userDetails.name ?? "FitFusion user"}</h3>
+                {userDetails.username && <p className="text-xs text-muted-foreground">@{userDetails.username}</p>}
+                {userDetails.status && <Badge variant="outline" className="mt-1 text-[10px]">{userDetails.status}</Badge>}
+              </div>
+              <div className="w-full space-y-2 text-left text-sm">
+                {userDetails.email && (
+                  <div className="flex items-center gap-2 rounded-lg border bg-muted/30 px-3 py-2">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <span className="truncate">{userDetails.email}</span>
+                  </div>
+                )}
+                {userDetails.phone && (
+                  <div className="flex items-center gap-2 rounded-lg border bg-muted/30 px-3 py-2">
+                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <span className="truncate">{userDetails.phone}</span>
+                  </div>
+                )}
+                {userDetails.bio && (
+                  <p className="rounded-lg border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">{userDetails.bio}</p>
+                )}
+              </div>
+            </div>
+          ) : (
+            <p className="p-6 text-center text-sm text-muted-foreground">No details available.</p>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
