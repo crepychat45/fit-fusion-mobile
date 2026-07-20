@@ -14,15 +14,13 @@ function triggerRecovery(reason: any) {
   const recovery = (window as any).__fitfusionRecovery;
   if (recovery?.recover) {
     recovery.recover("chunk-error", reason);
+    return;
+  }
+  const reload = () => window.location.reload();
+  if (typeof caches !== "undefined") {
+    caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k)))).finally(reload);
   } else {
-    // Last resort: clear caches then reload
-    if ("caches" in window) {
-      caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k)))).finally(() => {
-        window.location.reload();
-      });
-    } else {
-      window.location.reload();
-    }
+    reload();
   }
 }
 
