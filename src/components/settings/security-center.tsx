@@ -36,6 +36,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { AdvancedAuthentication } from "./advanced-authentication";
 
 export function SecurityCenter() {
   const { toast } = useToast();
