@@ -40,8 +40,14 @@ import {
   Archive,
   Bot,
   Download,
+  FileText,
+  Image as ImageIcon,
+  Info,
   Loader2,
+  Mail,
   MoreVertical,
+  Paperclip,
+  Phone,
   Pin,
   Plus,
   Search,
@@ -51,10 +57,12 @@ import {
   Trash2,
   UserPlus,
   Users,
+  Video as VideoIcon,
   X,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import fitBotAvatar from "@/assets/fitbot-coach-avatar.png";
 
 interface AdvancedChatInterfaceProps {
   user?: User | null;
