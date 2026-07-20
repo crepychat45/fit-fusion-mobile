@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bell, Lock, Smartphone } from "lucide-react";
 import { ChatSettings } from "@/types/chat";
-import { VersionManager } from "./version-manager";
+import { VersionControlPanel } from "./version-control-panel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PrivacySettings } from "./privacy-settings";
 import { DeveloperOptions } from "./developer-options";
@@ -388,7 +388,7 @@ export function ChatSettingsPanel() {
               <CardDescription>View and manage app updates</CardDescription>
             </CardHeader>
             <CardContent>
-              <VersionManager />
+              <VersionControlPanel />
             </CardContent>
           </Card>
 

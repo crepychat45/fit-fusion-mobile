@@ -34,6 +34,15 @@ const DataManagementPanel = lazy(() => import("./data-management-panel").then(m 
 const PerformanceMetricsPanel = lazy(() => import("./performance-metrics-panel").then(m => ({ default: m.PerformanceMetricsPanel })));
 const AdvancedSettingsReset = lazy(() => import("./advanced-settings-reset").then(m => ({ default: m.AdvancedSettingsReset })));
 const UnifiedUpdateManager = lazy(() => import("./unified-update-manager").then(m => ({ default: m.UnifiedUpdateManager })));
+import { ConfirmDialog } from "./confirm-dialog";
+const VersionControlPanel = lazy(() => import("./version-control-panel").then(m => ({ default: m.VersionControlPanel })));
+const AppearancePanel = lazy(() => import("./appearance-panel").then(m => ({ default: m.AppearancePanel })));
+const NotificationPreferences = lazy(() => import("./notification-preferences").then(m => ({ default: m.NotificationPreferences })));
+const DataBackupPanel = lazy(() => import("./data-backup-panel").then(m => ({ default: m.DataBackupPanel })));
+const SystemHealthPanel = lazy(() => import("./system-health-panel").then(m => ({ default: m.SystemHealthPanel })));
+const PwaVaultPanel = lazy(() => import("./pwa-vault-panel").then(m => ({ default: m.PwaVaultPanel })));
+const NetworkAdaptiveBanner = lazy(() => import("./network-adaptive-banner").then(m => ({ default: m.NetworkAdaptiveBanner })));
+const SettingsCopilot = lazy(() => import("./settings-copilot").then(m => ({ default: m.SettingsCopilot })));
 
 const PanelLoader = () => (
   <div className="flex items-center justify-center py-12">
@@ -55,6 +64,8 @@ export function SettingsContainer() {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isConnected, setIsConnected] = useState(true);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [confirmClearOpen, setConfirmClearOpen] = useState(false);
+  const [confirmLogoutOpen, setConfirmLogoutOpen] = useState(false);
 
   useEffect(() => {
     // Check connection status
@@ -85,11 +96,6 @@ export function SettingsContainer() {
 
   const handleClearLocalData = async () => {
     try {
-      const confirmation = window.confirm(
-        "Are you sure you want to clear all local data? This action cannot be undone.",
-      );
-      if (!confirmation) return;
-
       const keysToPreserve = [
         "auth_token",
         "supabase.auth.token",
@@ -129,10 +135,7 @@ export function SettingsContainer() {
 
   const handleLogout = async () => {
     try {
-      const confirmation = window.confirm("Are you sure you want to log out?");
-      if (!confirmation) return;
-
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: "global" });
       localStorage.removeItem("auth_token");
       setIsLoggedOut(true);
 
@@ -358,7 +361,9 @@ export function SettingsContainer() {
         onMobileMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
       />
 
-      <div className="max-w-screen-xl mx-auto py-6 px-4">
+      <div className="max-w-screen-xl mx-auto py-6 px-4 space-y-4">
+        <L><NetworkAdaptiveBanner /></L>
+        <L><SettingsCopilot /></L>
         <motion.div
           key={activeTab}
           initial={{ opacity: 0, x: 20 }}
@@ -404,7 +409,10 @@ export function SettingsContainer() {
             </TabsContent>
 
             <TabsContent value="display" className="mt-0">
-              <L><DisplaySettings /></L>
+              <div className="space-y-6">
+                <L><AppearancePanel /></L>
+                <L><DisplaySettings /></L>
+              </div>
             </TabsContent>
 
             <TabsContent value="privacy" className="mt-0">
@@ -412,7 +420,10 @@ export function SettingsContainer() {
             </TabsContent>
 
             <TabsContent value="notifications" className="mt-0">
-              <L><NotificationSettings /></L>
+              <div className="space-y-6">
+                <L><NotificationPreferences /></L>
+                <L><NotificationSettings /></L>
+              </div>
             </TabsContent>
 
             <TabsContent value="units" className="mt-0">
@@ -424,8 +435,14 @@ export function SettingsContainer() {
             </TabsContent>
 
             <TabsContent value="updates" className="mt-0">
-              <L><UnifiedUpdateManager /></L>
+              <div className="space-y-6">
+                <L><VersionControlPanel /></L>
+                <L><PwaVaultPanel /></L>
+                <L><UnifiedUpdateManager /></L>
+              </div>
             </TabsContent>
+
+
 
 
             <TabsContent value="enhanced" className="mt-0">
@@ -448,7 +465,7 @@ export function SettingsContainer() {
                     <Button
                       variant="outline"
                       className="w-full justify-between h-auto p-4"
-                      onClick={handleClearLocalData}
+                      onClick={() => setConfirmClearOpen(true)}
                     >
                       <div className="text-left">
                         <div className="font-medium">Clear Local Data</div>
@@ -462,7 +479,7 @@ export function SettingsContainer() {
                     <Button
                       variant="destructive"
                       className="w-full justify-between h-auto p-4 md:col-span-2"
-                      onClick={handleLogout}
+                      onClick={() => setConfirmLogoutOpen(true)}
                     >
                       <div className="text-left">
                         <div className="font-medium">Log Out</div>
@@ -483,6 +500,9 @@ export function SettingsContainer() {
 
             <TabsContent value="data" className="mt-0">
               <div className="space-y-6">
+                <L><DataBackupPanel /></L>
+                <L><SystemHealthPanel /></L>
+
                 <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 p-6 rounded-lg border">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                     Data Management Center
@@ -496,7 +516,7 @@ export function SettingsContainer() {
                     <Button
                       variant="outline"
                       className="w-full justify-between h-auto p-4"
-                      onClick={handleClearLocalData}
+                      onClick={() => setConfirmClearOpen(true)}
                     >
                       <div className="text-left">
                         <div className="font-medium">Clear Local Data</div>
@@ -510,7 +530,7 @@ export function SettingsContainer() {
                     <Button
                       variant="destructive"
                       className="w-full justify-between h-auto p-4 md:col-span-2"
-                      onClick={handleLogout}
+                      onClick={() => setConfirmLogoutOpen(true)}
                     >
                       <div className="text-left">
                         <div className="font-medium">Log Out</div>
@@ -532,6 +552,25 @@ export function SettingsContainer() {
           </Tabs>
         </motion.div>
       </div>
+
+      <ConfirmDialog
+        open={confirmClearOpen}
+        onOpenChange={setConfirmClearOpen}
+        onConfirm={handleClearLocalData}
+        title="Clear all local data?"
+        description="This removes cached app data from this device. Your session and account are preserved."
+        confirmLabel="Clear data"
+        destructive
+      />
+      <ConfirmDialog
+        open={confirmLogoutOpen}
+        onOpenChange={setConfirmLogoutOpen}
+        onConfirm={handleLogout}
+        title="Sign out of all devices?"
+        description="This ends your session on every device signed into this account."
+        confirmLabel="Sign out everywhere"
+        destructive
+      />
     </div>
   );
 }
