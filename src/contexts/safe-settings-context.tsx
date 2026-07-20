@@ -486,6 +486,120 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     }
   };
 
+  /* -------------------- Cloud sync (persistence across devices / logout) -------------------- */
+  const userIdRef = useRef<string | null>(null);
+  const hydratedRef = useRef(false);
+  const pushRef = useRef(createDebouncedPush(900));
+
+  // Hydrate from remote when signed in; clear flag on sign-out.
+  useEffect(() => {
+    let cancelled = false;
+    const hydrate = async (uid: string) => {
+      const remote = await fetchRemoteSettings(uid);
+      if (cancelled) return;
+      if (remote) {
+        if (typeof remote.theme === "string") setTheme(remote.theme as any);
+        if (typeof remote.fontSize === "string") setFontSize(remote.fontSize as any);
+        if (typeof remote.language === "string") setLanguage(remote.language);
+        if (typeof remote.unitSystem === "string") setUnitSystem(remote.unitSystem as UnitSystem);
+        if (typeof remote.autoSync === "boolean") setAutoSync(remote.autoSync);
+        if (typeof remote.cloudBackup === "boolean") setCloudBackup(remote.cloudBackup);
+        if (typeof remote.notifications === "boolean") setNotifications(remote.notifications);
+        if (typeof remote.soundEnabled === "boolean") setSoundEnabled(remote.soundEnabled);
+        if (typeof remote.soundVolume === "number") setSoundVolume(remote.soundVolume);
+        if (typeof remote.soundPack === "string") setSoundPack(remote.soundPack);
+        if (typeof remote.hapticEnabled === "boolean") setHapticEnabled(remote.hapticEnabled);
+        if (typeof remote.hapticFeedback === "boolean") setHapticFeedback(remote.hapticFeedback);
+        if (typeof remote.compactView === "boolean") setCompactView(remote.compactView);
+        if (typeof remote.showCalories === "boolean") setShowCalories(remote.showCalories);
+        if (typeof remote.showHeartRate === "boolean") setShowHeartRate(remote.showHeartRate);
+        if (typeof remote.exportFormat === "string") setExportFormat(remote.exportFormat as any);
+        if (typeof remote.exportAnonymized === "boolean") setExportAnonymized(remote.exportAnonymized);
+        if (Array.isArray(remote.exportCategories)) setExportCategories(remote.exportCategories);
+        if (remote.displayOptions && typeof remote.displayOptions === "object") setDisplayOptions((p: any) => ({ ...p, ...remote.displayOptions }));
+        if (remote.developerOptions && typeof remote.developerOptions === "object") setDeveloperOptions((p: any) => ({ ...p, ...remote.developerOptions }));
+        if (typeof remote.codeEditorEnabled === "boolean") setCCodeEditorEnabled(remote.codeEditorEnabled);
+        if (Array.isArray(remote.programmingLanguages)) setProgrammingLanguages(remote.programmingLanguages);
+        if (remote.customSounds && typeof remote.customSounds === "object") setCustomSounds(remote.customSounds);
+        if (typeof remote.subscriptionPlan === "string") setSubscriptionPlan(remote.subscriptionPlan as any);
+        if (typeof remote.paymentMethod === "string") setPaymentMethod(remote.paymentMethod as any);
+      }
+      hydratedRef.current = true;
+    };
+
+    supabase.auth.getSession().then(({ data }) => {
+      const uid = data.session?.user?.id ?? null;
+      userIdRef.current = uid;
+      if (uid) hydrate(uid);
+      else hydratedRef.current = true; // allow push once user signs in
+    });
+
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      const uid = session?.user?.id ?? null;
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+        userIdRef.current = uid;
+        if (uid) hydrate(uid);
+      } else if (event === "SIGNED_OUT") {
+        userIdRef.current = null;
+        hydratedRef.current = false;
+      }
+    });
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Push snapshot to cloud on any settings change (debounced).
+  useEffect(() => {
+    if (!hydratedRef.current) return;
+    const uid = userIdRef.current;
+    if (!uid) return;
+    const snapshot: SettingsSnapshot = {
+      theme, fontSize, language, unitSystem,
+      autoSync, cloudBackup, notifications,
+      soundEnabled, soundVolume, soundPack, hapticEnabled, hapticFeedback,
+      compactView, showCalories, showHeartRate,
+      exportFormat, exportAnonymized, exportCategories,
+      displayOptions, developerOptions, codeEditorEnabled,
+      programmingLanguages, customSounds,
+      subscriptionPlan, paymentMethod,
+    };
+    pushRef.current(uid, snapshot);
+  }, [
+    theme, fontSize, language, unitSystem,
+    autoSync, cloudBackup, notifications,
+    soundEnabled, soundVolume, soundPack, hapticEnabled, hapticFeedback,
+    compactView, showCalories, showHeartRate,
+    exportFormat, exportAnonymized, exportCategories,
+    displayOptions, developerOptions, codeEditorEnabled,
+    programmingLanguages, customSounds,
+    subscriptionPlan, paymentMethod,
+  ]);
+
+  // Retry sync when network returns.
+  useEffect(() => {
+    const onOnline = () => {
+      const uid = userIdRef.current;
+      if (!uid || !hydratedRef.current) return;
+      const snapshot: SettingsSnapshot = {
+        theme, fontSize, language, unitSystem,
+        autoSync, cloudBackup, notifications,
+        soundEnabled, soundVolume, soundPack, hapticEnabled, hapticFeedback,
+        compactView, showCalories, showHeartRate,
+        exportFormat, exportAnonymized, exportCategories,
+        displayOptions, developerOptions, codeEditorEnabled,
+        programmingLanguages, customSounds,
+        subscriptionPlan, paymentMethod,
+      };
+      pushRef.current(uid, snapshot);
+    };
+    window.addEventListener("online", onOnline);
+    return () => window.removeEventListener("online", onOnline);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <SettingsContext.Provider
       value={{
