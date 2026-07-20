@@ -70,8 +70,34 @@ function b64urlEncode(buf: ArrayBuffer) {
   return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
+type SecurityEvent = { id: string; type: string; label: string; at: string };
+
+async function pushSecurityEvent(userId: string | null, event: Omit<SecurityEvent, "id" | "at">) {
+  if (!userId) return;
+  try {
+    const { data } = await supabase
+      .from("user_settings")
+      .select("security_settings")
+      .eq("user_id", userId)
+      .maybeSingle();
+    const current = (data?.security_settings as any) || {};
+    const events: SecurityEvent[] = Array.isArray(current.events) ? current.events : [];
+    const next = [
+      { id: crypto.randomUUID(), at: new Date().toISOString(), ...event },
+      ...events,
+    ].slice(0, 20);
+    await supabase
+      .from("user_settings")
+      .upsert(
+        { user_id: userId, security_settings: { ...current, events: next } },
+        { onConflict: "user_id" },
+      );
+  } catch { /* non-fatal */ }
+}
+
 export function SecurityPanel({ userEmail }: { userEmail?: string }) {
   const { toast } = useToast();
+  const [userId, setUserId] = useState<string | null>(null);
   const [sensors, setSensors] = useState<SensorStatus[]>([]);
   const [webAuthnSupported, setWebAuthnSupported] = useState(false);
   const [platformAuth, setPlatformAuth] = useState(false);
@@ -82,6 +108,7 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
   const [verifying, setVerifying] = useState(false);
   const [liveCode, setLiveCode] = useState<string>("------");
   const [tick, setTick] = useState(0);
+  const [events, setEvents] = useState<SecurityEvent[]>([]);
 
   useEffect(() => {
     detectSensors().then(setSensors);
@@ -94,10 +121,56 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
           setPlatformAuth(!!avail);
         } catch { setPlatformAuth(false); }
       }
+      // Hydrate from backend
+      try {
+        const { data: auth } = await supabase.auth.getUser();
+        const uid = auth?.user?.id ?? null;
+        setUserId(uid);
+        if (uid) {
+          const { data } = await supabase
+            .from("user_settings")
+            .select("security_settings")
+            .eq("user_id", uid)
+            .maybeSingle();
+          const s: any = data?.security_settings ?? {};
+          if (typeof s.twoFAEnabled === "boolean") {
+            setTwoFAEnabled(s.twoFAEnabled);
+            localStorage.setItem(LS_2FA_ENABLED, s.twoFAEnabled ? "1" : "0");
+          }
+          if (typeof s.biometricEnabled === "boolean") {
+            setBiometricEnabled(s.biometricEnabled && !!localStorage.getItem(LS_BIOMETRIC_CRED));
+          }
+          if (Array.isArray(s.events)) setEvents(s.events);
+        }
+      } catch { /* offline */ }
     })();
     const t = setInterval(() => setTick((v) => v + 1), 1000);
     return () => clearInterval(t);
   }, []);
+
+  const persistFlag = async (patch: Record<string, unknown>) => {
+    if (!userId) return;
+    try {
+      const { data } = await supabase
+        .from("user_settings")
+        .select("security_settings")
+        .eq("user_id", userId)
+        .maybeSingle();
+      const current = (data?.security_settings as any) || {};
+      await supabase
+        .from("user_settings")
+        .upsert(
+          { user_id: userId, security_settings: { ...current, ...patch } },
+          { onConflict: "user_id" },
+        );
+    } catch { /* offline */ }
+  };
+
+  const logEvent = async (type: string, label: string) => {
+    const ev = { id: crypto.randomUUID(), type, label, at: new Date().toISOString() };
+    setEvents((prev) => [ev, ...prev].slice(0, 20));
+    await pushSecurityEvent(userId, { type, label });
+  };
 
   useEffect(() => {
     (async () => {
