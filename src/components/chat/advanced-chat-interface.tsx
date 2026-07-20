@@ -1055,6 +1055,33 @@ export function AdvancedChatInterface({
           )}
         </DialogContent>
       </Dialog>
+      <Dialog open={showBgPicker} onOpenChange={setShowBgPicker}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Chat background</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {CHAT_BACKGROUNDS.map((bg) => (
+              <button
+                key={bg.id}
+                type="button"
+                onClick={() => { applyBackground(bg.id); setShowBgPicker(false); }}
+                className={cn(
+                  "group relative flex h-24 flex-col items-start justify-end overflow-hidden rounded-xl border p-2 text-left text-xs font-medium transition-all",
+                  threadBg === bg.id ? "ring-2 ring-primary" : "hover:ring-2 hover:ring-primary/40",
+                )}
+                style={{ backgroundImage: bg.preview }}
+              >
+                <span className="rounded-md bg-black/40 px-2 py-0.5 text-white backdrop-blur-sm">{bg.label}</span>
+                {threadBg === bg.id && (
+                  <span className="absolute right-2 top-2 rounded-full bg-primary px-2 py-0.5 text-[10px] text-primary-foreground">Active</span>
+                )}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">Background is saved on this device for this conversation.</p>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
