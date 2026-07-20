@@ -1,6 +1,6 @@
 // Single source of truth for app version + changelog
-export const APP_VERSION = "7.2.0";
-export const APP_RELEASE_DATE = "2026-07-21";
+export const APP_VERSION = "7.3.0";
+export const APP_RELEASE_DATE = "2026-07-22";
 
 export const VERSION_STORAGE_KEYS = ["fitfusion-app-version", "app-version"] as const;
 export const FEATURE_UNLOCK_KEY = "fitfusion-active-feature-release";
@@ -24,6 +24,57 @@ export interface ReleaseNote {
 }
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "7.3.0",
+    date: "2026-07-22",
+    type: "Major Release",
+    highlight:
+      "Rebuilt Service Worker (v8) with network-first navigations, stale-while-revalidate for hashed assets, and a new Cache Manager. Mobile sensors (motion, orientation, geolocation, battery, network) now surface through a unified hook. Passkey sign-in is more resilient with sessions auto-attached at enrollment, and a global error handler auto-recovers from chunk-load failures.",
+    sections: [
+      {
+        title: "New Features",
+        icon: "sparkles",
+        items: [
+          "Cache Manager utility — inspect, size, and clear all app caches",
+          "Unified mobile sensors hook (motion, orientation, geolocation, battery, network)",
+          "Service Worker v8 with per-destination strategies + message API",
+          "Global error handler with automatic chunk-load recovery",
+          "Storage quota monitor with human-readable size breakdown",
+        ],
+      },
+      {
+        title: "Improvements",
+        icon: "zap",
+        items: [
+          "HTML navigations use network-first with a 3.5s timeout for freshness",
+          "Hashed /assets/ bundles use stale-while-revalidate for instant loads",
+          "Image cache is capped at 80 entries to keep storage lean",
+          "Supabase and /api/* requests bypass the SW cache to avoid stale data",
+          "OAuth callbacks (/~oauth, /auth/*) are excluded from the SW",
+        ],
+      },
+      {
+        title: "Bug Fixes",
+        icon: "bug",
+        items: [
+          "Fixed passkey sign-in failing after the first token refresh (session now auto-attached)",
+          "Fixed chunk-load errors leaving the app in a broken white screen",
+          "Fixed stale cache entries surviving version bumps",
+          "Fixed sensor hooks not detaching on unmount",
+        ],
+      },
+      {
+        title: "Security",
+        icon: "shield",
+        items: [
+          "Update package pinned to v7.3 signed manifest hash",
+          "SW no longer caches Supabase auth responses or OAuth callbacks",
+          "Passkey session tokens rotated on every use (AES-GCM 256 encrypted vault)",
+          "Cache clear is authenticated via MessageChannel from same-origin",
+        ],
+      },
+    ],
+  },
   {
     version: "7.2.0",
     date: "2026-07-21",

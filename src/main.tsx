@@ -5,7 +5,10 @@ import "./index.css";
 import "@/utils/perf-telemetry";
 import { mark } from "@/utils/perf-telemetry";
 import { installAppRecovery } from "@/utils/app-recovery";
+import { installGlobalErrorHandler } from "@/utils/global-error-handler";
 import { initSettingsCloudMirror } from "@/utils/local-storage-sync";
+
+installGlobalErrorHandler();
 
 // Boot the cloud mirror early so localStorage writes from any Settings
 // component are transparently pushed to Supabase and restored on sign-in.
