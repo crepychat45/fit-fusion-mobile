@@ -11,6 +11,7 @@ import { useToast } from "@/components/ui/use-toast";
 import {
   listPasskeys, enrollPasskey, verifyPasskey, renamePasskey,
   setDefaultPasskey, removePasskey, probePasskeySupport, PasskeyError,
+  attachSessionToPasskey,
   type PasskeyRecord,
 } from "@/lib/passkey-manager";
 import { supabase } from "@/integrations/supabase/client";
