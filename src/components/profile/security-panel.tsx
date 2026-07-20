@@ -200,12 +200,12 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
     try {
       const challenge = new Uint8Array(32);
       crypto.getRandomValues(challenge);
-      const userId = new TextEncoder().encode(userEmail || "fitfusion-user");
+      const userHandle = new TextEncoder().encode(userEmail || "fitfusion-user");
       const cred = (await navigator.credentials.create({
         publicKey: {
           challenge,
           rp: { name: "FitFusion", id: window.location.hostname },
-          user: { id: userId, name: userEmail || "user", displayName: userEmail || "FitFusion User" },
+          user: { id: userHandle, name: userEmail || "user", displayName: userEmail || "FitFusion User" },
           pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
           authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required", residentKey: "preferred" },
           timeout: 60000,
@@ -216,6 +216,8 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
       localStorage.setItem(LS_BIOMETRIC_CRED, b64urlEncode(cred.rawId));
       if (userEmail) localStorage.setItem("ff.security.biometric.email", userEmail);
       setBiometricEnabled(true);
+      await persistFlag({ biometricEnabled: true });
+      await logEvent("biometric.enrolled", "Biometric authentication enrolled on this device");
       toast({ title: "Biometric enabled", description: "You can now sign in with your fingerprint or face on this device." });
     } catch (e: any) {
       toast({ title: "Setup failed", description: e?.message || "Biometric enrollment cancelled.", variant: "destructive" });
