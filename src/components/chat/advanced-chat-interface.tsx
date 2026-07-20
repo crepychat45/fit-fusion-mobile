@@ -484,15 +484,58 @@ export function AdvancedChatInterface({
     }
   };
 
-  const exportThread = () => {
+  const exportThread = async (format: "json" | "pdf" | "xlsx" = "json") => {
     if (!activeThread) return;
-    const blob = new Blob([JSON.stringify({ thread: activeThread, messages }, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `${activeThread.title.replace(/\W+/g, "-").toLowerCase()}-chat.json`;
-    anchor.click();
-    URL.revokeObjectURL(url);
+    const safeTitle = (activeThread.title || "chat").replace(/\W+/g, "-").toLowerCase();
+    const stamp = new Date().toISOString().slice(0, 10);
+    try {
+      if (format === "json") {
+        const blob = new Blob([JSON.stringify({ thread: activeThread, messages, exportedAt: new Date().toISOString() }, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = `${safeTitle}-${stamp}.json`; a.click();
+        URL.revokeObjectURL(url);
+      } else if (format === "xlsx") {
+        const XLSX = await import("xlsx");
+        const rows = messages.map((m) => ({
+          Time: new Date(m.created_at ?? Date.now()).toLocaleString(),
+          Sender: m.sender_role === "assistant" ? "Fit Bot AI" : m.sender_role === "system" ? "System" : m.sender_id === currentUser?.id ? "You" : "Other",
+          Message: m.content,
+          Attachments: jsonArray<any>(m.attachments as any).map((a) => a.name).join(", "),
+        }));
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(rows);
+        ws["!cols"] = [{ wch: 22 }, { wch: 14 }, { wch: 80 }, { wch: 30 }];
+        XLSX.utils.book_append_sheet(wb, ws, "Chat");
+        XLSX.writeFile(wb, `${safeTitle}-${stamp}.xlsx`);
+      } else if (format === "pdf") {
+        const { default: jsPDF } = await import("jspdf");
+        const { default: autoTable } = await import("jspdf-autotable");
+        const doc = new jsPDF({ unit: "pt", format: "a4" });
+        doc.setFontSize(16);
+        doc.text(activeThread.title || "FitFusion Chat", 40, 40);
+        doc.setFontSize(10);
+        doc.setTextColor(120);
+        doc.text(`Exported ${new Date().toLocaleString()} • ${messages.length} messages`, 40, 58);
+        autoTable(doc, {
+          startY: 80,
+          head: [["Time", "Sender", "Message"]],
+          body: messages.map((m) => [
+            new Date(m.created_at ?? Date.now()).toLocaleString(),
+            m.sender_role === "assistant" ? "Fit Bot AI" : m.sender_role === "system" ? "System" : m.sender_id === currentUser?.id ? "You" : "Other",
+            m.content + (jsonArray<any>(m.attachments as any).length ? `\n📎 ${jsonArray<any>(m.attachments as any).map((a) => a.name).join(", ")}` : ""),
+          ]),
+          styles: { fontSize: 9, cellPadding: 6, overflow: "linebreak" },
+          headStyles: { fillColor: [37, 99, 235] },
+          columnStyles: { 0: { cellWidth: 110 }, 1: { cellWidth: 70 }, 2: { cellWidth: "auto" } },
+        });
+        doc.save(`${safeTitle}-${stamp}.pdf`);
+      }
+      toast({ title: "Chat exported", description: format.toUpperCase() + " file downloaded." });
+    } catch (error) {
+      console.error("Export failed", error);
+      toast({ title: "Export failed", description: error instanceof Error ? error.message : "Try another format.", variant: "destructive" });
+    }
   };
 
   const togglePin = async () => {
