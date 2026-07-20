@@ -4,7 +4,7 @@ import { MobileNav } from "@/components/mobile-nav";
 import { ProfileEditor } from "@/components/profile-editor";
 import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, CreditCard, Settings, User, Bell, Trophy, Activity, Share2, Target, Sparkles } from "lucide-react";
+import { Shield, CreditCard, Settings, User, Bell, Trophy, Activity, Share2, Target, Sparkles, Apple, PlugZap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { userProfile } from "@/data/user";
 import { motion, AnimatePresence } from "framer-motion";
@@ -27,6 +27,11 @@ import { AwardsExtras } from "@/components/profile/awards-extras";
 import { StatsExtras } from "@/components/profile/stats-extras";
 import { ProfileInsightsWidget } from "@/components/profile/profile-insights-widget";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
+import { PersonalRecordsCard } from "@/components/profile/personal-records-card";
+import { BadgesCollection } from "@/components/profile/badges-collection";
+import { NutritionSummary } from "@/components/profile/nutrition-summary";
+import { GoalsTracker } from "@/components/profile/goals-tracker";
+import { DevicesPanel } from "@/components/profile/devices-panel";
 
 const Profile = () => {
   const { toast } = useToast();
@@ -190,11 +195,14 @@ const Profile = () => {
 
       <div className="px-4 py-5">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-4xl mx-auto">
-          <TabsList className="grid grid-cols-4 mb-5 bg-muted/40 backdrop-blur-sm rounded-xl h-10">
-            <TabsTrigger value="profile" className="text-xs rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><User className="h-3.5 w-3.5 mr-1" />Profile</TabsTrigger>
-            <TabsTrigger value="security" className="text-xs rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Shield className="h-3.5 w-3.5 mr-1" />Security</TabsTrigger>
-            <TabsTrigger value="achievements" className="text-xs rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Trophy className="h-3.5 w-3.5 mr-1" />Awards</TabsTrigger>
-            <TabsTrigger value="stats" className="text-xs rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Activity className="h-3.5 w-3.5 mr-1" />Stats</TabsTrigger>
+          <TabsList className="grid grid-cols-4 sm:grid-cols-7 mb-5 bg-muted/40 backdrop-blur-sm rounded-xl h-auto gap-1 p-1">
+            <TabsTrigger value="profile" className="text-[11px] rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><User className="h-3.5 w-3.5 mr-1" />Profile</TabsTrigger>
+            <TabsTrigger value="security" className="text-[11px] rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Shield className="h-3.5 w-3.5 mr-1" />Security</TabsTrigger>
+            <TabsTrigger value="achievements" className="text-[11px] rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Trophy className="h-3.5 w-3.5 mr-1" />Awards</TabsTrigger>
+            <TabsTrigger value="stats" className="text-[11px] rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Activity className="h-3.5 w-3.5 mr-1" />Stats</TabsTrigger>
+            <TabsTrigger value="nutrition" className="text-[11px] rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Apple className="h-3.5 w-3.5 mr-1" />Nutrition</TabsTrigger>
+            <TabsTrigger value="goals" className="text-[11px] rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Target className="h-3.5 w-3.5 mr-1" />Goals</TabsTrigger>
+            <TabsTrigger value="devices" className="text-[11px] rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><PlugZap className="h-3.5 w-3.5 mr-1" />Devices</TabsTrigger>
           </TabsList>
 
           <AnimatePresence mode="wait">
