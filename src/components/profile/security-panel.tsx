@@ -246,9 +246,11 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
     }
   }
 
-  function removeBiometric() {
+  async function removeBiometric() {
     localStorage.removeItem(LS_BIOMETRIC_CRED);
     setBiometricEnabled(false);
+    await persistFlag({ biometricEnabled: false });
+    await logEvent("biometric.removed", "Biometric authentication removed");
     toast({ title: "Biometric removed" });
   }
 
@@ -268,13 +270,17 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
       setTwoFAEnabled(true);
       setSetupSecret(null);
       setCode("");
+      await persistFlag({ twoFAEnabled: true, twoFAEnrolledAt: new Date().toISOString() });
+      await logEvent("2fa.enabled", "Two-factor authentication enabled");
       toast({ title: "Two-factor enabled 🔐", description: "Codes will be required at sign-in." });
     } finally { setVerifying(false); }
   }
-  function disable2FA() {
+  async function disable2FA() {
     localStorage.removeItem(LS_2FA_ENABLED);
     localStorage.removeItem(LS_2FA_SECRET);
     setTwoFAEnabled(false);
+    await persistFlag({ twoFAEnabled: false });
+    await logEvent("2fa.disabled", "Two-factor authentication disabled");
     toast({ title: "Two-factor disabled" });
   }
 
@@ -288,10 +294,12 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
       redirectTo: `${window.location.origin}/reset-password`,
     });
     if (error) return toast({ title: "Failed", description: error.message, variant: "destructive" });
+    await logEvent("password.reset_sent", `Password reset email sent to ${userEmail}`);
     toast({ title: "Reset link sent", description: `Check ${userEmail}` });
   }
 
   async function signOutAll() {
+    await logEvent("session.signout_all", "Signed out of all devices");
     await supabase.auth.signOut({ scope: "global" as any });
     toast({ title: "Signed out of all devices" });
   }
