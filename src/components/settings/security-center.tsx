@@ -376,139 +376,30 @@ export function SecurityCenter() {
         </Card>
       </motion.div>
 
-      {/* Enhanced Authentication Methods */}
+      {/* Real Advanced Authentication (2FA / Passkey / Magic link) */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
+        <AdvancedAuthentication />
+      </motion.div>
+
+      {/* Device Trust & Auto-Lock */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.25 }}
+      >
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Key className="h-5 w-5" />
-              Advanced Authentication
+              <ShieldCheck className="h-5 w-5" />
+              Device & Session
             </CardTitle>
-            <CardDescription>
-              Multiple layers of authentication for ultimate security
-            </CardDescription>
+            <CardDescription>Trust and inactivity behaviour</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Two-Factor Authentication */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Smartphone className="h-4 w-4 text-primary" />
-                  <div>
-                    <p className="font-medium">Two-Factor Authentication</p>
-                    <p className="text-sm text-muted-foreground">
-                      TOTP-based authentication with backup codes
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {twoFactorEnabled && (
-                    <Badge variant="default" className="text-xs">
-                      <CheckCircle className="h-3 w-3 mr-1" />
-                      Active
-                    </Badge>
-                  )}
-                  <Switch
-                    checked={twoFactorEnabled}
-                    onCheckedChange={
-                      twoFactorEnabled ? setTwoFactorEnabled : enableTwoFactor
-                    }
-                  />
-                </div>
-              </div>
-
-              <AnimatePresence>
-                {showQRCode && !twoFactorEnabled && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="bg-muted/50 p-4 rounded-lg border-2 border-dashed border-muted-foreground/20"
-                  >
-                    <div className="flex items-center justify-center mb-3">
-                      <QrCode className="h-16 w-16 text-muted-foreground" />
-                    </div>
-                    <p className="text-center text-sm text-muted-foreground mb-3">
-                      Scan this QR code with your authenticator app
-                    </p>
-                    <div className="space-y-2">
-                      <Label htmlFor="verification-code">
-                        Verification Code
-                      </Label>
-                      <Input
-                        id="verification-code"
-                        placeholder="Enter 6-digit code"
-                        value={verificationCode}
-                        onChange={(e) => setVerificationCode(e.target.value)}
-                        maxLength={6}
-                      />
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Biometric Authentication */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Fingerprint className="h-4 w-4 text-primary" />
-                <div>
-                  <p className="font-medium">Biometric Authentication</p>
-                  <p className="text-sm text-muted-foreground">
-                    Fingerprint, Face ID, and voice recognition
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                {biometricEnabled && (
-                  <Badge variant="default" className="text-xs">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Enabled
-                  </Badge>
-                )}
-                <Switch
-                  checked={biometricEnabled}
-                  onCheckedChange={
-                    biometricEnabled ? setBiometricEnabled : enableBiometric
-                  }
-                />
-              </div>
-            </div>
-
-            {/* Passwordless Login */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <UserCheck className="h-4 w-4 text-primary" />
-                <div>
-                  <p className="font-medium">Passwordless Login</p>
-                  <p className="text-sm text-muted-foreground">
-                    Magic links and WebAuthn support
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                {passwordlessLogin && (
-                  <Badge variant="default" className="text-xs">
-                    <CheckCircle className="h-3 w-3 mr-1" />
-                    Active
-                  </Badge>
-                )}
-                <Switch
-                  checked={passwordlessLogin}
-                  onCheckedChange={
-                    passwordlessLogin
-                      ? setPasswordlessLogin
-                      : enablePasswordlessLogin
-                  }
-                />
-              </div>
-            </div>
-
-            {/* Device Trust */}
+          <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <ShieldCheck className="h-4 w-4 text-primary" />
@@ -521,8 +412,6 @@ export function SecurityCenter() {
               </div>
               <Switch checked={deviceTrust} onCheckedChange={setDeviceTrust} />
             </div>
-
-            {/* Auto-Lock */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Lock className="h-4 w-4 text-primary" />
@@ -541,6 +430,7 @@ export function SecurityCenter() {
           </CardContent>
         </Card>
       </motion.div>
+
 
       {/* Security Recommendations */}
       <motion.div
