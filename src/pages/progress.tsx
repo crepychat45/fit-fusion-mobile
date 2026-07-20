@@ -12,6 +12,7 @@ import {
   Clock, Zap, Trophy, Star, Heart, Brain, LineChart, PieChart, Download, Share2, Sparkles,
 } from "lucide-react";
 import { ProgressChart } from "@/components/progress-chart";
+import { SessionHistory } from "@/components/progress/session-history";
 
 const ProgressPage = () => {
   const { toast } = useToast();
