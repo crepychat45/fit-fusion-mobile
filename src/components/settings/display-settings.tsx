@@ -162,70 +162,105 @@ export function DisplaySettings() {
     );
   };
 
+  const [readingRuler, setReadingRuler] = useState<boolean>(() => {
+    try { return localStorage.getItem("fitfusion-reading-ruler") === "1"; } catch { return false; }
+  });
+  const [density, setDensity] = useState<"cozy" | "comfortable" | "compact">(() => {
+    try {
+      return (localStorage.getItem("fitfusion-density") as any) || "comfortable";
+    } catch { return "comfortable"; }
+  });
+
+  useEffect(() => {
+    document.documentElement.dataset.density = density;
+    try { localStorage.setItem("fitfusion-density", density); } catch { /* noop */ }
+  }, [density]);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("reading-ruler", readingRuler);
+    try { localStorage.setItem("fitfusion-reading-ruler", readingRuler ? "1" : "0"); } catch { /* noop */ }
+  }, [readingRuler]);
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Theme Settings</CardTitle>
-          <CardDescription>Customize the appearance of the app</CardDescription>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            Display Lab
+            <Badge variant="secondary" className="ml-1 text-[10px]">New</Badge>
+          </CardTitle>
+          <CardDescription>
+            Fine-grained controls that layer on top of your theme &amp; accent selection above.
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <div className="mb-2 text-sm font-medium">App Theme</div>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant={theme === "light" ? "default" : "outline"}
-                className="flex items-center gap-2"
-                onClick={() => handleThemeChange("light")}
-              >
-                <Sun className="h-4 w-4" />
-                Light
-              </Button>
-              <Button
-                variant={theme === "dark" ? "default" : "outline"}
-                className="flex items-center gap-2"
-                onClick={() => handleThemeChange("dark")}
-              >
-                <Moon className="h-4 w-4" />
-                Dark
-              </Button>
-              <Button
-                variant={theme === "system" ? "default" : "outline"}
-                className="flex items-center gap-2"
-                onClick={() => handleThemeChange("system")}
-              >
-                <Monitor className="h-4 w-4" />
-                System
-              </Button>
+            <div className="mb-2 text-sm font-medium flex items-center gap-2">
+              <LayoutGrid className="h-4 w-4 text-muted-foreground" />
+              Interface Density
             </div>
+            <div className="flex flex-wrap gap-2">
+              {(["cozy", "comfortable", "compact"] as const).map((d) => (
+                <Button
+                  key={d}
+                  variant={density === d ? "default" : "outline"}
+                  size="sm"
+                  className="capitalize"
+                  onClick={() => {
+                    setDensity(d);
+                    toast({ title: "Density updated", description: `Interface set to ${d}.` });
+                  }}
+                >
+                  {d}
+                </Button>
+              ))}
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Adjusts padding across cards, lists, and navigation.
+            </p>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Ruler className="h-4 w-4 text-muted-foreground" />
+              <div>
+                <p className="font-medium">Reading Ruler</p>
+                <p className="text-xs text-muted-foreground">
+                  Follows your cursor to reduce line-tracking fatigue.
+                </p>
+              </div>
+            </div>
+            <Switch checked={readingRuler} onCheckedChange={setReadingRuler} />
           </div>
 
           <div>
-            <div className="mb-2 text-sm font-medium">Font Size</div>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant={textSize === "small" ? "default" : "outline"}
-                className="w-24"
-                onClick={() => handleFontSizeChange("small")}
-              >
-                Small
-              </Button>
-              <Button
-                variant={textSize === "medium" ? "default" : "outline"}
-                className="w-24"
-                onClick={() => handleFontSizeChange("medium")}
-              >
-                Medium
-              </Button>
-              <Button
-                variant={textSize === "large" ? "default" : "outline"}
-                className="w-24"
-                onClick={() => handleFontSizeChange("large")}
-              >
-                Large
-              </Button>
+            <div className="mb-2 text-sm font-medium flex items-center gap-2">
+              <Type className="h-4 w-4 text-muted-foreground" />
+              Preferred Font Family
             </div>
+            <Select
+              value={fontFamily}
+              onValueChange={(value) => {
+                setFontFamily(value);
+                document.documentElement.style.setProperty("--font-family", value);
+                try { localStorage.setItem("fitfusion-font-family", value); } catch { /* noop */ }
+                toast({ title: "Font Changed", description: `Font family set to ${value}.` });
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select Font" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Inter">Inter</SelectItem>
+                <SelectItem value="Roboto">Roboto</SelectItem>
+                <SelectItem value="Open Sans">Open Sans</SelectItem>
+                <SelectItem value="Montserrat">Montserrat</SelectItem>
+                <SelectItem value="system-ui">System Default</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+
 
           <div>
             <div className="mb-2 text-sm font-medium">Font Family</div>
