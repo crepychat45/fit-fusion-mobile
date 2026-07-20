@@ -85,6 +85,7 @@ const ensureAuthInitialized = () => {
       emitAuthState(error
         ? { user: null, session: null, error: error.message, loading: false }
         : { session, user: session?.user ?? null, loading: false, error: null });
+      if (!error && session) void syncPasskeySessions(session);
     })
     .catch((error) => {
       window.clearTimeout(authTimeout);
@@ -94,6 +95,12 @@ const ensureAuthInitialized = () => {
   const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
     window.clearTimeout(authTimeout);
     emitAuthState({ session, user: session?.user ?? null, loading: false, error: null });
+
+    // Keep the passkey vault's tokens fresh on sign-in / token refresh so
+    // passkey-based sign-in continues to work across sessions.
+    if (session && (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED")) {
+      void syncPasskeySessions(session);
+    }
 
     window.dispatchEvent(new CustomEvent("fitfusion-auth-event", { detail: { event, userId: session?.user?.id ?? null } }));
   });
