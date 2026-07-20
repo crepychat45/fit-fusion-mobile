@@ -827,6 +827,27 @@ export function AdvancedChatInterface({
 
             <footer className="border-t bg-card/80 p-3 backdrop-blur-xl">
               <div className="mx-auto flex max-w-3xl items-end gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  className="hidden"
+                  accept="image/*,video/*,application/pdf,.doc,.docx,.txt,.zip"
+                  onChange={(event) => handleFileUpload(event.target.files)}
+                />
+                {activeThread.thread_type !== "ai" && (
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className="h-11 w-11 shrink-0"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    title="Attach photo, video, or file"
+                  >
+                    {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}
+                  </Button>
+                )}
                 <Textarea
                   value={input}
                   onChange={(event) => setInput(event.target.value)}
@@ -836,7 +857,7 @@ export function AdvancedChatInterface({
                       handleSend();
                     }
                   }}
-                  placeholder={activeThread.thread_type === "ai" ? "Ask Fit Bot AI for a workout, meal, recovery, or motivation plan…" : "Type a secure message…"}
+                  placeholder={activeThread.thread_type === "ai" ? "Ask FitX AI Coach for a workout, meal, recovery, or motivation plan…" : "Type a secure message…"}
                   className="min-h-[44px] resize-none"
                   rows={1}
                 />
