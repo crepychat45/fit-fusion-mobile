@@ -43,6 +43,18 @@ const SystemHealthPanel = lazy(() => import("./system-health-panel").then(m => (
 const PwaVaultPanel = lazy(() => import("./pwa-vault-panel").then(m => ({ default: m.PwaVaultPanel })));
 const NetworkAdaptiveBanner = lazy(() => import("./network-adaptive-banner").then(m => ({ default: m.NetworkAdaptiveBanner })));
 const SettingsCopilot = lazy(() => import("./settings-copilot").then(m => ({ default: m.SettingsCopilot })));
+const AccountExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.AccountExtras })));
+const SecurityExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.SecurityExtras })));
+const DisplayExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.DisplayExtras })));
+const PrivacyExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.PrivacyExtras })));
+const NotificationExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.NotificationExtras })));
+const UnitsExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.UnitsExtras })));
+const ChatExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.ChatExtras })));
+const UpdateExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.UpdateExtras })));
+const EnhancedValidationExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.EnhancedValidationExtras })));
+const DeveloperExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.DeveloperExtras })));
+const DataExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.DataExtras })));
+const AboutExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.AboutExtras })));
 
 const PanelLoader = () => (
   <div className="flex items-center justify-center py-12">
@@ -401,42 +413,60 @@ export function SettingsContainer() {
             </TabsContent>
 
             <TabsContent value="account" className="mt-0">
-              <L><AccountSettings /></L>
+              <div className="space-y-6">
+                <L><AccountSettings /></L>
+                <L><AccountExtras /></L>
+              </div>
             </TabsContent>
 
             <TabsContent value="security" className="mt-0">
-              <L><SecurityCenter /></L>
+              <div className="space-y-6">
+                <L><SecurityCenter /></L>
+                <L><SecurityExtras /></L>
+              </div>
             </TabsContent>
 
             <TabsContent value="display" className="mt-0">
               <div className="space-y-6">
                 <L><AppearancePanel /></L>
                 <L><DisplaySettings /></L>
+                <L><DisplayExtras /></L>
               </div>
             </TabsContent>
 
             <TabsContent value="privacy" className="mt-0">
-              <L><PrivacySettings /></L>
+              <div className="space-y-6">
+                <L><PrivacySettings /></L>
+                <L><PrivacyExtras /></L>
+              </div>
             </TabsContent>
 
             <TabsContent value="notifications" className="mt-0">
               <div className="space-y-6">
                 <L><NotificationPreferences /></L>
                 <L><NotificationSettings /></L>
+                <L><NotificationExtras /></L>
               </div>
             </TabsContent>
 
             <TabsContent value="units" className="mt-0">
-              <L><UnitPreferences /></L>
+              <div className="space-y-6">
+                <L><UnitPreferences /></L>
+                <L><UnitsExtras /></L>
+              </div>
             </TabsContent>
 
             <TabsContent value="chat" className="mt-0">
-              <L><ChatSettingsPanel /></L>
+              <div className="space-y-6">
+                <L><ChatSettingsPanel /></L>
+                <L><ChatExtras /></L>
+              </div>
             </TabsContent>
 
             <TabsContent value="updates" className="mt-0">
               <div className="space-y-6">
                 <L><VersionControlPanel /></L>
+                <L><UpdateExtras /></L>
                 <L><PwaVaultPanel /></L>
                 <L><UnifiedUpdateManager /></L>
               </div>
@@ -445,12 +475,15 @@ export function SettingsContainer() {
 
 
 
+
             <TabsContent value="enhanced" className="mt-0">
               <div className="space-y-6">
+                <L><EnhancedValidationExtras /></L>
                 <L><PerformanceMetricsPanel /></L>
                 <L><AdvancedSettingsReset /></L>
                 <L><SettingsBackupRestore /></L>
                 <L><DataManagementPanel /></L>
+
 
                 <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 p-6 rounded-lg border">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -495,13 +528,18 @@ export function SettingsContainer() {
             </TabsContent>
 
             <TabsContent value="developer" className="mt-0">
-              <L><DeveloperOptions /></L>
+              <div className="space-y-6">
+                <L><DeveloperOptions /></L>
+                <L><DeveloperExtras /></L>
+              </div>
             </TabsContent>
 
             <TabsContent value="data" className="mt-0">
               <div className="space-y-6">
                 <L><DataBackupPanel /></L>
+                <L><DataExtras /></L>
                 <L><SystemHealthPanel /></L>
+
 
                 <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 p-6 rounded-lg border">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -546,8 +584,12 @@ export function SettingsContainer() {
             </TabsContent>
 
             <TabsContent value="about" className="mt-0">
-              <L><AboutPage /></L>
+              <div className="space-y-6">
+                <L><AboutPage /></L>
+                <L><AboutExtras /></L>
+              </div>
             </TabsContent>
+
 
           </Tabs>
         </motion.div>
