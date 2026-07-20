@@ -138,7 +138,12 @@ export function AdvancedChatInterface({
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [aiStreaming, setAiStreaming] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [showUserDetails, setShowUserDetails] = useState(false);
+  const [userDetails, setUserDetails] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const notifiedIdsRef = useRef<Set<string>>(new Set());
 
   const activeThread = useMemo(
     () => threads.find((thread) => thread.id === activeThreadId) ?? null,
