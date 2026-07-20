@@ -683,17 +683,29 @@ export function AdvancedChatInterface({
                     <X className="h-4 w-4" />
                   </Button>
                 )}
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={getThreadAvatar(activeThread, currentUser.id) ?? undefined} />
-                  <AvatarFallback>{getThreadInitial(activeThread)}</AvatarFallback>
-                </Avatar>
-                <div className="min-w-0">
-                  <h3 className="truncate font-semibold">{activeThread.title}</h3>
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                    <span>{activeThread.thread_type === "ai" ? "Fast AI coach" : `${activeThread.participant_ids.length} participant${activeThread.participant_ids.length === 1 ? "" : "s"}`}</span>
-                    <Badge variant="outline" className="h-5 px-1.5 text-[10px]"><ShieldCheck className="mr-1 h-3 w-3" />{securityLevel}</Badge>
+                <button
+                  type="button"
+                  onClick={openUserDetails}
+                  className="flex min-w-0 items-center gap-3 rounded-lg px-1 py-0.5 text-left transition hover:bg-muted/60"
+                  title={activeThread.thread_type === "ai" ? "About FitX AI Coach" : "View user details"}
+                >
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={activeThread.thread_type === "ai" ? fitBotAvatar : (getThreadAvatar(activeThread, currentUser.id) ?? undefined)} />
+                    <AvatarFallback className={activeThread.thread_type === "ai" ? "bg-gradient-to-br from-blue-500 to-purple-600 text-white" : ""}>
+                      {activeThread.thread_type === "ai" ? "AI" : getThreadInitial(activeThread)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <h3 className="truncate font-semibold flex items-center gap-1">
+                      {activeThread.thread_type === "ai" ? "FitX AI Coach" : activeThread.title}
+                      <Info className="h-3 w-3 text-muted-foreground" />
+                    </h3>
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <span>{activeThread.thread_type === "ai" ? "Fast multilingual AI coach" : `${activeThread.participant_ids.length} participant${activeThread.participant_ids.length === 1 ? "" : "s"}`}</span>
+                      <Badge variant="outline" className="h-5 px-1.5 text-[10px]"><ShieldCheck className="mr-1 h-3 w-3" />{securityLevel}</Badge>
+                    </div>
                   </div>
-                </div>
+                </button>
               </div>
 
               <div className="flex items-center gap-1">
