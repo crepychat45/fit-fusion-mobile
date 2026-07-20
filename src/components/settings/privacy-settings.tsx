@@ -538,7 +538,7 @@ export function PrivacySettings() {
 
               <Button
                 variant="destructive"
-                onClick={handleDataDeletion}
+                onClick={requestDataDeletion}
                 className="w-full h-auto p-4 justify-start"
               >
                 <div className="text-left">
