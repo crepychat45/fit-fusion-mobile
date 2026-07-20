@@ -535,8 +535,9 @@ export function AdvancedChatInterface({
           toast({ title: "File too large", description: `${file.name} exceeds 25MB`, variant: "destructive" });
           continue;
         }
-        const ext = file.name.split(".").pop() || "bin";
-        const path = `chat/${currentUser.id}/${activeThread.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const ext = (file.name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "");
+        // IMPORTANT: RLS on storage requires the first folder to equal auth.uid()
+        const path = `${currentUser.id}/chat/${activeThread.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
         const { error: upErr } = await supabase.storage.from("fitusion.data").upload(path, file, {
           cacheControl: "3600",
           upsert: false,
