@@ -2,6 +2,26 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { listPasskeys, attachSessionToPasskey } from "@/lib/passkey-manager";
+
+// Keep the encrypted passkey vault's session tokens in sync with Supabase's
+// rotating refresh tokens. Without this, a stashed refresh_token becomes
+// invalid after the first refresh and passkey sign-in silently falls back
+// to a magic link email.
+async function syncPasskeySessions(session: Session | null) {
+  if (!session?.refresh_token || !session.user?.email) return;
+  try {
+    const list = await listPasskeys();
+    const email = session.user.email.toLowerCase();
+    const matches = list.filter((p) => p.email.toLowerCase() === email);
+    for (const p of matches) {
+      await attachSessionToPasskey(p.id, {
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+      });
+    }
+  } catch { /* non-fatal */ }
+}
 
 interface AuthState {
   user: User | null;
