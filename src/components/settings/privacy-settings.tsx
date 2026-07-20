@@ -570,6 +570,17 @@ export function PrivacySettings() {
           </CardContent>
         </Card>
       </motion.div>
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        onConfirm={handleDataDeletion}
+        title="Delete all your data?"
+        description="This permanently removes your personal data from this device and the connected account. This action cannot be undone."
+        confirmLabel="Delete permanently"
+        destructive
+        typeToConfirm="DELETE"
+      />
     </div>
   );
 }
