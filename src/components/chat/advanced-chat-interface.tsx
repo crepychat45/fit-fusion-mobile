@@ -762,9 +762,13 @@ export function AdvancedChatInterface({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={togglePin}><Pin className="mr-2 h-4 w-4" />{activeThread.is_pinned ? "Unpin" : "Pin"}</DropdownMenuItem>
-                    <DropdownMenuItem onClick={exportThread}><Download className="mr-2 h-4 w-4" />Export chat</DropdownMenuItem>
-                    <DropdownMenuItem onClick={archiveThread}><Archive className="mr-2 h-4 w-4" />Archive</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setShowBgPicker(true)}><ImageIcon className="mr-2 h-4 w-4" />Change background</DropdownMenuItem>
                     <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => exportThread("json")}><Download className="mr-2 h-4 w-4" />Export as JSON</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => exportThread("pdf")}><FileText className="mr-2 h-4 w-4" />Export as PDF</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => exportThread("xlsx")}><FileText className="mr-2 h-4 w-4" />Export as Excel</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={archiveThread}><Archive className="mr-2 h-4 w-4" />Archive</DropdownMenuItem>
                     <DropdownMenuItem onClick={clearThread}><Trash2 className="mr-2 h-4 w-4" />Clear messages</DropdownMenuItem>
                     {activeThread.thread_type !== "ai" && <DropdownMenuItem onClick={deleteThread} className="text-destructive"><Trash2 className="mr-2 h-4 w-4" />Delete chat</DropdownMenuItem>}
                   </DropdownMenuContent>
