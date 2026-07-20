@@ -108,6 +108,13 @@ const Index = () => {
             </div>
           </motion.div>
 
+          {/* AI Daily Briefing — new v7.3 */}
+          <motion.div variants={fadeUp} className="px-4">
+            <Suspense fallback={<HomeSectionFallback />}>
+              <AiDailyBriefingWidget />
+            </Suspense>
+          </motion.div>
+
           {/* Quick Start Workout */}
           <motion.div variants={fadeUp} className="px-4">
             <div className="rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 to-accent/10 backdrop-blur-xl shadow-lg p-4">
