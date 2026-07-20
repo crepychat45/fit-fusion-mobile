@@ -70,12 +70,18 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [capsLock, setCapsLock] = useState(false);
 
-  useEffect(() => {
-    const hasWebAuthn =
-      typeof window !== "undefined" && !!(window as any).PublicKeyCredential;
-    setBiometricAvailable(hasWebAuthn);
+  // Magic link dialog (with alternative email support)
+  const [magicOpen, setMagicOpen] = useState(false);
+  const [magicPrimary, setMagicPrimary] = useState<string>(""); // account email (from passkey or form)
+  const [useAltEmail, setUseAltEmail] = useState(false);
+  const [altEmail, setAltEmail] = useState("");
+  const [magicContext, setMagicContext] = useState<"passkey" | "manual">("manual");
 
+  useEffect(() => {
     (async () => {
+      const probe = await probePasskeySupport();
+      setBiometricAvailable(probe.supported && probe.platformAvailable);
+
       try {
         const list = await listPasskeys();
         if (list.length > 0) {
