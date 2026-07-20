@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 import { userProfile } from "@/data/user";
 import { useNavigate } from "react-router-dom";
+import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
+import { useProfile } from "@/hooks/use-profile";
 
 interface Achievement {
   id: string;
