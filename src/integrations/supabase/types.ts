@@ -364,10 +364,12 @@ export type Database = {
         Row: {
           accessibility_settings: Json
           account_settings: Json
+          appearance_settings: Json
           chat_settings: Json
           created_at: string
           developer_settings: Json
           display_settings: Json
+          local_kv: Json
           notification_settings: Json
           privacy_settings: Json
           security_settings: Json
@@ -379,10 +381,12 @@ export type Database = {
         Insert: {
           accessibility_settings?: Json
           account_settings?: Json
+          appearance_settings?: Json
           chat_settings?: Json
           created_at?: string
           developer_settings?: Json
           display_settings?: Json
+          local_kv?: Json
           notification_settings?: Json
           privacy_settings?: Json
           security_settings?: Json
@@ -394,10 +398,12 @@ export type Database = {
         Update: {
           accessibility_settings?: Json
           account_settings?: Json
+          appearance_settings?: Json
           chat_settings?: Json
           created_at?: string
           developer_settings?: Json
           display_settings?: Json
+          local_kv?: Json
           notification_settings?: Json
           privacy_settings?: Json
           security_settings?: Json
