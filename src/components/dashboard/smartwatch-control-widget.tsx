@@ -20,6 +20,7 @@ import {
   Volume2,
   Play,
   Square,
+  Phone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -355,9 +356,14 @@ export const SmartwatchControlWidget: React.FC = () => {
       </AnimatePresence>
 
       {/* Quick actions */}
-      <div className="px-4 pb-3 grid grid-cols-4 gap-2">
+      <div className="px-4 pb-3 grid grid-cols-5 gap-2">
         <ActionTile icon={<MapPin className="h-4 w-4" />} label="Find" onClick={findMyWatch} active={pinging} />
         <ActionTile icon={<Zap className="h-4 w-4" />} label="Sync" onClick={quickSync} />
+        <ActionTile
+          icon={<Phone className="h-4 w-4" />}
+          label="Dial"
+          onClick={() => navigate("/smartwatch-settings")}
+        />
         <ActionTile
           icon={state.connected ? <BluetoothConnected className="h-4 w-4" /> : <Bluetooth className="h-4 w-4" />}
           label={state.connected ? "Off" : "Pair"}
