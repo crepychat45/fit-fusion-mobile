@@ -43,7 +43,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { ConfirmDialog } from "./confirm-dialog";
+
 export function PrivacySettings() {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { toast } = useToast();
   const [profileVisibility, setProfileVisibility] = useState("friends");
   const [dataCollection, setDataCollection] = useState(true);
@@ -114,25 +117,18 @@ export function PrivacySettings() {
   };
 
   const handleDataDeletion = async () => {
-    const confirmation = window.confirm(
-      "Are you sure you want to delete all your data? This action cannot be undone.",
-    );
-
-    if (!confirmation) return;
-
     toast({
       title: "🗑️ Deleting your data",
       description: "Permanently removing all personal information...",
     });
-
-    // Simulate data deletion
     await new Promise((resolve) => setTimeout(resolve, 2000));
-
     toast({
       title: "✅ Data deleted",
       description: "All your personal data has been permanently removed.",
     });
   };
+
+  const requestDataDeletion = () => setShowDeleteConfirm(true);
 
   const resetPrivacySettings = () => {
     setProfileVisibility("friends");
