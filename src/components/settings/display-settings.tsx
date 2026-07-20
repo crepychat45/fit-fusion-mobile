@@ -12,14 +12,12 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
 import {
-  Moon,
-  Sun,
-  Monitor,
   Eye,
   LayoutGrid,
-  PanelLeft,
+  Ruler,
+  Sparkles,
   Type,
-  Lightbulb,
+  Palette,
 } from "lucide-react";
 import {
   Select,
