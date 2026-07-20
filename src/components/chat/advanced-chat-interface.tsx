@@ -100,6 +100,13 @@ const quickPrompts = [
   "Build a weekly fat-loss routine",
 ];
 
+const mergeMessage = (rows: ChatMessageRow[], row: ChatMessageRow) => {
+  if (rows.some((message) => message.id === row.id)) {
+    return rows.map((message) => (message.id === row.id ? row : message));
+  }
+  return [...rows, row];
+};
+
 export function AdvancedChatInterface({
   user: providedUser,
   securityLevel = "high",
@@ -335,8 +342,7 @@ export function AdvancedChatInterface({
       }
 
       const finalText = assistantText.trim() || "I’m ready — ask me about your next workout, recovery, or nutrition plan.";
-      setMessages((prev) => prev.filter((message) => message.id !== tempId));
-      await addChatMessage({
+      const savedAssistant = await addChatMessage({
         threadId,
         content: finalText,
         senderRole: "assistant",
@@ -344,19 +350,22 @@ export function AdvancedChatInterface({
         recipientId: currentUser.id,
         metadata: { source: "lovable_ai" },
       });
+      setMessages((prev) => prev.map((message) => (message.id === tempId ? savedAssistant : message)));
     } catch (error) {
       console.error("AI chat failed", error);
       toast({ title: "Fit Bot AI failed", description: error instanceof Error ? error.message : "Try again.", variant: "destructive" });
-      await addChatMessage({
+      const fallback = await addChatMessage({
         threadId,
         content: "I could not connect to Fit Bot AI right now. Please try again in a moment.",
         senderRole: "assistant",
         senderId: null,
         recipientId: currentUser.id,
       }).catch(console.error);
+      if (fallback) setMessages((prev) => mergeMessage(prev.filter((message) => !message.id.startsWith("stream-")), fallback));
     } finally {
       setAiStreaming(false);
       loadThreads(threadId).catch(console.error);
+      listChatMessages(threadId).then(setMessages).catch(console.error);
     }
   };
 
@@ -368,7 +377,7 @@ export function AdvancedChatInterface({
 
     try {
       const recipientId = activeThread.participant_ids.find((id) => id !== currentUser.id) ?? null;
-      await addChatMessage({
+      const savedUserMessage = await addChatMessage({
         threadId: activeThread.id,
         content,
         senderRole: "user",
@@ -376,6 +385,7 @@ export function AdvancedChatInterface({
         recipientId: activeThread.thread_type === "direct" ? recipientId : null,
         metadata: { encrypted: true, securityLevel },
       });
+      setMessages((prev) => mergeMessage(prev, savedUserMessage));
       await loadThreads(activeThread.id);
       if (activeThread.thread_type === "ai") await callAi(activeThread.id, content);
     } catch (error) {
