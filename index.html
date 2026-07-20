@@ -99,37 +99,83 @@
     </noscript>
     <div id="root">
       <div class="ff-boot">
+        <div class="ff-grid"></div>
         <div class="ff-orb ff-orb-1"></div>
         <div class="ff-orb ff-orb-2"></div>
-        <div class="ff-logo-wrap">
-          <div class="ff-ring"></div>
-          <div class="ff-ring ff-ring-2"></div>
-          <div class="ff-logo">
-            <svg viewBox="0 0 48 48" width="44" height="44" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M6 24h6l4-12 8 24 4-12h14"/>
+        <div class="ff-orb ff-orb-3"></div>
+
+        <div class="ff-stage">
+          <svg class="ff-rings" viewBox="0 0 140 140" width="150" height="150" aria-hidden="true">
+            <defs>
+              <linearGradient id="ff-g1" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#ec4899"/>
+                <stop offset="100%" stop-color="#f97316"/>
+              </linearGradient>
+              <linearGradient id="ff-g2" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#a78bfa"/>
+                <stop offset="100%" stop-color="#3b82f6"/>
+              </linearGradient>
+              <linearGradient id="ff-g3" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#22d3ee"/>
+                <stop offset="100%" stop-color="#10b981"/>
+              </linearGradient>
+            </defs>
+            <circle cx="70" cy="70" r="58" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="8"/>
+            <circle cx="70" cy="70" r="45" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="8"/>
+            <circle cx="70" cy="70" r="32" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="8"/>
+            <circle class="ff-r ff-r1" cx="70" cy="70" r="58" fill="none" stroke="url(#ff-g1)" stroke-width="8" stroke-linecap="round" pathLength="100" stroke-dasharray="100" transform="rotate(-90 70 70)"/>
+            <circle class="ff-r ff-r2" cx="70" cy="70" r="45" fill="none" stroke="url(#ff-g2)" stroke-width="8" stroke-linecap="round" pathLength="100" stroke-dasharray="100" transform="rotate(-90 70 70)"/>
+            <circle class="ff-r ff-r3" cx="70" cy="70" r="32" fill="none" stroke="url(#ff-g3)" stroke-width="8" stroke-linecap="round" pathLength="100" stroke-dasharray="100" transform="rotate(-90 70 70)"/>
+          </svg>
+          <div class="ff-core">
+            <svg viewBox="0 0 48 48" width="38" height="38" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 24h6l4-14 8 28 6-20 4 10h12"/>
             </svg>
           </div>
+          <span class="ff-spark ff-s1"></span>
+          <span class="ff-spark ff-s2"></span>
+          <span class="ff-spark ff-s3"></span>
         </div>
-        <p class="ff-title">FitFusion</p>
-        <p class="ff-sub">Powering up your session…</p>
+
+        <h1 class="ff-title" aria-label="FitxFusion">
+          <span style="--i:0">F</span><span style="--i:1">i</span><span style="--i:2">t</span><span class="ff-x" style="--i:3">x</span><span style="--i:4">F</span><span style="--i:5">u</span><span style="--i:6">s</span><span style="--i:7">i</span><span style="--i:8">o</span><span style="--i:9">n</span>
+        </h1>
+        <p class="ff-sub">Igniting your workout engine…</p>
         <div class="ff-bar"><div class="ff-bar-fill"></div></div>
+
         <style>
-          .ff-boot{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:radial-gradient(circle at 20% 10%,#1a1a3a 0%,#0a0a1f 60%,#050510 100%);overflow:hidden;font-family:system-ui,-apple-system,sans-serif}
-          .ff-orb{position:absolute;border-radius:50%;filter:blur(60px);opacity:.6;animation:ff-float 6s ease-in-out infinite}
-          .ff-orb-1{width:280px;height:280px;background:radial-gradient(circle,#8b5cf6,transparent);top:10%;left:-10%}
-          .ff-orb-2{width:340px;height:340px;background:radial-gradient(circle,#ec4899,transparent);bottom:5%;right:-15%;animation-delay:-3s}
-          .ff-logo-wrap{position:relative;width:120px;height:120px;display:flex;align-items:center;justify-content:center}
-          .ff-ring{position:absolute;inset:0;border-radius:50%;border:2px solid transparent;border-top-color:#8b5cf6;border-right-color:#ec4899;animation:ff-spin 1.4s linear infinite}
-          .ff-ring-2{inset:10px;border-top-color:#3b82f6;border-right-color:transparent;border-bottom-color:#10b981;animation:ff-spin 2s linear infinite reverse}
-          .ff-logo{width:72px;height:72px;border-radius:22px;background:linear-gradient(135deg,#3b82f6,#8b5cf6,#ec4899);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 40px rgba(139,92,246,.5),inset 0 1px 0 rgba(255,255,255,.3);animation:ff-pulse 2s ease-in-out infinite}
-          .ff-title{margin:24px 0 4px;font-size:22px;font-weight:700;background:linear-gradient(135deg,#fff,#c4b5fd);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:.5px}
-          .ff-sub{margin:0;color:rgba(255,255,255,.5);font-size:13px}
-          .ff-bar{margin-top:18px;width:180px;height:3px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden}
-          .ff-bar-fill{width:40%;height:100%;border-radius:3px;background:linear-gradient(90deg,#3b82f6,#8b5cf6,#ec4899);animation:ff-slide 1.6s ease-in-out infinite}
-          @keyframes ff-spin{to{transform:rotate(360deg)}}
-          @keyframes ff-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
-          @keyframes ff-float{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-20px)}}
+          .ff-boot{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:radial-gradient(ellipse at 20% 10%,#1a1a3a 0%,#0a0a1f 55%,#050510 100%);overflow:hidden;font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:#fff}
+          .ff-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(139,92,246,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,.06) 1px,transparent 1px);background-size:38px 38px;mask-image:radial-gradient(circle at center,#000 30%,transparent 75%);-webkit-mask-image:radial-gradient(circle at center,#000 30%,transparent 75%);animation:ff-drift 12s linear infinite}
+          .ff-orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;animation:ff-float 7s ease-in-out infinite;pointer-events:none}
+          .ff-orb-1{width:300px;height:300px;background:radial-gradient(circle,#8b5cf6,transparent);top:6%;left:-12%}
+          .ff-orb-2{width:360px;height:360px;background:radial-gradient(circle,#ec4899,transparent);bottom:2%;right:-15%;animation-delay:-3s}
+          .ff-orb-3{width:220px;height:220px;background:radial-gradient(circle,#22d3ee,transparent);top:45%;left:60%;animation-delay:-1.5s;opacity:.35}
+          .ff-stage{position:relative;width:150px;height:150px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 12px 40px rgba(139,92,246,.35))}
+          .ff-rings{position:absolute;inset:0}
+          .ff-r{stroke-dashoffset:100;animation:ff-fill 1.6s cubic-bezier(.4,0,.2,1) forwards infinite}
+          .ff-r1{animation-delay:0s;--to:18}
+          .ff-r2{animation-delay:.15s;--to:32}
+          .ff-r3{animation-delay:.3s;--to:8}
+          .ff-core{position:relative;width:56px;height:56px;border-radius:18px;background:linear-gradient(135deg,#3b82f6,#8b5cf6 50%,#ec4899);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 28px rgba(139,92,246,.55),inset 0 1px 0 rgba(255,255,255,.35);animation:ff-heart 1.2s ease-in-out infinite}
+          .ff-spark{position:absolute;width:6px;height:6px;border-radius:50%;background:#fff;box-shadow:0 0 12px #fff,0 0 24px #a78bfa;top:50%;left:50%;margin:-3px 0 0 -3px;animation:ff-orbit 3.6s linear infinite}
+          .ff-s2{animation-duration:2.8s;animation-delay:-.9s;background:#22d3ee;box-shadow:0 0 12px #22d3ee}
+          .ff-s3{animation-duration:4.4s;animation-delay:-1.8s;background:#ec4899;box-shadow:0 0 12px #ec4899}
+          .ff-title{margin:26px 0 6px;font-size:26px;font-weight:800;letter-spacing:1.5px;display:flex;gap:1px}
+          .ff-title span{display:inline-block;background:linear-gradient(135deg,#fff,#c4b5fd 60%,#f0abfc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;opacity:0;transform:translateY(8px);animation:ff-letter .5s cubic-bezier(.34,1.56,.64,1) forwards;animation-delay:calc(var(--i) * 60ms + 200ms)}
+          .ff-title .ff-x{background:linear-gradient(135deg,#ec4899,#f97316);-webkit-background-clip:text;background-clip:text;text-shadow:0 0 24px rgba(236,72,153,.6)}
+          .ff-sub{margin:2px 0 0;color:rgba(255,255,255,.55);font-size:12px;letter-spacing:.5px;animation:ff-fade 1.4s ease-out .8s both}
+          .ff-bar{margin-top:20px;width:200px;height:4px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;position:relative}
+          .ff-bar-fill{position:absolute;inset:0;width:40%;border-radius:4px;background:linear-gradient(90deg,#3b82f6,#8b5cf6,#ec4899,#f97316);background-size:200% 100%;animation:ff-slide 1.4s ease-in-out infinite,ff-shimmer 2s linear infinite}
+          @keyframes ff-fill{0%{stroke-dashoffset:100}60%{stroke-dashoffset:var(--to,20)}100%{stroke-dashoffset:100}}
+          @keyframes ff-heart{0%,100%{transform:scale(1)}20%{transform:scale(1.12)}40%{transform:scale(.96)}60%{transform:scale(1.08)}}
+          @keyframes ff-orbit{from{transform:rotate(0deg) translateX(62px) rotate(0deg)}to{transform:rotate(360deg) translateX(62px) rotate(-360deg)}}
+          @keyframes ff-float{0%,100%{transform:translate(0,0)}50%{transform:translate(24px,-22px)}}
+          @keyframes ff-drift{from{background-position:0 0,0 0}to{background-position:38px 38px,38px 38px}}
           @keyframes ff-slide{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}
+          @keyframes ff-shimmer{to{background-position:200% 0}}
+          @keyframes ff-letter{to{opacity:1;transform:translateY(0)}}
+          @keyframes ff-fade{from{opacity:0}to{opacity:1}}
+          @media (prefers-reduced-motion:reduce){.ff-r,.ff-core,.ff-spark,.ff-orb,.ff-grid,.ff-bar-fill,.ff-title span{animation:none!important}.ff-title span{opacity:1;transform:none}}
         </style>
       </div>
     </div>
