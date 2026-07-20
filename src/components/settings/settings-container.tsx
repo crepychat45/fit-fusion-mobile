@@ -43,6 +43,18 @@ const SystemHealthPanel = lazy(() => import("./system-health-panel").then(m => (
 const PwaVaultPanel = lazy(() => import("./pwa-vault-panel").then(m => ({ default: m.PwaVaultPanel })));
 const NetworkAdaptiveBanner = lazy(() => import("./network-adaptive-banner").then(m => ({ default: m.NetworkAdaptiveBanner })));
 const SettingsCopilot = lazy(() => import("./settings-copilot").then(m => ({ default: m.SettingsCopilot })));
+const AccountExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.AccountExtras })));
+const SecurityExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.SecurityExtras })));
+const DisplayExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.DisplayExtras })));
+const PrivacyExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.PrivacyExtras })));
+const NotificationExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.NotificationExtras })));
+const UnitsExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.UnitsExtras })));
+const ChatExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.ChatExtras })));
+const UpdateExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.UpdateExtras })));
+const EnhancedValidationExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.EnhancedValidationExtras })));
+const DeveloperExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.DeveloperExtras })));
+const DataExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.DataExtras })));
+const AboutExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.AboutExtras })));
 
 const PanelLoader = () => (
   <div className="flex items-center justify-center py-12">
