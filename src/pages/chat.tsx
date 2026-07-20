@@ -169,11 +169,16 @@ const ChatPage = () => {
             ); // 50 minutes
           }
 
-          supabase
-            .from("chat_user_directory")
-            .select("user_id", { count: "exact", head: true })
-            .then(({ count }) => setOnlineUsers(Math.max(count ?? 1, 1)))
-            .catch(() => setOnlineUsers(1));
+          void (async () => {
+            try {
+              const { count } = await supabase
+                .from("chat_user_directory")
+                .select("user_id", { count: "exact", head: true });
+              setOnlineUsers(Math.max(count ?? 1, 1));
+            } catch {
+              setOnlineUsers(1);
+            }
+          })();
         } else {
           setIsAuthenticated(false);
           setConnectionStatus("disconnected");
