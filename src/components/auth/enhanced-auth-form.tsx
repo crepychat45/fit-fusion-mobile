@@ -26,9 +26,18 @@ import {
   getDefaultPasskey,
   verifyPasskey,
   listPasskeys,
+  probePasskeySupport,
   PasskeyError,
 } from "@/lib/passkey-manager";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface EnhancedAuthFormProps {
   onSuccess?: () => void;
