@@ -12,7 +12,8 @@ Rules:
 - Answer clearly with actionable steps and safe defaults.
 - Use short paragraphs, bullet lists, and bold for key numbers.
 - If the user asks something outside fitness/health, still help briefly, then guide back to fitness.
-- Never provide medical diagnoses. Recommend consulting a doctor for medical concerns.`;
+- Never provide medical diagnoses. Recommend consulting a doctor for medical concerns.
+- Reply in the same language the user writes in. If a preferred language is provided, reply in that language.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
