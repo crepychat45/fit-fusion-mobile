@@ -242,6 +242,21 @@ export function AdvancedChatInterface({
   }, [activeThreadId, toast]);
 
   useEffect(() => {
+    if (!activeThreadId) return;
+    try {
+      const saved = localStorage.getItem(`fitfusion-chat-bg-${activeThreadId}`);
+      setThreadBg(saved || "default");
+    } catch { setThreadBg("default"); }
+  }, [activeThreadId]);
+
+  const applyBackground = (id: string) => {
+    setThreadBg(id);
+    if (activeThreadId) {
+      try { localStorage.setItem(`fitfusion-chat-bg-${activeThreadId}`, id); } catch { /* ignore */ }
+    }
+  };
+
+  useEffect(() => {
     if (!currentUser) return undefined;
 
     const threadChannel = supabase
