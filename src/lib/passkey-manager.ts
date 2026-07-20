@@ -278,6 +278,18 @@ export async function enrollPasskey(opts: {
     if (!list.some((p) => p.isDefault)) rec.isDefault = true;
     list.push(rec);
     await saveList(list);
+    // Auto-attach the current Supabase session (if any) so this passkey can
+    // sign the user back in immediately without waiting for a token refresh.
+    try {
+      const mod = await import("@/integrations/supabase/client");
+      const { data } = await mod.supabase.auth.getSession();
+      if (data.session?.refresh_token) {
+        await attachSessionToPasskey(rec.id, {
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token,
+        });
+      }
+    } catch { /* noop — vault still works, sign-in falls back to magic link */ }
     return rec;
   } catch (e: any) {
     if (e instanceof PasskeyError) throw e;
