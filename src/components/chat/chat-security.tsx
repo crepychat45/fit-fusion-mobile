@@ -161,7 +161,7 @@ export function ChatSecurity({
   const SecurityIcon = currentSecurityLevel.icon;
 
   return (
-    <div className="space-y-6 h-full overflow-y-auto">
+    <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-3 custom-scrollbar">
       {/* Security Score */}
       <Card>
         <CardHeader>
