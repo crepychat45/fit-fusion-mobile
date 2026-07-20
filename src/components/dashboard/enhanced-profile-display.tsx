@@ -183,7 +183,7 @@ export function EnhancedProfileDisplay({
             <div className="flex items-start gap-6">
               <motion.div whileHover={{ scale: 1.05 }} className="relative">
                 <Avatar className="w-24 h-24 border-4 border-white shadow-xl">
-                  <AvatarImage src={currentProfile.avatar} alt="Profile" />
+                  <AvatarImage src={avatarSrc} alt="Profile" />
                   <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold text-2xl">
                     {getInitials()}
                   </AvatarFallback>
@@ -360,7 +360,7 @@ export function EnhancedProfileDisplay({
   return (
     <div className="flex items-center gap-4 p-4 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
       <Avatar className="w-12 h-12 border-2 border-white/30">
-        <AvatarImage src={currentProfile.avatar} alt="Profile" />
+        <AvatarImage src={avatarSrc} alt="Profile" />
         <AvatarFallback className="bg-white/20 text-white font-bold">
           {getInitials()}
         </AvatarFallback>
