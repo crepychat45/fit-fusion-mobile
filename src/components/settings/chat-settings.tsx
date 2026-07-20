@@ -388,7 +388,7 @@ export function ChatSettingsPanel() {
               <CardDescription>View and manage app updates</CardDescription>
             </CardHeader>
             <CardContent>
-              <VersionManager />
+              <VersionControlPanel />
             </CardContent>
           </Card>
 
