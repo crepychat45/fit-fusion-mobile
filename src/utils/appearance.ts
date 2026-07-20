@@ -1,7 +1,8 @@
 // Apply appearance preferences (accent color, dark mode, font size) globally.
 // Accent is written as an HSL triple to match shadcn's `--primary` token.
 
-export function hexToHslTriple(hex: string): string | null {
+export function hexToHslTriple(hex: string | null | undefined): string | null {
+  if (typeof hex !== "string") return null;
   const m = /^#?([a-f\d]{6})$/i.exec(hex.trim());
   if (!m) return null;
   const int = parseInt(m[1], 16);
@@ -24,7 +25,7 @@ export function hexToHslTriple(hex: string): string | null {
   return `${Math.round(h)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
 }
 
-export function applyAccent(hex: string) {
+export function applyAccent(hex: string | null | undefined) {
   const hsl = hexToHslTriple(hex);
   if (!hsl) return;
   const root = document.documentElement;
