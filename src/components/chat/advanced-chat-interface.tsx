@@ -675,7 +675,7 @@ export function AdvancedChatInterface({
                   className="min-h-[44px] resize-none"
                   rows={1}
                 />
-                <Button onClick={handleSend} disabled={!input.trim() || sending || aiStreaming} className="h-11 px-4">
+                <Button onClick={() => handleSend()} disabled={!input.trim() || sending || aiStreaming} className="h-11 px-4">
                   {sending || aiStreaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 </Button>
               </div>
