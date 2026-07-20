@@ -772,14 +772,38 @@ export function AdvancedChatInterface({
                 )}
                 {filteredMessages.map((message) => {
                   const role = messageRole(message, currentUser.id);
+                  const attachments = jsonArray<any>(message.attachments as any);
                   return (
                     <div key={message.id} className={cn("flex gap-2", role === "own" ? "justify-end" : "justify-start")}> 
                       {role !== "own" && (
                         <Avatar className="mt-1 h-7 w-7">
-                          <AvatarFallback>{role === "assistant" ? "AI" : "U"}</AvatarFallback>
+                          {role === "assistant" ? <AvatarImage src={fitBotAvatar} /> : null}
+                          <AvatarFallback className={role === "assistant" ? "bg-gradient-to-br from-blue-500 to-purple-600 text-[10px] text-white" : ""}>
+                            {role === "assistant" ? "AI" : "U"}
+                          </AvatarFallback>
                         </Avatar>
                       )}
                       <div className={cn("max-w-[82%] rounded-2xl px-3 py-2 text-sm shadow-sm", role === "own" ? "bg-primary text-primary-foreground" : role === "system" ? "border bg-muted text-muted-foreground" : "border bg-card")}> 
+                        {attachments.length > 0 && (
+                          <div className="mb-2 grid gap-2">
+                            {attachments.map((att: any, idx: number) => (
+                              <div key={idx}>
+                                {att.kind === "image" ? (
+                                  <a href={att.url} target="_blank" rel="noreferrer">
+                                    <img src={att.url} alt={att.name} loading="lazy" className="max-h-64 rounded-lg object-cover" />
+                                  </a>
+                                ) : att.kind === "video" ? (
+                                  <video src={att.url} controls className="max-h-64 rounded-lg" />
+                                ) : (
+                                  <a href={att.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-lg border bg-background/60 px-2 py-1 text-xs hover:bg-background">
+                                    <FileText className="h-4 w-4" />
+                                    <span className="truncate">{att.name}</span>
+                                  </a>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                         {role === "assistant" ? (
                           <div className="prose prose-sm max-w-none dark:prose-invert prose-p:my-1 prose-ul:my-1 prose-ol:my-1">
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content || "Thinking…"}</ReactMarkdown>
@@ -794,7 +818,7 @@ export function AdvancedChatInterface({
                 })}
                 {aiStreaming && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" /> Fit Bot AI is answering…
+                    <Loader2 className="h-4 w-4 animate-spin" /> FitX AI Coach is answering…
                   </div>
                 )}
                 <div ref={messagesEndRef} />
