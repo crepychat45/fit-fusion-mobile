@@ -1,27 +1,68 @@
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Dumbbell, Heart, Flame, Moon, Droplet, Zap } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dumbbell, Heart, Flame, Moon, Droplet, Zap, Download } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
-export function StatsExtras() {
+interface StatsExtrasProps {
+  workouts?: number;
+  streak?: number;
+  calories?: number;
+}
+
+export function StatsExtras({ workouts = 0, streak = 0, calories = 0 }: StatsExtrasProps) {
+  const { toast } = useToast();
+
+  const restingHR = 62;
+  const sleepPct = 83;
+  const hydrationL = 2.1;
+  const volumeT = Math.max(0.5, (workouts * 0.45)).toFixed(1);
+  const recovery = streak >= 5 ? "Great" : streak >= 2 ? "Good" : "Fair";
+  const hrv = 60 + Math.min(20, streak * 2);
+
   const metrics = [
-    { icon: Heart, label: "Resting HR", value: "62 bpm", trend: "-3 vs last mo", color: "text-rose-500" },
-    { icon: Flame, label: "Active Calories", value: "482 kcal", trend: "+12% today", color: "text-orange-500" },
-    { icon: Moon, label: "Sleep Quality", value: "83%", trend: "7h 42m", color: "text-indigo-500" },
-    { icon: Droplet, label: "Hydration", value: "2.1 L", trend: "of 2.5 L", color: "text-cyan-500" },
-    { icon: Dumbbell, label: "Volume Lifted", value: "12.4 t", trend: "This month", color: "text-primary" },
-    { icon: Zap, label: "Recovery", value: "Great", trend: "HRV 72", color: "text-emerald-500" },
+    { icon: Heart, label: "Resting HR", value: `${restingHR} bpm`, trend: "-3 vs last mo", color: "text-rose-500" },
+    { icon: Flame, label: "Active Calories", value: `${Math.round(calories).toLocaleString()} kcal`, trend: "This week", color: "text-orange-500" },
+    { icon: Moon, label: "Sleep Quality", value: `${sleepPct}%`, trend: "7h 42m avg", color: "text-indigo-500" },
+    { icon: Droplet, label: "Hydration", value: `${hydrationL} L`, trend: "of 2.5 L", color: "text-cyan-500" },
+    { icon: Dumbbell, label: "Volume Lifted", value: `${volumeT} t`, trend: "This month", color: "text-primary" },
+    { icon: Zap, label: "Recovery", value: recovery, trend: `HRV ${hrv}`, color: "text-emerald-500" },
   ];
+
   const muscleGroups = [
     { name: "Chest", value: 78 }, { name: "Back", value: 65 }, { name: "Legs", value: 82 },
     { name: "Arms", value: 58 }, { name: "Core", value: 71 }, { name: "Shoulders", value: 63 },
   ];
+
+  const handleExport = () => {
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      totals: { workouts, streak, calories },
+      health: { restingHR, sleepPct, hydrationL, hrv, recovery, volumeT: Number(volumeT) },
+      muscleGroups,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `fitfusion-stats-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+    toast({ title: "Stats exported", description: "Downloaded as JSON." });
+  };
+
   return (
     <div className="space-y-3">
       <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Health Snapshot</CardTitle>
-          <CardDescription>Live sensor + logged metrics</CardDescription>
+        <CardHeader className="pb-2 flex flex-row items-start justify-between">
+          <div>
+            <CardTitle className="text-base">Health Snapshot</CardTitle>
+            <CardDescription>Live sensor + logged metrics</CardDescription>
+          </div>
+          <Button size="sm" variant="outline" className="h-8" onClick={handleExport}>
+            <Download className="h-3.5 w-3.5 mr-1" />Export
+          </Button>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
