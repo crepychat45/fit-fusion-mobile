@@ -42,7 +42,7 @@ export function ActivityFeed({ filter = "all" }: { filter?: "all" | "mine" }) {
       const { data } = await supabase
         .from("profiles")
         .select("id, display_name, avatar_url")
-        .in("id", ids);
+        .in("id", ids as any);
       if (data) {
         const next: Record<string, ProfileLite> = { ...profiles };
         data.forEach((p: any) => (next[p.id] = p));
