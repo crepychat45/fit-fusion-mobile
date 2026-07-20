@@ -355,6 +355,42 @@ export async function getDefaultPasskey(): Promise<PasskeyRecord | null> {
   return list.find((p) => p.isDefault) || list[0] || null;
 }
 
+/**
+ * Attach a Supabase session (access + refresh token) to a stored passkey.
+ * The entire vault is AES-GCM encrypted, so tokens remain protected at rest.
+ * Call this at enrollment time and after every successful passkey sign-in to
+ * keep the refresh token fresh (Supabase rotates refresh_tokens on use).
+ */
+export async function attachSessionToPasskey(
+  id: string,
+  session: { access_token: string; refresh_token: string },
+): Promise<void> {
+  const list = await listPasskeys();
+  const rec = list.find((p) => p.id === id);
+  if (!rec) return;
+  rec.session = {
+    access_token: session.access_token,
+    refresh_token: session.refresh_token,
+    updated_at: Date.now(),
+  };
+  await saveList(list);
+}
+
+/** Retrieve the encrypted session attached to a passkey, if any. */
+export async function getPasskeySession(id: string): Promise<PasskeySession | null> {
+  const list = await listPasskeys();
+  return list.find((p) => p.id === id)?.session ?? null;
+}
+
+/** Clear an attached session (e.g., after refresh failure / revocation). */
+export async function clearPasskeySession(id: string): Promise<void> {
+  const list = await listPasskeys();
+  const rec = list.find((p) => p.id === id);
+  if (!rec) return;
+  delete rec.session;
+  await saveList(list);
+}
+
 function defaultLabel(): string {
   const ua = navigator.userAgent;
   if (/iPhone/.test(ua)) return "iPhone";
