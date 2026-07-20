@@ -3,8 +3,15 @@ import React, {
   useContext,
   useState,
   useEffect,
+  useRef,
   ReactNode,
 } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  fetchRemoteSettings,
+  createDebouncedPush,
+  type SettingsSnapshot,
+} from "@/utils/settings-sync";
 
 type SubscriptionPlan = "Free" | "Basic" | "Super" | "Advance";
 type PaymentMethod =
