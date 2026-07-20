@@ -500,6 +500,9 @@ export function SettingsContainer() {
 
             <TabsContent value="data" className="mt-0">
               <div className="space-y-6">
+                <L><DataBackupPanel /></L>
+                <L><SystemHealthPanel /></L>
+
                 <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 p-6 rounded-lg border">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                     Data Management Center
@@ -549,6 +552,25 @@ export function SettingsContainer() {
           </Tabs>
         </motion.div>
       </div>
+
+      <ConfirmDialog
+        open={confirmClearOpen}
+        onOpenChange={setConfirmClearOpen}
+        onConfirm={handleClearLocalData}
+        title="Clear all local data?"
+        description="This removes cached app data from this device. Your session and account are preserved."
+        confirmLabel="Clear data"
+        destructive
+      />
+      <ConfirmDialog
+        open={confirmLogoutOpen}
+        onOpenChange={setConfirmLogoutOpen}
+        onConfirm={handleLogout}
+        title="Sign out of all devices?"
+        description="This ends your session on every device signed into this account."
+        confirmLabel="Sign out everywhere"
+        destructive
+      />
     </div>
   );
 }
