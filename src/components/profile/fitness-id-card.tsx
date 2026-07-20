@@ -83,7 +83,7 @@ export const FitnessIDCard: React.FC<FitnessIDCardProps> = ({
   const since = memberSince || new Date().getFullYear().toString();
 
   const shareUrl = typeof window !== "undefined"
-    ? `${window.location.origin}/profile${userId ? `?u=${encodeURIComponent(userId)}` : ""}`
+    ? (userId ? `${window.location.origin}/card/${encodeURIComponent(userId)}` : `${window.location.origin}/profile`)
     : "";
   const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=0&data=${encodeURIComponent(shareUrl)}`;
 
