@@ -14,6 +14,12 @@ const DEVICE_KEY = "ff.security.passkeys.dk"; // JWK-wrapped AES key (base64)
 const LEGACY_ID = "ff.security.biometric.credId";
 const LEGACY_EMAIL = "ff.security.biometric.email";
 
+export type PasskeySession = {
+  access_token: string;
+  refresh_token: string;
+  updated_at: number;
+};
+
 export type PasskeyRecord = {
   id: string;            // base64url raw credential id (also acts as record id)
   name: string;          // user-friendly label
@@ -22,6 +28,7 @@ export type PasskeyRecord = {
   lastUsedAt?: number;
   isDefault?: boolean;
   deviceUA?: string;
+  session?: PasskeySession; // encrypted session tokens for direct sign-in
 };
 
 export type PasskeyErrorKind =
@@ -346,6 +353,42 @@ export async function clearAllPasskeys(): Promise<void> {
 export async function getDefaultPasskey(): Promise<PasskeyRecord | null> {
   const list = await listPasskeys();
   return list.find((p) => p.isDefault) || list[0] || null;
+}
+
+/**
+ * Attach a Supabase session (access + refresh token) to a stored passkey.
+ * The entire vault is AES-GCM encrypted, so tokens remain protected at rest.
+ * Call this at enrollment time and after every successful passkey sign-in to
+ * keep the refresh token fresh (Supabase rotates refresh_tokens on use).
+ */
+export async function attachSessionToPasskey(
+  id: string,
+  session: { access_token: string; refresh_token: string },
+): Promise<void> {
+  const list = await listPasskeys();
+  const rec = list.find((p) => p.id === id);
+  if (!rec) return;
+  rec.session = {
+    access_token: session.access_token,
+    refresh_token: session.refresh_token,
+    updated_at: Date.now(),
+  };
+  await saveList(list);
+}
+
+/** Retrieve the encrypted session attached to a passkey, if any. */
+export async function getPasskeySession(id: string): Promise<PasskeySession | null> {
+  const list = await listPasskeys();
+  return list.find((p) => p.id === id)?.session ?? null;
+}
+
+/** Clear an attached session (e.g., after refresh failure / revocation). */
+export async function clearPasskeySession(id: string): Promise<void> {
+  const list = await listPasskeys();
+  const rec = list.find((p) => p.id === id);
+  if (!rec) return;
+  delete rec.session;
+  await saveList(list);
 }
 
 function defaultLabel(): string {

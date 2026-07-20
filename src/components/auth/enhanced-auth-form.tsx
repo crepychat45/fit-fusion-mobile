@@ -26,7 +26,16 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
 import { SocialLogin } from "./social-login";
-import { getDefaultPasskey, verifyPasskey, listPasskeys, PasskeyError } from "@/lib/passkey-manager";
+import {
+  getDefaultPasskey,
+  verifyPasskey,
+  listPasskeys,
+  PasskeyError,
+  getPasskeySession,
+  attachSessionToPasskey,
+  clearPasskeySession,
+} from "@/lib/passkey-manager";
+import { supabase } from "@/integrations/supabase/client";
 
 interface EnhancedAuthFormProps {
   onSuccess?: () => void;
@@ -99,7 +108,32 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
       }
       const rec = await verifyPasskey(def.id);
       if (!rec) throw new Error("Verification cancelled");
-      // WebAuthn verified locally → complete Supabase session via magic link.
+
+      // Preferred path: restore the session tokens stashed at enrollment.
+      const stored = await getPasskeySession(rec.id);
+      if (stored?.refresh_token) {
+        const { data, error } = await supabase.auth.setSession({
+          access_token: stored.access_token,
+          refresh_token: stored.refresh_token,
+        });
+        if (!error && data.session) {
+          // Refresh tokens rotate on use — persist the new pair.
+          await attachSessionToPasskey(rec.id, {
+            access_token: data.session.access_token,
+            refresh_token: data.session.refresh_token,
+          });
+          toast({
+            title: "Signed in with passkey ✓",
+            description: `Welcome back, ${rec.email}`,
+          });
+          if (onSuccess) onSuccess();
+          return;
+        }
+        // Refresh token expired or revoked → clear and fall through to magic link.
+        await clearPasskeySession(rec.id);
+      }
+
+      // Fallback: no stored session (older enrollment) or refresh failed.
       const { error } = await signInWithMagicLink(rec.email);
       if (error) throw new Error(error);
       toast({

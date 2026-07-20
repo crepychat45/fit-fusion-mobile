@@ -11,6 +11,7 @@ import { useToast } from "@/components/ui/use-toast";
 import {
   listPasskeys, enrollPasskey, verifyPasskey, renamePasskey,
   setDefaultPasskey, removePasskey, probePasskeySupport, PasskeyError,
+  attachSessionToPasskey,
   type PasskeyRecord,
 } from "@/lib/passkey-manager";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,6 +54,18 @@ export function PasskeyManagementPanel({ userEmail }: Props) {
     setLastError(null);
     try {
       const rec = await enrollPasskey({ email: userEmail, name: newLabel || undefined });
+      // Attach the current Supabase session so future passkey unlocks can
+      // restore it directly (no email round-trip). Tokens are stored inside
+      // the AES-GCM encrypted passkey vault.
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.refresh_token && session.access_token) {
+          await attachSessionToPasskey(rec.id, {
+            access_token: session.access_token,
+            refresh_token: session.refresh_token,
+          });
+        }
+      } catch { /* non-fatal */ }
       setNewLabel("");
       await refresh();
       toast({ title: "Passkey added 🔐", description: `${rec.name} is ready for fast sign-in.` });
