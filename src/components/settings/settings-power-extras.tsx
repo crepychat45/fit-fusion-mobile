@@ -4,6 +4,7 @@
 // needs to be wired up at the container level beyond mounting the panel.
 
 import React, { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 import {
   Card,
