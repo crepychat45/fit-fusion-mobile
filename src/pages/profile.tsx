@@ -212,6 +212,7 @@ const Profile = () => {
                   calories={localStats.caloriesBurned || 0}
                   fitnessScore={78}
                   goal={cloudProfile?.fitness_goals?.[0] || "Stay Fit"}
+                  userId={user?.id ?? null}
                 />
                 <ProfileInsightsWidget
                   workouts={localStats.workoutsCompleted || 0}
