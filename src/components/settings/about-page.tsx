@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
@@ -49,7 +43,7 @@ export function AboutPage() {
       year: "numeric",
       month: "long",
       day: "numeric",
-    })
+    }),
   );
   const [userStats, setUserStats] = useState({
     totalUsers: 125000,
@@ -180,8 +174,7 @@ export function AboutPage() {
       setUserStats((prev) => ({
         ...prev,
         activeToday: prev.activeToday + Math.floor(Math.random() * 3),
-        workoutsCompleted:
-          prev.workoutsCompleted + Math.floor(Math.random() * 5),
+        workoutsCompleted: prev.workoutsCompleted + Math.floor(Math.random() * 5),
       }));
     }, 5000);
 
@@ -191,11 +184,7 @@ export function AboutPage() {
   return (
     <div className="space-y-6 h-full overflow-y-auto">
       {/* App Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
         <Card className="overflow-hidden">
           <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30">
             <div className="flex items-center justify-between">
@@ -205,14 +194,9 @@ export function AboutPage() {
                 </div>
                 <div>
                   <CardTitle className="text-2xl">FitFusion</CardTitle>
-                  <CardDescription className="text-lg">
-                    AI-Powered Fitness Companion
-                  </CardDescription>
+                  <CardDescription className="text-lg">AI-Powered Fitness Companion</CardDescription>
                   <div className="flex items-center gap-2 mt-2">
-                    <Badge
-                      variant="default"
-                      className="bg-gradient-to-r from-purple-500 to-pink-500"
-                    >
+                    <Badge variant="default" className="bg-gradient-to-r from-purple-500 to-pink-500">
                       v{appVersion}
                     </Badge>
                     <Badge variant="outline">Build {buildNumber}</Badge>
@@ -229,23 +213,17 @@ export function AboutPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
                 <Users className="h-6 w-6 text-blue-600 mx-auto mb-1" />
-                <p className="text-lg font-bold">
-                  {userStats.totalUsers.toLocaleString()}
-                </p>
+                <p className="text-lg font-bold">{userStats.totalUsers.toLocaleString()}</p>
                 <p className="text-xs text-muted-foreground">Total Users</p>
               </div>
               <div className="text-center p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
                 <TrendingUp className="h-6 w-6 text-green-600 mx-auto mb-1" />
-                <p className="text-lg font-bold">
-                  {userStats.activeToday.toLocaleString()}
-                </p>
+                <p className="text-lg font-bold">{userStats.activeToday.toLocaleString()}</p>
                 <p className="text-xs text-muted-foreground">Active Today</p>
               </div>
               <div className="text-center p-3 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
                 <Award className="h-6 w-6 text-purple-600 mx-auto mb-1" />
-                <p className="text-lg font-bold">
-                  {(userStats.workoutsCompleted / 1000000).toFixed(1)}M
-                </p>
+                <p className="text-lg font-bold">{(userStats.workoutsCompleted / 1000000).toFixed(1)}M</p>
                 <p className="text-xs text-muted-foreground">Workouts</p>
               </div>
               <div className="text-center p-3 bg-orange-50 dark:bg-orange-950/20 rounded-lg">
@@ -270,9 +248,7 @@ export function AboutPage() {
               <Star className="h-5 w-5" />
               Key Features
             </CardTitle>
-            <CardDescription>
-              Cutting-edge technology that makes FitFusion stand out
-            </CardDescription>
+            <CardDescription>Cutting-edge technology that makes FitFusion stand out</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {features.map((feature, index) => {
@@ -303,9 +279,7 @@ export function AboutPage() {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      {feature.description}
-                    </p>
+                    <p className="text-sm text-muted-foreground">{feature.description}</p>
                   </div>
                 </motion.div>
               );
@@ -326,9 +300,7 @@ export function AboutPage() {
               <Calendar className="h-5 w-5" />
               What's New in v{appVersion}
             </CardTitle>
-            <CardDescription>
-              Latest updates and improvements in this release
-            </CardDescription>
+            <CardDescription>Latest updates and improvements in this release</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <ScrollArea className="h-96 pr-4">
@@ -339,27 +311,19 @@ export function AboutPage() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: releaseIndex * 0.1 }}
                   className={`border-l-4 pl-4 mb-6 ${
-                    release.version === appVersion
-                      ? "border-primary"
-                      : "border-muted"
+                    release.version === appVersion ? "border-primary" : "border-muted"
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <h4 className="font-semibold">Version {release.version}</h4>
                     <Badge
                       variant={
-                        release.type === "major"
-                          ? "default"
-                          : release.type === "minor"
-                            ? "secondary"
-                            : "outline"
+                        release.type === "major" ? "default" : release.type === "minor" ? "secondary" : "outline"
                       }
                     >
                       {release.type}
                     </Badge>
-                    <span className="text-sm text-muted-foreground">
-                      {release.date}
-                    </span>
+                    <span className="text-sm text-muted-foreground">{release.date}</span>
                   </div>
                   <ul className="space-y-1">
                     {release.changes.map((change, changeIndex) => (
@@ -397,9 +361,7 @@ export function AboutPage() {
               <Users className="h-5 w-5" />
               Development Team
             </CardTitle>
-            <CardDescription>
-              Meet the talented people behind FitFusion
-            </CardDescription>
+            <CardDescription>Meet the talented people behind FitFusion</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -416,9 +378,7 @@ export function AboutPage() {
                   </div>
                   <div>
                     <h4 className="font-medium">{member.name}</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {member.role}
-                    </p>
+                    <p className="text-sm text-muted-foreground">{member.role}</p>
                   </div>
                 </motion.div>
               ))}
@@ -439,83 +399,55 @@ export function AboutPage() {
               <Heart className="h-5 w-5" />
               Support & Community
             </CardTitle>
-            <CardDescription>
-              Help us improve and connect with other users
-            </CardDescription>
+            <CardDescription>Help us improve and connect with other users</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Button
-                variant="outline"
-                onClick={handleRateApp}
-                className="w-full justify-start h-auto p-4"
-              >
+              <Button variant="outline" onClick={handleRateApp} className="w-full justify-start h-auto p-4">
                 <div className="text-left">
                   <div className="flex items-center gap-2 mb-1">
                     <Star className="h-4 w-4" />
                     <span className="font-medium">Rate the App</span>
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    Help others discover FitFusion
-                  </div>
+                  <div className="text-xs text-muted-foreground">Help others discover FitFusion</div>
                 </div>
               </Button>
 
-              <Button
-                variant="outline"
-                onClick={handleFeedback}
-                className="w-full justify-start h-auto p-4"
-              >
+              <Button variant="outline" onClick={handleFeedback} className="w-full justify-start h-auto p-4">
                 <div className="text-left">
                   <div className="flex items-center gap-2 mb-1">
                     <Info className="h-4 w-4" />
                     <span className="font-medium">Send Feedback</span>
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    Share your thoughts and suggestions
-                  </div>
+                  <div className="text-xs text-muted-foreground">Share your thoughts and suggestions</div>
                 </div>
               </Button>
 
-              <Button
-                variant="outline"
-                className="w-full justify-start h-auto p-4"
-              >
+              <Button variant="outline" className="w-full justify-start h-auto p-4">
                 <div className="text-left">
                   <div className="flex items-center gap-2 mb-1">
                     <ExternalLink className="h-4 w-4" />
                     <span className="font-medium">Visit Website</span>
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    Learn more at fitfusion.app
-                  </div>
+                  <div className="text-xs text-muted-foreground">Learn more at fitfusion.app</div>
                 </div>
               </Button>
 
-              <Button
-                variant="outline"
-                className="w-full justify-start h-auto p-4"
-              >
+              <Button variant="outline" className="w-full justify-start h-auto p-4">
                 <div className="text-left">
                   <div className="flex items-center gap-2 mb-1">
                     <Code className="h-4 w-4" />
                     <span className="font-medium">Open Source</span>
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    Contribute on GitHub
-                  </div>
+                  <div className="text-xs text-muted-foreground">Contribute on GitHub</div>
                 </div>
               </Button>
             </div>
 
             <div className="pt-4 border-t text-center text-sm text-muted-foreground">
-              <p>
-                © 2025 FitFusion. Made with ❤️ for fitness enthusiasts
-                worldwide.
-              </p>
+              <p>© 2025 FitFusion. Made with ❤️ for fitness enthusiasts worldwide.</p>
               <p className="mt-1">
-                Built with React, TypeScript, and Supabase • Lovable AI-assisted
-                development
+                Built with React, TypeScript, and Jk Cloud OAuth • Jk Cloud AI-assisted development
               </p>
             </div>
           </CardContent>
