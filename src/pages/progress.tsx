@@ -12,6 +12,7 @@ import {
   Clock, Zap, Trophy, Star, Heart, Brain, LineChart, PieChart, Download, Share2, Sparkles,
 } from "lucide-react";
 import { ProgressChart } from "@/components/progress-chart";
+import { SessionHistory } from "@/components/progress/session-history";
 
 const ProgressPage = () => {
   const { toast } = useToast();
@@ -139,6 +140,11 @@ const ProgressPage = () => {
                   <ProgressChart title="Weekly Activity" data={weeklyData} color="hsl(var(--primary))" />
                   <ProgressChart title="Monthly Summary" data={monthlyData} color="hsl(var(--accent-foreground))" />
                 </div>
+
+                {/* Live Session History */}
+                <SessionHistory />
+
+
 
                 {/* Personal Records Board */}
                 <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
