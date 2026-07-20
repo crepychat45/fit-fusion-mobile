@@ -93,6 +93,13 @@ const messageRole = (message: ChatMessageRow, currentUserId?: string) => {
   return message.sender_id === currentUserId ? "own" : "other";
 };
 
+const quickPrompts = [
+  "Create a 25-minute beginner workout for today",
+  "What should I eat after strength training?",
+  "Make a recovery plan for sore legs",
+  "Build a weekly fat-loss routine",
+];
+
 export function AdvancedChatInterface({
   user: providedUser,
   securityLevel = "high",
@@ -380,6 +387,20 @@ export function AdvancedChatInterface({
     }
   };
 
+  const sendQuickPrompt = (prompt: string) => {
+    setInput(prompt);
+    window.setTimeout(() => {
+      const event = new KeyboardEvent("keydown", { key: "Enter" });
+      document.dispatchEvent(event);
+    }, 0);
+  };
+
+  const sendPromptNow = async (prompt: string) => {
+    if (!currentUser || !activeThread || sending || aiStreaming) return;
+    setInput(prompt);
+    window.setTimeout(() => handleSend(), 0);
+  };
+
   const startDirectChat = async (contact: ChatDirectoryUser) => {
     if (!currentUser) return;
     try {
@@ -585,6 +606,38 @@ export function AdvancedChatInterface({
 
             <ScrollArea className="flex-1 custom-scrollbar bg-muted/10 p-4">
               <div className="mx-auto flex max-w-3xl flex-col gap-3">
+                {!filteredMessages.length && activeThread.thread_type === "ai" && (
+                  <div className="mx-auto my-8 max-w-xl rounded-2xl border bg-card/80 p-5 text-center shadow-sm backdrop-blur-xl">
+                    <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                      <Bot className="h-6 w-6" />
+                    </div>
+                    <h3 className="text-lg font-semibold">Fit Bot AI is ready</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Ask for workouts, diet guidance, recovery plans, motivation, or progress help. Replies stream live and save to your backend history.
+                    </p>
+                    <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                      {quickPrompts.map((prompt) => (
+                        <Button
+                          key={prompt}
+                          type="button"
+                          variant="outline"
+                          className="h-auto justify-start whitespace-normal text-left text-xs"
+                          onClick={() => sendPromptNow(prompt)}
+                        >
+                          <Sparkles className="mr-2 h-3.5 w-3.5 shrink-0" />
+                          {prompt}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {!filteredMessages.length && activeThread.thread_type !== "ai" && (
+                  <div className="mx-auto my-8 max-w-md rounded-2xl border bg-card/80 p-5 text-center shadow-sm">
+                    <Users className="mx-auto mb-3 h-8 w-8 text-primary" />
+                    <h3 className="font-semibold">Secure chat started</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">Send the first message. It will sync to the backend for every participant.</p>
+                  </div>
+                )}
                 {filteredMessages.map((message) => {
                   const role = messageRole(message, currentUser.id);
                   return (
