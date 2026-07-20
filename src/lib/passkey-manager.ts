@@ -14,6 +14,12 @@ const DEVICE_KEY = "ff.security.passkeys.dk"; // JWK-wrapped AES key (base64)
 const LEGACY_ID = "ff.security.biometric.credId";
 const LEGACY_EMAIL = "ff.security.biometric.email";
 
+export type PasskeySession = {
+  access_token: string;
+  refresh_token: string;
+  updated_at: number;
+};
+
 export type PasskeyRecord = {
   id: string;            // base64url raw credential id (also acts as record id)
   name: string;          // user-friendly label
@@ -22,6 +28,7 @@ export type PasskeyRecord = {
   lastUsedAt?: number;
   isDefault?: boolean;
   deviceUA?: string;
+  session?: PasskeySession; // encrypted session tokens for direct sign-in
 };
 
 export type PasskeyErrorKind =
