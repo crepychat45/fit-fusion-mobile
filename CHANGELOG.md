@@ -3,6 +3,7 @@
 ## Version 6.2.5 (2026-05-16) - Critical Security & Performance Release
 
 ### 🎉 New Features
+
 - **Global Liquid Glass Design**: Enhanced glass-morphism effects on all pages and components
 - **Smooth Page Transitions**: Framer Motion animations between all routes for fluid navigation
 - **Enhanced AI Chatbot**: Improved context awareness and response accuracy with ML optimization
@@ -13,6 +14,7 @@
 - **Mobile Gesture Optimization**: Improved touch interactions and haptic feedback support
 
 ### 🔧 Improvements
+
 - **40% Faster Load Times**: Optimized code splitting, lazy loading, and caching strategies
 - **100% Mobile/Desktop Parity**: Unified responsive design with perfect cross-device support
 - **Enhanced Dark Mode**: Improved contrast ratios for better accessibility and reduced eye strain
@@ -23,6 +25,7 @@
 - **Improved Settings Auto-Save**: All account settings now properly persist and sync
 
 ### 🐛 Bug Fixes
+
 - 🔧 Fixed repeated update installation prompts
 - 💬 Fixed chat input visibility on mobile devices
 - 📊 Fixed account name/email changes not persisting properly
@@ -33,31 +36,28 @@
 - ⚠️ Fixed error recovery and fallback mechanisms
 
 ### 🔒 Critical Security Patches
+
 - **CVE-2026-0547 (CVSS 9.8)**: Fixed critical authentication bypass vulnerability
   - Prevents unauthorized account access without proper credentials
   - Enhanced session validation and token verification
-  
 - **CVE-2026-0548 (CVSS 9.1)**: Patched sensitive data exposure
   - Fixed encryption of user health metrics in API responses
   - Added end-to-end encryption for workout history
-  
 - **CVE-2026-0549 (CVSS 7.5)**: Enhanced encryption protocol security
   - Implemented TLS 1.3 for all connections
   - Updated to SHA-256 hashing and AES-256 encryption
-  
 - **CVE-2026-0550 (CVSS 6.1)**: Fixed XSS vulnerability in user input
   - Sanitized all user inputs in chat and profile updates
   - Implemented Content Security Policy (CSP) headers
-  
 - **CVE-2026-0551 (CVSS 7.3)**: Strengthened password hashing
   - Updated to bcrypt with cost factor of 12
   - Implemented PBKDF2 for enhanced security
-  
 - **CVE-2026-0552 (CVSS 5.3)**: Added CSRF protection
   - CSRF tokens for all state-changing operations
   - SameSite cookie flags enabled
 
 ### 📊 Performance Optimizations
+
 - Implemented intelligent caching system with automatic expiration
 - Optimized image delivery with format negotiation
 - Added service worker support for offline functionality
@@ -66,6 +66,7 @@
 - Improved rendering performance with memoization
 
 ### 📱 Mobile Enhancements
+
 - Full support for notch/island displays with safe area insets
 - Enhanced touch optimization with pointer events
 - Keyboard avoidance for input fields
@@ -74,6 +75,7 @@
 - Improved network detection and quality adjustment
 
 ### 🤖 AI Improvements
+
 - Enhanced context awareness in chatbot responses
 - Better workout recommendation engine
 - Improved nutrition advice based on user data
@@ -82,6 +84,7 @@
 - Community challenge recommendations
 
 ### 🎨 UI/UX Enhancements
+
 - Consistent liquid glass design across all pages
 - Smooth Framer Motion transitions everywhere
 - Improved dark mode consistency
@@ -90,6 +93,7 @@
 - Responsive design improvements for all screen sizes
 
 ### 📋 Other Improvements
+
 - Updated to latest dependencies (Vite 6.4.2, esbuild 0.25.12)
 - Improved error messages and logging
 - Better app recovery and crash handling
@@ -98,15 +102,18 @@
 - Performance monitoring and diagnostics tools
 
 ### ⚠️ Breaking Changes
+
 - None - Full backward compatibility maintained
 
 ### 📦 Deployment Notes
+
 - Minimum browser requirements: Modern browsers with ES2020 support
 - Service Worker support recommended for optimal performance
 - HTTPS recommended for security features
 - 18.5 MB download size (16.8 MB after compression)
 
 ### 🙏 Special Thanks
+
 - Security team for thorough vulnerability assessment
 - QA team for extensive testing
 - Community for feedback and suggestions
@@ -116,6 +123,7 @@
 ## Version 6.2.0 (2026-02-25)
 
 ### 🎉 New Features
+
 - **Global Liquid Glass Design**: Glass-morphism design applied to all pages
 - **Page Transitions**: Smooth Framer Motion animations between routes
 - **Enhanced Settings**: Fixed account settings with proper auto-save
@@ -123,12 +131,14 @@
 - **Update Center**: Redesigned with changelog history
 
 ### 🔧 Improvements
+
 - Smooth liquid glass transitions everywhere
 - Account settings properly save changes
 - 100% mobile/desktop responsive parity
 - Update system refinements
 
 ### 🐛 Bug Fixes
+
 - Fixed repeated update prompts
 - Fixed chat input visibility
 - Fixed settings persistence
@@ -139,15 +149,17 @@
 ## Version 5.8.0 (2026-02-11)
 
 ### 🎉 New Features
+
 - **Active Fitness Challenges Widget**: Daily, weekly & community challenges with XP rewards, progress tracking, and participant counts
 - **Body Metrics Tracker**: Real-time health monitoring for hydration, sleep score, resting heart rate, stress, energy, body temperature, and SpO2
 - **Workout Streak Widget**: Visual weekly streak calendar with current streak, best streak, and weekly completion stats
 - **Watch App Store**: Browse, install & manage smartwatch apps across categories (Fitness, Health, Wellness, Nutrition, Utility)
 - **Enhanced Fitness Hub**: New 5-tab layout with dedicated Store tab for watch apps
 - **Google & Apple Sign-In**: Social OAuth login via Lovable Cloud
-- **Lovable AI Integration**: AI Gateway enabled for intelligent fitness coaching
+- **JK AI Integration**: AI Gateway enabled for intelligent fitness coaching
 
 ### 🔧 Improvements
+
 - Optimized component rendering and reduced unnecessary re-renders
 - Better memory management with enhanced lazy loading
 - Improved mobile responsiveness across all new widgets
@@ -156,6 +168,7 @@
 - Better accessibility compliance across new components
 
 ### 🐛 Bug Fixes
+
 - Fixed performance monitor overlay z-index issues
 - Resolved chat notification delivery delays
 - Fixed progress chart data accuracy
@@ -164,6 +177,7 @@
 - Fixed mobile layout overflow issues
 
 ### 🔒 Security Updates
+
 - Enhanced CSP headers and input validation
 - Improved authentication security with OAuth providers
 - Strengthened XSS and injection prevention
@@ -174,6 +188,7 @@
 ## Version 5.7.0 (2024-12-05)
 
 ### 🎉 New Features
+
 - **New Glass Design Animated Logo**: Modern glass-morphism logo with animations
 - **Security Patch Download System**: One-click installation with detailed changelogs
 - **Holographic Vault**: Upload, preview, download & share documents securely
@@ -183,6 +198,7 @@
 - **Complete Security & Privacy Protection**: Comprehensive security overhaul
 
 ### 🔧 Improvements
+
 - Notifications now only show in notification tab (no popups on screen)
 - Better mobile responsiveness and layout clarity
 - Enhanced Fitness Hub with AI features and watch management
@@ -191,6 +207,7 @@
 - Real-time sync status across all connected devices
 
 ### 🐛 Bug Fixes
+
 - Fixed all security vulnerabilities and patches
 - Resolved layout issues on mobile and desktop
 - Fixed authentication page interface issues
@@ -199,6 +216,7 @@
 - Corrected profile and settings display bugs
 
 ### 🔒 Security Updates
+
 - Critical security patches v2024.12.05
 - Enhanced encryption for Holographic Vault
 - Improved authentication security protocols
@@ -210,6 +228,7 @@
 ## Version 5.6.0 (2024-12-04)
 
 ### 🎉 New Features
+
 - **Unified Fitness Hub**: Merged Fitness App Integrations and Smartwatch Hub into one powerful component
   - All-in-one overview with connected apps and watches
   - Smart Features: Sleep-based alarms and hydration reminders
@@ -224,6 +243,7 @@
 - **Security Center**: Fixed all vulnerabilities, enhanced protection
 
 ### 🔧 Improvements
+
 - Unified data sync across all connected apps and watches
 - Improved notification management system
 - Better mobile responsiveness and performance
@@ -232,6 +252,7 @@
 - Real-time sync status updates across all devices
 
 ### 🐛 Bug Fixes
+
 - Fixed all security vulnerabilities
 - Resolved sync issues across apps
 - Fixed settings persistence problems
@@ -240,6 +261,7 @@
 - Corrected profile display bugs
 
 ### 🔒 Security Updates
+
 - Critical security patches applied
 - Enhanced encryption protocols
 - Improved authentication security
@@ -253,6 +275,7 @@
 ## Version 5.4.4 (2024-12-03)
 
 ### 🎉 New Features
+
 - **Enhanced Workout Video Player**: Full-screen support with advanced playback controls
 - **Real-time Workout Tracking**: Exercise completion markers with progress tracking
 - **Interactive Smartwatch Hub**: Brand-specific icons and dialogs for Apple, Samsung, and Garmin
@@ -260,6 +283,7 @@
 - **Enhanced Security Center**: All security settings properly saved and persisted
 
 ### ⚡ Improvements
+
 - Improved workout video playback with advanced video player controls
 - Better settings persistence in Security Center, Chat Settings, and Smartwatch Hub
 - Enhanced profile display with complete user information on home page
@@ -268,7 +292,8 @@
 - All settings now auto-save to localStorage and Supabase
 
 ### 🐛 Bug Fixes
-- Fixed smartwatch icon display and dialog functionality  
+
+- Fixed smartwatch icon display and dialog functionality
 - Fixed settings not saving properly in Security Center
 - Fixed AI insights not persisting between sessions
 - Fixed workout video player not showing all exercises properly
@@ -276,17 +301,20 @@
 - Removed all popup notifications (now showing in notification center only)
 
 ### 🔒 Security Updates
+
 - Enhanced data encryption for all stored settings
 - Improved localStorage security practices
 - Better error handling for sensitive operations
 
 ### 💾 Data Management
+
 - EnhancedWorkoutPlayer component for better workout tracking
 - Improved localStorage management across all components
 - Workout completion history now saved
 - Better state persistence for all user preferences
 
 ### 🎨 UI/UX Enhancements
+
 - Interactive watch brand logos in Smartwatch Hub
 - Better visual feedback for settings changes
 - Improved notification system (no more popups)
@@ -297,6 +325,7 @@
 ## Version 5.4.0 (2025-01-23)
 
 ### 🎉 New Features
+
 - **AI Fitness Tools**: Advanced calculators powered by AI algorithms
   - 1 Rep Max Calculator with training percentages
   - Body Fat Percentage Calculator using US Navy Method
@@ -305,7 +334,7 @@
   - Export chat conversations to JSON
   - Clear history functionality
   - Answers questions about nutrition, injury prevention, motivation, consistency
-- **Smartwatch Hub Enhancements**: 
+- **Smartwatch Hub Enhancements**:
   - Brand visual indicators (🍎 Apple, 📱 Samsung, 🏃 Garmin)
   - Improved brand-specific styling and colors
   - Better device connection status indicators
@@ -335,12 +364,13 @@
   - All security settings persist properly
 
 ### ⚡ Improvements
+
 - **AI Intelligence**: Extended AI Coach knowledge base
   - Comprehensive nutrition guidance
   - Injury prevention and management advice
   - Motivation and consistency strategies
   - Detailed workout programming
-- **User Experience**: 
+- **User Experience**:
   - Settings auto-save every 5 seconds
   - Connection status monitoring with offline support
   - Real-time sync indicators
@@ -355,12 +385,13 @@
   - Profile information shows correctly on home page
   - Instant updates after name/photo changes
   - Real-time synchronization across components
-- **Video Player**: 
+- **Video Player**:
   - Full controls for workout videos
   - Play/pause, volume, seek, fullscreen
   - Playback speed control
 
 ### 🐛 Bug Fixes
+
 - Fixed settings not persisting across browser sessions
 - Resolved chat history being lost on page refresh
 - Fixed smartwatch connection status inconsistencies
@@ -373,6 +404,7 @@
 - Fixed video player autoplay and control issues
 
 ### 🔒 Security Updates
+
 - Encrypted chat history storage
 - Enhanced Supabase RLS policies for user data
 - Secure localStorage practices implemented
@@ -383,6 +415,7 @@
 - Secure mode with additional validation
 
 ### 💾 Data Management
+
 - All user data now saved to both localStorage and Supabase
 - Automatic backup and sync functionality
 - Export capabilities for chat conversations
@@ -391,6 +424,7 @@
 - Auto-save with 5-second debounce
 
 ### 🎨 UI/UX Enhancements
+
 - New AI tools card with modern design
 - Enhanced profile header with instant updates
 - Improved smartwatch device cards
@@ -404,6 +438,7 @@
 ## Version 5.4.2 (2025-01-20)
 
 ### 🎉 New Features
+
 - **Fitness Tools Page**: BMI Calculator and TDEE (Calorie) Calculator with detailed results
 - **Progress Tracker Page**: Bodyweight logging with visual charts, measurement tracking (waist, chest, arms, thighs)
 - **Nutrition Page**: High-protein recipe library with 6+ healthy recipes, comprehensive food logger for meal tracking
@@ -413,6 +448,7 @@
 - **Enhanced Notification System**: All notifications now display only in notification tab, removed intrusive pop-ups
 
 ### ⚡ Improvements
+
 - **Smartwatch Hub Enhancements**: New dialog interfaces, improved watch face and wallpaper selection
 - **Profile Management**: Profile header displays on home page, real-time updates after name/image changes
 - **UI/UX Redesign**: Modern gradient cards, new icon set throughout the application
@@ -421,6 +457,7 @@
 - **Performance**: Faster page loads, optimized charts and visualizations
 
 ### 🐛 Bug Fixes
+
 - Fixed notification pop-ups appearing on screen
 - Resolved profile update synchronization issues
 - Fixed video player autoplay and control issues
@@ -428,18 +465,21 @@
 - Fixed responsive layouts on chat page for all devices
 
 ### 🔒 Security Updates
+
 - Updated RLS policies for user data protection
 - Enhanced input validation on all forms
 - Improved error handling and user feedback
 - Secure data storage practices implemented
 
 ### 📱 Mobile Improvements
+
 - Better touch interactions on all calculators and forms
 - Improved navigation between tools and features
 - Enhanced mobile chat interface
 - Optimized charts and graphs for mobile viewing
 
 ### 🎨 Design Updates
+
 - New gradient color schemes across all pages
 - Modern card designs with hover effects
 - Improved icon consistency (Lucide React icons)
@@ -447,6 +487,7 @@
 - Enhanced dark mode support
 
 ### 🔧 Technical Improvements
+
 - Added Recharts library for data visualization
 - Improved TypeScript type definitions
 - Better state management with localStorage
@@ -458,6 +499,7 @@
 ## Version 4.0.0 (2025-01-16)
 
 ### 🎉 New Features
+
 - **AI-Powered Workout Video Library**: Browse and watch workout videos with AI-powered recommendations, filtering by category, difficulty, and duration
 - **Profile Header Component**: Enhanced user profile display in header with instant avatar updates and quick access to profile settings
 - **Version Update Dialog**: Automatic update notifications with detailed changelogs and one-click installation
@@ -465,8 +507,9 @@
 - **Enhanced Profile Management**: Improved avatar upload with drag-and-drop support and instant preview
 
 ### ⚡ Improvements
+
 - **Toast Notification System**: Standardized all toast imports across the application to use `@/hooks/use-toast`
-- **UI/UX Enhancements**: 
+- **UI/UX Enhancements**:
   - Modern icon set throughout the application
   - Improved mobile responsiveness
   - Enhanced gradient designs and color schemes
@@ -480,6 +523,7 @@
 - **Workout Pages**: Added new "Videos" tab with comprehensive AI workout video library
 
 ### 🐛 Bug Fixes
+
 - Fixed import path issues in toast components (standardized to `@/hooks/use-toast`)
 - Resolved missing key props in map functions across components
 - Fixed undefined image sources in workout cards
@@ -489,18 +533,21 @@
 - Fixed localStorage error handling for settings
 
 ### 🔒 Security Updates
+
 - **Enhanced Content Security Policy**: Improved CSP headers in index.html
 - **Service Worker Security**: Enhanced service worker with better error handling and security measures
 - **SMS Auth Protection**: Added comprehensive RLS policies to protect SMS authentication logs
 - **API Security**: Strengthened endpoint security with proper validation
 
 ### 📱 Mobile Improvements
+
 - Better touch target sizes for improved accessibility
 - Enhanced mobile navigation experience
 - Improved responsive design across all screen sizes
 - Better performance on mobile devices
 
 ### 🎨 Design Updates
+
 - Hidden Lovable badge CSS to improve accessibility scores
 - Enhanced color schemes and gradients
 - Improved typography and spacing
@@ -508,6 +555,7 @@
 - Modern card designs with hover effects
 
 ### 🔧 Technical Improvements
+
 - Standardized error handling across the application
 - Enhanced cache strategies (cache-first for static, network-first for API)
 - Background sync for offline workout data
@@ -515,6 +563,7 @@
 - Better TypeScript type definitions
 
 ### 📊 Performance Metrics
+
 - Lighthouse Accessibility Score: 100 (up from 90)
 - Lighthouse Best Practices: 100 (up from 96)
 - Page Load Time: Under 500ms (50% improvement)
@@ -523,17 +572,20 @@
 ---
 
 ### 🎉 New Features
+
 - **AI-Powered Workout Coach**: Interactive AI assistant for personalized fitness guidance
 - **Video Player Integration**: Full-featured video player with controls for workout videos
 - **Profile Header Component**: Enhanced user profile display with real-time updates
 - **Enhanced Chat UI**: Improved layouts, user avatars, and email display
 
 ### ⚡ Improvements
+
 - Profile picture updates now reflect immediately across the application
 - Better mobile responsiveness on chat page
 - Enhanced smartwatch hub interface
 
 ### 🐛 Bug Fixes
+
 - Fixed profile data refresh issues
 - Resolved video player control errors
 - Corrected avatar upload feedback
@@ -543,12 +595,14 @@
 ## Version 3.5.0 (2025-01-15)
 
 ### Features
+
 - Initial SmartWatch Hub implementation
 - Community features with posts and comments
 - Workout plans catalog
 - Progress tracking dashboard
 
 ### Improvements
+
 - Basic authentication flow
 - Initial PWA support
 - Mobile navigation
@@ -563,9 +617,11 @@
 4. App will reload with all new features
 
 ## Known Issues
+
 - None reported for this version
 
 ## Coming Soon
+
 - Advanced AI workout plan generation
 - Social workout challenges
 - Integration with more wearable devices
