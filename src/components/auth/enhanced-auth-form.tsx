@@ -26,9 +26,18 @@ import {
   getDefaultPasskey,
   verifyPasskey,
   listPasskeys,
+  probePasskeySupport,
   PasskeyError,
 } from "@/lib/passkey-manager";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface EnhancedAuthFormProps {
   onSuccess?: () => void;
@@ -61,12 +70,18 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [capsLock, setCapsLock] = useState(false);
 
-  useEffect(() => {
-    const hasWebAuthn =
-      typeof window !== "undefined" && !!(window as any).PublicKeyCredential;
-    setBiometricAvailable(hasWebAuthn);
+  // Magic link dialog (with alternative email support)
+  const [magicOpen, setMagicOpen] = useState(false);
+  const [magicPrimary, setMagicPrimary] = useState<string>(""); // account email (from passkey or form)
+  const [useAltEmail, setUseAltEmail] = useState(false);
+  const [altEmail, setAltEmail] = useState("");
+  const [magicContext, setMagicContext] = useState<"passkey" | "manual">("manual");
 
+  useEffect(() => {
     (async () => {
+      const probe = await probePasskeySupport();
+      setBiometricAvailable(probe.supported && probe.platformAvailable);
+
       try {
         const list = await listPasskeys();
         if (list.length > 0) {
@@ -107,6 +122,21 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
   const handlePasskeySignIn = async () => {
     setLoadingProvider("passkey");
     try {
+      const probe = await probePasskeySupport();
+      if (!probe.supported) {
+        throw new PasskeyError(
+          "unsupported",
+          "WebAuthn is not supported in this browser.",
+          "Use a modern browser (Chrome, Safari, Edge) over HTTPS.",
+        );
+      }
+      if (!probe.platformAvailable) {
+        throw new PasskeyError(
+          "no-platform-authenticator",
+          "No fingerprint / Face ID / Windows Hello set up on this device.",
+          "Enable device biometrics, or use email magic link below.",
+        );
+      }
       const def = await getDefaultPasskey();
       if (!def) {
         toast({
@@ -120,13 +150,12 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
       const rec = await verifyPasskey(def.id);
       if (!rec) throw new Error("Verification cancelled");
 
-      const { error } = await signInWithMagicLink(rec.email);
-      if (error) throw new Error(error);
-
-      toast({
-        title: "Passkey verified ✓",
-        description: `Check ${rec.email} for a one-tap link to complete sign-in.`,
-      });
+      // Open dialog so the user can confirm or choose an alternative email
+      setMagicPrimary(rec.email);
+      setAltEmail("");
+      setUseAltEmail(false);
+      setMagicContext("passkey");
+      setMagicOpen(true);
     } catch (e: any) {
       const isPk = e instanceof PasskeyError;
       toast({
@@ -139,6 +168,32 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
     } finally {
       setLoadingProvider(null);
     }
+  };
+
+  const sendMagicLinkTo = async (target: string) => {
+    setLoadingProvider("magic");
+    const { error } = await signInWithMagicLink(target);
+    setLoadingProvider(null);
+    if (!error) {
+      setMagicOpen(false);
+      toast({
+        title: "Magic link sent ✓",
+        description: `Check ${target} for a one-tap sign-in link.`,
+      });
+    }
+  };
+
+  const confirmMagicSend = async () => {
+    const target = useAltEmail ? altEmail.trim() : magicPrimary.trim();
+    if (!validEmail(target)) {
+      toast({
+        title: "Invalid email",
+        description: "Enter a valid email address to receive the link.",
+        variant: "destructive",
+      });
+      return;
+    }
+    await sendMagicLinkTo(target);
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -203,9 +258,11 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
       });
       return;
     }
-    setLoadingProvider("magic");
-    await signInWithMagicLink(email.trim());
-    setLoadingProvider(null);
+    setMagicPrimary(email.trim());
+    setAltEmail("");
+    setUseAltEmail(false);
+    setMagicContext("manual");
+    setMagicOpen(true);
   };
 
   const detectCaps = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -505,6 +562,89 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
           </p>
         </CardContent>
       </Card>
+
+      {/* Magic link — with alternative email support */}
+      <Dialog open={magicOpen} onOpenChange={(o) => !busy && setMagicOpen(o)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="h-4 w-4 text-primary" />
+              {magicContext === "passkey" ? "Passkey verified — send sign-in link" : "Send magic sign-in link"}
+            </DialogTitle>
+            <DialogDescription>
+              We'll email a one-tap link that finishes your sign-in. You can also send it to an alternative inbox you have access to.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3 py-2">
+            <div className="rounded-xl border border-border/50 bg-secondary/40 p-3 text-sm">
+              <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1">
+                Account email
+              </div>
+              <div className="font-medium truncate">{magicPrimary || "—"}</div>
+            </div>
+
+            <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+              <input
+                type="checkbox"
+                className="h-4 w-4 accent-primary"
+                checked={useAltEmail}
+                onChange={(e) => setUseAltEmail(e.target.checked)}
+                disabled={busy}
+              />
+              <span>Send to an alternative email instead</span>
+            </label>
+
+            {useAltEmail && (
+              <div className="space-y-1.5">
+                <Label htmlFor="alt-email" className="text-xs">Alternative email</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="alt-email"
+                    type="email"
+                    autoComplete="email"
+                    inputMode="email"
+                    className="pl-9 h-11"
+                    placeholder="backup@example.com"
+                    value={altEmail}
+                    onChange={(e) => setAltEmail(e.target.value)}
+                    disabled={busy}
+                    autoFocus
+                  />
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  Use a recovery inbox you can open right now — the link signs in the account above.
+                </p>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setMagicOpen(false)}
+              disabled={busy}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={confirmMagicSend}
+              disabled={busy}
+              className="min-w-[140px]"
+            >
+              {loadingProvider === "magic" ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Mail className="mr-2 h-4 w-4" />
+              )}
+              Send link
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }
