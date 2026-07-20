@@ -2,6 +2,26 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { listPasskeys, attachSessionToPasskey } from "@/lib/passkey-manager";
+
+// Keep the encrypted passkey vault's session tokens in sync with Supabase's
+// rotating refresh tokens. Without this, a stashed refresh_token becomes
+// invalid after the first refresh and passkey sign-in silently falls back
+// to a magic link email.
+async function syncPasskeySessions(session: Session | null) {
+  if (!session?.refresh_token || !session.user?.email) return;
+  try {
+    const list = await listPasskeys();
+    const email = session.user.email.toLowerCase();
+    const matches = list.filter((p) => p.email.toLowerCase() === email);
+    for (const p of matches) {
+      await attachSessionToPasskey(p.id, {
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+      });
+    }
+  } catch { /* non-fatal */ }
+}
 
 interface AuthState {
   user: User | null;
@@ -65,6 +85,7 @@ const ensureAuthInitialized = () => {
       emitAuthState(error
         ? { user: null, session: null, error: error.message, loading: false }
         : { session, user: session?.user ?? null, loading: false, error: null });
+      if (!error && session) void syncPasskeySessions(session);
     })
     .catch((error) => {
       window.clearTimeout(authTimeout);
@@ -74,6 +95,12 @@ const ensureAuthInitialized = () => {
   const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
     window.clearTimeout(authTimeout);
     emitAuthState({ session, user: session?.user ?? null, loading: false, error: null });
+
+    // Keep the passkey vault's tokens fresh on sign-in / token refresh so
+    // passkey-based sign-in continues to work across sessions.
+    if (session && (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED")) {
+      void syncPasskeySessions(session);
+    }
 
     window.dispatchEvent(new CustomEvent("fitfusion-auth-event", { detail: { event, userId: session?.user?.id ?? null } }));
   });
