@@ -122,6 +122,21 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
   const handlePasskeySignIn = async () => {
     setLoadingProvider("passkey");
     try {
+      const probe = await probePasskeySupport();
+      if (!probe.supported) {
+        throw new PasskeyError(
+          "unsupported",
+          "WebAuthn is not supported in this browser.",
+          "Use a modern browser (Chrome, Safari, Edge) over HTTPS.",
+        );
+      }
+      if (!probe.platformAvailable) {
+        throw new PasskeyError(
+          "no-platform-authenticator",
+          "No fingerprint / Face ID / Windows Hello set up on this device.",
+          "Enable device biometrics, or use email magic link below.",
+        );
+      }
       const def = await getDefaultPasskey();
       if (!def) {
         toast({
@@ -135,13 +150,12 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
       const rec = await verifyPasskey(def.id);
       if (!rec) throw new Error("Verification cancelled");
 
-      const { error } = await signInWithMagicLink(rec.email);
-      if (error) throw new Error(error);
-
-      toast({
-        title: "Passkey verified ✓",
-        description: `Check ${rec.email} for a one-tap link to complete sign-in.`,
-      });
+      // Open dialog so the user can confirm or choose an alternative email
+      setMagicPrimary(rec.email);
+      setAltEmail("");
+      setUseAltEmail(false);
+      setMagicContext("passkey");
+      setMagicOpen(true);
     } catch (e: any) {
       const isPk = e instanceof PasskeyError;
       toast({
@@ -154,6 +168,32 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
     } finally {
       setLoadingProvider(null);
     }
+  };
+
+  const sendMagicLinkTo = async (target: string) => {
+    setLoadingProvider("magic");
+    const { error } = await signInWithMagicLink(target);
+    setLoadingProvider(null);
+    if (!error) {
+      setMagicOpen(false);
+      toast({
+        title: "Magic link sent ✓",
+        description: `Check ${target} for a one-tap sign-in link.`,
+      });
+    }
+  };
+
+  const confirmMagicSend = async () => {
+    const target = useAltEmail ? altEmail.trim() : magicPrimary.trim();
+    if (!validEmail(target)) {
+      toast({
+        title: "Invalid email",
+        description: "Enter a valid email address to receive the link.",
+        variant: "destructive",
+      });
+      return;
+    }
+    await sendMagicLinkTo(target);
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
