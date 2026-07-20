@@ -25,7 +25,7 @@ export function hexToHslTriple(hex: string | null | undefined): string | null {
   return `${Math.round(h)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
 }
 
-export function applyAccent(hex: string) {
+export function applyAccent(hex: string | null | undefined) {
   const hsl = hexToHslTriple(hex);
   if (!hsl) return;
   const root = document.documentElement;
