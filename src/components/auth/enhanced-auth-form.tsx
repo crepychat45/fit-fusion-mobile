@@ -258,9 +258,11 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
       });
       return;
     }
-    setLoadingProvider("magic");
-    await signInWithMagicLink(email.trim());
-    setLoadingProvider(null);
+    setMagicPrimary(email.trim());
+    setAltEmail("");
+    setUseAltEmail(false);
+    setMagicContext("manual");
+    setMagicOpen(true);
   };
 
   const detectCaps = (e: React.KeyboardEvent<HTMLInputElement>) => {
