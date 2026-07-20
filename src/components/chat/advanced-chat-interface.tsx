@@ -332,7 +332,7 @@ export function AdvancedChatInterface({
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ messages: history }),
+        body: JSON.stringify({ messages: history, language: (typeof navigator !== "undefined" ? navigator.language : "") || "en" }),
       });
 
       if (!response.ok || !response.body) {
