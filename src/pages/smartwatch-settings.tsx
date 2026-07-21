@@ -359,13 +359,27 @@ const SmartwatchSettings: React.FC = () => {
               variant="ghost"
               size="icon"
               aria-label="Back"
-              onClick={() => {
-                if (window.history.length > 1) {
-                  navigate(-1);
-                } else {
-                  navigate("/more");
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                try {
+                  if (window.history.length > 1) {
+                    navigate(-1);
+                    // Fallback if history state was replaced (SPA guard)
+                    window.setTimeout(() => {
+                      if (window.location.pathname.includes("smartwatch-settings")) {
+                        navigate("/", { replace: true });
+                      }
+                    }, 200);
+                  } else {
+                    navigate("/", { replace: true });
+                  }
+                } catch {
+                  navigate("/", { replace: true });
                 }
               }}
+              className="relative z-30"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
