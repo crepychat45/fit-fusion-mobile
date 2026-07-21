@@ -249,7 +249,7 @@ export const SmartwatchControlWidget: React.FC = () => {
           {!activeFace.image && (
             <div className={`absolute inset-0 bg-gradient-to-br ${activeFace.gradient}`} />
           )}
-          <div className="absolute inset-2 rounded-[1.4rem] bg-black/55 backdrop-blur-md border border-white/10 flex flex-col items-center justify-center">
+          <div className={`absolute inset-2 rounded-[1.4rem] border border-white/10 flex flex-col items-center justify-center ${activeFace.image ? "bg-gradient-to-b from-black/20 via-transparent to-black/40" : "bg-black/40"}`}>
             {activeFace.style === "analog" ? (
               <AnalogFace hours={hours} minutes={minutes} seconds={seconds} accent={activeFace.accent} />
             ) : (
