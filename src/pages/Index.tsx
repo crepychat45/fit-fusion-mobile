@@ -79,7 +79,7 @@ const Index = () => {
 
   return (
     <MainLayout showFooter={false}>
-      <div className="min-h-screen bg-background pb-24 relative overflow-hidden">
+      <div className="min-h-dvh bg-background pb-24 relative overflow-hidden">
         {/* Ambient background orbs */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden">
           <div className="absolute -top-32 -right-32 w-80 h-80 bg-primary/5 rounded-full blur-3xl animate-float" />

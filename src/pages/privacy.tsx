@@ -286,7 +286,7 @@ const Privacy = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-16">
+    <div className="min-h-dvh bg-background pb-16">
       <header className="fitness-gradient pt-12 pb-6 px-4">
         <div className="flex items-center">
           <button
