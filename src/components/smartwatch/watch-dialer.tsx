@@ -53,6 +53,8 @@ export const WatchDialer: React.FC = () => {
   const [dialed, setDialed] = useState("");
   const [inCall, setInCall] = useState<{ name: string; number: string; started: number } | null>(null);
   const [callSec, setCallSec] = useState(0);
+  const [muted, setMuted] = useState(false);
+  const [speaker, setSpeaker] = useState(false);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
 
