@@ -41,6 +41,7 @@ import {
   type WatchState,
   type WorkoutSession,
 } from "@/lib/smartwatch";
+import { WatchFacePreview } from "@/components/smartwatch/watch-face-preview";
 
 export const SmartwatchControlWidget: React.FC = () => {
   const navigate = useNavigate();
