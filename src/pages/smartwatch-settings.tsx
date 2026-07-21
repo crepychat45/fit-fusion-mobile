@@ -156,6 +156,7 @@ const SmartwatchSettings: React.FC = () => {
   const [newFaceName, setNewFaceName] = useState("");
   const [newFaceColor, setNewFaceColor] = useState("#a855f7");
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [newFaceFit, setNewFaceFit] = useState<"cover" | "contain">("cover");
   const [pinging, setPinging] = useState(false);
   const [pairOpen, setPairOpen] = useState(false);
   const [pairStep, setPairStep] = useState<"scan" | "select" | "connecting" | "syncing" | "done">("scan");
