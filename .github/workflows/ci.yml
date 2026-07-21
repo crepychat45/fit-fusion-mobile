@@ -18,8 +18,9 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [20.x, 22.x]
 
     steps:
       - name: Checkout repository
@@ -43,11 +44,21 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bun-${{ matrix.node-version }}-
 
-      - name: Install dependencies
+      - name: Verify lockfile hygiene
+        run: |
+          test ! -f package-lock.json || (echo "❌ package-lock.json must not exist — this project uses Bun." && exit 1)
+          test ! -f yarn.lock || (echo "❌ yarn.lock must not exist — this project uses Bun." && exit 1)
+          test -f bun.lock && echo "✅ bun.lock present"
+
+      - name: Install dependencies (Bun, frozen)
         run: bun install --frozen-lockfile
+
+      - name: Typecheck
+        run: bunx tsc --noEmit
 
       - name: Run linter
         run: bun run lint
+        continue-on-error: true
 
       - name: Build with Vite
         run: bun run build

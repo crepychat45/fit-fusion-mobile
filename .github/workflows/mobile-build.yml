@@ -18,6 +18,9 @@ jobs:
   build:
     name: Build & Publish Android artifacts
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false -Dorg.gradle.jvmargs=-Xmx4g"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -49,6 +52,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bun-mobile-
 
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            android/.gradle
+          key: ${{ runner.os }}-gradle-${{ hashFiles('android/**/*.gradle*', 'android/**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
       # ---------- DRY-RUN PREFLIGHT ----------
       - name: 🔍 Dry-run — Environment info
         run: |
@@ -60,7 +74,8 @@ jobs:
           echo "::endgroup::"
           echo "::group::Repository lockfiles"
           ls -la bun.lock package.json capacitor.config.json
-          test ! -f package-lock.json && echo "✅ no stale package-lock.json" || echo "⚠️ package-lock.json present"
+          test ! -f package-lock.json && echo "✅ no stale package-lock.json" || (echo "❌ package-lock.json present — Bun-only project" && exit 1)
+          test ! -f yarn.lock && echo "✅ no stale yarn.lock" || (echo "❌ yarn.lock present — Bun-only project" && exit 1)
           echo "::endgroup::"
 
       - name: 🔍 Dry-run — Bun install (frozen lockfile)
@@ -95,7 +110,7 @@ jobs:
           echo "✅ Capacitor Android sync passed"
           echo "::endgroup::"
 
-      - name: 🔍 Dry-run — Gradle assembleDebug (validation)
+      - name: 🔍 Dry-run — Gradle wrapper validation
         working-directory: android
         run: |
           chmod +x ./gradlew
@@ -107,11 +122,11 @@ jobs:
       # ---------- ACTUAL BUILD ----------
       - name: Build Debug APK
         working-directory: android
-        run: ./gradlew assembleDebug --no-daemon
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Build Release AAB
         working-directory: android
-        run: ./gradlew bundleRelease --no-daemon
+        run: ./gradlew bundleRelease --no-daemon --stacktrace
         continue-on-error: true
 
       - name: Collect artifacts
