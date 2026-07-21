@@ -10,7 +10,12 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "test": "echo 'No tests yet' && exit 0"
+    "test": "echo 'No tests yet' && exit 0",
+    "cap:add": "cap add android",
+    "cap:sync": "cap sync android"
+  },
+  "engines": {
+    "node": ">=22"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.2",
