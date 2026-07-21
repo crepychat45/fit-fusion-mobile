@@ -7,6 +7,7 @@ export type WatchFace = {
   accent: string;
   style: "analog" | "digital" | "hybrid";
   image?: string; // dataURL for uploaded faces
+  imageFit?: "cover" | "contain"; // how uploaded image fills the watch screen
 };
 
 export const BUILT_IN_FACES: WatchFace[] = [
