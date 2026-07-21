@@ -5,7 +5,8 @@
 
 import { supabase } from "@/integrations/supabase/client";
 
-const PREFIX = "fitfusion-";
+const PREFIXES = ["fitfusion-", "fitfusion."] as const;
+const matchesPrefix = (k: string) => PREFIXES.some((p) => k.startsWith(p));
 const DEBOUNCE_MS = 900;
 
 let currentUserId: string | null = null;
