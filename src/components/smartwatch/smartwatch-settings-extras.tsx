@@ -102,10 +102,29 @@ export const SmartwatchSettingsExtras: React.FC = () => {
   const [newAlarmLabel, setNewAlarmLabel] = useState("");
   const [newAlarmTime, setNewAlarmTime] = useState("07:00");
 
-  useEffect(() => saveSecurity(security), [security]);
-  useEffect(() => saveAlarms(alarms), [alarms]);
-  useEffect(() => saveComplications(complications), [complications]);
-  useEffect(() => saveAdvanced(advanced), [advanced]);
+  // Skip the very first render's persist so we don't overwrite hydrated cloud
+  // values with the local defaults during initial mount.
+  const mountedRef = React.useRef({ sec: false, al: false, cx: false, adv: false });
+  useEffect(() => { if (mountedRef.current.sec) saveSecurity(security); else mountedRef.current.sec = true; }, [security]);
+  useEffect(() => { if (mountedRef.current.al) saveAlarms(alarms); else mountedRef.current.al = true; }, [alarms]);
+  useEffect(() => { if (mountedRef.current.cx) saveComplications(complications); else mountedRef.current.cx = true; }, [complications]);
+  useEffect(() => { if (mountedRef.current.adv) saveAdvanced(advanced); else mountedRef.current.adv = true; }, [advanced]);
+
+  // Rehydrate from localStorage when cloud sync pushes fresh values in.
+  useEffect(() => {
+    const rehydrate = () => {
+      setSecurity(loadSecurity());
+      setAlarms(loadAlarms());
+      setComplications(loadComplications());
+      setAdvanced(loadAdvanced());
+    };
+    window.addEventListener("fitfusion-settings-hydrated", rehydrate);
+    window.addEventListener("storage", rehydrate);
+    return () => {
+      window.removeEventListener("fitfusion-settings-hydrated", rehydrate);
+      window.removeEventListener("storage", rehydrate);
+    };
+  }, []);
 
   const updSec = <K extends keyof SecurityConfig>(k: K, v: SecurityConfig[K]) =>
     setSecurity((s) => ({ ...s, [k]: v }));
