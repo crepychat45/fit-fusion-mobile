@@ -241,11 +241,18 @@ const SmartwatchSettings: React.FC = () => {
       setWatchState(loadState());
       setWorkout(loadWorkout());
     };
+    const rehydrateSettings = () => {
+      setS(loadSettings());
+      setCustomFaces(loadCustomFaces());
+      setWatchState(loadState());
+    };
     window.addEventListener(EVT, sync);
     window.addEventListener("storage", sync);
+    window.addEventListener("fitfusion-settings-hydrated", rehydrateSettings);
     return () => {
       window.removeEventListener(EVT, sync);
       window.removeEventListener("storage", sync);
+      window.removeEventListener("fitfusion-settings-hydrated", rehydrateSettings);
     };
   }, []);
 
