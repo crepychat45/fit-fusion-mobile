@@ -114,7 +114,7 @@ function installStorageProxy() {
 
   // Sync across tabs on the same device too.
   window.addEventListener("storage", (e) => {
-    if (e.key && e.matchesPrefix(key)) schedulePush();
+    if (e.key && matchesPrefix(e.key)) schedulePush();
   });
 }
 

@@ -1079,4 +1079,36 @@ const formatDuration = (s: number) => {
     : `${m}:${String(sec).padStart(2, "0")}`;
 };
 
+// Downscale + compress arbitrary image files to a JPEG dataURL that comfortably
+// fits inside localStorage (target max side 720px). Falls back to raw dataURL
+// when canvas isn't available.
+const compressImageToDataUrl = (file: File, maxSide = 720, quality = 0.85): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("read"));
+    reader.onload = () => {
+      const src = reader.result as string;
+      const img = new Image();
+      img.onerror = () => resolve(src);
+      img.onload = () => {
+        try {
+          const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+          const w = Math.round(img.width * scale);
+          const h = Math.round(img.height * scale);
+          const canvas = document.createElement("canvas");
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return resolve(src);
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL("image/jpeg", quality));
+        } catch {
+          resolve(src);
+        }
+      };
+      img.src = src;
+    };
+    reader.readAsDataURL(file);
+  });
+
 export default SmartwatchSettings;
