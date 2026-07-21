@@ -405,56 +405,48 @@ const SmartwatchSettings: React.FC = () => {
             className="rounded-2xl border border-border/20 bg-card/60 backdrop-blur-xl shadow-lg p-5"
           >
             <div className="flex flex-col items-center gap-3">
-              <div
-                className="relative h-48 w-48 rounded-[2rem] shadow-2xl overflow-hidden bg-black"
-                style={
-                  activeFace.image
-                    ? {
-                        backgroundImage: `url("${activeFace.image}")`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                        backgroundRepeat: "no-repeat",
-                      }
-                    : undefined
-                }
-              >
-                {activeFace.image ? (
-                  <img
-                    src={activeFace.image}
-                    alt={activeFace.name}
-                    className="absolute inset-0 h-full w-full object-cover"
-                    draggable={false}
-                  />
-                ) : (
-                  <div className={`absolute inset-0 bg-gradient-to-br ${activeFace.gradient}`} />
-                )}
-                {/* Light readability gradient (top→bottom), no blur so image stays sharp */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/45 pointer-events-none" />
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-3 text-center">
-                  <div
-                    className="text-4xl font-bold tabular-nums drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]"
-                    style={{ fontFamily: activeFont.css, color: activeFace.accent }}
-                  >
-                    {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  </div>
-                  <div
-                    className="text-[11px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]"
-                    style={{ fontFamily: activeFont.css }}
-                  >
-                    {new Date().toLocaleDateString([], { weekday: "short", day: "numeric", month: "short" })}
-                  </div>
-                  <div className="flex items-center gap-2 mt-2 text-[10px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]">
-                    <Heart className="h-3 w-3" /> {reading.hr}
-                    <Droplets className="h-3 w-3 ml-1" /> {reading.spo2}%
-                    <Activity className="h-3 w-3 ml-1" /> {(reading.steps / 1000).toFixed(1)}k
-                  </div>
-                </div>
-              </div>
+              <WatchFacePreview
+                face={activeFace}
+                fontId={activeFont.id}
+                size={192}
+                showStats
+                className="rounded-[2rem]"
+              />
               <div className="text-center">
                 <div className="text-sm font-bold text-foreground">{activeFace.name}</div>
                 <div className="text-xs text-muted-foreground">
                   {activeFace.style} · {activeFont.name} · fw {watchState.firmwareVersion}
                 </div>
+                {activeFace.image && (
+                  <div className="mt-2 inline-flex rounded-lg border border-border/30 bg-muted/20 p-0.5 text-[10px]">
+                    {(["cover", "contain"] as const).map((fit) => {
+                      const isActive = (activeFace.imageFit ?? "cover") === fit;
+                      return (
+                        <button
+                          key={fit}
+                          type="button"
+                          onClick={() => {
+                            // Persist fit on the face (only custom faces are editable)
+                            if (!activeFace.id.startsWith("custom-")) {
+                              toast.message("Fit is only editable on custom faces");
+                              return;
+                            }
+                            const nextFaces = customFaces.map((f) =>
+                              f.id === activeFace.id ? { ...f, imageFit: fit } : f,
+                            );
+                            setCustomFaces(nextFaces);
+                            saveCustomFaces(nextFaces);
+                          }}
+                          className={`px-2.5 py-1 rounded-md transition-colors ${
+                            isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                          }`}
+                        >
+                          {fit === "cover" ? "Fill" : "Fit"}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
