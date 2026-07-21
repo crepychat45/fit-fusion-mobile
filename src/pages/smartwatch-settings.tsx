@@ -800,6 +800,105 @@ const SmartwatchSettings: React.FC = () => {
             </Button>
           </Section>
 
+          {/* NEW: Remote controls that stream from watch → phone */}
+          <Section icon={<RadioTower className="h-4 w-4 text-primary" />} title="Remote Controls">
+            <p className="text-xs text-muted-foreground">
+              Trigger phone actions from your wrist. Works while the watch is paired.
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <RemoteAction
+                icon={<Music className="h-4 w-4" />}
+                label="Music"
+                hint="Play / pause"
+                onClick={() => toast.success("Media command sent", { description: "Toggle Play/Pause" })}
+                disabled={!watchState.connected}
+              />
+              <RemoteAction
+                icon={<Camera className="h-4 w-4" />}
+                label="Camera"
+                hint="Shutter"
+                onClick={() => toast.success("Camera shutter triggered")}
+                disabled={!watchState.connected}
+              />
+              <RemoteAction
+                icon={<Flashlight className="h-4 w-4" />}
+                label="Flashlight"
+                hint="Torch on watch"
+                onClick={() => toast.success("Watch torch enabled", { description: "Max brightness for 60s" })}
+                disabled={!watchState.connected}
+              />
+              <RemoteAction
+                icon={<PhoneIcon className="h-4 w-4" />}
+                label="Find Phone"
+                hint="Ring loud"
+                onClick={() => toast.success("Phone ringing at full volume")}
+                disabled={!watchState.connected}
+              />
+              <RemoteAction
+                icon={<CloudSun className="h-4 w-4" />}
+                label="Weather"
+                hint="Sync now"
+                onClick={() => toast.success("Weather pushed to watch")}
+                disabled={!watchState.connected}
+              />
+              <RemoteAction
+                icon={<Wallet className="h-4 w-4" />}
+                label="Wallet"
+                hint="Open card"
+                onClick={() => toast.success("Wallet unlocked on watch")}
+                disabled={!watchState.connected}
+              />
+            </div>
+          </Section>
+
+          {/* NEW: Advanced Health quick actions */}
+          <Section icon={<HeartPulse className="h-4 w-4 text-rose-400" />} title="Advanced Health">
+            <div className="grid grid-cols-2 gap-2">
+              <RemoteAction
+                icon={<HeartPulse className="h-4 w-4 text-rose-400" />}
+                label="ECG Scan"
+                hint="30-second read"
+                onClick={() =>
+                  toast.success("ECG scan started", {
+                    description: "Rest your arm. Result in ~30s.",
+                  })
+                }
+              />
+              <RemoteAction
+                icon={<Waves className="h-4 w-4 text-cyan-400" />}
+                label="Stress Check"
+                hint="HRV analysis"
+                onClick={() => toast.success("Stress analysis running")}
+              />
+              <RemoteAction
+                icon={<Thermometer className="h-4 w-4 text-amber-400" />}
+                label="Skin Temp"
+                hint="Baseline"
+                onClick={() => toast.success("Measuring skin temperature")}
+              />
+              <RemoteAction
+                icon={<ShieldAlert className="h-4 w-4 text-emerald-400" />}
+                label="Fall Detect"
+                hint="Enabled"
+                onClick={() => toast.success("Fall detection is active")}
+              />
+              <RemoteAction
+                icon={<Activity className="h-4 w-4 text-primary" />}
+                label="VO₂ Max"
+                hint="Estimate"
+                onClick={() =>
+                  toast.success("VO₂ Max estimate", { description: `${(38 + Math.random() * 8).toFixed(1)} ml/kg/min` })
+                }
+              />
+              <RemoteAction
+                icon={<Moon className="h-4 w-4 text-indigo-400" />}
+                label="Nap Timer"
+                hint="20 min"
+                onClick={() => toast.success("Nap timer set", { description: "Watch will wake you gently in 20m" })}
+              />
+            </div>
+          </Section>
+
           {/* NEW: Dialer, Security, SOS, Medical ID, Advanced Health, Complications, Alarms, Apps */}
           <SmartwatchSettingsExtras />
         </div>
