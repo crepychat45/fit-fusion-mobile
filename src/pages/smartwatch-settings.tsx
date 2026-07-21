@@ -297,12 +297,16 @@ const SmartwatchSettings: React.FC = () => {
       accent: newFaceColor,
       style: uploadedImage ? "digital" : "hybrid",
       image: uploadedImage ?? undefined,
+      imageFit: uploadedImage ? newFaceFit : undefined,
     };
     const next = [...customFaces, face];
     setCustomFaces(next);
     saveCustomFaces(next);
+    // Auto-apply the newly created face
+    update("face", face.id);
     setNewFaceName("");
     setUploadedImage(null);
+    setNewFaceFit("cover");
     toast.success("Custom face created", { description: face.name });
   };
 
