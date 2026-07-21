@@ -275,16 +275,23 @@ const SmartwatchSettings: React.FC = () => {
     else toast.error("Not available", { description: "Web Bluetooth or a heart rate sensor is required." });
   };
 
-  /* ------- Face uploads ------- */
+  /* ------- Face uploads (up to 10 MB, auto-compressed) ------- */
   const onPickImage = () => fileRef.current?.click();
-  const onImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 3 * 1024 * 1024) return toast.error("Image must be under 3 MB");
-    const reader = new FileReader();
-    reader.onload = () => setUploadedImage(reader.result as string);
-    reader.readAsDataURL(file);
     e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return toast.error("Please choose an image file");
+    if (file.size > 10 * 1024 * 1024) return toast.error("Image must be under 10 MB");
+    try {
+      const dataUrl = await compressImageToDataUrl(file, 720, 0.85);
+      setUploadedImage(dataUrl);
+      toast.success("Image ready", {
+        description: `${(file.size / 1024 / 1024).toFixed(1)} MB → optimized for watch`,
+      });
+    } catch {
+      toast.error("Couldn't read image");
+    }
   };
 
   const addCustomFace = () => {
@@ -1071,5 +1078,37 @@ const formatDuration = (s: number) => {
     ? `${h}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`
     : `${m}:${String(sec).padStart(2, "0")}`;
 };
+
+// Downscale + compress arbitrary image files to a JPEG dataURL that comfortably
+// fits inside localStorage (target max side 720px). Falls back to raw dataURL
+// when canvas isn't available.
+const compressImageToDataUrl = (file: File, maxSide = 720, quality = 0.85): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("read"));
+    reader.onload = () => {
+      const src = reader.result as string;
+      const img = new Image();
+      img.onerror = () => resolve(src);
+      img.onload = () => {
+        try {
+          const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+          const w = Math.round(img.width * scale);
+          const h = Math.round(img.height * scale);
+          const canvas = document.createElement("canvas");
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return resolve(src);
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL("image/jpeg", quality));
+        } catch {
+          resolve(src);
+        }
+      };
+      img.src = src;
+    };
+    reader.readAsDataURL(file);
+  });
 
 export default SmartwatchSettings;
