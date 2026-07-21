@@ -571,7 +571,9 @@ const SmartwatchSettings: React.FC = () => {
                       <img
                         src={f.image}
                         alt={f.name}
-                        className="absolute inset-0 h-full w-full object-cover"
+                        className={`absolute inset-0 h-full w-full ${
+                          (f.imageFit ?? "cover") === "contain" ? "object-contain" : "object-cover"
+                        }`}
                         draggable={false}
                       />
                     ) : (
