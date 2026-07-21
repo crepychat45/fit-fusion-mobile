@@ -67,6 +67,8 @@ import {
   type WorkoutType,
 } from "@/lib/smartwatch";
 import { SmartwatchSettingsExtras } from "@/components/smartwatch/smartwatch-settings-extras";
+import { WatchFacePreview } from "@/components/smartwatch/watch-face-preview";
+import { Music, Camera, Flashlight, Phone as PhoneIcon, CloudSun, Wallet, Waves, Thermometer, HeartPulse, ShieldAlert } from "lucide-react";
 
 type Settings = {
   face: string;
@@ -154,6 +156,7 @@ const SmartwatchSettings: React.FC = () => {
   const [newFaceName, setNewFaceName] = useState("");
   const [newFaceColor, setNewFaceColor] = useState("#a855f7");
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [newFaceFit, setNewFaceFit] = useState<"cover" | "contain">("cover");
   const [pinging, setPinging] = useState(false);
   const [pairOpen, setPairOpen] = useState(false);
   const [pairStep, setPairStep] = useState<"scan" | "select" | "connecting" | "syncing" | "done">("scan");
@@ -294,12 +297,16 @@ const SmartwatchSettings: React.FC = () => {
       accent: newFaceColor,
       style: uploadedImage ? "digital" : "hybrid",
       image: uploadedImage ?? undefined,
+      imageFit: uploadedImage ? newFaceFit : undefined,
     };
     const next = [...customFaces, face];
     setCustomFaces(next);
     saveCustomFaces(next);
+    // Auto-apply the newly created face
+    update("face", face.id);
     setNewFaceName("");
     setUploadedImage(null);
+    setNewFaceFit("cover");
     toast.success("Custom face created", { description: face.name });
   };
 
@@ -357,13 +364,27 @@ const SmartwatchSettings: React.FC = () => {
               variant="ghost"
               size="icon"
               aria-label="Back"
-              onClick={() => {
-                if (window.history.length > 1) {
-                  navigate(-1);
-                } else {
-                  navigate("/more");
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                try {
+                  if (window.history.length > 1) {
+                    navigate(-1);
+                    // Fallback if history state was replaced (SPA guard)
+                    window.setTimeout(() => {
+                      if (window.location.pathname.includes("smartwatch-settings")) {
+                        navigate("/", { replace: true });
+                      }
+                    }, 200);
+                  } else {
+                    navigate("/", { replace: true });
+                  }
+                } catch {
+                  navigate("/", { replace: true });
                 }
               }}
+              className="relative z-30"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -389,56 +410,48 @@ const SmartwatchSettings: React.FC = () => {
             className="rounded-2xl border border-border/20 bg-card/60 backdrop-blur-xl shadow-lg p-5"
           >
             <div className="flex flex-col items-center gap-3">
-              <div
-                className="relative h-48 w-48 rounded-[2rem] shadow-2xl overflow-hidden bg-black"
-                style={
-                  activeFace.image
-                    ? {
-                        backgroundImage: `url("${activeFace.image}")`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                        backgroundRepeat: "no-repeat",
-                      }
-                    : undefined
-                }
-              >
-                {activeFace.image ? (
-                  <img
-                    src={activeFace.image}
-                    alt={activeFace.name}
-                    className="absolute inset-0 h-full w-full object-cover"
-                    draggable={false}
-                  />
-                ) : (
-                  <div className={`absolute inset-0 bg-gradient-to-br ${activeFace.gradient}`} />
-                )}
-                {/* Light readability gradient (top→bottom), no blur so image stays sharp */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/45 pointer-events-none" />
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-3 text-center">
-                  <div
-                    className="text-4xl font-bold tabular-nums drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]"
-                    style={{ fontFamily: activeFont.css, color: activeFace.accent }}
-                  >
-                    {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  </div>
-                  <div
-                    className="text-[11px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]"
-                    style={{ fontFamily: activeFont.css }}
-                  >
-                    {new Date().toLocaleDateString([], { weekday: "short", day: "numeric", month: "short" })}
-                  </div>
-                  <div className="flex items-center gap-2 mt-2 text-[10px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]">
-                    <Heart className="h-3 w-3" /> {reading.hr}
-                    <Droplets className="h-3 w-3 ml-1" /> {reading.spo2}%
-                    <Activity className="h-3 w-3 ml-1" /> {(reading.steps / 1000).toFixed(1)}k
-                  </div>
-                </div>
-              </div>
+              <WatchFacePreview
+                face={activeFace}
+                fontId={activeFont.id}
+                size={192}
+                showStats
+                className="rounded-[2rem]"
+              />
               <div className="text-center">
                 <div className="text-sm font-bold text-foreground">{activeFace.name}</div>
                 <div className="text-xs text-muted-foreground">
                   {activeFace.style} · {activeFont.name} · fw {watchState.firmwareVersion}
                 </div>
+                {activeFace.image && (
+                  <div className="mt-2 inline-flex rounded-lg border border-border/30 bg-muted/20 p-0.5 text-[10px]">
+                    {(["cover", "contain"] as const).map((fit) => {
+                      const isActive = (activeFace.imageFit ?? "cover") === fit;
+                      return (
+                        <button
+                          key={fit}
+                          type="button"
+                          onClick={() => {
+                            // Persist fit on the face (only custom faces are editable)
+                            if (!activeFace.id.startsWith("custom-")) {
+                              toast.message("Fit is only editable on custom faces");
+                              return;
+                            }
+                            const nextFaces = customFaces.map((f) =>
+                              f.id === activeFace.id ? { ...f, imageFit: fit } : f,
+                            );
+                            setCustomFaces(nextFaces);
+                            saveCustomFaces(nextFaces);
+                          }}
+                          className={`px-2.5 py-1 rounded-md transition-colors ${
+                            isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                          }`}
+                        >
+                          {fit === "cover" ? "Fill" : "Fit"}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
@@ -558,7 +571,9 @@ const SmartwatchSettings: React.FC = () => {
                       <img
                         src={f.image}
                         alt={f.name}
-                        className="absolute inset-0 h-full w-full object-cover"
+                        className={`absolute inset-0 h-full w-full ${
+                          (f.imageFit ?? "cover") === "contain" ? "object-contain" : "object-cover"
+                        }`}
                         draggable={false}
                       />
                     ) : (
@@ -638,6 +653,28 @@ const SmartwatchSettings: React.FC = () => {
                   />
                 )}
               </div>
+              {uploadedImage && (
+                <div className="flex items-center gap-2">
+                  <Label className="text-xs w-14 shrink-0">Fit</Label>
+                  <div className="inline-flex rounded-lg border border-border/30 bg-muted/20 p-0.5 text-xs">
+                    {(["cover", "contain"] as const).map((fit) => {
+                      const isActive = newFaceFit === fit;
+                      return (
+                        <button
+                          key={fit}
+                          type="button"
+                          onClick={() => setNewFaceFit(fit)}
+                          className={`px-3 py-1 rounded-md transition-colors ${
+                            isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                          }`}
+                        >
+                          {fit === "cover" ? "Fill screen" : "Fit whole image"}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
               <Button onClick={addCustomFace} className="w-full">
                 <Upload className="h-4 w-4 mr-2" />
                 Save Custom Face
@@ -761,6 +798,105 @@ const SmartwatchSettings: React.FC = () => {
               <Trash2 className="h-4 w-4 mr-2" />
               Reset Watch to Defaults
             </Button>
+          </Section>
+
+          {/* NEW: Remote controls that stream from watch → phone */}
+          <Section icon={<RadioTower className="h-4 w-4 text-primary" />} title="Remote Controls">
+            <p className="text-xs text-muted-foreground">
+              Trigger phone actions from your wrist. Works while the watch is paired.
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <RemoteAction
+                icon={<Music className="h-4 w-4" />}
+                label="Music"
+                hint="Play / pause"
+                onClick={() => toast.success("Media command sent", { description: "Toggle Play/Pause" })}
+                disabled={!watchState.connected}
+              />
+              <RemoteAction
+                icon={<Camera className="h-4 w-4" />}
+                label="Camera"
+                hint="Shutter"
+                onClick={() => toast.success("Camera shutter triggered")}
+                disabled={!watchState.connected}
+              />
+              <RemoteAction
+                icon={<Flashlight className="h-4 w-4" />}
+                label="Flashlight"
+                hint="Torch on watch"
+                onClick={() => toast.success("Watch torch enabled", { description: "Max brightness for 60s" })}
+                disabled={!watchState.connected}
+              />
+              <RemoteAction
+                icon={<PhoneIcon className="h-4 w-4" />}
+                label="Find Phone"
+                hint="Ring loud"
+                onClick={() => toast.success("Phone ringing at full volume")}
+                disabled={!watchState.connected}
+              />
+              <RemoteAction
+                icon={<CloudSun className="h-4 w-4" />}
+                label="Weather"
+                hint="Sync now"
+                onClick={() => toast.success("Weather pushed to watch")}
+                disabled={!watchState.connected}
+              />
+              <RemoteAction
+                icon={<Wallet className="h-4 w-4" />}
+                label="Wallet"
+                hint="Open card"
+                onClick={() => toast.success("Wallet unlocked on watch")}
+                disabled={!watchState.connected}
+              />
+            </div>
+          </Section>
+
+          {/* NEW: Advanced Health quick actions */}
+          <Section icon={<HeartPulse className="h-4 w-4 text-rose-400" />} title="Advanced Health">
+            <div className="grid grid-cols-2 gap-2">
+              <RemoteAction
+                icon={<HeartPulse className="h-4 w-4 text-rose-400" />}
+                label="ECG Scan"
+                hint="30-second read"
+                onClick={() =>
+                  toast.success("ECG scan started", {
+                    description: "Rest your arm. Result in ~30s.",
+                  })
+                }
+              />
+              <RemoteAction
+                icon={<Waves className="h-4 w-4 text-cyan-400" />}
+                label="Stress Check"
+                hint="HRV analysis"
+                onClick={() => toast.success("Stress analysis running")}
+              />
+              <RemoteAction
+                icon={<Thermometer className="h-4 w-4 text-amber-400" />}
+                label="Skin Temp"
+                hint="Baseline"
+                onClick={() => toast.success("Measuring skin temperature")}
+              />
+              <RemoteAction
+                icon={<ShieldAlert className="h-4 w-4 text-emerald-400" />}
+                label="Fall Detect"
+                hint="Enabled"
+                onClick={() => toast.success("Fall detection is active")}
+              />
+              <RemoteAction
+                icon={<Activity className="h-4 w-4 text-primary" />}
+                label="VO₂ Max"
+                hint="Estimate"
+                onClick={() =>
+                  toast.success("VO₂ Max estimate", { description: `${(38 + Math.random() * 8).toFixed(1)} ml/kg/min` })
+                }
+              />
+              <RemoteAction
+                icon={<Moon className="h-4 w-4 text-indigo-400" />}
+                label="Nap Timer"
+                hint="20 min"
+                onClick={() => toast.success("Nap timer set", { description: "Watch will wake you gently in 20m" })}
+              />
+            </div>
           </Section>
 
           {/* NEW: Dialer, Security, SOS, Medical ID, Advanced Health, Complications, Alarms, Apps */}
@@ -904,6 +1040,27 @@ const MiniStat: React.FC<{ label: string; value: string }> = ({ label, value }) 
     <div className="text-[9px] text-muted-foreground">{label}</div>
     <div className="text-xs font-bold text-foreground tabular-nums">{value}</div>
   </div>
+);
+
+const RemoteAction: React.FC<{
+  icon: React.ReactNode;
+  label: string;
+  hint?: string;
+  onClick: () => void;
+  disabled?: boolean;
+}> = ({ icon, label, hint, onClick, disabled }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={disabled}
+    className="group relative rounded-xl border border-border/30 bg-muted/20 hover:bg-muted/40 disabled:opacity-50 disabled:cursor-not-allowed p-3 flex items-center gap-3 text-left transition-colors"
+  >
+    <div className="p-2 rounded-lg bg-primary/10 text-primary">{icon}</div>
+    <div className="min-w-0 flex-1">
+      <div className="text-xs font-bold text-foreground truncate">{label}</div>
+      {hint && <div className="text-[10px] text-muted-foreground truncate">{hint}</div>}
+    </div>
+  </button>
 );
 
 const formatDuration = (s: number) => {
