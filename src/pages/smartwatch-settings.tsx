@@ -275,16 +275,23 @@ const SmartwatchSettings: React.FC = () => {
     else toast.error("Not available", { description: "Web Bluetooth or a heart rate sensor is required." });
   };
 
-  /* ------- Face uploads ------- */
+  /* ------- Face uploads (up to 10 MB, auto-compressed) ------- */
   const onPickImage = () => fileRef.current?.click();
-  const onImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 3 * 1024 * 1024) return toast.error("Image must be under 3 MB");
-    const reader = new FileReader();
-    reader.onload = () => setUploadedImage(reader.result as string);
-    reader.readAsDataURL(file);
     e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return toast.error("Please choose an image file");
+    if (file.size > 10 * 1024 * 1024) return toast.error("Image must be under 10 MB");
+    try {
+      const dataUrl = await compressImageToDataUrl(file, 720, 0.85);
+      setUploadedImage(dataUrl);
+      toast.success("Image ready", {
+        description: `${(file.size / 1024 / 1024).toFixed(1)} MB → optimized for watch`,
+      });
+    } catch {
+      toast.error("Couldn't read image");
+    }
   };
 
   const addCustomFace = () => {

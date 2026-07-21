@@ -35,6 +35,28 @@ export const BUILT_IN_FACES: WatchFace[] = [
   { id: "matrix", name: "Matrix", gradient: "from-black via-green-950 to-emerald-900", accent: "#22c55e", style: "digital" },
   { id: "champagne", name: "Champagne", gradient: "from-yellow-100 via-amber-200 to-yellow-300", accent: "#d97706", style: "analog" },
   { id: "cyberpunk", name: "Cyberpunk", gradient: "from-fuchsia-600 via-cyan-500 to-yellow-400", accent: "#f0abfc", style: "digital" },
+  // New styles ↓
+  { id: "nebula", name: "Nebula", gradient: "from-violet-600 via-fuchsia-500 to-rose-500", accent: "#c084fc", style: "hybrid" },
+  { id: "aurora-borealis", name: "Aurora Borealis", gradient: "from-emerald-400 via-teal-500 to-indigo-600", accent: "#34d399", style: "digital" },
+  { id: "obsidian", name: "Obsidian", gradient: "from-black via-zinc-900 to-slate-900", accent: "#f43f5e", style: "analog" },
+  { id: "platinum", name: "Platinum", gradient: "from-slate-200 via-slate-300 to-slate-400", accent: "#0f172a", style: "analog" },
+  { id: "gold-rush", name: "Gold Rush", gradient: "from-yellow-500 via-amber-500 to-orange-600", accent: "#fbbf24", style: "hybrid" },
+  { id: "ocean-deep", name: "Ocean Deep", gradient: "from-blue-950 via-cyan-900 to-teal-800", accent: "#22d3ee", style: "hybrid" },
+  { id: "volcano", name: "Volcano", gradient: "from-red-900 via-orange-700 to-yellow-600", accent: "#fb923c", style: "digital" },
+  { id: "monochrome", name: "Monochrome", gradient: "from-neutral-200 via-neutral-500 to-neutral-800", accent: "#ffffff", style: "digital" },
+  { id: "iron-hud", name: "Iron HUD", gradient: "from-red-700 via-yellow-500 to-red-900", accent: "#facc15", style: "digital" },
+  { id: "stealth", name: "Stealth", gradient: "from-black via-zinc-950 to-neutral-900", accent: "#22c55e", style: "digital" },
+  { id: "prism", name: "Prism", gradient: "from-red-500 via-yellow-400 via-green-500 via-blue-500 to-purple-600", accent: "#ffffff", style: "hybrid" },
+  { id: "dune", name: "Dune", gradient: "from-amber-800 via-orange-600 to-yellow-700", accent: "#fef3c7", style: "analog" },
+  { id: "tokyo-night", name: "Tokyo Night", gradient: "from-indigo-950 via-purple-900 to-pink-800", accent: "#f0abfc", style: "digital" },
+  { id: "emerald-dream", name: "Emerald Dream", gradient: "from-emerald-900 via-green-700 to-lime-500", accent: "#a7f3d0", style: "hybrid" },
+  { id: "rose-gold", name: "Rose Gold", gradient: "from-rose-300 via-amber-200 to-pink-400", accent: "#fda4af", style: "analog" },
+  { id: "arctic-fox", name: "Arctic Fox", gradient: "from-sky-200 via-blue-300 to-indigo-400", accent: "#1e3a8a", style: "analog" },
+  { id: "electric-blue", name: "Electric Blue", gradient: "from-blue-500 via-indigo-600 to-cyan-400", accent: "#22d3ee", style: "digital" },
+  { id: "sakura-night", name: "Sakura Night", gradient: "from-pink-500 via-purple-700 to-slate-900", accent: "#f9a8d4", style: "hybrid" },
+  { id: "retro-wave", name: "Retro Wave", gradient: "from-pink-500 via-purple-500 to-cyan-400", accent: "#f472b6", style: "digital" },
+  { id: "biohazard", name: "Biohazard", gradient: "from-lime-400 via-green-600 to-black", accent: "#84cc16", style: "hybrid" },
+  { id: "royal-purple", name: "Royal Purple", gradient: "from-purple-800 via-violet-700 to-fuchsia-600", accent: "#e9d5ff", style: "analog" },
 ];
 
 export const FONTS = [
