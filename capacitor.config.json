@@ -3,7 +3,13 @@
   "appName": "fitxfusion",
   "webDir": "dist",
   "server": {
-    "url": "https://7c0c0ca1-5e79-4cf3-b1ce-b9b34af55603.lovableproject.com?forceHideBadge=true",
-    "cleartext": true
+    "url": "https://fitxfusion.lovable.app",
+    "cleartext": true,
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
   }
 }
