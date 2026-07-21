@@ -19,7 +19,7 @@ function collectLocalKv(): Record<string, string> {
   try {
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);
-      if (!k || !k.startsWith(PREFIX)) continue;
+      if (!k || !matchesPrefix(k)) continue;
       const v = localStorage.getItem(k);
       if (v !== null) out[k] = v;
     }
@@ -101,11 +101,11 @@ function installStorageProxy() {
 
   localStorage.setItem = function (key: string, value: string) {
     origSet(key, value);
-    if (key.startsWith(PREFIX)) schedulePush();
+    if (matchesPrefix(key)) schedulePush();
   };
   localStorage.removeItem = function (key: string) {
     origRemove(key);
-    if (key.startsWith(PREFIX)) schedulePush();
+    if (matchesPrefix(key)) schedulePush();
   };
 
   window.addEventListener("online", () => {
@@ -114,7 +114,7 @@ function installStorageProxy() {
 
   // Sync across tabs on the same device too.
   window.addEventListener("storage", (e) => {
-    if (e.key && e.key.startsWith(PREFIX)) schedulePush();
+    if (e.key && e.matchesPrefix(key)) schedulePush();
   });
 }
 
