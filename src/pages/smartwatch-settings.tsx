@@ -67,6 +67,8 @@ import {
   type WorkoutType,
 } from "@/lib/smartwatch";
 import { SmartwatchSettingsExtras } from "@/components/smartwatch/smartwatch-settings-extras";
+import { WatchFacePreview } from "@/components/smartwatch/watch-face-preview";
+import { Music, Camera, Flashlight, Phone as PhoneIcon, CloudSun, Wallet, Waves, Thermometer, HeartPulse, ShieldAlert } from "lucide-react";
 
 type Settings = {
   face: string;
