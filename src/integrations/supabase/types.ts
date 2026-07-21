@@ -557,6 +557,63 @@ export type Database = {
         }
         Relationships: []
       }
+      user_subscriptions: {
+        Row: {
+          auto_renew: boolean
+          billing_cycle: string
+          cancelled_at: string | null
+          created_at: string
+          currency: string
+          expires_at: string
+          id: string
+          payment_method: string | null
+          plan_id: string
+          plan_name: string
+          price_inr: number
+          started_at: string
+          status: string
+          transaction_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_renew?: boolean
+          billing_cycle: string
+          cancelled_at?: string | null
+          created_at?: string
+          currency?: string
+          expires_at: string
+          id?: string
+          payment_method?: string | null
+          plan_id: string
+          plan_name: string
+          price_inr: number
+          started_at?: string
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_renew?: boolean
+          billing_cycle?: string
+          cancelled_at?: string | null
+          created_at?: string
+          currency?: string
+          expires_at?: string
+          id?: string
+          payment_method?: string | null
+          plan_id?: string
+          plan_name?: string
+          price_inr?: number
+          started_at?: string
+          status?: string
+          transaction_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       workout_plans: {
         Row: {
           created_at: string
