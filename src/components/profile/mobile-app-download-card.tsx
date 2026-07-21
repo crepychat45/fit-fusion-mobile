@@ -5,21 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
-const REPO_OWNER = "crepychat45";
-const REPO_NAME = "fit-fusion-mobile";
-const REPO_URL = `https://github.com/${REPO_OWNER}/${REPO_NAME}`;
+const ENV = (typeof import.meta !== "undefined" ? (import.meta as any).env : {}) || {};
+const REPO_SLUG: string = ENV.VITE_FITX_MOBILE_REPO || "crepychat45/fit-fusion-mobile";
+const [REPO_OWNER, REPO_NAME] = REPO_SLUG.split("/");
+const REPO_URL = `https://github.com/${REPO_SLUG}`;
 
 const APK_URL =
-  (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_FITX_APK_URL) ||
-  `${REPO_URL}/releases/latest/download/fitxfusion.apk`;
+  ENV.VITE_FITX_APK_URL || `${REPO_URL}/releases/latest/download/fitxfusion.apk`;
 
 const PLAY_URL =
-  (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_FITX_PLAY_URL) ||
+  ENV.VITE_FITX_PLAY_URL ||
   "https://play.google.com/store/apps/details?id=app.lovable.7c0c0ca15e794cf3b1ceb9b34af55603";
 
-const IOS_URL =
-  (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_FITX_IOS_URL) ||
-  "https://apps.apple.com/app/fitxfusion";
+const IOS_URL = ENV.VITE_FITX_IOS_URL || "https://apps.apple.com/app/fitxfusion";
 
 export function MobileAppDownloadCard() {
   const [checking, setChecking] = useState(false);
@@ -40,6 +38,14 @@ export function MobileAppDownloadCard() {
           action: { label: "Open repo", onClick: () => window.open(REPO_URL, "_blank") },
           duration: 8000,
         });
+        return;
+      }
+
+      if (res.status === 403) {
+        toast.info("GitHub rate limit reached", {
+          description: "Opening the releases page so you can download the APK directly.",
+        });
+        window.open(`${REPO_URL}/releases/latest`, "_blank", "noopener,noreferrer");
         return;
       }
 
