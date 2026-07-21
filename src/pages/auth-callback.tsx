@@ -91,7 +91,7 @@ export default function AuthCallback() {
     <XCircle className="h-8 w-8 text-destructive" />;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+    <div className="min-h-dvh flex items-center justify-center p-4 bg-background">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
