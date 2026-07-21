@@ -97,6 +97,36 @@ type Settings = {
   stepGoal: number;
   waterReminders: boolean;
   standReminders: boolean;
+  // v7.4 additions
+  screenTimeoutSec: number;
+  gestureWake: boolean;
+  tiltToShowTime: boolean;
+  wristHand: "left" | "right";
+  themeVariant: "auto" | "dark" | "light";
+  hrIrregularAlerts: boolean;
+  hrRestingBaseline: number;
+  spo2LowAlert: number;
+  sleepSmartAlarm: boolean;
+  snoreDetection: boolean;
+  respiratoryRate: boolean;
+  activeEnergyGoal: number;
+  standGoalHours: number;
+  autoPauseWorkout: boolean;
+  cooldownReminder: boolean;
+  autoLapKm: number;
+  notifPreviews: boolean;
+  notifWhileActive: boolean;
+  notifAppFilter: "all" | "priority" | "calls-only";
+  batteryLowThreshold: number;
+  ultraPowerSaver: boolean;
+  privacyAnonymizedSync: boolean;
+  wifiEnabled: boolean;
+  lteEnabled: boolean;
+  offlineMaps: boolean;
+  autoUpdateFirmware: boolean;
+  developerMode: boolean;
+  language: string;
+  timezoneAuto: boolean;
 };
 
 const DEFAULT_SETTINGS: Settings = {
@@ -126,6 +156,35 @@ const DEFAULT_SETTINGS: Settings = {
   stepGoal: 10000,
   waterReminders: true,
   standReminders: true,
+  screenTimeoutSec: 15,
+  gestureWake: true,
+  tiltToShowTime: true,
+  wristHand: "left",
+  themeVariant: "auto",
+  hrIrregularAlerts: true,
+  hrRestingBaseline: 62,
+  spo2LowAlert: 92,
+  sleepSmartAlarm: true,
+  snoreDetection: false,
+  respiratoryRate: true,
+  activeEnergyGoal: 500,
+  standGoalHours: 12,
+  autoPauseWorkout: true,
+  cooldownReminder: true,
+  autoLapKm: 1,
+  notifPreviews: true,
+  notifWhileActive: false,
+  notifAppFilter: "all",
+  batteryLowThreshold: 20,
+  ultraPowerSaver: false,
+  privacyAnonymizedSync: true,
+  wifiEnabled: true,
+  lteEnabled: false,
+  offlineMaps: true,
+  autoUpdateFirmware: true,
+  developerMode: false,
+  language: "English",
+  timezoneAuto: true,
 };
 
 const loadSettings = (): Settings => {
