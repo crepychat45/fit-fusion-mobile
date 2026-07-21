@@ -274,7 +274,7 @@ export const SmartwatchControlWidget: React.FC = () => {
               </>
             )}
           </div>
-          <div className="absolute -inset-8 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.28),transparent_50%)] pointer-events-none" />
+          {!activeFace.image && <div className="absolute -inset-8 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.28),transparent_50%)] pointer-events-none" />}
           <span className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-1 rounded-full bg-white/20" />
         </button>
 
