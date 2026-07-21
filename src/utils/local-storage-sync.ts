@@ -131,10 +131,18 @@ export function initSettingsCloudMirror() {
 
   supabase.auth.onAuthStateChange((event, session) => {
     const uid = session?.user?.id ?? null;
-    if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+    if (event === "SIGNED_IN") {
+      // Only hydrate on true sign-in transitions; skip TOKEN_REFRESHED so
+      // that in-flight local toggles are never overwritten by a stale cloud row.
+      if (uid && uid !== currentUserId) {
+        currentUserId = uid;
+        hydrated = false;
+        hydrateFromCloud(uid);
+      } else {
+        currentUserId = uid;
+      }
+    } else if (event === "TOKEN_REFRESHED") {
       currentUserId = uid;
-      hydrated = false;
-      if (uid) hydrateFromCloud(uid);
     } else if (event === "SIGNED_OUT") {
       currentUserId = null;
       hydrated = false;
