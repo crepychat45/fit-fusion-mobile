@@ -249,7 +249,8 @@ const SmartwatchSettings: React.FC = () => {
     };
   }, []);
 
-  // Persist settings + broadcast face/font to homepage widget
+  // Persist settings + broadcast face/font to homepage widget (with debounced toast)
+  const savedToastTimer = useRef<number | null>(null);
   const update = <K extends keyof Settings>(k: K, v: Settings[K]) => {
     const next = { ...s, [k]: v };
     setS(next);
@@ -259,6 +260,10 @@ const SmartwatchSettings: React.FC = () => {
       saveState({ ...w, face: next.face, font: next.font });
       setWatchState(loadState());
     }
+    if (savedToastTimer.current) window.clearTimeout(savedToastTimer.current);
+    savedToastTimer.current = window.setTimeout(() => {
+      toast.success("Watch settings saved", { duration: 1400 });
+    }, 500);
   };
 
   // Live workout tick
