@@ -1042,6 +1042,27 @@ const MiniStat: React.FC<{ label: string; value: string }> = ({ label, value }) 
   </div>
 );
 
+const RemoteAction: React.FC<{
+  icon: React.ReactNode;
+  label: string;
+  hint?: string;
+  onClick: () => void;
+  disabled?: boolean;
+}> = ({ icon, label, hint, onClick, disabled }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={disabled}
+    className="group relative rounded-xl border border-border/30 bg-muted/20 hover:bg-muted/40 disabled:opacity-50 disabled:cursor-not-allowed p-3 flex items-center gap-3 text-left transition-colors"
+  >
+    <div className="p-2 rounded-lg bg-primary/10 text-primary">{icon}</div>
+    <div className="min-w-0 flex-1">
+      <div className="text-xs font-bold text-foreground truncate">{label}</div>
+      {hint && <div className="text-[10px] text-muted-foreground truncate">{hint}</div>}
+    </div>
+  </button>
+);
+
 const formatDuration = (s: number) => {
   const h = Math.floor(s / 3600);
   const m = Math.floor((s % 3600) / 60);
