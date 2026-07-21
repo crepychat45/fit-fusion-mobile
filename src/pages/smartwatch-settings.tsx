@@ -390,33 +390,49 @@ const SmartwatchSettings: React.FC = () => {
           >
             <div className="flex flex-col items-center gap-3">
               <div
-                className="relative h-48 w-48 rounded-[2rem] shadow-2xl overflow-hidden"
+                className="relative h-48 w-48 rounded-[2rem] shadow-2xl overflow-hidden bg-black"
                 style={
                   activeFace.image
-                    ? { backgroundImage: `url(${activeFace.image})`, backgroundSize: "cover", backgroundPosition: "center" }
+                    ? {
+                        backgroundImage: `url("${activeFace.image}")`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        backgroundRepeat: "no-repeat",
+                      }
                     : undefined
                 }
               >
-                {!activeFace.image && (
+                {activeFace.image ? (
+                  <img
+                    src={activeFace.image}
+                    alt={activeFace.name}
+                    className="absolute inset-0 h-full w-full object-cover"
+                    draggable={false}
+                  />
+                ) : (
                   <div className={`absolute inset-0 bg-gradient-to-br ${activeFace.gradient}`} />
                 )}
-                <div className="absolute inset-2 rounded-[1.6rem] bg-black/50 backdrop-blur-sm border border-white/10 flex flex-col items-center justify-center gap-1">
+                {/* Light readability gradient (top→bottom), no blur so image stays sharp */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/45 pointer-events-none" />
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-3 text-center">
                   <div
-                    className="text-4xl font-bold tabular-nums"
+                    className="text-4xl font-bold tabular-nums drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]"
                     style={{ fontFamily: activeFont.css, color: activeFace.accent }}
                   >
                     {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   </div>
-                  <div className="text-[11px] text-white/80" style={{ fontFamily: activeFont.css }}>
+                  <div
+                    className="text-[11px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]"
+                    style={{ fontFamily: activeFont.css }}
+                  >
                     {new Date().toLocaleDateString([], { weekday: "short", day: "numeric", month: "short" })}
                   </div>
-                  <div className="flex items-center gap-2 mt-2 text-[10px] text-white/80">
+                  <div className="flex items-center gap-2 mt-2 text-[10px] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]">
                     <Heart className="h-3 w-3" /> {reading.hr}
                     <Droplets className="h-3 w-3 ml-1" /> {reading.spo2}%
                     <Activity className="h-3 w-3 ml-1" /> {(reading.steps / 1000).toFixed(1)}k
                   </div>
                 </div>
-                <div className="absolute -inset-6 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.25),transparent_50%)] pointer-events-none" />
               </div>
               <div className="text-center">
                 <div className="text-sm font-bold text-foreground">{activeFace.name}</div>
@@ -533,21 +549,23 @@ const SmartwatchSettings: React.FC = () => {
                   <button
                     key={f.id}
                     onClick={() => update("face", f.id)}
-                    className={`relative aspect-square rounded-2xl p-1 shadow-md overflow-hidden ${
+                    className={`relative aspect-square rounded-2xl shadow-md overflow-hidden bg-black ${
                       selected ? "ring-2 ring-primary" : ""
                     }`}
-                    style={
-                      f.image
-                        ? { backgroundImage: `url(${f.image})`, backgroundSize: "cover", backgroundPosition: "center" }
-                        : undefined
-                    }
                     aria-label={`Select ${f.name}`}
                   >
-                    {!f.image && (
+                    {f.image ? (
+                      <img
+                        src={f.image}
+                        alt={f.name}
+                        className="absolute inset-0 h-full w-full object-cover"
+                        draggable={false}
+                      />
+                    ) : (
                       <div className={`absolute inset-0 bg-gradient-to-br ${f.gradient}`} />
                     )}
-                    <div className="absolute inset-1.5 rounded-xl bg-black/40 flex items-center justify-center">
-                      <span className="text-[9px] font-semibold text-white/90 truncate px-1">
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-1 py-1 flex items-end justify-center">
+                      <span className="text-[9px] font-semibold text-white truncate drop-shadow">
                         {f.name}
                       </span>
                     </div>
