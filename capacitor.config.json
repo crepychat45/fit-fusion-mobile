@@ -1,6 +1,6 @@
 {
-  "appId": "app.lovable.7c0c0ca15e794cf3b1ceb9b34af55603",
-  "appName": "fitxfusion",
+  "appId": "com.fitxfusion.app",
+  "appName": "FitXFusion",
   "webDir": "dist",
   "server": {
     "url": "https://fitxfusion.lovable.app",
