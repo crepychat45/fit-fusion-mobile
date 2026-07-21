@@ -53,6 +53,8 @@ export const WatchDialer: React.FC = () => {
   const [dialed, setDialed] = useState("");
   const [inCall, setInCall] = useState<{ name: string; number: string; started: number } | null>(null);
   const [callSec, setCallSec] = useState(0);
+  const [muted, setMuted] = useState(false);
+  const [speaker, setSpeaker] = useState(false);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
 
@@ -81,6 +83,8 @@ export const WatchDialer: React.FC = () => {
     if (!number.trim()) return toast.error("Enter a number first");
     setInCall({ name, number, started: Date.now() });
     setCallSec(0);
+    setMuted(false);
+    setSpeaker(false);
     toast.success(`Calling ${name}`, { description: number });
     if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
   };
@@ -166,17 +170,33 @@ export const WatchDialer: React.FC = () => {
                 {callMins}:{callSecs}
               </div>
               <div className="grid grid-cols-3 gap-2 w-full mt-2">
-                <Button variant="outline" size="sm" className="flex-col h-14 gap-1">
+                <Button
+                  variant={muted ? "default" : "outline"}
+                  size="sm"
+                  className="flex-col h-14 gap-1"
+                  onClick={() => {
+                    setMuted((m) => !m);
+                    toast.message(muted ? "Mic unmuted" : "Mic muted");
+                  }}
+                >
                   <Mic className="h-4 w-4" />
-                  <span className="text-[10px]">Mute</span>
+                  <span className="text-[10px]">{muted ? "Muted" : "Mute"}</span>
                 </Button>
                 <Button variant="destructive" size="sm" className="flex-col h-14 gap-1" onClick={endCall}>
                   <PhoneOff className="h-5 w-5" />
                   <span className="text-[10px]">End</span>
                 </Button>
-                <Button variant="outline" size="sm" className="flex-col h-14 gap-1">
+                <Button
+                  variant={speaker ? "default" : "outline"}
+                  size="sm"
+                  className="flex-col h-14 gap-1"
+                  onClick={() => {
+                    setSpeaker((sp) => !sp);
+                    toast.message(speaker ? "Speaker off" : "Speaker on");
+                  }}
+                >
                   <Volume2 className="h-4 w-4" />
-                  <span className="text-[10px]">Speaker</span>
+                  <span className="text-[10px]">{speaker ? "On" : "Speaker"}</span>
                 </Button>
               </div>
             </div>

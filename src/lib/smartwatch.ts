@@ -57,6 +57,22 @@ export const BUILT_IN_FACES: WatchFace[] = [
   { id: "retro-wave", name: "Retro Wave", gradient: "from-pink-500 via-purple-500 to-cyan-400", accent: "#f472b6", style: "digital" },
   { id: "biohazard", name: "Biohazard", gradient: "from-lime-400 via-green-600 to-black", accent: "#84cc16", style: "hybrid" },
   { id: "royal-purple", name: "Royal Purple", gradient: "from-purple-800 via-violet-700 to-fuchsia-600", accent: "#e9d5ff", style: "analog" },
+  // v7.4 face pack ↓
+  { id: "hologram", name: "Hologram", gradient: "from-cyan-300 via-fuchsia-400 to-indigo-500", accent: "#67e8f9", style: "hybrid" },
+  { id: "graphite", name: "Graphite", gradient: "from-neutral-800 via-zinc-700 to-slate-900", accent: "#fb7185", style: "analog" },
+  { id: "coral-reef", name: "Coral Reef", gradient: "from-teal-300 via-cyan-400 to-orange-300", accent: "#fdba74", style: "hybrid" },
+  { id: "solar-flare", name: "Solar Flare", gradient: "from-yellow-300 via-orange-500 to-red-600", accent: "#fde047", style: "digital" },
+  { id: "midnight-forest", name: "Midnight Forest", gradient: "from-emerald-900 via-slate-900 to-green-800", accent: "#4ade80", style: "analog" },
+  { id: "candy-pop", name: "Candy Pop", gradient: "from-pink-300 via-fuchsia-400 to-violet-400", accent: "#f472b6", style: "digital" },
+  { id: "stellar", name: "Stellar", gradient: "from-slate-900 via-blue-800 to-fuchsia-700", accent: "#a5b4fc", style: "hybrid" },
+  { id: "amber-lux", name: "Amber Lux", gradient: "from-amber-600 via-yellow-400 to-orange-500", accent: "#78350f", style: "analog" },
+  { id: "porsche", name: "Racing", gradient: "from-red-600 via-black to-red-800", accent: "#facc15", style: "hybrid" },
+  { id: "pastel-mint", name: "Pastel Mint", gradient: "from-emerald-200 via-teal-200 to-sky-200", accent: "#0f766e", style: "digital" },
+  { id: "sunrise", name: "Sunrise", gradient: "from-yellow-200 via-orange-300 to-rose-400", accent: "#f97316", style: "analog" },
+  { id: "deep-space", name: "Deep Space", gradient: "from-black via-purple-950 to-slate-950", accent: "#818cf8", style: "digital" },
+  { id: "quartz", name: "Quartz", gradient: "from-white via-pink-100 to-purple-200", accent: "#a855f7", style: "analog" },
+  { id: "gunmetal", name: "Gunmetal", gradient: "from-slate-700 via-zinc-800 to-slate-900", accent: "#38bdf8", style: "digital" },
+  { id: "aurora-mint", name: "Aurora Mint", gradient: "from-teal-300 via-emerald-400 to-cyan-500", accent: "#a7f3d0", style: "hybrid" },
 ];
 
 export const FONTS = [

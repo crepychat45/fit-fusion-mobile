@@ -97,6 +97,36 @@ type Settings = {
   stepGoal: number;
   waterReminders: boolean;
   standReminders: boolean;
+  // v7.4 additions
+  screenTimeoutSec: number;
+  gestureWake: boolean;
+  tiltToShowTime: boolean;
+  wristHand: "left" | "right";
+  themeVariant: "auto" | "dark" | "light";
+  hrIrregularAlerts: boolean;
+  hrRestingBaseline: number;
+  spo2LowAlert: number;
+  sleepSmartAlarm: boolean;
+  snoreDetection: boolean;
+  respiratoryRate: boolean;
+  activeEnergyGoal: number;
+  standGoalHours: number;
+  autoPauseWorkout: boolean;
+  cooldownReminder: boolean;
+  autoLapKm: number;
+  notifPreviews: boolean;
+  notifWhileActive: boolean;
+  notifAppFilter: "all" | "priority" | "calls-only";
+  batteryLowThreshold: number;
+  ultraPowerSaver: boolean;
+  privacyAnonymizedSync: boolean;
+  wifiEnabled: boolean;
+  lteEnabled: boolean;
+  offlineMaps: boolean;
+  autoUpdateFirmware: boolean;
+  developerMode: boolean;
+  language: string;
+  timezoneAuto: boolean;
 };
 
 const DEFAULT_SETTINGS: Settings = {
@@ -126,6 +156,35 @@ const DEFAULT_SETTINGS: Settings = {
   stepGoal: 10000,
   waterReminders: true,
   standReminders: true,
+  screenTimeoutSec: 15,
+  gestureWake: true,
+  tiltToShowTime: true,
+  wristHand: "left",
+  themeVariant: "auto",
+  hrIrregularAlerts: true,
+  hrRestingBaseline: 62,
+  spo2LowAlert: 92,
+  sleepSmartAlarm: true,
+  snoreDetection: false,
+  respiratoryRate: true,
+  activeEnergyGoal: 500,
+  standGoalHours: 12,
+  autoPauseWorkout: true,
+  cooldownReminder: true,
+  autoLapKm: 1,
+  notifPreviews: true,
+  notifWhileActive: false,
+  notifAppFilter: "all",
+  batteryLowThreshold: 20,
+  ultraPowerSaver: false,
+  privacyAnonymizedSync: true,
+  wifiEnabled: true,
+  lteEnabled: false,
+  offlineMaps: true,
+  autoUpdateFirmware: true,
+  developerMode: false,
+  language: "English",
+  timezoneAuto: true,
 };
 
 const loadSettings = (): Settings => {
@@ -190,7 +249,8 @@ const SmartwatchSettings: React.FC = () => {
     };
   }, []);
 
-  // Persist settings + broadcast face/font to homepage widget
+  // Persist settings + broadcast face/font to homepage widget (with debounced toast)
+  const savedToastTimer = useRef<number | null>(null);
   const update = <K extends keyof Settings>(k: K, v: Settings[K]) => {
     const next = { ...s, [k]: v };
     setS(next);
@@ -200,6 +260,10 @@ const SmartwatchSettings: React.FC = () => {
       saveState({ ...w, face: next.face, font: next.font });
       setWatchState(loadState());
     }
+    if (savedToastTimer.current) window.clearTimeout(savedToastTimer.current);
+    savedToastTimer.current = window.setTimeout(() => {
+      toast.success("Watch settings saved", { duration: 1400 });
+    }, 500);
   };
 
   // Live workout tick
@@ -906,8 +970,156 @@ const SmartwatchSettings: React.FC = () => {
             </div>
           </Section>
 
+          {/* NEW: Display Advanced */}
+          <Section icon={<Sparkles className="h-4 w-4" />} title="Display Advanced">
+            <SliderRow label="Screen timeout" value={s.screenTimeoutSec} min={5} max={120} step={5} onChange={(v) => update("screenTimeoutSec", v)} suffix="s" />
+            <Row label="Gesture wake (double-tap)">
+              <Switch checked={s.gestureWake} onCheckedChange={(v) => update("gestureWake", v)} />
+            </Row>
+            <Row label="Tilt to show time">
+              <Switch checked={s.tiltToShowTime} onCheckedChange={(v) => update("tiltToShowTime", v)} />
+            </Row>
+            <Row label="Wrist orientation">
+              <div className="inline-flex rounded-lg border border-border/30 bg-muted/20 p-0.5 text-xs">
+                {(["left", "right"] as const).map((h) => (
+                  <button
+                    key={h}
+                    type="button"
+                    onClick={() => update("wristHand", h)}
+                    className={`px-3 py-1 rounded-md ${s.wristHand === h ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+                  >
+                    {h === "left" ? "Left" : "Right"}
+                  </button>
+                ))}
+              </div>
+            </Row>
+            <Row label="Theme">
+              <div className="inline-flex rounded-lg border border-border/30 bg-muted/20 p-0.5 text-xs">
+                {(["auto", "dark", "light"] as const).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => update("themeVariant", t)}
+                    className={`px-2.5 py-1 rounded-md capitalize ${s.themeVariant === t ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </Row>
+          </Section>
+
+          {/* NEW: Heart Rate Advanced */}
+          <Section icon={<Heart className="h-4 w-4 text-rose-400" />} title="Heart Rate Advanced">
+            <Row label="Irregular rhythm alerts">
+              <Switch checked={s.hrIrregularAlerts} onCheckedChange={(v) => update("hrIrregularAlerts", v)} />
+            </Row>
+            <SliderRow label="Resting baseline" value={s.hrRestingBaseline} min={40} max={90} onChange={(v) => update("hrRestingBaseline", v)} suffix=" bpm" />
+          </Section>
+
+          {/* NEW: SpO2 Advanced */}
+          <Section icon={<Droplets className="h-4 w-4 text-cyan-400" />} title="SpO₂ Advanced">
+            <SliderRow label="Low SpO₂ alert" value={s.spo2LowAlert} min={85} max={95} onChange={(v) => update("spo2LowAlert", v)} suffix=" %" />
+          </Section>
+
+          {/* NEW: Sleep Advanced */}
+          <Section icon={<Moon className="h-4 w-4 text-indigo-400" />} title="Sleep Advanced">
+            <Row label="Smart alarm (wake in light sleep)">
+              <Switch checked={s.sleepSmartAlarm} onCheckedChange={(v) => update("sleepSmartAlarm", v)} />
+            </Row>
+            <Row label="Snore detection">
+              <Switch checked={s.snoreDetection} onCheckedChange={(v) => update("snoreDetection", v)} />
+            </Row>
+            <Row label="Respiratory rate tracking">
+              <Switch checked={s.respiratoryRate} onCheckedChange={(v) => update("respiratoryRate", v)} />
+            </Row>
+          </Section>
+
+          {/* NEW: Activity Goals Advanced */}
+          <Section icon={<Flame className="h-4 w-4 text-orange-400" />} title="Activity Goals Advanced">
+            <SliderRow label="Active energy goal" value={s.activeEnergyGoal} min={100} max={1500} step={50} onChange={(v) => update("activeEnergyGoal", v)} suffix=" kcal" />
+            <SliderRow label="Stand goal" value={s.standGoalHours} min={6} max={16} onChange={(v) => update("standGoalHours", v)} suffix=" hrs" />
+          </Section>
+
+          {/* NEW: Workout Advanced */}
+          <Section icon={<Activity className="h-4 w-4 text-emerald-400" />} title="Workout Advanced">
+            <Row label="Auto-pause when idle">
+              <Switch checked={s.autoPauseWorkout} onCheckedChange={(v) => update("autoPauseWorkout", v)} />
+            </Row>
+            <Row label="Cooldown reminder">
+              <Switch checked={s.cooldownReminder} onCheckedChange={(v) => update("cooldownReminder", v)} />
+            </Row>
+            <SliderRow label="Auto-lap every" value={s.autoLapKm} min={0.5} max={5} step={0.5} onChange={(v) => update("autoLapKm", v)} suffix=" km" />
+          </Section>
+
+          {/* NEW: Notifications Advanced */}
+          <Section icon={<Bell className="h-4 w-4" />} title="Notifications Advanced">
+            <Row label="Show message previews">
+              <Switch checked={s.notifPreviews} onCheckedChange={(v) => update("notifPreviews", v)} />
+            </Row>
+            <Row label="Notify during workouts">
+              <Switch checked={s.notifWhileActive} onCheckedChange={(v) => update("notifWhileActive", v)} />
+            </Row>
+            <Row label="Filter">
+              <div className="inline-flex rounded-lg border border-border/30 bg-muted/20 p-0.5 text-[10px]">
+                {(["all", "priority", "calls-only"] as const).map((f) => (
+                  <button
+                    key={f}
+                    type="button"
+                    onClick={() => update("notifAppFilter", f)}
+                    className={`px-2 py-1 rounded-md ${s.notifAppFilter === f ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+                  >
+                    {f === "calls-only" ? "Calls" : f}
+                  </button>
+                ))}
+              </div>
+            </Row>
+          </Section>
+
+          {/* NEW: Power Management */}
+          <Section icon={<BatteryLow className="h-4 w-4 text-amber-400" />} title="Power Management">
+            <SliderRow label="Low battery alert" value={s.batteryLowThreshold} min={5} max={50} step={5} onChange={(v) => update("batteryLowThreshold", v)} suffix=" %" />
+            <Row label="Ultra power saver" hint="Time only, ~7 day life">
+              <Switch checked={s.ultraPowerSaver} onCheckedChange={(v) => update("ultraPowerSaver", v)} />
+            </Row>
+          </Section>
+
+          {/* NEW: Connectivity */}
+          <Section icon={<Wifi className="h-4 w-4" />} title="Connectivity">
+            <Row label="Wi-Fi">
+              <Switch checked={s.wifiEnabled} onCheckedChange={(v) => update("wifiEnabled", v)} />
+            </Row>
+            <Row label="LTE / Cellular">
+              <Switch checked={s.lteEnabled} onCheckedChange={(v) => update("lteEnabled", v)} />
+            </Row>
+            <Row label="Offline maps">
+              <Switch checked={s.offlineMaps} onCheckedChange={(v) => update("offlineMaps", v)} />
+            </Row>
+            <Row label="Auto-update firmware">
+              <Switch checked={s.autoUpdateFirmware} onCheckedChange={(v) => update("autoUpdateFirmware", v)} />
+            </Row>
+          </Section>
+
+          {/* NEW: System */}
+          <Section icon={<ShieldCheck className="h-4 w-4" />} title="System">
+            <Row label="Anonymized cloud sync">
+              <Switch checked={s.privacyAnonymizedSync} onCheckedChange={(v) => update("privacyAnonymizedSync", v)} />
+            </Row>
+            <Row label="Automatic timezone">
+              <Switch checked={s.timezoneAuto} onCheckedChange={(v) => update("timezoneAuto", v)} />
+            </Row>
+            <Row label="Developer mode">
+              <Switch checked={s.developerMode} onCheckedChange={(v) => update("developerMode", v)} />
+            </Row>
+            <div className="flex items-center gap-2">
+              <Label className="text-xs w-14 shrink-0">Language</Label>
+              <Input value={s.language} onChange={(e) => update("language", e.target.value)} className="h-9" />
+            </div>
+          </Section>
+
           {/* NEW: Dialer, Security, SOS, Medical ID, Advanced Health, Complications, Alarms, Apps */}
           <SmartwatchSettingsExtras />
+
         </div>
       </div>
 
@@ -1001,9 +1213,12 @@ const Section: React.FC<{ icon: React.ReactNode; title: string; children: React.
   </motion.div>
 );
 
-const Row: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
+const Row: React.FC<{ label: string; hint?: string; children: React.ReactNode }> = ({ label, hint, children }) => (
   <div className="flex items-center justify-between gap-3">
-    <span className="text-xs text-foreground">{label}</span>
+    <div className="min-w-0">
+      <span className="text-xs text-foreground">{label}</span>
+      {hint && <div className="text-[10px] text-muted-foreground">{hint}</div>}
+    </div>
     {children}
   </div>
 );
