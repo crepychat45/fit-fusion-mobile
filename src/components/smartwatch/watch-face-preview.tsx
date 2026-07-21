@@ -77,7 +77,10 @@ export const WatchFacePreview: React.FC<Props> = ({
 
   useEffect(() => {
     sensorHub.start();
-    return sensorHub.subscribe(setReading);
+    const unsub = sensorHub.subscribe(setReading);
+    return () => {
+      unsub();
+    };
   }, []);
 
   const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
