@@ -233,50 +233,16 @@ export const SmartwatchControlWidget: React.FC = () => {
         </div>
       </div>
 
-      {/* LIVE watch face */}
+      {/* LIVE watch face (shared preview component — matches Settings) */}
       <div className="p-4 flex items-center gap-4">
-        <button
-          type="button"
+        <WatchFacePreview
+          face={activeFace}
+          fontId={activeFont.id}
+          size={128}
           onClick={() => navigate("/smartwatch-settings")}
-          className="relative h-32 w-32 shrink-0 rounded-[1.75rem] overflow-hidden shadow-2xl group"
-          aria-label="Open smartwatch settings"
-          style={
-            activeFace.image
-              ? { backgroundImage: `url(${activeFace.image})`, backgroundSize: "cover", backgroundPosition: "center" }
-              : undefined
-          }
-        >
-          {!activeFace.image && (
-            <div className={`absolute inset-0 bg-gradient-to-br ${activeFace.gradient}`} />
-          )}
-          <div className={`absolute inset-2 rounded-[1.4rem] border border-white/10 flex flex-col items-center justify-center ${activeFace.image ? "bg-gradient-to-b from-black/20 via-transparent to-black/40" : "bg-black/40"}`}>
-            {activeFace.style === "analog" ? (
-              <AnalogFace hours={hours} minutes={minutes} seconds={seconds} accent={activeFace.accent} />
-            ) : (
-              <>
-                <div
-                  className="text-3xl font-bold tabular-nums leading-none"
-                  style={{ fontFamily: activeFont.css, color: activeFace.accent }}
-                >
-                  {timeStr}
-                </div>
-                <div className="text-[10px] text-white/80 mt-1" style={{ fontFamily: activeFont.css }}>
-                  {dateStr}
-                </div>
-                {activeFace.style === "hybrid" && (
-                  <div className="mt-1.5 flex items-center gap-1.5 text-[9px] text-white/85">
-                    <Heart className="h-2.5 w-2.5" style={{ color: activeFace.accent }} />
-                    {reading.hr}
-                    <Droplets className="h-2.5 w-2.5 ml-1" style={{ color: activeFace.accent }} />
-                    {reading.spo2}%
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-          {!activeFace.image && <div className="absolute -inset-8 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.28),transparent_50%)] pointer-events-none" />}
-          <span className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-1 rounded-full bg-white/20" />
-        </button>
+          ariaLabel="Open smartwatch settings"
+        />
+
 
         {/* Right column: live biometrics */}
         <div className="flex-1 min-w-0 grid grid-cols-2 gap-2">
