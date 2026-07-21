@@ -1213,9 +1213,12 @@ const Section: React.FC<{ icon: React.ReactNode; title: string; children: React.
   </motion.div>
 );
 
-const Row: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
+const Row: React.FC<{ label: string; hint?: string; children: React.ReactNode }> = ({ label, hint, children }) => (
   <div className="flex items-center justify-between gap-3">
-    <span className="text-xs text-foreground">{label}</span>
+    <div className="min-w-0">
+      <span className="text-xs text-foreground">{label}</span>
+      {hint && <div className="text-[10px] text-muted-foreground">{hint}</div>}
+    </div>
     {children}
   </div>
 );
