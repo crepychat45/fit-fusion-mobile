@@ -187,7 +187,7 @@ export function PrivacySecurityExtras({ userEmail }: { userEmail?: string }) {
           .maybeSingle();
         const current = (data?.privacy_settings as Record<string, unknown>) || {};
         await supabase.from("user_settings").upsert(
-          { user_id: userId, privacy_settings: { ...current, advanced: prefs } },
+          { user_id: userId, privacy_settings: { ...current, advanced: prefs } as unknown as never },
           { onConflict: "user_id" },
         );
       } catch {
