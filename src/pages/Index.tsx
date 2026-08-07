@@ -36,6 +36,8 @@ const VitalityIndexWidget = lazy(() => import("@/components/dashboard/vitality-i
 const SmartwatchControlWidget = lazy(() => import("@/components/dashboard/smartwatch-control-widget").then((m) => ({ default: m.SmartwatchControlWidget })));
 const MindfulMinuteWidget = lazy(() => import("@/components/dashboard/mindful-minute-widget").then((m) => ({ default: m.MindfulMinuteWidget })));
 const AiDailyBriefingWidget = lazy(() => import("@/components/dashboard/ai-daily-briefing-widget").then((m) => ({ default: m.AiDailyBriefingWidget })));
+const HomeCommandCenter = lazy(() => import("@/components/home/home-command-center").then((m) => ({ default: m.HomeCommandCenter })));
+
 const MobileNav = lazy(() => import("@/components/mobile-nav").then((m) => ({ default: m.MobileNav })));
 const MobileFloatingActions = lazy(() => import("@/components/mobile/mobile-floating-actions").then((m) => ({ default: m.MobileFloatingActions })));
 const MobileAIAssistant = lazy(() => import("@/components/mobile/mobile-ai-assistant").then((m) => ({ default: m.MobileAIAssistant })));
@@ -114,6 +116,15 @@ const Index = () => {
               <AiDailyBriefingWidget />
             </Suspense>
           </motion.div>
+
+          {/* Daily Command Center — quick logging, check-in, focus timer, planner */}
+          <motion.div variants={fadeUp} className="px-4">
+            <Suspense fallback={<HomeSectionFallback />}>
+              <HomeCommandCenter />
+            </Suspense>
+          </motion.div>
+
+
 
           {/* Quick Start Workout */}
           <motion.div variants={fadeUp} className="px-4">

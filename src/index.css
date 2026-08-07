@@ -1062,3 +1062,9 @@ html.reading-ruler body::after {
   transition: transform 60ms linear;
   mix-blend-mode: multiply;
 }
+
+/* Privacy screen: blur app content when it loses focus */
+html.ff-privacy-blur body {
+  filter: blur(14px);
+  transition: filter 120ms ease-out;
+}

@@ -23,6 +23,8 @@ import { ProfilePhotoUpload } from "@/components/profile-photo-upload";
 import { useProfile } from "@/hooks/use-profile";
 import { FitnessIDCard } from "@/components/profile/fitness-id-card";
 import { SecurityPanel } from "@/components/profile/security-panel";
+import { PrivacySecurityExtras } from "@/components/profile/privacy-security-extras";
+
 import { AwardsExtras } from "@/components/profile/awards-extras";
 import { StatsExtras } from "@/components/profile/stats-extras";
 import { ProfileInsightsWidget } from "@/components/profile/profile-insights-widget";
@@ -266,7 +268,9 @@ const Profile = () => {
 
               <TabsContent value="security" className="space-y-3 mt-0">
                 <SecurityPanel userEmail={userEmail} />
+                <PrivacySecurityExtras userEmail={userEmail} />
               </TabsContent>
+
 
 
               <TabsContent value="achievements" className="space-y-3 mt-0">
