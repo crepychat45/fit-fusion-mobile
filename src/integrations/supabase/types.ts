@@ -725,6 +725,16 @@ export type Database = {
           read_ct: number
         }[]
       }
+      search_chat_contacts: {
+        Args: { _query?: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          user_id: string
+          username: string
+        }[]
+      }
+      shares_chat_thread: { Args: { _a: string; _b: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
