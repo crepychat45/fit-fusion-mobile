@@ -117,6 +117,15 @@ const Index = () => {
             </Suspense>
           </motion.div>
 
+          {/* Daily Command Center — quick logging, check-in, focus timer, planner */}
+          <motion.div variants={fadeUp} className="px-4">
+            <Suspense fallback={<HomeSectionFallback />}>
+              <HomeCommandCenter />
+            </Suspense>
+          </motion.div>
+
+
+
           {/* Quick Start Workout */}
           <motion.div variants={fadeUp} className="px-4">
             <div className="rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 to-accent/10 backdrop-blur-xl shadow-lg p-4">
