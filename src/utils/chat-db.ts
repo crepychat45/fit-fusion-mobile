@@ -244,19 +244,26 @@ export async function clearChatThreadMessages(threadId: string) {
 }
 
 export async function searchChatContacts(query: string, currentUserId: string) {
-  const sanitized = query.trim().replace(/[%_,]/g, "").slice(0, 60);
-  let request = supabase
-    .from("chat_user_directory")
-    .select("*")
-    .neq("user_id", currentUserId)
-    .order("display_name", { ascending: true })
-    .limit(20);
+  const sanitized = query.trim().slice(0, 60);
 
-  if (sanitized) {
-    request = request.or(`display_name.ilike.%${sanitized}%,username.ilike.%${sanitized}%`);
-  }
-
-  const { data, error } = await request;
+  // Directory rows are private (presence/last_seen are only visible to actual
+  // chat contacts). Discovery goes through a restricted RPC that returns only
+  // name, username and avatar.
+  const { data, error } = await supabase.rpc("search_chat_contacts", {
+    _query: sanitized,
+  });
   if (error) throw error;
-  return data ?? [];
+
+  return (data ?? [])
+    .filter((row) => row.user_id !== currentUserId)
+    .map((row) => ({
+      user_id: row.user_id,
+      display_name: row.display_name,
+      username: row.username,
+      avatar_url: row.avatar_url,
+      status: "offline",
+      last_seen: new Date(0).toISOString(),
+      created_at: new Date(0).toISOString(),
+      updated_at: new Date(0).toISOString(),
+    })) as ChatDirectoryUser[];
 }
