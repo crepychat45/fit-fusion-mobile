@@ -222,6 +222,13 @@ export function PrivacySecurityExtras({ userEmail }: { userEmail?: string }) {
       window.removeEventListener("focus", clear);
     };
   }, [prefs.privacyScreen]);
+  // Reflect privacy prefs on the document so the rest of the app can react.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle("ff-mask-stats", prefs.maskSensitiveStats);
+    root.classList.toggle("ff-hide-switcher-preview", prefs.hideContentInSwitcher);
+  }, [prefs.maskSensitiveStats, prefs.hideContentInSwitcher]);
+
 
   const pwStrength = useMemo(() => scorePassword(pwTest), [pwTest]);
 
