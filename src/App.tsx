@@ -8,6 +8,7 @@ import { clearAppCaches, isRecoverableResourceError, markAppReady, recoverApp } 
 import { BootLoader } from "@/components/common/boot-loader";
 import { prefetchAllRoutes } from "@/utils/route-prefetch";
 import { SEOManager } from "@/components/seo-manager";
+import { AppLockGate } from "@/components/security/app-lock-gate";
 
 const Loader = BootLoader;
 
