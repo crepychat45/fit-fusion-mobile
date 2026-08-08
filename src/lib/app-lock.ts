@@ -110,9 +110,10 @@ export async function biometricAvailable(): Promise<boolean> {
   }
 }
 
-function b64urlToBytes(v: string): Uint8Array {
+function b64urlToBytes(v: string): ArrayBuffer {
   const s = v.replace(/-/g, "+").replace(/_/g, "/");
-  return Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+  const bytes = Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+  return bytes.buffer.slice(0) as ArrayBuffer;
 }
 
 /**
