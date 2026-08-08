@@ -1068,3 +1068,17 @@ html.ff-privacy-blur body {
   filter: blur(14px);
   transition: filter 120ms ease-out;
 }
+
+/* Mask sensitive stats until tapped */
+html.ff-mask-stats [data-sensitive]:not(:hover):not(:focus-within) {
+  filter: blur(7px);
+  transition: filter 140ms ease-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+}

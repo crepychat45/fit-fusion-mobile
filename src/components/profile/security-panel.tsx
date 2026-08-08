@@ -70,6 +70,14 @@ function b64urlEncode(buf: ArrayBuffer) {
   return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
+type PermKey = "camera" | "microphone" | "geolocation" | "notifications";
+const PERMISSIONS: { key: PermKey; label: string; icon: React.ElementType }[] = [
+  { key: "camera", label: "Camera", icon: Camera },
+  { key: "microphone", label: "Microphone", icon: Mic },
+  { key: "geolocation", label: "Location", icon: MapPin },
+  { key: "notifications", label: "Notifications", icon: Smartphone },
+];
+
 type SecurityEvent = { id: string; type: string; label: string; at: string };
 
 async function pushSecurityEvent(userId: string | null, event: Omit<SecurityEvent, "id" | "at">) {
@@ -109,6 +117,58 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
   const [liveCode, setLiveCode] = useState<string>("------");
   const [tick, setTick] = useState(0);
   const [events, setEvents] = useState<SecurityEvent[]>([]);
+  const [permissions, setPermissions] = useState<Partial<Record<PermKey, string>>>({});
+
+  const refreshPermissions = React.useCallback(async () => {
+    const next: Partial<Record<PermKey, string>> = {};
+    next.notifications =
+      typeof Notification !== "undefined" ? Notification.permission : "unsupported";
+    for (const name of ["camera", "microphone", "geolocation"] as const) {
+      try {
+        const st = await navigator.permissions?.query({ name: name as PermissionName });
+        next[name] = st?.state ?? "unknown";
+      } catch {
+        next[name] = "unknown";
+      }
+    }
+    setPermissions(next);
+  }, []);
+
+  const requestPermission = React.useCallback(
+    async (key: PermKey) => {
+      try {
+        if (key === "notifications") {
+          await Notification.requestPermission();
+        } else if (key === "geolocation") {
+          await new Promise<void>((res, rej) =>
+            navigator.geolocation.getCurrentPosition(() => res(), rej, { timeout: 10000 }),
+          );
+        } else {
+          const stream = await navigator.mediaDevices.getUserMedia(
+            key === "camera" ? { video: true } : { audio: true },
+          );
+          stream.getTracks().forEach((t) => t.stop());
+        }
+        toast({ title: "Permission updated" });
+      } catch {
+        toast({
+          title: "Permission denied",
+          description: "Enable it from your browser's site settings.",
+          variant: "destructive",
+        });
+      } finally {
+        await refreshPermissions();
+        await detectSensors().then(setSensors);
+      }
+    },
+    [refreshPermissions, toast],
+  );
+
+  useEffect(() => {
+    void refreshPermissions();
+  }, [refreshPermissions]);
+
+
 
   useEffect(() => {
     detectSensors().then(setSensors);
@@ -337,6 +397,93 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
 
       {/* Passkeys */}
       <PasskeyManagementPanel userEmail={userEmail} />
+
+      {/* Biometric device credential */}
+      <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Fingerprint className="h-4 w-4 text-primary" /> Biometric & Face Unlock
+          </CardTitle>
+          <CardDescription>Fingerprint, Face ID or Windows Hello for this device.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <div className="grid grid-cols-2 gap-2 text-[10px]">
+            <div className={`rounded-lg border px-2 py-1 text-center ${webAuthnSupported ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-500" : "border-border/30 bg-muted/20 text-muted-foreground"}`}>
+              {webAuthnSupported ? "✓" : "×"} WebAuthn supported
+            </div>
+            <div className={`rounded-lg border px-2 py-1 text-center ${platformAuth ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-500" : "border-border/30 bg-muted/20 text-muted-foreground"}`}>
+              {platformAuth ? "✓" : "×"} Platform sensor
+            </div>
+          </div>
+          <div className="flex items-center justify-between rounded-xl border border-border/20 bg-muted/20 p-3">
+            <div className="min-w-0">
+              <div className="text-xs font-semibold">Device credential</div>
+              <div className="text-[10px] text-muted-foreground">
+                {biometricEnabled ? "Enrolled on this device" : "Not enrolled yet"}
+              </div>
+            </div>
+            <Badge variant={biometricEnabled ? "default" : "outline"}>{biometricEnabled ? "Active" : "Off"}</Badge>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {!biometricEnabled ? (
+              <Button size="sm" onClick={enrollBiometric} disabled={!webAuthnSupported || !platformAuth}>
+                <Fingerprint className="h-3.5 w-3.5 mr-1.5" /> Enable biometric unlock
+              </Button>
+            ) : (
+              <>
+                <Button size="sm" variant="outline" onClick={testBiometric}>
+                  <ShieldCheck className="h-3.5 w-3.5 mr-1.5" /> Test unlock
+                </Button>
+                <Button size="sm" variant="outline" className="text-destructive" onClick={removeBiometric}>
+                  <XCircle className="h-3.5 w-3.5 mr-1.5" /> Remove
+                </Button>
+              </>
+            )}
+          </div>
+          {!platformAuth && webAuthnSupported && (
+            <p className="text-[10px] text-amber-500">
+              No platform authenticator detected. Set up Face ID / fingerprint / Windows Hello in your device settings first.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Permissions */}
+      <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Shield className="h-4 w-4 text-primary" /> App Permissions
+          </CardTitle>
+          <CardDescription>Grant or review the access FitFusion uses.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {PERMISSIONS.map((p) => (
+            <div key={p.key} className="flex items-center justify-between gap-3 rounded-xl border border-border/20 bg-muted/20 p-2.5">
+              <div className="flex items-center gap-2 min-w-0">
+                <p.icon className="h-4 w-4 text-primary shrink-0" />
+                <div className="min-w-0">
+                  <div className="text-xs font-semibold truncate">{p.label}</div>
+                  <div className="text-[10px] text-muted-foreground capitalize">
+                    {permissions[p.key] ?? "unknown"}
+                  </div>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                variant={permissions[p.key] === "granted" ? "outline" : "default"}
+                className="h-7 text-[11px] shrink-0"
+                onClick={() => requestPermission(p.key)}
+                disabled={permissions[p.key] === "granted"}
+              >
+                {permissions[p.key] === "granted" ? "Granted" : "Allow"}
+              </Button>
+            </div>
+          ))}
+          <Button size="sm" variant="ghost" className="w-full" onClick={refreshPermissions}>
+            <RefreshCw className="h-3.5 w-3.5 mr-1.5" /> Re-check permissions
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* 2FA */}
       <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
