@@ -117,6 +117,58 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
   const [liveCode, setLiveCode] = useState<string>("------");
   const [tick, setTick] = useState(0);
   const [events, setEvents] = useState<SecurityEvent[]>([]);
+  const [permissions, setPermissions] = useState<Partial<Record<PermKey, string>>>({});
+
+  const refreshPermissions = React.useCallback(async () => {
+    const next: Partial<Record<PermKey, string>> = {};
+    next.notifications =
+      typeof Notification !== "undefined" ? Notification.permission : "unsupported";
+    for (const name of ["camera", "microphone", "geolocation"] as const) {
+      try {
+        const st = await navigator.permissions?.query({ name: name as PermissionName });
+        next[name] = st?.state ?? "unknown";
+      } catch {
+        next[name] = "unknown";
+      }
+    }
+    setPermissions(next);
+  }, []);
+
+  const requestPermission = React.useCallback(
+    async (key: PermKey) => {
+      try {
+        if (key === "notifications") {
+          await Notification.requestPermission();
+        } else if (key === "geolocation") {
+          await new Promise<void>((res, rej) =>
+            navigator.geolocation.getCurrentPosition(() => res(), rej, { timeout: 10000 }),
+          );
+        } else {
+          const stream = await navigator.mediaDevices.getUserMedia(
+            key === "camera" ? { video: true } : { audio: true },
+          );
+          stream.getTracks().forEach((t) => t.stop());
+        }
+        toast({ title: "Permission updated" });
+      } catch {
+        toast({
+          title: "Permission denied",
+          description: "Enable it from your browser's site settings.",
+          variant: "destructive",
+        });
+      } finally {
+        await refreshPermissions();
+        await detectSensors().then(setSensors);
+      }
+    },
+    [refreshPermissions, toast],
+  );
+
+  useEffect(() => {
+    void refreshPermissions();
+  }, [refreshPermissions]);
+
+
 
   useEffect(() => {
     detectSensors().then(setSensors);
