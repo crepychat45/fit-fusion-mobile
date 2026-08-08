@@ -230,26 +230,78 @@ export function PrivacySecurityExtras({ userEmail }: { userEmail?: string }) {
       toast({ title: "PINs do not match", variant: "destructive" });
       return;
     }
-    // Stored as a salted hash-ish digest, never plaintext.
-    void crypto.subtle
-      .digest("SHA-256", new TextEncoder().encode(`fitfusion:${userEmail ?? "local"}:${pin}`))
-      .then((buf) => {
-        const hex = Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
-        localStorage.setItem(LS_PIN, hex);
-        setPinSet(true);
-        setPin("");
-        setPinConfirm("");
-        set("appLockEnabled", true);
-        toast({ title: "App lock enabled 🔒", description: "Your PIN is stored hashed on this device." });
-      });
+    // Stored as a hashed digest, never plaintext.
+    void savePinHash(pin, userEmail ?? "local").then(() => {
+      setPinSet(true);
+      setPin("");
+      setPinConfirm("");
+      set("appLockEnabled", true);
+      notifyLockPrefsChanged();
+      toast({ title: "App lock enabled 🔒", description: "Your PIN is stored hashed on this device." });
+    });
+  };
+
+  const testPin = () => {
+    if (!/^\d{4,8}$/.test(pin)) {
+      toast({ title: "Enter your PIN above to test", variant: "destructive" });
+      return;
+    }
+    void verifyPin(pin).then((ok) => {
+      setPin("");
+      toast(
+        ok
+          ? { title: "PIN correct ✓" }
+          : { title: "PIN incorrect", variant: "destructive" as const },
+      );
+    });
   };
 
   const removePin = () => {
-    localStorage.removeItem(LS_PIN);
+    clearPin();
     setPinSet(false);
     set("appLockEnabled", false);
+    notifyLockPrefsChanged();
     toast({ title: "App lock removed" });
   };
+
+  const lockNow = () => {
+    if (!pinSet || !prefs.appLockEnabled) {
+      toast({ title: "Set a PIN and enable app lock first", variant: "destructive" });
+      return;
+    }
+    requestLock();
+  };
+
+  const toggleBiometricUnlock = async (v: boolean) => {
+    if (!v) {
+      set("biometricUnlock", false);
+      notifyLockPrefsChanged();
+      return;
+    }
+    if (!(await biometricAvailable())) {
+      toast({
+        title: "Biometrics unavailable",
+        description: "Set up Face ID / fingerprint / Windows Hello on this device first.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const ok = await promptBiometric(
+      (await listPasskeys().catch(() => []))?.map((p) => p.id) ?? [],
+    );
+    if (!ok) {
+      toast({
+        title: "Could not verify",
+        description: "Add a passkey in the Passkey Manager above, then try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+    set("biometricUnlock", true);
+    notifyLockPrefsChanged();
+    toast({ title: "Biometric unlock enabled" });
+  };
+
 
   const downloadReport = () => {
     const report = {
