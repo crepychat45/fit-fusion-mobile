@@ -15,13 +15,9 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  savePinHash, verifyPin, clearPin, requestLock, notifyLockPrefsChanged,
-  biometricAvailable, promptBiometric, LS_PIN,
-} from "@/lib/app-lock";
-import { listPasskeys } from "@/lib/passkey-manager";
 
 const LS_KEY = "fitfusion-privacy-security";
+const LS_PIN = "fitfusion-applock-pin";
 
 type Visibility = "public" | "followers" | "private";
 
@@ -222,13 +218,6 @@ export function PrivacySecurityExtras({ userEmail }: { userEmail?: string }) {
       window.removeEventListener("focus", clear);
     };
   }, [prefs.privacyScreen]);
-  // Reflect privacy prefs on the document so the rest of the app can react.
-  useEffect(() => {
-    const root = document.documentElement;
-    root.classList.toggle("ff-mask-stats", prefs.maskSensitiveStats);
-    root.classList.toggle("ff-hide-switcher-preview", prefs.hideContentInSwitcher);
-  }, [prefs.maskSensitiveStats, prefs.hideContentInSwitcher]);
-
 
   const pwStrength = useMemo(() => scorePassword(pwTest), [pwTest]);
 
@@ -241,78 +230,26 @@ export function PrivacySecurityExtras({ userEmail }: { userEmail?: string }) {
       toast({ title: "PINs do not match", variant: "destructive" });
       return;
     }
-    // Stored as a hashed digest, never plaintext.
-    void savePinHash(pin, userEmail ?? "local").then(() => {
-      setPinSet(true);
-      setPin("");
-      setPinConfirm("");
-      set("appLockEnabled", true);
-      notifyLockPrefsChanged();
-      toast({ title: "App lock enabled 🔒", description: "Your PIN is stored hashed on this device." });
-    });
-  };
-
-  const testPin = () => {
-    if (!/^\d{4,8}$/.test(pin)) {
-      toast({ title: "Enter your PIN above to test", variant: "destructive" });
-      return;
-    }
-    void verifyPin(pin).then((ok) => {
-      setPin("");
-      toast(
-        ok
-          ? { title: "PIN correct ✓" }
-          : { title: "PIN incorrect", variant: "destructive" as const },
-      );
-    });
+    // Stored as a salted hash-ish digest, never plaintext.
+    void crypto.subtle
+      .digest("SHA-256", new TextEncoder().encode(`fitfusion:${userEmail ?? "local"}:${pin}`))
+      .then((buf) => {
+        const hex = Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+        localStorage.setItem(LS_PIN, hex);
+        setPinSet(true);
+        setPin("");
+        setPinConfirm("");
+        set("appLockEnabled", true);
+        toast({ title: "App lock enabled 🔒", description: "Your PIN is stored hashed on this device." });
+      });
   };
 
   const removePin = () => {
-    clearPin();
+    localStorage.removeItem(LS_PIN);
     setPinSet(false);
     set("appLockEnabled", false);
-    notifyLockPrefsChanged();
     toast({ title: "App lock removed" });
   };
-
-  const lockNow = () => {
-    if (!pinSet || !prefs.appLockEnabled) {
-      toast({ title: "Set a PIN and enable app lock first", variant: "destructive" });
-      return;
-    }
-    requestLock();
-  };
-
-  const toggleBiometricUnlock = async (v: boolean) => {
-    if (!v) {
-      set("biometricUnlock", false);
-      notifyLockPrefsChanged();
-      return;
-    }
-    if (!(await biometricAvailable())) {
-      toast({
-        title: "Biometrics unavailable",
-        description: "Set up Face ID / fingerprint / Windows Hello on this device first.",
-        variant: "destructive",
-      });
-      return;
-    }
-    const ok = await promptBiometric(
-      (await listPasskeys().catch(() => []))?.map((p) => p.id) ?? [],
-    );
-    if (!ok) {
-      toast({
-        title: "Could not verify",
-        description: "Add a passkey in the Passkey Manager above, then try again.",
-        variant: "destructive",
-      });
-      return;
-    }
-    set("biometricUnlock", true);
-    notifyLockPrefsChanged();
-    toast({ title: "Biometric unlock enabled" });
-  };
-
 
   const downloadReport = () => {
     const report = {
@@ -380,37 +317,26 @@ export function PrivacySecurityExtras({ userEmail }: { userEmail?: string }) {
               <Button size="sm" className="w-full" onClick={savePin}>Set PIN & enable lock</Button>
             </div>
           ) : (
-            <div className="space-y-2 rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3">
-              <div className="flex items-center justify-between">
-                <div className="text-xs">
-                  <div className="font-semibold">PIN configured</div>
-                  <div className="text-[10px] text-muted-foreground">Stored hashed on this device only</div>
-                </div>
-                <Button size="sm" variant="outline" onClick={removePin}>Remove</Button>
+            <div className="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3">
+              <div className="text-xs">
+                <div className="font-semibold">PIN configured</div>
+                <div className="text-[10px] text-muted-foreground">Stored hashed on this device only</div>
               </div>
-              <div className="flex gap-2">
-                <Input
-                  inputMode="numeric" type="password" maxLength={8} placeholder="Verify PIN"
-                  aria-label="Verify PIN" value={pin}
-                  onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))} className="h-9"
-                />
-                <Button size="sm" variant="outline" className="h-9" onClick={testPin}>Test</Button>
-                <Button size="sm" className="h-9" onClick={lockNow}>Lock now</Button>
-              </div>
+              <Button size="sm" variant="outline" onClick={removePin}>Remove</Button>
             </div>
           )}
 
           <Row icon={Lock} title="App lock" desc="Ask for the PIN when the app starts">
             <Switch
               aria-label="App lock" checked={prefs.appLockEnabled} disabled={!pinSet}
-              onCheckedChange={(v) => { set("appLockEnabled", v); notifyLockPrefsChanged(); }}
+              onCheckedChange={(v) => set("appLockEnabled", v)}
             />
           </Row>
           <Row icon={ScanFace} title="Biometric unlock" desc="Use fingerprint / face instead of the PIN">
-            <Switch aria-label="Biometric unlock" checked={prefs.biometricUnlock} onCheckedChange={(v) => void toggleBiometricUnlock(v)} />
+            <Switch aria-label="Biometric unlock" checked={prefs.biometricUnlock} onCheckedChange={(v) => set("biometricUnlock", v)} />
           </Row>
           <Row icon={Timer} title="Auto-lock" desc="Lock after a period of inactivity">
-            <Select value={String(prefs.autoLockMinutes)} onValueChange={(v) => { set("autoLockMinutes", Number(v)); notifyLockPrefsChanged(); }}>
+            <Select value={String(prefs.autoLockMinutes)} onValueChange={(v) => set("autoLockMinutes", Number(v))}>
               <SelectTrigger className="h-8 w-[110px] text-xs" aria-label="Auto-lock delay"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {[1, 5, 15, 30, 60].map((m) => <SelectItem key={m} value={String(m)}>{m} min</SelectItem>)}
@@ -418,9 +344,8 @@ export function PrivacySecurityExtras({ userEmail }: { userEmail?: string }) {
             </Select>
           </Row>
           <Row icon={EyeOff} title="Lock on background" desc="Lock instantly when you switch apps">
-            <Switch aria-label="Lock on background" checked={prefs.lockOnBackground} onCheckedChange={(v) => { set("lockOnBackground", v); notifyLockPrefsChanged(); }} />
+            <Switch aria-label="Lock on background" checked={prefs.lockOnBackground} onCheckedChange={(v) => set("lockOnBackground", v)} />
           </Row>
-
         </CardContent>
       </Card>
 
