@@ -373,26 +373,37 @@ export function PrivacySecurityExtras({ userEmail }: { userEmail?: string }) {
               <Button size="sm" className="w-full" onClick={savePin}>Set PIN & enable lock</Button>
             </div>
           ) : (
-            <div className="flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3">
-              <div className="text-xs">
-                <div className="font-semibold">PIN configured</div>
-                <div className="text-[10px] text-muted-foreground">Stored hashed on this device only</div>
+            <div className="space-y-2 rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-3">
+              <div className="flex items-center justify-between">
+                <div className="text-xs">
+                  <div className="font-semibold">PIN configured</div>
+                  <div className="text-[10px] text-muted-foreground">Stored hashed on this device only</div>
+                </div>
+                <Button size="sm" variant="outline" onClick={removePin}>Remove</Button>
               </div>
-              <Button size="sm" variant="outline" onClick={removePin}>Remove</Button>
+              <div className="flex gap-2">
+                <Input
+                  inputMode="numeric" type="password" maxLength={8} placeholder="Verify PIN"
+                  aria-label="Verify PIN" value={pin}
+                  onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))} className="h-9"
+                />
+                <Button size="sm" variant="outline" className="h-9" onClick={testPin}>Test</Button>
+                <Button size="sm" className="h-9" onClick={lockNow}>Lock now</Button>
+              </div>
             </div>
           )}
 
           <Row icon={Lock} title="App lock" desc="Ask for the PIN when the app starts">
             <Switch
               aria-label="App lock" checked={prefs.appLockEnabled} disabled={!pinSet}
-              onCheckedChange={(v) => set("appLockEnabled", v)}
+              onCheckedChange={(v) => { set("appLockEnabled", v); notifyLockPrefsChanged(); }}
             />
           </Row>
           <Row icon={ScanFace} title="Biometric unlock" desc="Use fingerprint / face instead of the PIN">
-            <Switch aria-label="Biometric unlock" checked={prefs.biometricUnlock} onCheckedChange={(v) => set("biometricUnlock", v)} />
+            <Switch aria-label="Biometric unlock" checked={prefs.biometricUnlock} onCheckedChange={(v) => void toggleBiometricUnlock(v)} />
           </Row>
           <Row icon={Timer} title="Auto-lock" desc="Lock after a period of inactivity">
-            <Select value={String(prefs.autoLockMinutes)} onValueChange={(v) => set("autoLockMinutes", Number(v))}>
+            <Select value={String(prefs.autoLockMinutes)} onValueChange={(v) => { set("autoLockMinutes", Number(v)); notifyLockPrefsChanged(); }}>
               <SelectTrigger className="h-8 w-[110px] text-xs" aria-label="Auto-lock delay"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {[1, 5, 15, 30, 60].map((m) => <SelectItem key={m} value={String(m)}>{m} min</SelectItem>)}
@@ -400,8 +411,9 @@ export function PrivacySecurityExtras({ userEmail }: { userEmail?: string }) {
             </Select>
           </Row>
           <Row icon={EyeOff} title="Lock on background" desc="Lock instantly when you switch apps">
-            <Switch aria-label="Lock on background" checked={prefs.lockOnBackground} onCheckedChange={(v) => set("lockOnBackground", v)} />
+            <Switch aria-label="Lock on background" checked={prefs.lockOnBackground} onCheckedChange={(v) => { set("lockOnBackground", v); notifyLockPrefsChanged(); }} />
           </Row>
+
         </CardContent>
       </Card>
 
