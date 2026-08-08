@@ -70,6 +70,14 @@ function b64urlEncode(buf: ArrayBuffer) {
   return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
+type PermKey = "camera" | "microphone" | "geolocation" | "notifications";
+const PERMISSIONS: { key: PermKey; label: string; icon: React.ElementType }[] = [
+  { key: "camera", label: "Camera", icon: Camera },
+  { key: "microphone", label: "Microphone", icon: Mic },
+  { key: "geolocation", label: "Location", icon: MapPin },
+  { key: "notifications", label: "Notifications", icon: Smartphone },
+];
+
 type SecurityEvent = { id: string; type: string; label: string; at: string };
 
 async function pushSecurityEvent(userId: string | null, event: Omit<SecurityEvent, "id" | "at">) {
