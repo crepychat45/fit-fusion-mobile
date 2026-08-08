@@ -15,9 +15,13 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  savePinHash, verifyPin, clearPin, requestLock, notifyLockPrefsChanged,
+  biometricAvailable, promptBiometric, LS_PIN,
+} from "@/lib/app-lock";
+import { listPasskeys } from "@/lib/passkey-manager";
 
 const LS_KEY = "fitfusion-privacy-security";
-const LS_PIN = "fitfusion-applock-pin";
 
 type Visibility = "public" | "followers" | "private";
 
