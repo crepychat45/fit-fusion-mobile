@@ -154,7 +154,9 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => (
   <ErrorBoundary>
     <AppWrapper>
-      <AppContent />
+      <AppLockGate>
+        <AppContent />
+      </AppLockGate>
     </AppWrapper>
   </ErrorBoundary>
 );
