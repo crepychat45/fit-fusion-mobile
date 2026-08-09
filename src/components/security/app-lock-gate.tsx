@@ -2,8 +2,8 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Delete, Fingerprint, Lock, ShieldAlert, ShieldCheck } from "lucide-react";
 import {
-  biometricAvailable, failureCount, hasPin, markUnlocked, promptBiometric,
-  readLockPrefs, recordFailure, verifyPin, type AppLockPrefs,
+  biometricAvailable, clearPin, failureCount, hasPin, markUnlocked, notifyLockPrefsChanged,
+  promptBiometric, readLockPrefs, recordFailure, verifyPin, type AppLockPrefs,
 } from "@/lib/app-lock";
 import { listPasskeys } from "@/lib/passkey-manager";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,6 +40,19 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
       window.removeEventListener("storage", sync);
       window.removeEventListener("fitfusion-app-lock", onLock);
     };
+  }, []);
+
+  useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (event !== "PASSWORD_RECOVERY") return;
+      clearPin();
+      const next = { ...readLockPrefs(), appLockEnabled: false, biometricUnlock: false };
+      localStorage.setItem("fitfusion-privacy-security", JSON.stringify(next));
+      setPrefs(next);
+      setLocked(false);
+      notifyLockPrefsChanged();
+    });
+    return () => data.subscription.unsubscribe();
   }, []);
 
   useEffect(() => {

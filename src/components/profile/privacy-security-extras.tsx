@@ -234,7 +234,19 @@ export function PrivacySecurityExtras({ userEmail }: { userEmail?: string }) {
     const root = document.documentElement;
     root.classList.toggle("ff-mask-stats", prefs.maskSensitiveStats);
     root.classList.toggle("ff-hide-switcher-preview", prefs.hideContentInSwitcher);
-  }, [prefs.maskSensitiveStats, prefs.hideContentInSwitcher]);
+    root.dataset.profileVisibility = prefs.profileVisibility;
+    root.dataset.hideNotificationContent = String(prefs.hideNotificationContent);
+    root.dataset.incognitoWorkouts = String(prefs.incognitoWorkouts);
+    root.dataset.showOnlineStatus = String(prefs.showOnlineStatus);
+    root.dataset.showLastSeen = String(prefs.showLastSeen);
+    root.dataset.readReceipts = String(prefs.readReceipts);
+    root.dataset.shareWorkoutData = String(prefs.shareWorkoutData);
+    root.dataset.shareHealthMetrics = String(prefs.shareHealthMetrics);
+    root.dataset.personalizedAi = String(prefs.personalizedAi);
+    root.dataset.analyticsCollection = String(prefs.analyticsCollection);
+    root.dataset.crashReports = String(prefs.crashReports);
+    root.dataset.locationPrecision = prefs.locationPrecision;
+  }, [prefs]);
 
 
   const pwStrength = useMemo(() => scorePassword(pwTest), [pwTest]);
