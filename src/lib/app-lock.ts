@@ -6,6 +6,7 @@ export const LS_PIN = "fitfusion-applock-pin";
 export const LS_PIN_ID = "fitfusion-applock-id";
 export const LS_UNLOCKED_AT = "fitfusion-applock-unlocked-at";
 export const LS_FAILS = "fitfusion-applock-fails";
+export const APP_LOCK_EVENT = "fitfusion-app-lock-state";
 
 export type AppLockPrefs = {
   appLockEnabled: boolean;
@@ -71,11 +72,14 @@ export function clearPin() {
   localStorage.removeItem(LS_PIN);
   localStorage.removeItem(LS_PIN_ID);
   localStorage.removeItem(LS_FAILS);
+  localStorage.removeItem(LS_UNLOCKED_AT);
+  window.dispatchEvent(new CustomEvent(APP_LOCK_EVENT, { detail: { enabled: false } }));
 }
 
 export function markUnlocked() {
   localStorage.setItem(LS_UNLOCKED_AT, String(Date.now()));
   localStorage.setItem(LS_FAILS, "0");
+  window.dispatchEvent(new CustomEvent(APP_LOCK_EVENT, { detail: { locked: false } }));
 }
 
 export function recordFailure(): number {

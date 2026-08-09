@@ -204,7 +204,12 @@ export function PrivacySecurityExtras({ userEmail }: { userEmail?: string }) {
   }, [prefs, userId]);
 
   const set = useCallback(<K extends keyof PrivacySecurityPrefs>(key: K, value: PrivacySecurityPrefs[K]) => {
-    setPrefs((prev) => ({ ...prev, [key]: value }));
+    setPrefs((prev) => {
+      const next = { ...prev, [key]: value };
+      localStorage.setItem(LS_KEY, JSON.stringify(next));
+      window.dispatchEvent(new CustomEvent("fitfusion-privacy-security-changed", { detail: { key, value } }));
+      return next;
+    });
   }, []);
 
   // Privacy screen: blur the app when it loses focus.
@@ -215,11 +220,13 @@ export function PrivacySecurityExtras({ userEmail }: { userEmail?: string }) {
     const clear = () => root.classList.remove("ff-privacy-blur");
     window.addEventListener("blur", blur);
     window.addEventListener("focus", clear);
-    document.addEventListener("visibilitychange", () => (document.hidden ? blur() : clear()));
+    const onVisibility = () => (document.hidden ? blur() : clear());
+    document.addEventListener("visibilitychange", onVisibility);
     return () => {
       clear();
       window.removeEventListener("blur", blur);
       window.removeEventListener("focus", clear);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [prefs.privacyScreen]);
   // Reflect privacy prefs on the document so the rest of the app can react.
@@ -333,7 +340,11 @@ export function PrivacySecurityExtras({ userEmail }: { userEmail?: string }) {
   };
 
   const clearLocalData = () => {
-    const keep = ["fitfusion-privacy-security", LS_PIN];
+    const keep = [
+      "fitfusion-privacy-security", LS_PIN, "fitfusion-applock-id",
+      "ff.security.passkeys.v2", "ff.security.passkeys.dk",
+      "ff.security.biometric.credId", "ff.security.biometric.email",
+    ];
     Object.keys(localStorage)
       .filter((k) => k.startsWith("fitfusion") && !keep.includes(k))
       .forEach((k) => localStorage.removeItem(k));
@@ -406,20 +417,20 @@ export function PrivacySecurityExtras({ userEmail }: { userEmail?: string }) {
               onCheckedChange={(v) => { set("appLockEnabled", v); notifyLockPrefsChanged(); }}
             />
           </Row>
-          <Row icon={ScanFace} title="Biometric unlock" desc="Use fingerprint / face instead of the PIN">
+          {prefs.appLockEnabled && <Row icon={ScanFace} title="Biometric unlock" desc="Use fingerprint / face instead of the PIN">
             <Switch aria-label="Biometric unlock" checked={prefs.biometricUnlock} onCheckedChange={(v) => void toggleBiometricUnlock(v)} />
-          </Row>
-          <Row icon={Timer} title="Auto-lock" desc="Lock after a period of inactivity">
+          </Row>}
+          {prefs.appLockEnabled && <Row icon={Timer} title="Auto-lock" desc="Lock after a period of inactivity">
             <Select value={String(prefs.autoLockMinutes)} onValueChange={(v) => { set("autoLockMinutes", Number(v)); notifyLockPrefsChanged(); }}>
               <SelectTrigger className="h-8 w-[110px] text-xs" aria-label="Auto-lock delay"><SelectValue /></SelectTrigger>
               <SelectContent>
                 {[1, 5, 15, 30, 60].map((m) => <SelectItem key={m} value={String(m)}>{m} min</SelectItem>)}
               </SelectContent>
             </Select>
-          </Row>
-          <Row icon={EyeOff} title="Lock on background" desc="Lock instantly when you switch apps">
+          </Row>}
+          {prefs.appLockEnabled && <Row icon={EyeOff} title="Lock on background" desc="Lock instantly when you switch apps">
             <Switch aria-label="Lock on background" checked={prefs.lockOnBackground} onCheckedChange={(v) => { set("lockOnBackground", v); notifyLockPrefsChanged(); }} />
-          </Row>
+          </Row>}
 
         </CardContent>
       </Card>

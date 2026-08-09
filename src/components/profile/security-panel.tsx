@@ -252,68 +252,6 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
   const secondsLeft = 30 - (Math.floor(Date.now() / 1000) % 30);
 
   // ---- Biometric (WebAuthn) ----
-  async function enrollBiometric() {
-    if (!webAuthnSupported) {
-      toast({ title: "Unsupported", description: "This device does not support WebAuthn.", variant: "destructive" });
-      return;
-    }
-    try {
-      const challenge = new Uint8Array(32);
-      crypto.getRandomValues(challenge);
-      const userHandle = new TextEncoder().encode(userEmail || "fitfusion-user");
-      const cred = (await navigator.credentials.create({
-        publicKey: {
-          challenge,
-          rp: { name: "FitFusion", id: window.location.hostname },
-          user: { id: userHandle, name: userEmail || "user", displayName: userEmail || "FitFusion User" },
-          pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
-          authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required", residentKey: "preferred" },
-          timeout: 60000,
-          attestation: "none",
-        },
-      })) as PublicKeyCredential | null;
-      if (!cred) throw new Error("No credential returned");
-      localStorage.setItem(LS_BIOMETRIC_CRED, b64urlEncode(cred.rawId));
-      if (userEmail) localStorage.setItem("ff.security.biometric.email", userEmail);
-      setBiometricEnabled(true);
-      await persistFlag({ biometricEnabled: true });
-      await logEvent("biometric.enrolled", "Biometric authentication enrolled on this device");
-      toast({ title: "Biometric enabled", description: "You can now sign in with your fingerprint or face on this device." });
-    } catch (e: any) {
-      toast({ title: "Setup failed", description: e?.message || "Biometric enrollment cancelled.", variant: "destructive" });
-    }
-  }
-
-  async function testBiometric() {
-    const credId = localStorage.getItem(LS_BIOMETRIC_CRED);
-    if (!credId) return;
-    try {
-      const challenge = new Uint8Array(32);
-      crypto.getRandomValues(challenge);
-      const idBytes = Uint8Array.from(atob(credId.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
-      await navigator.credentials.get({
-        publicKey: {
-          challenge,
-          allowCredentials: [{ id: idBytes, type: "public-key" }],
-          userVerification: "required",
-          timeout: 60000,
-          rpId: window.location.hostname,
-        },
-      });
-      toast({ title: "Verified ✓", description: "Biometric authentication works on this device." });
-    } catch (e: any) {
-      toast({ title: "Verification failed", description: e?.message || "Cancelled", variant: "destructive" });
-    }
-  }
-
-  async function removeBiometric() {
-    localStorage.removeItem(LS_BIOMETRIC_CRED);
-    setBiometricEnabled(false);
-    await persistFlag({ biometricEnabled: false });
-    await logEvent("biometric.removed", "Biometric authentication removed");
-    toast({ title: "Biometric removed" });
-  }
-
   // ---- 2FA ----
   function begin2FA() {
     setSetupSecret(randomBase32Secret(20));
