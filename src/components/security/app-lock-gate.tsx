@@ -6,6 +6,7 @@ import {
   readLockPrefs, recordFailure, verifyPin, type AppLockPrefs,
 } from "@/lib/app-lock";
 import { listPasskeys } from "@/lib/passkey-manager";
+import { supabase } from "@/integrations/supabase/client";
 
 const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "del"];
 
@@ -16,6 +17,7 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [bioReady, setBioReady] = useState(false);
   const [shake, setShake] = useState(false);
+  const [recovering, setRecovering] = useState(false);
   const idleTimer = useRef<number | null>(null);
 
   const active = prefs.appLockEnabled && hasPin();
@@ -113,6 +115,28 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
     setPin(next);
   };
 
+  const recoverPin = async () => {
+    setRecovering(true);
+    setError(null);
+    try {
+      const { data } = await supabase.auth.getUser();
+      const email = data.user?.email;
+      if (!email) {
+        setError("Sign in with your account password to reset App Lock.");
+        return;
+      }
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (resetError) throw resetError;
+      setError("Recovery email sent. After verifying your account, return to Security to create a new PIN.");
+    } catch {
+      setError("Recovery could not be started. Check your connection and try again.");
+    } finally {
+      setRecovering(false);
+    }
+  };
+
   if (!active || !locked) return <>{children}</>;
 
   return (
@@ -173,10 +197,9 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
         </Button>
       )}
 
-      <Button variant="ghost" size="sm" onClick={() => {
-        window.dispatchEvent(new Event("fitfusion-app-lock-recovery"));
-        setError("Open your recovery email on this device, then return to reset your PIN.");
-      }}>Forgot PIN?</Button>
+      <Button variant="ghost" size="sm" disabled={recovering} onClick={() => void recoverPin()}>
+        {recovering ? "Sending recovery…" : "Forgot PIN?"}
+      </Button>
 
       <p className="text-[10px] text-muted-foreground">
         Failed attempts on this device: {failureCount()}

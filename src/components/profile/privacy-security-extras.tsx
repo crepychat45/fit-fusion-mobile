@@ -212,9 +212,9 @@ export function PrivacySecurityExtras({ userEmail }: { userEmail?: string }) {
     });
   }, []);
 
-  // Privacy screen: blur the app when it loses focus.
+  // Privacy screen: conceal the app when it loses focus or enters the switcher.
   useEffect(() => {
-    if (!prefs.privacyScreen) return;
+    if (!prefs.privacyScreen && !prefs.hideContentInSwitcher) return;
     const root = document.documentElement;
     const blur = () => root.classList.add("ff-privacy-blur");
     const clear = () => root.classList.remove("ff-privacy-blur");
@@ -228,7 +228,7 @@ export function PrivacySecurityExtras({ userEmail }: { userEmail?: string }) {
       window.removeEventListener("focus", clear);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [prefs.privacyScreen]);
+  }, [prefs.privacyScreen, prefs.hideContentInSwitcher]);
   // Reflect privacy prefs on the document so the rest of the app can react.
   useEffect(() => {
     const root = document.documentElement;

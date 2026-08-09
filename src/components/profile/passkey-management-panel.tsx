@@ -28,27 +28,26 @@ export function PasskeyManagementPanel({ userEmail }: Props) {
   const [newLabel, setNewLabel] = useState("");
   const [lastError, setLastError] = useState<{ title: string; hint: string } | null>(null);
 
-  const refresh = useCallback(async () => {
-    try {
-      setPasskeys(await listPasskeys());
-    } catch (e) {
-      handleError(e, "Vault error");
-      setPasskeys([]);
-    }
-  }, [handleError]);
-
-  useEffect(() => {
-    probePasskeySupport().then(setCaps);
-    refresh();
-  }, [refresh]);
-
-  const handleError = (e: unknown, fallbackTitle: string) => {
+  const handleError = useCallback((e: unknown, fallbackTitle: string) => {
     const err = e instanceof PasskeyError ? e : null;
     const title = err?.message || fallbackTitle;
     const hint = err?.suggestion || "You can still sign in via email magic link or password.";
     setLastError({ title, hint });
     toast({ title, description: hint, variant: "destructive" });
-  };
+  }, [toast]);
+
+  const refresh = useCallback(async () => {
+    try {
+      setPasskeys(await listPasskeys());
+    } catch (e) {
+      handleError(e, "Vault error");
+    }
+  }, [handleError]);
+
+  useEffect(() => {
+    void probePasskeySupport().then(setCaps);
+    void refresh();
+  }, [refresh]);
 
   const doEnroll = async () => {
     if (!userEmail) {
