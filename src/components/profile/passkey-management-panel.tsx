@@ -29,8 +29,13 @@ export function PasskeyManagementPanel({ userEmail }: Props) {
   const [lastError, setLastError] = useState<{ title: string; hint: string } | null>(null);
 
   const refresh = useCallback(async () => {
-    setPasskeys(await listPasskeys());
-  }, []);
+    try {
+      setPasskeys(await listPasskeys());
+    } catch (e) {
+      handleError(e, "Vault error");
+      setPasskeys([]);
+    }
+  }, [handleError]);
 
   useEffect(() => {
     probePasskeySupport().then(setCaps);
