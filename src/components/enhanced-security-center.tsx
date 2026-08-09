@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
+import { listPasskeys } from "@/lib/passkey-manager";
 import {
   Shield,
   Lock,
@@ -38,6 +39,9 @@ export function EnhancedSecurityCenter() {
   const [isScanning, setIsScanning] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
+  useEffect(() => {
+    listPasskeys().then(list => setBiometricEnabled(list.length > 0)).catch(() => {});
+  }, []);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const [securityChecks, setSecurityChecks] = useState<SecurityCheck[]>([
     {
@@ -112,33 +116,15 @@ export function EnhancedSecurityCenter() {
       description: twoFactorEnabled
         ? "Two-factor authentication has been disabled"
         : "Two-factor authentication has been enabled",
+      variant: twoFactorEnabled ? "destructive" : "default",
     });
   };
 
-  const enableBiometric = async () => {
-    try {
-      if ("credentials" in navigator) {
-        setBiometricEnabled(!biometricEnabled);
-        toast({
-          title: biometricEnabled ? "Biometric Disabled" : "Biometric Enabled",
-          description: biometricEnabled
-            ? "Biometric authentication has been disabled"
-            : "Biometric authentication has been enabled",
-        });
-      } else {
-        toast({
-          title: "Biometric Not Supported",
-          description: "Your device doesn't support biometric authentication",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "Biometric Setup Failed",
-        description: "Could not set up biometric authentication",
-        variant: "destructive",
-      });
-    }
+  const enableBiometric = () => {
+    toast({
+      title: "Use Passkey Manager",
+      description: "Manage biometrics from your Profile → Security settings.",
+    });
   };
 
   const getScoreColor = (score: number) => {

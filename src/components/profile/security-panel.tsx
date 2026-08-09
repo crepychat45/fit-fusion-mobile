@@ -109,7 +109,6 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
   const [sensors, setSensors] = useState<SensorStatus[]>([]);
   const [webAuthnSupported, setWebAuthnSupported] = useState(false);
   const [platformAuth, setPlatformAuth] = useState(false);
-  const [biometricEnabled, setBiometricEnabled] = useState(() => !!localStorage.getItem(LS_BIOMETRIC_CRED));
   const [twoFAEnabled, setTwoFAEnabled] = useState(() => localStorage.getItem(LS_2FA_ENABLED) === "1");
   const [setupSecret, setSetupSecret] = useState<string | null>(null);
   const [code, setCode] = useState("");
@@ -197,9 +196,6 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
             setTwoFAEnabled(s.twoFAEnabled);
             localStorage.setItem(LS_2FA_ENABLED, s.twoFAEnabled ? "1" : "0");
           }
-          if (typeof s.biometricEnabled === "boolean") {
-            setBiometricEnabled(s.biometricEnabled && !!localStorage.getItem(LS_BIOMETRIC_CRED));
-          }
           if (Array.isArray(s.events)) setEvents(s.events);
         }
       } catch { /* offline */ }
@@ -252,68 +248,6 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
   const secondsLeft = 30 - (Math.floor(Date.now() / 1000) % 30);
 
   // ---- Biometric (WebAuthn) ----
-  async function enrollBiometric() {
-    if (!webAuthnSupported) {
-      toast({ title: "Unsupported", description: "This device does not support WebAuthn.", variant: "destructive" });
-      return;
-    }
-    try {
-      const challenge = new Uint8Array(32);
-      crypto.getRandomValues(challenge);
-      const userHandle = new TextEncoder().encode(userEmail || "fitfusion-user");
-      const cred = (await navigator.credentials.create({
-        publicKey: {
-          challenge,
-          rp: { name: "FitFusion", id: window.location.hostname },
-          user: { id: userHandle, name: userEmail || "user", displayName: userEmail || "FitFusion User" },
-          pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
-          authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required", residentKey: "preferred" },
-          timeout: 60000,
-          attestation: "none",
-        },
-      })) as PublicKeyCredential | null;
-      if (!cred) throw new Error("No credential returned");
-      localStorage.setItem(LS_BIOMETRIC_CRED, b64urlEncode(cred.rawId));
-      if (userEmail) localStorage.setItem("ff.security.biometric.email", userEmail);
-      setBiometricEnabled(true);
-      await persistFlag({ biometricEnabled: true });
-      await logEvent("biometric.enrolled", "Biometric authentication enrolled on this device");
-      toast({ title: "Biometric enabled", description: "You can now sign in with your fingerprint or face on this device." });
-    } catch (e: any) {
-      toast({ title: "Setup failed", description: e?.message || "Biometric enrollment cancelled.", variant: "destructive" });
-    }
-  }
-
-  async function testBiometric() {
-    const credId = localStorage.getItem(LS_BIOMETRIC_CRED);
-    if (!credId) return;
-    try {
-      const challenge = new Uint8Array(32);
-      crypto.getRandomValues(challenge);
-      const idBytes = Uint8Array.from(atob(credId.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
-      await navigator.credentials.get({
-        publicKey: {
-          challenge,
-          allowCredentials: [{ id: idBytes, type: "public-key" }],
-          userVerification: "required",
-          timeout: 60000,
-          rpId: window.location.hostname,
-        },
-      });
-      toast({ title: "Verified ✓", description: "Biometric authentication works on this device." });
-    } catch (e: any) {
-      toast({ title: "Verification failed", description: e?.message || "Cancelled", variant: "destructive" });
-    }
-  }
-
-  async function removeBiometric() {
-    localStorage.removeItem(LS_BIOMETRIC_CRED);
-    setBiometricEnabled(false);
-    await persistFlag({ biometricEnabled: false });
-    await logEvent("biometric.removed", "Biometric authentication removed");
-    toast({ title: "Biometric removed" });
-  }
-
   // ---- 2FA ----
   function begin2FA() {
     setSetupSecret(randomBase32Secret(20));
@@ -364,7 +298,11 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
     toast({ title: "Signed out of all devices" });
   }
 
-  const secureScore = (biometricEnabled ? 40 : 0) + (twoFAEnabled ? 40 : 0) + (userEmail ? 20 : 0);
+  const [passkeyCount, setPasskeyCount] = useState(0);
+  useEffect(() => {
+    import("@/lib/passkey-manager").then(m => m.listPasskeys()).then(l => setPasskeyCount(l.length)).catch(() => {});
+  }, []);
+  const secureScore = (passkeyCount > 0 ? 40 : 0) + (twoFAEnabled ? 40 : 0) + (userEmail ? 20 : 0);
 
   return (
     <div className="space-y-3">
@@ -387,7 +325,7 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
               <div className="absolute inset-0 flex items-center justify-center text-lg font-black">{secureScore}</div>
             </div>
             <div className="text-xs space-y-1 flex-1">
-              <div className="flex items-center gap-2">{biometricEnabled ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> : <XCircle className="h-3.5 w-3.5 text-muted-foreground" />} Biometric login</div>
+              <div className="flex items-center gap-2">{passkeyCount > 0 ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> : <XCircle className="h-3.5 w-3.5 text-muted-foreground" />} Passkey login</div>
               <div className="flex items-center gap-2">{twoFAEnabled ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> : <XCircle className="h-3.5 w-3.5 text-muted-foreground" />} Two-factor auth</div>
               <div className="flex items-center gap-2"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> Verified email</div>
             </div>
@@ -397,56 +335,6 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
 
       {/* Passkeys */}
       <PasskeyManagementPanel userEmail={userEmail} />
-
-      {/* Biometric device credential */}
-      <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Fingerprint className="h-4 w-4 text-primary" /> Biometric & Face Unlock
-          </CardTitle>
-          <CardDescription>Fingerprint, Face ID or Windows Hello for this device.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <div className="grid grid-cols-2 gap-2 text-[10px]">
-            <div className={`rounded-lg border px-2 py-1 text-center ${webAuthnSupported ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-500" : "border-border/30 bg-muted/20 text-muted-foreground"}`}>
-              {webAuthnSupported ? "✓" : "×"} WebAuthn supported
-            </div>
-            <div className={`rounded-lg border px-2 py-1 text-center ${platformAuth ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-500" : "border-border/30 bg-muted/20 text-muted-foreground"}`}>
-              {platformAuth ? "✓" : "×"} Platform sensor
-            </div>
-          </div>
-          <div className="flex items-center justify-between rounded-xl border border-border/20 bg-muted/20 p-3">
-            <div className="min-w-0">
-              <div className="text-xs font-semibold">Device credential</div>
-              <div className="text-[10px] text-muted-foreground">
-                {biometricEnabled ? "Enrolled on this device" : "Not enrolled yet"}
-              </div>
-            </div>
-            <Badge variant={biometricEnabled ? "default" : "outline"}>{biometricEnabled ? "Active" : "Off"}</Badge>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {!biometricEnabled ? (
-              <Button size="sm" onClick={enrollBiometric} disabled={!webAuthnSupported || !platformAuth}>
-                <Fingerprint className="h-3.5 w-3.5 mr-1.5" /> Enable biometric unlock
-              </Button>
-            ) : (
-              <>
-                <Button size="sm" variant="outline" onClick={testBiometric}>
-                  <ShieldCheck className="h-3.5 w-3.5 mr-1.5" /> Test unlock
-                </Button>
-                <Button size="sm" variant="outline" className="text-destructive" onClick={removeBiometric}>
-                  <XCircle className="h-3.5 w-3.5 mr-1.5" /> Remove
-                </Button>
-              </>
-            )}
-          </div>
-          {!platformAuth && webAuthnSupported && (
-            <p className="text-[10px] text-amber-500">
-              No platform authenticator detected. Set up Face ID / fingerprint / Windows Hello in your device settings first.
-            </p>
-          )}
-        </CardContent>
-      </Card>
 
       {/* Permissions */}
       <Card className="border-border/20 bg-card/60 backdrop-blur-sm">

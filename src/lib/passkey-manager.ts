@@ -130,7 +130,11 @@ export async function listPasskeys(): Promise<PasskeyRecord[]> {
     const list = await decryptJSON<PasskeyRecord[]>(raw);
     return Array.isArray(list) ? list : [];
   } catch {
-    return [];
+    throw new PasskeyError(
+      "unknown",
+      "The passkey vault could not be opened on this device.",
+      "Do not clear site data. Reload the app and try again.",
+    );
   }
 }
 

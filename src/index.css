@@ -1069,6 +1069,21 @@ html.ff-privacy-blur body {
   transition: filter 120ms ease-out;
 }
 
+/* Keep the privacy cover above app content without preventing focus recovery. */
+html.ff-privacy-blur::after {
+  content: "FitFusion protected";
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: grid;
+  place-items: center;
+  background: hsl(var(--background) / 0.94);
+  color: hsl(var(--muted-foreground));
+  font-size: 0.875rem;
+  font-weight: 600;
+  pointer-events: none;
+}
+
 /* Mask sensitive stats until tapped */
 html.ff-mask-stats [data-sensitive]:not(:hover):not(:focus-within) {
   filter: blur(7px);

@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Delete, Fingerprint, Lock, ShieldAlert } from "lucide-react";
+import { Delete, Fingerprint, Lock, ShieldAlert, ShieldCheck } from "lucide-react";
 import {
-  biometricAvailable, failureCount, hasPin, markUnlocked, promptBiometric,
-  readLockPrefs, recordFailure, verifyPin, type AppLockPrefs,
+  biometricAvailable, clearPin, failureCount, hasPin, markUnlocked, notifyLockPrefsChanged,
+  promptBiometric, readLockPrefs, recordFailure, verifyPin, type AppLockPrefs,
 } from "@/lib/app-lock";
 import { listPasskeys } from "@/lib/passkey-manager";
+import { supabase } from "@/integrations/supabase/client";
 
 const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", "del"];
 
@@ -16,6 +17,7 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [bioReady, setBioReady] = useState(false);
   const [shake, setShake] = useState(false);
+  const [recovering, setRecovering] = useState(false);
   const idleTimer = useRef<number | null>(null);
 
   const active = prefs.appLockEnabled && hasPin();
@@ -38,6 +40,19 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
       window.removeEventListener("storage", sync);
       window.removeEventListener("fitfusion-app-lock", onLock);
     };
+  }, []);
+
+  useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange((event) => {
+      if (event !== "PASSWORD_RECOVERY") return;
+      clearPin();
+      const next = { ...readLockPrefs(), appLockEnabled: false, biometricUnlock: false };
+      localStorage.setItem("fitfusion-privacy-security", JSON.stringify(next));
+      setPrefs(next);
+      setLocked(false);
+      notifyLockPrefsChanged();
+    });
+    return () => data.subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -111,19 +126,42 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
     if (!k) return;
     const next = (pin + k).slice(0, 8);
     setPin(next);
-    if (next.length >= 4) void submit(next);
+  };
+
+  const recoverPin = async () => {
+    setRecovering(true);
+    setError(null);
+    try {
+      const { data } = await supabase.auth.getUser();
+      const email = data.user?.email;
+      if (!email) {
+        setError("Sign in with your account password to reset App Lock.");
+        return;
+      }
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (resetError) throw resetError;
+      setError("Recovery email sent. After verifying your account, return to Security to create a new PIN.");
+    } catch {
+      setError("Recovery could not be started. Check your connection and try again.");
+    } finally {
+      setRecovering(false);
+    }
   };
 
   if (!active || !locked) return <>{children}</>;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-6 bg-background/95 px-6 backdrop-blur-2xl">
+    <div className="fixed inset-0 z-[9999] overflow-y-auto bg-background/95 px-5 py-8 backdrop-blur-2xl">
+      <div className="mx-auto flex min-h-full w-full max-w-sm flex-col items-center justify-center gap-5">
       <div className="flex flex-col items-center gap-2 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10">
-          <Lock className="h-7 w-7 text-primary" />
+        <div className="relative flex h-20 w-20 items-center justify-center rounded-[28px] border border-primary/30 bg-primary/10 shadow-lg shadow-primary/10">
+          <ShieldCheck className="h-9 w-9 text-primary" />
+          <span className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full border border-background bg-primary text-primary-foreground"><Lock className="h-3.5 w-3.5" /></span>
         </div>
-        <h1 className="text-lg font-black tracking-tight">FitFusion is locked</h1>
-        <p className="text-xs text-muted-foreground">Enter your PIN to continue</p>
+        <h1 className="text-xl font-black">FitFusion is locked</h1>
+        <p className="text-sm text-muted-foreground">Enter your 4–8 digit PIN</p>
       </div>
 
       <div className={`flex gap-3 ${shake ? "animate-[shake_0.4s_ease-in-out]" : ""}`}>
@@ -143,23 +181,28 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
         </p>
       )}
 
-      <div className="grid w-full max-w-[260px] grid-cols-3 gap-3">
+      <div className="grid w-full max-w-[280px] grid-cols-3 gap-3">
         {KEYS.map((k, i) =>
           k === "" ? (
             <span key={i} />
           ) : (
-            <button
+            <Button
               key={i}
               type="button"
+              variant="outline"
               aria-label={k === "del" ? "Delete" : `Digit ${k}`}
               onClick={() => press(k)}
-              className="flex h-16 items-center justify-center rounded-2xl border border-border/30 bg-card/60 text-xl font-semibold backdrop-blur-md transition-transform active:scale-95"
+              className="h-16 rounded-2xl bg-card/60 text-xl font-semibold backdrop-blur-md active:scale-95"
             >
               {k === "del" ? <Delete className="h-5 w-5" /> : k}
-            </button>
+            </Button>
           ),
         )}
       </div>
+
+      <Button className="w-full max-w-[280px]" disabled={pin.length < 4} onClick={() => void submit(pin)}>
+        <Lock className="mr-2 h-4 w-4" /> Unlock
+      </Button>
 
       {prefs.biometricUnlock && bioReady && (
         <Button variant="outline" onClick={() => void tryBiometric()} className="gap-2">
@@ -167,9 +210,14 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
         </Button>
       )}
 
+      <Button variant="ghost" size="sm" disabled={recovering} onClick={() => void recoverPin()}>
+        {recovering ? "Sending recovery…" : "Forgot PIN?"}
+      </Button>
+
       <p className="text-[10px] text-muted-foreground">
         Failed attempts on this device: {failureCount()}
       </p>
+      </div>
     </div>
   );
 }
