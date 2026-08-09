@@ -115,15 +115,16 @@ export function EnhancedSecurityCenter() {
       title: twoFactorEnabled ? "2FA Disabled" : "2FA Enabled",
       description: twoFactorEnabled
         ? "Two-factor authentication has been disabled"
+        : "Two-factor authentication has been enabled",
+      variant: twoFactorEnabled ? "destructive" : "default",
+    });
+  };
+
   const enableBiometric = () => {
     toast({
       title: "Use Passkey Manager",
-      description: "Manage biometrics from your Profile -> Security settings.",
+      description: "Manage biometrics from your Profile → Security settings.",
     });
-  };
-        variant: "destructive",
-      });
-    }
   };
 
   const getScoreColor = (score: number) => {

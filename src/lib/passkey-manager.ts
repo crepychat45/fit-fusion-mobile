@@ -129,10 +129,7 @@ export async function listPasskeys(): Promise<PasskeyRecord[]> {
   try {
     const list = await decryptJSON<PasskeyRecord[]>(raw);
     return Array.isArray(list) ? list : [];
-  } catch (e) {
-    console.error("Vault decryption failed:", e);
-    throw new PasskeyError("unknown", "Security vault is corrupted or locked.", "Refresh the page or re-authenticate.");
-  }
+  } catch {
     throw new PasskeyError(
       "unknown",
       "The passkey vault could not be opened on this device.",
