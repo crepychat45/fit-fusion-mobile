@@ -55,6 +55,17 @@ const EnhancedValidationExtras = lazy(() => import("./settings-power-extras").th
 const DeveloperExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.DeveloperExtras })));
 const DataExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.DataExtras })));
 const AboutExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.AboutExtras })));
+const AccountProExtras = lazy(() => import("./settings-pro-extras").then(m => ({ default: m.AccountProExtras })));
+const SecurityProExtras = lazy(() => import("./settings-pro-extras").then(m => ({ default: m.SecurityProExtras })));
+const DisplayProExtras = lazy(() => import("./settings-pro-extras").then(m => ({ default: m.DisplayProExtras })));
+const PrivacyProExtras = lazy(() => import("./settings-pro-extras").then(m => ({ default: m.PrivacyProExtras })));
+const NotificationProExtras = lazy(() => import("./settings-pro-extras").then(m => ({ default: m.NotificationProExtras })));
+const UnitsProExtras = lazy(() => import("./settings-pro-extras").then(m => ({ default: m.UnitsProExtras })));
+const ChatProExtras = lazy(() => import("./settings-pro-extras").then(m => ({ default: m.ChatProExtras })));
+const UpdateProExtras = lazy(() => import("./settings-pro-extras").then(m => ({ default: m.UpdateProExtras })));
+const DeveloperProExtras = lazy(() => import("./settings-pro-extras").then(m => ({ default: m.DeveloperProExtras })));
+const DataProExtras = lazy(() => import("./settings-pro-extras").then(m => ({ default: m.DataProExtras })));
+const AboutProExtras = lazy(() => import("./settings-pro-extras").then(m => ({ default: m.AboutProExtras })));
 
 const PanelLoader = () => (
   <div className="flex items-center justify-center py-12">
