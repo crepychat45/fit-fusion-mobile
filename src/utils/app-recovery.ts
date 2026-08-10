@@ -153,8 +153,22 @@ export const clearAppCaches = async () => {
   await Promise.allSettled(operations);
 };
 
+const appHasRenderedUi = (): boolean => {
+  const root = document.getElementById("root");
+  if (!root) return false;
+  // A booted app renders real nodes; the static boot spinner is a single div.
+  return root.querySelectorAll("*").length > 6;
+};
+
 export const recoverApp = async (reason: string, error?: unknown) => {
   if (typeof window === "undefined" || recovering) return;
+
+  // Never tear down an app that is already running — a late timeout or a
+  // background fetch hiccup must not blank a working screen.
+  if (appReadyMarked || appHasRenderedUi()) {
+    removeSessionValue(RECOVERY_STATE_KEY);
+    return;
+  }
 
   recovering = true;
   const state = getRecoveryState();
@@ -196,13 +210,13 @@ export const markAppReady = () => {
   if (!appReadyMarked) {
     appReadyMarked = true;
     import("@/utils/perf-telemetry").then((m) => m.mark("app-ready")).catch(() => undefined);
-  }
-
-  window.setTimeout(() => {
+    // Clear the attempt counter immediately so a previous bad session can't
+    // push a healthy boot straight into the "recovery limit" fallback.
     removeSessionValue(RECOVERY_STATE_KEY);
     removeSessionValue(RECOVERY_URL_KEY);
-  }, 8_000);
+  }
 };
+
 
 
 const installFetchRecovery = () => {
