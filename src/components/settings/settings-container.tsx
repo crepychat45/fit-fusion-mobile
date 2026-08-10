@@ -427,6 +427,7 @@ export function SettingsContainer() {
               <div className="space-y-6">
                 <L><AccountSettings /></L>
                 <L><AccountExtras /></L>
+                <L><AccountProExtras /></L>
               </div>
             </TabsContent>
 
@@ -434,6 +435,7 @@ export function SettingsContainer() {
               <div className="space-y-6">
                 <L><SecurityCenter /></L>
                 <L><SecurityExtras /></L>
+                <L><SecurityProExtras /></L>
               </div>
             </TabsContent>
 
@@ -442,6 +444,7 @@ export function SettingsContainer() {
                 <L><AppearancePanel /></L>
                 <L><DisplaySettings /></L>
                 <L><DisplayExtras /></L>
+                <L><DisplayProExtras /></L>
               </div>
             </TabsContent>
 
@@ -449,6 +452,7 @@ export function SettingsContainer() {
               <div className="space-y-6">
                 <L><PrivacySettings /></L>
                 <L><PrivacyExtras /></L>
+                <L><PrivacyProExtras /></L>
               </div>
             </TabsContent>
 
@@ -457,6 +461,7 @@ export function SettingsContainer() {
                 <L><NotificationPreferences /></L>
                 <L><NotificationSettings /></L>
                 <L><NotificationExtras /></L>
+                <L><NotificationProExtras /></L>
               </div>
             </TabsContent>
 
@@ -464,6 +469,7 @@ export function SettingsContainer() {
               <div className="space-y-6">
                 <L><UnitPreferences /></L>
                 <L><UnitsExtras /></L>
+                <L><UnitsProExtras /></L>
               </div>
             </TabsContent>
 
@@ -471,6 +477,7 @@ export function SettingsContainer() {
               <div className="space-y-6">
                 <L><ChatSettingsPanel /></L>
                 <L><ChatExtras /></L>
+                <L><ChatProExtras /></L>
               </div>
             </TabsContent>
 
@@ -478,6 +485,7 @@ export function SettingsContainer() {
               <div className="space-y-6">
                 <L><VersionControlPanel /></L>
                 <L><UpdateExtras /></L>
+                <L><UpdateProExtras /></L>
                 <L><PwaVaultPanel /></L>
                 <L><UnifiedUpdateManager /></L>
               </div>
@@ -542,6 +550,7 @@ export function SettingsContainer() {
               <div className="space-y-6">
                 <L><DeveloperOptions /></L>
                 <L><DeveloperExtras /></L>
+                <L><DeveloperProExtras /></L>
               </div>
             </TabsContent>
 
@@ -549,6 +558,7 @@ export function SettingsContainer() {
               <div className="space-y-6">
                 <L><DataBackupPanel /></L>
                 <L><DataExtras /></L>
+                <L><DataProExtras /></L>
                 <L><SystemHealthPanel /></L>
 
 
@@ -598,6 +608,7 @@ export function SettingsContainer() {
               <div className="space-y-6">
                 <L><AboutPage /></L>
                 <L><AboutExtras /></L>
+                <L><AboutProExtras /></L>
               </div>
             </TabsContent>
 
