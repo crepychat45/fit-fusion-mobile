@@ -66,6 +66,14 @@ const UpdateProExtras = lazy(() => import("./settings-pro-extras").then(m => ({ 
 const DeveloperProExtras = lazy(() => import("./settings-pro-extras").then(m => ({ default: m.DeveloperProExtras })));
 const DataProExtras = lazy(() => import("./settings-pro-extras").then(m => ({ default: m.DataProExtras })));
 const AboutProExtras = lazy(() => import("./settings-pro-extras").then(m => ({ default: m.AboutProExtras })));
+const UpdateCenter = lazy(() => import("./settings-nextgen-extras").then(m => ({ default: m.UpdateCenter })));
+const AccountNextExtras = lazy(() => import("./settings-nextgen-extras").then(m => ({ default: m.AccountNextExtras })));
+const DisplayNextExtras = lazy(() => import("./settings-nextgen-extras").then(m => ({ default: m.DisplayNextExtras })));
+const NotificationNextExtras = lazy(() => import("./settings-nextgen-extras").then(m => ({ default: m.NotificationNextExtras })));
+const UnitsNextExtras = lazy(() => import("./settings-nextgen-extras").then(m => ({ default: m.UnitsNextExtras })));
+const ChatNextExtras = lazy(() => import("./settings-nextgen-extras").then(m => ({ default: m.ChatNextExtras })));
+const DataNextExtras = lazy(() => import("./settings-nextgen-extras").then(m => ({ default: m.DataNextExtras })));
+const SecurityNextExtras = lazy(() => import("./settings-nextgen-extras").then(m => ({ default: m.SecurityNextExtras })));
 
 const PanelLoader = () => (
   <div className="flex items-center justify-center py-12">
@@ -428,6 +436,7 @@ export function SettingsContainer() {
                 <L><AccountSettings /></L>
                 <L><AccountExtras /></L>
                 <L><AccountProExtras /></L>
+                <L><AccountNextExtras /></L>
               </div>
             </TabsContent>
 
@@ -436,6 +445,7 @@ export function SettingsContainer() {
                 <L><SecurityCenter /></L>
                 <L><SecurityExtras /></L>
                 <L><SecurityProExtras /></L>
+                <L><SecurityNextExtras /></L>
               </div>
             </TabsContent>
 
@@ -445,6 +455,7 @@ export function SettingsContainer() {
                 <L><DisplaySettings /></L>
                 <L><DisplayExtras /></L>
                 <L><DisplayProExtras /></L>
+                <L><DisplayNextExtras /></L>
               </div>
             </TabsContent>
 
@@ -462,6 +473,7 @@ export function SettingsContainer() {
                 <L><NotificationSettings /></L>
                 <L><NotificationExtras /></L>
                 <L><NotificationProExtras /></L>
+                <L><NotificationNextExtras /></L>
               </div>
             </TabsContent>
 
@@ -470,6 +482,7 @@ export function SettingsContainer() {
                 <L><UnitPreferences /></L>
                 <L><UnitsExtras /></L>
                 <L><UnitsProExtras /></L>
+                <L><UnitsNextExtras /></L>
               </div>
             </TabsContent>
 
@@ -478,6 +491,7 @@ export function SettingsContainer() {
                 <L><ChatSettingsPanel /></L>
                 <L><ChatExtras /></L>
                 <L><ChatProExtras /></L>
+                <L><ChatNextExtras /></L>
               </div>
             </TabsContent>
 
@@ -486,6 +500,7 @@ export function SettingsContainer() {
                 <L><VersionControlPanel /></L>
                 <L><UpdateExtras /></L>
                 <L><UpdateProExtras /></L>
+                <L><UpdateCenter /></L>
                 <L><PwaVaultPanel /></L>
                 <L><UnifiedUpdateManager /></L>
               </div>
@@ -559,6 +574,7 @@ export function SettingsContainer() {
                 <L><DataBackupPanel /></L>
                 <L><DataExtras /></L>
                 <L><DataProExtras /></L>
+                <L><DataNextExtras /></L>
                 <L><SystemHealthPanel /></L>
 
 

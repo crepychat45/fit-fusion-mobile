@@ -1097,3 +1097,13 @@ html.ff-mask-stats [data-sensitive]:not(:hover):not(:focus-within) {
   60% { transform: translateX(-5px); }
   80% { transform: translateX(5px); }
 }
+
+/* v7.4.0 — global reduce-motion preference from Settings → Display */
+html.ff-reduce-motion *,
+html.ff-reduce-motion *::before,
+html.ff-reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
