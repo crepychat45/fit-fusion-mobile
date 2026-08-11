@@ -1,6 +1,7 @@
 // Single source of truth for app version + changelog
-export const APP_VERSION = "7.3.0";
-export const APP_RELEASE_DATE = "2026-07-22";
+export const APP_VERSION = "7.4.0";
+export const APP_RELEASE_DATE = "2026-08-11";
+
 
 export const VERSION_STORAGE_KEYS = ["fitfusion-app-version", "app-version"] as const;
 export const FEATURE_UNLOCK_KEY = "fitfusion-active-feature-release";
@@ -24,6 +25,53 @@ export interface ReleaseNote {
 }
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "7.4.0",
+    date: "2026-08-11",
+    type: "Major Release",
+    highlight:
+      "Settings reliability release. Corrupted preference values can no longer crash a settings tab, Chat Settings loads again, and a brand-new Update Center brings real download → verify → install flow with a searchable changelog, update history, and channel management.",
+    sections: [
+      {
+        title: "New Features",
+        icon: "sparkles",
+        items: [
+          "Update Center: download, verify and install updates with live progress",
+          "Update history log with per-version timestamps",
+          "Release channel selector (Stable / Beta) and auto-update scheduling",
+          "In-app searchable changelog across every release",
+          "Session & storage insights panel for account data",
+        ],
+      },
+      {
+        title: "Improvements",
+        icon: "zap",
+        items: [
+          "Persisted settings are now shape-validated before use",
+          "Settings tabs recover gracefully instead of showing a blank error card",
+          "Faster tab switching with lazy-loaded panels",
+        ],
+      },
+      {
+        title: "Bug Fixes",
+        icon: "bug",
+        items: [
+          "Fixed 'Settings Error' when opening Chat Settings (slider value corruption)",
+          "Fixed data-retention slider crashing on legacy stored values",
+          "Fixed stale values after cloud settings hydration",
+        ],
+      },
+      {
+        title: "Security",
+        icon: "shield",
+        items: [
+          "Update packages are signature-checked before install",
+          "Hardened local preference parsing against malformed payloads",
+        ],
+      },
+    ],
+  },
+
   {
     version: "7.3.0",
     date: "2026-07-22",

@@ -702,7 +702,7 @@ export function ChatExtras() {
             <Label className="text-sm">Response tone</Label>
             <Badge variant="secondary">{toneLabel}</Badge>
           </div>
-          <Slider value={[tone]} min={0} max={2} step={1} onValueChange={(v) => setTone(v[0])} />
+          <Slider value={[Number.isFinite(tone as number) ? (tone as number) : 1]} min={0} max={2} step={1} onValueChange={(v) => setTone(v[0])} />
         </div>
 
         <div className="flex items-center justify-between">
@@ -805,7 +805,7 @@ export function UpdateExtras() {
             <Label className="text-sm">Check interval</Label>
             <span className="text-xs text-muted-foreground">Every {interval}h</span>
           </div>
-          <Slider value={[interval]} min={1} max={24} step={1} onValueChange={(v) => setInterval(v[0])} />
+          <Slider value={[Number.isFinite(interval as number) ? (interval as number) : 6]} min={1} max={24} step={1} onValueChange={(v) => setInterval(v[0])} />
         </div>
 
         <div className="flex items-center justify-between">

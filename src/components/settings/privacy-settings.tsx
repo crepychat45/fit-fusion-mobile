@@ -50,15 +50,32 @@ import { ConfirmDialog } from "./confirm-dialog";
  * cloud-mirror (see src/utils/local-storage-sync.ts) into
  * public.user_settings.local_kv and back on sign-in / cross-device.
  */
+function sameShape(a: unknown, b: unknown) {
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  return typeof a === typeof b;
+}
+
 function usePersistedState<T>(key: string, initial: T): [T, (v: T) => void] {
+  // Guard against corrupted / type-shifted values coming from older builds or
+  // the cloud mirror (e.g. a number where an array is expected) which would
+  // otherwise crash components such as <Slider />.
+  const parse = (raw: string | null): T => {
+    if (raw === null) return initial;
+    try {
+      const parsed = JSON.parse(raw) as T;
+      return sameShape(parsed, initial) ? parsed : initial;
+    } catch {
+      return initial;
+    }
+  };
   const [value, setValue] = useState<T>(() => {
     try {
-      const raw = localStorage.getItem(key);
-      return raw === null ? initial : (JSON.parse(raw) as T);
+      return parse(localStorage.getItem(key));
     } catch {
       return initial;
     }
   });
+
   useEffect(() => {
     try {
       localStorage.setItem(key, JSON.stringify(value));
@@ -71,21 +88,16 @@ function usePersistedState<T>(key: string, initial: T): [T, (v: T) => void] {
     const rehydrate = () => {
       try {
         const raw = localStorage.getItem(key);
-        if (raw !== null) setValue(JSON.parse(raw) as T);
+        if (raw !== null) setValue(parse(raw));
       } catch {
         /* ignore */
       }
     };
     window.addEventListener("fitfusion-settings-hydrated", rehydrate);
     const onStorage = (e: StorageEvent) => {
-      if (e.key === key && e.newValue !== null) {
-        try {
-          setValue(JSON.parse(e.newValue) as T);
-        } catch {
-          /* ignore */
-        }
-      }
+      if (e.key === key && e.newValue !== null) setValue(parse(e.newValue));
     };
+
     window.addEventListener("storage", onStorage);
     return () => {
       window.removeEventListener("fitfusion-settings-hydrated", rehydrate);
@@ -106,6 +118,10 @@ export function PrivacySettings() {
   const [thirdPartySharing, setThirdPartySharing] = usePersistedState("fitfusion-privacy-third-party", false);
   const [cookieConsent, setCookieConsent] = usePersistedState("fitfusion-privacy-cookies", true);
   const [dataRetention, setDataRetention] = usePersistedState<number[]>("fitfusion-privacy-retention", [365]);
+  const retentionValue = Array.isArray(dataRetention) && typeof dataRetention[0] === "number"
+    ? dataRetention
+    : [365];
+
   const [aiTraining, setAiTraining] = usePersistedState("fitfusion-privacy-ai-training", false);
   const [biometricData, setBiometricData] = usePersistedState("fitfusion-privacy-biometric", true);
   const [voiceRecording, setVoiceRecording] = usePersistedState("fitfusion-privacy-voice", false);
@@ -525,10 +541,11 @@ export function PrivacySettings() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <p className="font-medium">Data Retention Period</p>
-                <Badge variant="outline">{dataRetention[0]} days</Badge>
+                <Badge variant="outline">{retentionValue[0]} days</Badge>
               </div>
               <Slider
-                value={dataRetention}
+                value={retentionValue}
+
                 onValueChange={setDataRetention}
                 max={730}
                 min={30}
