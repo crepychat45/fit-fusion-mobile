@@ -14,6 +14,16 @@ installGlobalErrorHandler();
 // component are transparently pushed to Supabase and restored on sign-in.
 initSettingsCloudMirror();
 
+// Warm DNS/TLS to the API + media CDNs so the first real request skips
+// the handshake cost — the single biggest perceived-latency win on mobile.
+if (typeof window !== "undefined") {
+  import("@/utils/network-adaptive")
+    .then(({ isTurboEnabled, warmCriticalOrigins }) => {
+      if (isTurboEnabled()) warmCriticalOrigins();
+    })
+    .catch(() => undefined);
+}
+
 mark("main-tsx-start");
 
 
