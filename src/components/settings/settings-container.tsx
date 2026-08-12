@@ -448,6 +448,7 @@ export function SettingsContainer() {
                 <L><AccountExtras /></L>
                 <L><AccountProExtras /></L>
                 <L><AccountNextExtras /></L>
+                <L><AccountUltraExtras /></L>
               </div>
             </TabsContent>
 
@@ -457,6 +458,7 @@ export function SettingsContainer() {
                 <L><SecurityExtras /></L>
                 <L><SecurityProExtras /></L>
                 <L><SecurityNextExtras /></L>
+                <L><SecurityUltraExtras /></L>
               </div>
             </TabsContent>
 
@@ -467,6 +469,7 @@ export function SettingsContainer() {
                 <L><DisplayExtras /></L>
                 <L><DisplayProExtras /></L>
                 <L><DisplayNextExtras /></L>
+                <L><DisplayUltraExtras /></L>
               </div>
             </TabsContent>
 
@@ -475,6 +478,7 @@ export function SettingsContainer() {
                 <L><PrivacySettings /></L>
                 <L><PrivacyExtras /></L>
                 <L><PrivacyProExtras /></L>
+                <L><PrivacyUltraExtras /></L>
               </div>
             </TabsContent>
 
@@ -485,6 +489,7 @@ export function SettingsContainer() {
                 <L><NotificationExtras /></L>
                 <L><NotificationProExtras /></L>
                 <L><NotificationNextExtras /></L>
+                <L><NotificationUltraExtras /></L>
               </div>
             </TabsContent>
 
@@ -494,6 +499,7 @@ export function SettingsContainer() {
                 <L><UnitsExtras /></L>
                 <L><UnitsProExtras /></L>
                 <L><UnitsNextExtras /></L>
+                <L><UnitsUltraExtras /></L>
               </div>
             </TabsContent>
 
@@ -503,6 +509,7 @@ export function SettingsContainer() {
                 <L><ChatExtras /></L>
                 <L><ChatProExtras /></L>
                 <L><ChatNextExtras /></L>
+                <L><ChatUltraExtras /></L>
               </div>
             </TabsContent>
 
@@ -577,6 +584,7 @@ export function SettingsContainer() {
                 <L><DeveloperOptions /></L>
                 <L><DeveloperExtras /></L>
                 <L><DeveloperProExtras /></L>
+                <L><DeveloperUltraExtras /></L>
               </div>
             </TabsContent>
 
@@ -586,6 +594,8 @@ export function SettingsContainer() {
                 <L><DataExtras /></L>
                 <L><DataProExtras /></L>
                 <L><DataNextExtras /></L>
+                <L><DataUltraExtras /></L>
+                <L><NetworkLabPanel /></L>
                 <L><SystemHealthPanel /></L>
 
 
@@ -636,6 +646,7 @@ export function SettingsContainer() {
                 <L><AboutPage /></L>
                 <L><AboutExtras /></L>
                 <L><AboutProExtras /></L>
+                <L><AboutUltraExtras /></L>
               </div>
             </TabsContent>
 
