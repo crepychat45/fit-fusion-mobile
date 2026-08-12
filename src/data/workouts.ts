@@ -1,3 +1,5 @@
+import { extraWorkouts } from "./workouts-extra";
+
 export interface Exercise {
   id: string;
   name: string;
@@ -18,9 +20,15 @@ export interface Workout {
   exercises: Exercise[];
   popularity: number;
   createdAt: number;
+  /** Optional media + metadata (used by newer library entries). */
+  videoUrl?: string;
+  thumbnailUrl?: string;
+  calories?: number;
+  equipment?: string[];
+  tags?: string[];
 }
 
-export const workouts: Workout[] = [
+const baseWorkouts: Workout[] = [
   {
     id: "1",
     title: "Full Body Strength",
@@ -393,3 +401,5 @@ export const workouts: Workout[] = [
     ],
   },
 ];
+
+export const workouts: Workout[] = [...baseWorkouts, ...extraWorkouts];
