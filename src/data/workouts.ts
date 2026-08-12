@@ -1,3 +1,5 @@
+import { extraWorkouts } from "./workouts-extra";
+
 export interface Exercise {
   id: string;
   name: string;
@@ -399,3 +401,5 @@ const baseWorkouts: Workout[] = [
     ],
   },
 ];
+
+export const workouts: Workout[] = [...baseWorkouts, ...extraWorkouts];
