@@ -18,9 +18,15 @@ export interface Workout {
   exercises: Exercise[];
   popularity: number;
   createdAt: number;
+  /** Optional media + metadata (used by newer library entries). */
+  videoUrl?: string;
+  thumbnailUrl?: string;
+  calories?: number;
+  equipment?: string[];
+  tags?: string[];
 }
 
-export const workouts: Workout[] = [
+const baseWorkouts: Workout[] = [
   {
     id: "1",
     title: "Full Body Strength",
