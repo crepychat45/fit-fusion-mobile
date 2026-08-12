@@ -74,6 +74,17 @@ const UnitsNextExtras = lazy(() => import("./settings-nextgen-extras").then(m =>
 const ChatNextExtras = lazy(() => import("./settings-nextgen-extras").then(m => ({ default: m.ChatNextExtras })));
 const DataNextExtras = lazy(() => import("./settings-nextgen-extras").then(m => ({ default: m.DataNextExtras })));
 const SecurityNextExtras = lazy(() => import("./settings-nextgen-extras").then(m => ({ default: m.SecurityNextExtras })));
+const NetworkLabPanel = lazy(() => import("./network-lab-panel").then(m => ({ default: m.NetworkLabPanel })));
+const AccountUltraExtras = lazy(() => import("./settings-ultra-extras").then(m => ({ default: m.AccountUltraExtras })));
+const SecurityUltraExtras = lazy(() => import("./settings-ultra-extras").then(m => ({ default: m.SecurityUltraExtras })));
+const DisplayUltraExtras = lazy(() => import("./settings-ultra-extras").then(m => ({ default: m.DisplayUltraExtras })));
+const PrivacyUltraExtras = lazy(() => import("./settings-ultra-extras").then(m => ({ default: m.PrivacyUltraExtras })));
+const NotificationUltraExtras = lazy(() => import("./settings-ultra-extras").then(m => ({ default: m.NotificationUltraExtras })));
+const UnitsUltraExtras = lazy(() => import("./settings-ultra-extras").then(m => ({ default: m.UnitsUltraExtras })));
+const ChatUltraExtras = lazy(() => import("./settings-ultra-extras").then(m => ({ default: m.ChatUltraExtras })));
+const DataUltraExtras = lazy(() => import("./settings-ultra-extras").then(m => ({ default: m.DataUltraExtras })));
+const DeveloperUltraExtras = lazy(() => import("./settings-ultra-extras").then(m => ({ default: m.DeveloperUltraExtras })));
+const AboutUltraExtras = lazy(() => import("./settings-ultra-extras").then(m => ({ default: m.AboutUltraExtras })));
 
 const PanelLoader = () => (
   <div className="flex items-center justify-center py-12">
