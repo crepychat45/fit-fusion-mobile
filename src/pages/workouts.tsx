@@ -19,6 +19,8 @@ import { AIWorkoutVideos } from "@/components/workout/ai-workout-videos";
 import { AIWorkoutBuilder } from "@/components/features/ai-workout-builder";
 import { RecoveryFocusWidget } from "@/components/workout/recovery-focus-widget";
 import { WorkoutCategories } from "@/components/workout/workout-categories";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import type { Workout } from "@/data/workouts";
 
 const Workouts = () => {
   const { toast } = useToast();
@@ -27,6 +29,8 @@ const Workouts = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [filterDifficulty, setFilterDifficulty] = useState("all");
+  const [sortBy, setSortBy] = useState("popular");
+  const [previewWorkout, setPreviewWorkout] = useState<Workout | null>(null);
   const [favoriteWorkouts, setFavoriteWorkouts] = useState<string[]>([]);
   const [completedWorkouts, setCompletedWorkouts] = useState<string[]>([]);
   const [aiRecommendations, setAiRecommendations] = useState<any[]>([]);
@@ -49,12 +53,34 @@ const Workouts = () => {
     ]);
   }, []);
 
-  const filteredWorkouts = workouts.filter((w) => {
-    const matchesSearch = w.title.toLowerCase().includes(searchQuery.toLowerCase()) || w.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType = filterType === "all" || w.category === filterType;
-    const matchesDifficulty = filterDifficulty === "all" || w.level === filterDifficulty;
-    return matchesSearch && matchesType && matchesDifficulty;
-  });
+  const filteredWorkouts = workouts
+    .filter((w) => {
+      const q = searchQuery.toLowerCase();
+      const matchesSearch =
+        w.title.toLowerCase().includes(q) ||
+        w.description.toLowerCase().includes(q) ||
+        (w.tags || []).some((t) => t.toLowerCase().includes(q)) ||
+        (w.equipment || []).some((t) => t.toLowerCase().includes(q));
+      const matchesType = filterType === "all" || w.category === filterType;
+      const matchesDifficulty = filterDifficulty === "all" || w.level === filterDifficulty;
+      return matchesSearch && matchesType && matchesDifficulty;
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "newest":
+          return b.createdAt - a.createdAt;
+        case "shortest":
+          return a.duration - b.duration;
+        case "longest":
+          return b.duration - a.duration;
+        case "calories":
+          return (b.calories ?? 0) - (a.calories ?? 0);
+        case "az":
+          return a.title.localeCompare(b.title);
+        default:
+          return b.popularity - a.popularity;
+      }
+    });
 
   const toggleFavorite = (id: string) => {
     const newFavs = favoriteWorkouts.includes(id) ? favoriteWorkouts.filter((f) => f !== id) : [...favoriteWorkouts, id];
@@ -137,6 +163,19 @@ const Workouts = () => {
                   <SelectItem value="flexibility">Flexibility</SelectItem>
                 </SelectContent>
               </Select>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-[140px] rounded-xl border-border/30 bg-card/60 backdrop-blur-sm h-9 text-sm">
+                  <SelectValue placeholder="Sort" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="popular">Most popular</SelectItem>
+                  <SelectItem value="newest">Newest</SelectItem>
+                  <SelectItem value="shortest">Shortest first</SelectItem>
+                  <SelectItem value="longest">Longest first</SelectItem>
+                  <SelectItem value="calories">Most calories</SelectItem>
+                  <SelectItem value="az">A → Z</SelectItem>
+                </SelectContent>
+              </Select>
               <Select value={filterDifficulty} onValueChange={setFilterDifficulty}>
                 <SelectTrigger className="w-[130px] rounded-xl border-border/30 bg-card/60 backdrop-blur-sm h-9 text-sm">
                   <SelectValue placeholder="Level" />
@@ -204,8 +243,15 @@ const Workouts = () => {
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
                                   <span className="flex items-center gap-1"><Flame className="h-3.5 w-3.5" />{workout.exercises?.length || 8} exercises</span>
-                                  <span className="flex items-center gap-1"><Zap className="h-3.5 w-3.5" />~250 cal</span>
+                                  <span className="flex items-center gap-1"><Zap className="h-3.5 w-3.5" />~{workout.calories ?? 250} cal</span>
                                 </div>
+                                <div className="flex items-center gap-1.5">
+                                {workout.videoUrl && (
+                                  <Button size="sm" variant="outline" onClick={() => setPreviewWorkout(workout)}
+                                    className="h-8 text-xs rounded-lg">
+                                    <Video className="h-3.5 w-3.5 mr-1" />Watch
+                                  </Button>
+                                )}
                                 {completedWorkouts.includes(workout.id) ? (
                                   <Badge className="bg-accent text-accent-foreground text-[10px]">✓ Done</Badge>
                                 ) : (
@@ -214,6 +260,7 @@ const Workouts = () => {
                                     <PlayCircle className="h-3.5 w-3.5 mr-1" />Start
                                   </Button>
                                 )}
+                                </div>
                               </div>
                             </CardContent>
                           </Card>
@@ -331,6 +378,43 @@ const Workouts = () => {
             </AnimatePresence>
           </Tabs>
         </div>
+
+        <Dialog open={!!previewWorkout} onOpenChange={(o) => !o && setPreviewWorkout(null)}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>{previewWorkout?.title}</DialogTitle>
+            </DialogHeader>
+            {previewWorkout?.videoUrl && (
+              <video
+                key={previewWorkout.id}
+                src={previewWorkout.videoUrl}
+                poster={previewWorkout.thumbnailUrl}
+                controls
+                playsInline
+                preload="metadata"
+                className="w-full rounded-xl bg-black"
+              />
+            )}
+            <p className="text-sm text-muted-foreground">{previewWorkout?.description}</p>
+            <div className="flex flex-wrap gap-2">
+              {(previewWorkout?.equipment || []).map((eq) => (
+                <Badge key={eq} variant="outline" className="text-[10px] capitalize">{eq}</Badge>
+              ))}
+              {(previewWorkout?.tags || []).map((t) => (
+                <Badge key={t} variant="secondary" className="text-[10px]">#{t}</Badge>
+              ))}
+            </div>
+            <Button
+              onClick={() => {
+                const id = previewWorkout?.id;
+                setPreviewWorkout(null);
+                if (id) navigate(`/workout-detail/${id}`);
+              }}
+            >
+              <PlayCircle className="h-4 w-4 mr-1.5" />Start this workout
+            </Button>
+          </DialogContent>
+        </Dialog>
 
         <MobileNav />
       </div>
