@@ -216,6 +216,7 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
         </p>
       )}
 
+      {!recoverMode && (<>
       <div className="grid w-full max-w-[280px] grid-cols-3 gap-3">
         {KEYS.map((k, i) =>
           k === "" ? (
@@ -244,6 +245,7 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
           <Fingerprint className="h-4 w-4" /> Unlock with biometrics
         </Button>
       )}
+      </>)}
 
       {!recoverMode ? (
         <Button variant="ghost" size="sm" onClick={startRecovery}>
