@@ -331,3 +331,150 @@ export function useLatencyMonitor(intervalMs = 20000, autoStart = true) {
 
   return { report, running, runOnce };
 }
+
+/* ------------------------------------------------------------------ */
+/* Throughput measurement + connection classification                  */
+/* ------------------------------------------------------------------ */
+
+export interface SpeedReport {
+  /** Measured download throughput in Mbps (0 when unknown). */
+  mbps: number;
+  /** Bytes transferred during the active test. */
+  bytes: number;
+  /** Round-trip latency used for classification. */
+  rtt: number;
+  /** Human label: 5G, 4G+, 4G, 3G, 2G, Offline. */
+  label: string;
+  /** Machine class used for adaptive decisions. */
+  tier: "offline" | "2g" | "3g" | "4g" | "4g+" | "5g";
+  /** Where the numbers came from. */
+  source: "measured" | "estimated";
+}
+
+/** Picks the heaviest same-origin asset already loaded — the best probe payload. */
+function pickProbeAsset(): { url: string; size: number } | null {
+  try {
+    const entries = performance.getEntriesByType("resource") as PerformanceResourceTiming[];
+    let best: { url: string; size: number } | null = null;
+    for (const e of entries) {
+      if (!e.name.startsWith(window.location.origin)) continue;
+      if (!/\.(js|css|png|jpg|jpeg|webp|svg|woff2?)(\?|$)/.test(e.name)) continue;
+      const size = e.decodedBodySize || e.transferSize || 0;
+      if (size > (best?.size ?? 0)) best = { url: e.name.split("?")[0], size };
+    }
+    return best && best.size > 8000 ? best : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Passive estimate from the resource-timing buffer (free, no extra traffic). */
+export function estimateThroughput(): number {
+  try {
+    const entries = performance.getEntriesByType("resource") as PerformanceResourceTiming[];
+    const recent = entries.slice(-60).filter((e) => (e.transferSize || 0) > 4000 && e.duration > 4);
+    if (!recent.length) return 0;
+    const rates = recent
+      .map((e) => ((e.transferSize || 0) * 8) / (e.duration / 1000) / 1_000_000)
+      .filter((v) => Number.isFinite(v) && v > 0)
+      .sort((a, b) => a - b);
+    if (!rates.length) return 0;
+    // 75th percentile approximates the achievable link rate better than the mean.
+    return Math.round(rates[Math.floor(rates.length * 0.75)] * 10) / 10;
+  } catch {
+    return 0;
+  }
+}
+
+export function classifySpeed(mbps: number, rtt: number, online = true): Pick<SpeedReport, "label" | "tier"> {
+  if (!online) return { label: "Offline", tier: "offline" };
+  if (mbps <= 0) {
+    const c = getConn();
+    const et = c?.effectiveType ?? "4g";
+    const map: Record<string, Pick<SpeedReport, "label" | "tier">> = {
+      "slow-2g": { label: "2G", tier: "2g" },
+      "2g": { label: "2G", tier: "2g" },
+      "3g": { label: "3G", tier: "3g" },
+      "4g": { label: "4G", tier: "4g" },
+    };
+    return map[et] ?? { label: "4G", tier: "4g" };
+  }
+  if (mbps >= 50 && rtt > 0 && rtt < 70) return { label: "5G / Fiber", tier: "5g" };
+  if (mbps >= 50) return { label: "5G", tier: "5g" };
+  if (mbps >= 12) return { label: "4G+ / LTE-A", tier: "4g+" };
+  if (mbps >= 3) return { label: "4G", tier: "4g" };
+  if (mbps >= 0.6) return { label: "3G", tier: "3g" };
+  return { label: "2G", tier: "2g" };
+}
+
+/**
+ * Active download test. Re-fetches a real (cache-busted) app asset and
+ * measures wall-clock throughput. Falls back to parallel micro-probes when
+ * no large asset is available, and finally to the passive estimate.
+ */
+export async function measureThroughput(timeoutMs = 8000): Promise<SpeedReport> {
+  const online = navigator.onLine;
+  const rtt = await probeLatency(3000);
+  if (!online) {
+    return { mbps: 0, bytes: 0, rtt: 0, ...classifySpeed(0, 0, false), source: "measured" };
+  }
+
+  const asset = pickProbeAsset();
+  let bytes = 0;
+  let seconds = 0;
+
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+    const started = performance.now();
+    if (asset) {
+      const res = await fetch(`${asset.url}?spd=${Date.now()}`, {
+        cache: "no-store",
+        signal: ctrl.signal,
+      });
+      const buf = await res.arrayBuffer();
+      bytes = buf.byteLength;
+    } else {
+      const results = await Promise.all(
+        Array.from({ length: 6 }, (_, i) =>
+          fetch(`${window.location.origin}/placeholder.svg?spd=${Date.now()}-${i}`, {
+            cache: "no-store",
+            signal: ctrl.signal,
+          })
+            .then((r) => r.arrayBuffer())
+            .then((b) => b.byteLength)
+            .catch(() => 0),
+        ),
+      );
+      bytes = results.reduce((a, b) => a + b, 0);
+    }
+    seconds = (performance.now() - started) / 1000;
+    clearTimeout(timer);
+  } catch {
+    bytes = 0;
+  }
+
+  // Subtract one RTT: the handshake is latency, not bandwidth.
+  const transferSeconds = Math.max(0.02, seconds - Math.max(0, rtt) / 1000);
+  let mbps = bytes > 0 ? (bytes * 8) / transferSeconds / 1_000_000 : 0;
+  let source: SpeedReport["source"] = "measured";
+
+  if (mbps <= 0 || !Number.isFinite(mbps)) {
+    mbps = estimateThroughput();
+    source = "estimated";
+  }
+  if (mbps <= 0) {
+    const c = getConn();
+    mbps = c?.downlink ?? 0;
+    source = "estimated";
+  }
+
+  mbps = Math.round(mbps * 10) / 10;
+  const cls = classifySpeed(mbps, rtt, online);
+  try {
+    document.documentElement.dataset.netTier = cls.tier;
+  } catch {
+    /* noop */
+  }
+  return { mbps, bytes, rtt: Math.max(0, rtt), ...cls, source };
+}
