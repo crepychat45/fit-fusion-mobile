@@ -128,7 +128,35 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
     setPin(next);
   };
 
-  const recoverPin = async () => {
+  const startRecovery = () => {
+    setError(null);
+    setAnswers({});
+    setNewPin("");
+    setRecoverMode(true);
+  };
+
+  const submitRecovery = async () => {
+    setRecovering(true);
+    setError(null);
+    try {
+      if (!/^\d{4,8}$/.test(newPin)) {
+        setError("Choose a new 4–8 digit PIN.");
+        return;
+      }
+      const ok = await resetPinWithRecovery(answers, newPin);
+      if (!ok) {
+        setError("Those answers don't match. Try again or use email recovery.");
+        return;
+      }
+      setRecoverMode(false);
+      setPin("");
+      setLocked(false);
+    } finally {
+      setRecovering(false);
+    }
+  };
+
+  const emailRecovery = async () => {
     setRecovering(true);
     setError(null);
     try {
@@ -149,6 +177,7 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
       setRecovering(false);
     }
   };
+
 
   if (!active || !locked) return <>{children}</>;
 
