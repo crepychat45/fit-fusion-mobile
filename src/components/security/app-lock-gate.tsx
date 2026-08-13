@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Delete, Fingerprint, Lock, ShieldAlert, ShieldCheck } from "lucide-react";
+import { Delete, Fingerprint, HelpCircle, Lock, ShieldAlert, ShieldCheck } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import {
   biometricAvailable, clearPin, failureCount, hasPin, markUnlocked, notifyLockPrefsChanged,
-  promptBiometric, readLockPrefs, recordFailure, verifyPin, type AppLockPrefs,
+  promptBiometric, readLockPrefs, recordFailure, verifyPin, readRecovery,
+  resetPinWithRecovery, type AppLockPrefs,
 } from "@/lib/app-lock";
 import { listPasskeys } from "@/lib/passkey-manager";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +20,10 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
   const [bioReady, setBioReady] = useState(false);
   const [shake, setShake] = useState(false);
   const [recovering, setRecovering] = useState(false);
+  const [recoverMode, setRecoverMode] = useState(false);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [newPin, setNewPin] = useState("");
+  const recoveryPairs = readRecovery();
   const idleTimer = useRef<number | null>(null);
 
   const active = prefs.appLockEnabled && hasPin();
@@ -128,7 +134,35 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
     setPin(next);
   };
 
-  const recoverPin = async () => {
+  const startRecovery = () => {
+    setError(null);
+    setAnswers({});
+    setNewPin("");
+    setRecoverMode(true);
+  };
+
+  const submitRecovery = async () => {
+    setRecovering(true);
+    setError(null);
+    try {
+      if (!/^\d{4,8}$/.test(newPin)) {
+        setError("Choose a new 4–8 digit PIN.");
+        return;
+      }
+      const ok = await resetPinWithRecovery(answers, newPin);
+      if (!ok) {
+        setError("Those answers don't match. Try again or use email recovery.");
+        return;
+      }
+      setRecoverMode(false);
+      setPin("");
+      setLocked(false);
+    } finally {
+      setRecovering(false);
+    }
+  };
+
+  const emailRecovery = async () => {
     setRecovering(true);
     setError(null);
     try {
@@ -149,6 +183,7 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
       setRecovering(false);
     }
   };
+
 
   if (!active || !locked) return <>{children}</>;
 
@@ -181,6 +216,7 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
         </p>
       )}
 
+      {!recoverMode && (<>
       <div className="grid w-full max-w-[280px] grid-cols-3 gap-3">
         {KEYS.map((k, i) =>
           k === "" ? (
@@ -209,10 +245,65 @@ export function AppLockGate({ children }: { children: React.ReactNode }) {
           <Fingerprint className="h-4 w-4" /> Unlock with biometrics
         </Button>
       )}
+      </>)}
 
-      <Button variant="ghost" size="sm" disabled={recovering} onClick={() => void recoverPin()}>
-        {recovering ? "Sending recovery…" : "Forgot PIN?"}
-      </Button>
+      {!recoverMode ? (
+        <Button variant="ghost" size="sm" onClick={startRecovery}>
+          Forgot PIN?
+        </Button>
+      ) : (
+        <div className="w-full space-y-3 rounded-2xl border border-border/50 bg-card/70 p-4 backdrop-blur-md">
+          <div className="flex items-center gap-2">
+            <HelpCircle className="h-4 w-4 text-primary" />
+            <h2 className="text-sm font-semibold">Recover with security questions</h2>
+          </div>
+          {recoveryPairs.length === 0 ? (
+            <p className="text-xs text-muted-foreground">
+              No security questions are set up on this device. Use email recovery instead, then
+              set questions from Profile → Security.
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {recoveryPairs.map((p) => (
+                <div key={p.question} className="space-y-1">
+                  <label className="text-xs text-muted-foreground" htmlFor={`ans-${p.question}`}>
+                    {p.question}
+                  </label>
+                  <Input
+                    id={`ans-${p.question}`}
+                    autoComplete="off"
+                    value={answers[p.question] ?? ""}
+                    onChange={(e) => setAnswers((a) => ({ ...a, [p.question]: e.target.value }))}
+                    placeholder="Your answer"
+                  />
+                </div>
+              ))}
+              <div className="space-y-1">
+                <label className="text-xs text-muted-foreground" htmlFor="new-pin">New PIN (4–8 digits)</label>
+                <Input
+                  id="new-pin"
+                  inputMode="numeric"
+                  type="password"
+                  value={newPin}
+                  onChange={(e) => setNewPin(e.target.value.replace(/\D/g, "").slice(0, 8))}
+                  placeholder="••••"
+                />
+              </div>
+              <Button className="w-full" disabled={recovering} onClick={() => void submitRecovery()}>
+                {recovering ? "Verifying…" : "Reset PIN & unlock"}
+              </Button>
+            </div>
+          )}
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" className="flex-1" disabled={recovering} onClick={() => void emailRecovery()}>
+              Email recovery
+            </Button>
+            <Button variant="ghost" size="sm" className="flex-1" onClick={() => setRecoverMode(false)}>
+              Back to PIN
+            </Button>
+          </div>
+        </div>
+      )}
 
       <p className="text-[10px] text-muted-foreground">
         Failed attempts on this device: {failureCount()}

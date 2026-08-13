@@ -150,3 +150,95 @@ export async function promptBiometric(credentialIds: string[] = []): Promise<boo
     return false;
   }
 }
+
+/* ---------------- Recovery questions (PIN reset without email) ---------------- */
+
+export const LS_RECOVERY = "fitfusion-applock-recovery";
+
+export const RECOVERY_QUESTIONS = [
+  "What was the name of your first pet?",
+  "In which city were you born?",
+  "What is your mother's maiden name?",
+  "What was the model of your first phone?",
+  "What is your favourite sport or exercise?",
+  "What was the name of your primary school?",
+  "What is your favourite food?",
+  "Who was your childhood best friend?",
+] as const;
+
+export interface RecoveryPair {
+  question: string;
+  /** SHA-256 of the normalised answer. Never the plain answer. */
+  hash: string;
+}
+
+function normaliseAnswer(a: string) {
+  return a.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+export async function hashAnswer(question: string, answer: string): Promise<string> {
+  const buf = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(`fitfusion-recovery:${question}:${normaliseAnswer(answer)}`),
+  );
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+export function readRecovery(): RecoveryPair[] {
+  try {
+    const raw = localStorage.getItem(LS_RECOVERY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed)
+      ? parsed.filter((p) => p && typeof p.question === "string" && typeof p.hash === "string")
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+export function hasRecovery(): boolean {
+  return readRecovery().length >= 2;
+}
+
+export async function saveRecovery(pairs: { question: string; answer: string }[]) {
+  const stored: RecoveryPair[] = [];
+  for (const p of pairs) {
+    if (!p.question || !p.answer.trim()) continue;
+    stored.push({ question: p.question, hash: await hashAnswer(p.question, p.answer) });
+  }
+  localStorage.setItem(LS_RECOVERY, JSON.stringify(stored));
+  window.dispatchEvent(new Event("fitfusion-app-lock-prefs"));
+  return stored.length;
+}
+
+export function clearRecovery() {
+  localStorage.removeItem(LS_RECOVERY);
+  window.dispatchEvent(new Event("fitfusion-app-lock-prefs"));
+}
+
+/** Verify every stored question was answered correctly. */
+export async function verifyRecovery(answers: Record<string, string>): Promise<boolean> {
+  const pairs = readRecovery();
+  if (!pairs.length) return false;
+  for (const p of pairs) {
+    const given = answers[p.question];
+    if (!given || (await hashAnswer(p.question, given)) !== p.hash) return false;
+  }
+  return true;
+}
+
+/** Replace the PIN after successful recovery verification. */
+export async function resetPinWithRecovery(
+  answers: Record<string, string>,
+  newPin: string,
+): Promise<boolean> {
+  if (!/^\d{4,8}$/.test(newPin)) return false;
+  if (!(await verifyRecovery(answers))) return false;
+  const identity = localStorage.getItem(LS_PIN_ID) || "local";
+  await savePinHash(newPin, identity);
+  localStorage.setItem(LS_FAILS, "0");
+  markUnlocked();
+  return true;
+}

@@ -24,6 +24,8 @@ import { useProfile } from "@/hooks/use-profile";
 import { FitnessIDCard } from "@/components/profile/fitness-id-card";
 import { SecurityPanel } from "@/components/profile/security-panel";
 import { PrivacySecurityExtras } from "@/components/profile/privacy-security-extras";
+import { RecoveryQuestionsCard } from "@/components/security/recovery-questions-card";
+import { ProfilePowerExtras } from "@/components/profile/profile-power-extras";
 
 import { AwardsExtras } from "@/components/profile/awards-extras";
 import { StatsExtras } from "@/components/profile/stats-extras";
@@ -268,6 +270,7 @@ const Profile = () => {
 
               <TabsContent value="security" className="space-y-3 mt-0">
                 <SecurityPanel userEmail={userEmail} />
+                <RecoveryQuestionsCard />
                 <PrivacySecurityExtras userEmail={userEmail} />
               </TabsContent>
 
