@@ -27,6 +27,10 @@ import {
   useLatencyMonitor,
   useNetworkStatus,
   warmCriticalOrigins,
+  measureThroughput,
+  estimateThroughput,
+  classifySpeed,
+  type SpeedReport,
 } from "@/utils/network-adaptive";
 
 const GRADE_STYLES: Record<string, string> = {
@@ -49,6 +53,30 @@ export function NetworkLabPanel() {
   const [budget, setBudget] = useState(() => getLatencyBudget());
   const [saver, setSaver] = useState(net.dataSaverActive);
   const [testing, setTesting] = useState(false);
+  const [speed, setSpeed] = useState<SpeedReport | null>(null);
+  const [speedTesting, setSpeedTesting] = useState(false);
+
+  // Seed an instant passive estimate so the tier badge is never empty.
+  useEffect(() => {
+    const mbps = estimateThroughput();
+    const cls = classifySpeed(mbps, net.rtt, net.online);
+    setSpeed({ mbps, bytes: 0, rtt: net.rtt, ...cls, source: "estimated" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [net.online]);
+
+  const runSpeedTest = async () => {
+    setSpeedTesting(true);
+    try {
+      const r = await measureThroughput();
+      setSpeed(r);
+      toast({
+        title: `${r.label} · ${r.mbps} Mbps`,
+        description: `Latency ${r.rtt} ms · ${(r.bytes / 1024).toFixed(0)} KB transferred`,
+      });
+    } finally {
+      setSpeedTesting(false);
+    }
+  };
 
   useEffect(() => {
     if (turbo) warmCriticalOrigins();
@@ -74,7 +102,10 @@ export function NetworkLabPanel() {
         <CardTitle className="flex items-center gap-2 text-base">
           <Radio className="h-4 w-4 text-primary" />
           Network Lab
-          <Badge variant="outline" className={`ml-auto text-[10px] capitalize ${GRADE_STYLES[report.grade]}`}>
+          <Badge variant="outline" className="ml-auto text-[10px]">
+            {speed?.label ?? net.effectiveType.toUpperCase()}
+          </Badge>
+          <Badge variant="outline" className={`text-[10px] capitalize ${GRADE_STYLES[report.grade]}`}>
             {report.grade}
           </Badge>
         </CardTitle>
@@ -88,11 +119,11 @@ export function NetworkLabPanel() {
           {[
             { icon: Gauge, label: "Latency", value: report.latency ? `${report.latency} ms` : "—" },
             { icon: Activity, label: "Jitter", value: report.jitter ? `${report.jitter} ms` : "—" },
-            { icon: Signal, label: "Network", value: net.effectiveType.toUpperCase() },
+            { icon: Signal, label: "Network", value: speed?.label ?? net.effectiveType.toUpperCase() },
             {
               icon: net.online ? Wifi : WifiOff,
               label: "Downlink",
-              value: net.downlink ? `${net.downlink} Mb/s` : net.online ? "—" : "Offline",
+              value: speed?.mbps ? `${speed.mbps} Mb/s` : net.downlink ? `${net.downlink} Mb/s` : net.online ? "—" : "Offline",
             },
           ].map((m) => (
             <div key={m.label} className="rounded-xl border border-border/40 bg-muted/30 p-3 text-center">
@@ -195,10 +226,21 @@ export function NetworkLabPanel() {
           </div>
         </div>
 
+        {speed && (
+          <p className="text-[11px] text-muted-foreground">
+            Connection class <span className="font-semibold text-foreground">{speed.label}</span> ·{" "}
+            {speed.mbps || "—"} Mbps ({speed.source}) · RTT {speed.rtt} ms
+          </p>
+        )}
+
         <div className="flex flex-wrap gap-2">
           <Button size="sm" onClick={runFullTest} disabled={testing || running}>
             <RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${testing || running ? "animate-spin" : ""}`} />
             Run speed test
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => void runSpeedTest()} disabled={speedTesting}>
+            <Gauge className={`mr-1.5 h-3.5 w-3.5 ${speedTesting ? "animate-pulse" : ""}`} />
+            {speedTesting ? "Measuring bandwidth…" : "Measure real speed"}
           </Button>
           <Button
             size="sm"

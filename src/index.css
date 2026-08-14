@@ -1107,3 +1107,27 @@ html.ff-reduce-motion *::after {
   transition-duration: 0.001ms !important;
   scroll-behavior: auto !important;
 }
+
+/* --- v7.5.0 layout & readability preferences (Settings → Display) --- */
+:root {
+  --ff-letter-spacing: 0em;
+  --ff-anim-scale: 1;
+}
+
+html.ff-compact body {
+  font-size: 0.94rem;
+}
+html.ff-compact .space-y-6 > * + * {
+  margin-top: 1rem;
+}
+html.ff-compact .space-y-4 > * + * {
+  margin-top: 0.6rem;
+}
+
+html.ff-large-text body {
+  font-size: 1.08rem;
+}
+
+body {
+  letter-spacing: var(--ff-letter-spacing);
+}
