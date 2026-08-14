@@ -265,6 +265,7 @@ const Profile = () => {
                 {/* Lots of new features: identity, milestones, prefs, connections, sharing, danger zone */}
                 <MobileAppDownloadCard />
                 <AdminAabDownloadCard />
+                <ProfilePowerExtras />
                 <ProfileTabExtras />
               </TabsContent>
 

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { ProgressChart } from "@/components/progress-chart";
 import { SessionHistory } from "@/components/progress/session-history";
+import { ProgressPowerExtras } from "@/components/progress/progress-power-extras";
 
 const ProgressPage = () => {
   const { toast } = useToast();
@@ -256,6 +257,7 @@ const ProgressPage = () => {
               </TabsContent>
 
               <TabsContent value="achievements" className="space-y-3 mt-0">
+                <ProgressPowerExtras />
                 {achievements.map((a, i) => (
                   <motion.div key={a.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
                     <Card className={`border-border/20 bg-card/60 backdrop-blur-sm transition-all ${a.progress === 100 ? "border-accent-foreground/30" : ""}`}>
