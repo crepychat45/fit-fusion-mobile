@@ -34,6 +34,15 @@ const DataManagementPanel = lazy(() => import("./data-management-panel").then(m 
 const PerformanceMetricsPanel = lazy(() => import("./performance-metrics-panel").then(m => ({ default: m.PerformanceMetricsPanel })));
 const AdvancedSettingsReset = lazy(() => import("./advanced-settings-reset").then(m => ({ default: m.AdvancedSettingsReset })));
 const UnifiedUpdateManager = lazy(() => import("./unified-update-manager").then(m => ({ default: m.UnifiedUpdateManager })));
+const AccountHyperExtras = lazy(() => import("./settings-hyper-extras").then(m => ({ default: m.AccountHyperExtras })));
+const SecurityHyperExtras = lazy(() => import("./settings-hyper-extras").then(m => ({ default: m.SecurityHyperExtras })));
+const DisplayHyperExtras = lazy(() => import("./settings-hyper-extras").then(m => ({ default: m.DisplayHyperExtras })));
+const PrivacyHyperExtras = lazy(() => import("./settings-hyper-extras").then(m => ({ default: m.PrivacyHyperExtras })));
+const NotificationHyperExtras = lazy(() => import("./settings-hyper-extras").then(m => ({ default: m.NotificationHyperExtras })));
+const UnitsHyperExtras = lazy(() => import("./settings-hyper-extras").then(m => ({ default: m.UnitsHyperExtras })));
+const ChatHyperExtras = lazy(() => import("./settings-hyper-extras").then(m => ({ default: m.ChatHyperExtras })));
+const DataHyperExtras = lazy(() => import("./settings-hyper-extras").then(m => ({ default: m.DataHyperExtras })));
+const DeveloperHyperExtras = lazy(() => import("./settings-hyper-extras").then(m => ({ default: m.DeveloperHyperExtras })));
 import { ConfirmDialog } from "./confirm-dialog";
 const VersionControlPanel = lazy(() => import("./version-control-panel").then(m => ({ default: m.VersionControlPanel })));
 const AppearancePanel = lazy(() => import("./appearance-panel").then(m => ({ default: m.AppearancePanel })));
@@ -449,6 +458,7 @@ export function SettingsContainer() {
                 <L><AccountProExtras /></L>
                 <L><AccountNextExtras /></L>
                 <L><AccountUltraExtras /></L>
+                <L><AccountHyperExtras /></L>
               </div>
             </TabsContent>
 
@@ -459,6 +469,7 @@ export function SettingsContainer() {
                 <L><SecurityProExtras /></L>
                 <L><SecurityNextExtras /></L>
                 <L><SecurityUltraExtras /></L>
+                <L><SecurityHyperExtras /></L>
               </div>
             </TabsContent>
 
@@ -470,6 +481,7 @@ export function SettingsContainer() {
                 <L><DisplayProExtras /></L>
                 <L><DisplayNextExtras /></L>
                 <L><DisplayUltraExtras /></L>
+                <L><DisplayHyperExtras /></L>
               </div>
             </TabsContent>
 
@@ -479,6 +491,7 @@ export function SettingsContainer() {
                 <L><PrivacyExtras /></L>
                 <L><PrivacyProExtras /></L>
                 <L><PrivacyUltraExtras /></L>
+                <L><PrivacyHyperExtras /></L>
               </div>
             </TabsContent>
 
@@ -490,6 +503,7 @@ export function SettingsContainer() {
                 <L><NotificationProExtras /></L>
                 <L><NotificationNextExtras /></L>
                 <L><NotificationUltraExtras /></L>
+                <L><NotificationHyperExtras /></L>
               </div>
             </TabsContent>
 
@@ -500,6 +514,7 @@ export function SettingsContainer() {
                 <L><UnitsProExtras /></L>
                 <L><UnitsNextExtras /></L>
                 <L><UnitsUltraExtras /></L>
+                <L><UnitsHyperExtras /></L>
               </div>
             </TabsContent>
 
@@ -510,6 +525,7 @@ export function SettingsContainer() {
                 <L><ChatProExtras /></L>
                 <L><ChatNextExtras /></L>
                 <L><ChatUltraExtras /></L>
+                <L><ChatHyperExtras /></L>
               </div>
             </TabsContent>
 
@@ -585,6 +601,7 @@ export function SettingsContainer() {
                 <L><DeveloperExtras /></L>
                 <L><DeveloperProExtras /></L>
                 <L><DeveloperUltraExtras /></L>
+                <L><DeveloperHyperExtras /></L>
               </div>
             </TabsContent>
 
@@ -595,6 +612,7 @@ export function SettingsContainer() {
                 <L><DataProExtras /></L>
                 <L><DataNextExtras /></L>
                 <L><DataUltraExtras /></L>
+                <L><DataHyperExtras /></L>
                 <L><NetworkLabPanel /></L>
                 <L><SystemHealthPanel /></L>
 
