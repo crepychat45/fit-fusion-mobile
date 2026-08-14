@@ -1,6 +1,6 @@
 // Single source of truth for app version + changelog
-export const APP_VERSION = "7.4.0";
-export const APP_RELEASE_DATE = "2026-08-11";
+export const APP_VERSION = "7.5.0";
+export const APP_RELEASE_DATE = "2026-08-13";
 
 
 export const VERSION_STORAGE_KEYS = ["fitfusion-app-version", "app-version"] as const;
@@ -25,6 +25,54 @@ export interface ReleaseNote {
 }
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "7.5.0",
+    date: "2026-08-13",
+    type: "Major Release",
+    highlight:
+      "Network intelligence, recovery and progress release. The adaptive engine now measures real bandwidth and reports an accurate connection class (2G → 5G), App Lock can be recovered with private security questions, and Progress, Profile and every Settings tab gain new working tools.",
+    sections: [
+      {
+        title: "New Features",
+        icon: "sparkles",
+        items: [
+          "Security questions for offline App Lock PIN recovery (answers hashed on-device)",
+          "Real bandwidth speed test with 2G/3G/4G/4G+/5G classification in Network Lab",
+          "Progress: weight trend logging, hydration tracker, daily targets, milestones and CSV export",
+          "Profile: Body Metrics Studio with live BMI, BMR and heart-rate zones",
+          "Settings: new panels in Account, Security, Display, Privacy, Notifications, Units, Chat, Data and Developer",
+          "Compact density, large text and adjustable animation speed",
+        ],
+      },
+      {
+        title: "Improvements",
+        icon: "zap",
+        items: [
+          "Latency probing subtracts handshake time for more accurate RTT figures",
+          "Passive throughput estimation from resource timing — instant readings with zero extra traffic",
+          "Redesigned lock screen with inline recovery flow",
+          "Service worker v9 with faster navigation fallback and cleaner cache eviction",
+        ],
+      },
+      {
+        title: "Bug Fixes",
+        icon: "bug",
+        items: [
+          "Forgot PIN no longer dead-ends when email recovery is unavailable",
+          "Network Lab no longer shows an empty connection type before the first probe",
+          "Settings panels rehydrate correctly after cloud sync",
+        ],
+      },
+      {
+        title: "Security",
+        icon: "shield",
+        items: [
+          "Recovery answers stored only as SHA-256 digests, never in plain text",
+          "Optional clipboard auto-clear and strict origin checks",
+        ],
+      },
+    ],
+  },
   {
     version: "7.4.0",
     date: "2026-08-11",
