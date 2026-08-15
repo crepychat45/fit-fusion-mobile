@@ -4,6 +4,7 @@ import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from
 import { EnhancedAuthForm } from "./enhanced-auth-form";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
 import { EnhancedErrorBoundary } from "@/components/enhanced-error-handling";
+import { APP_VERSION } from "@/lib/app-version";
 import {
   Activity,
   Shield,
@@ -217,7 +218,7 @@ export default function AuthPage() {
               FitFusion
             </span>
             <span className="ml-1 inline-flex items-center gap-1 text-[10px] font-medium text-primary/90 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20">
-              <Sparkles className="h-2.5 w-2.5" /> v7
+              <Sparkles className="h-2.5 w-2.5" /> v{APP_VERSION}
             </span>
           </div>
         </motion.header>
@@ -253,7 +254,7 @@ export default function AuthPage() {
                     </h1>
                     <div className="inline-flex items-center gap-1.5 text-xs font-medium text-primary mt-1">
                       <Sparkles className="h-3 w-3" />
-                      AI-Powered Fitness · Liquid Glass v7
+                      AI-Powered Fitness · Liquid Glass v{APP_VERSION}
                     </div>
                   </div>
                 </div>
