@@ -74,7 +74,7 @@ export function NativeShell() {
             void App.exitApp();
           } else {
             exitArmed.current = now;
-            toast({ title: "Press back again to exit", duration: 1800 });
+            toast({ title: "Press back again to exit" });
           }
         });
         removeBack = () => void handle.remove();
