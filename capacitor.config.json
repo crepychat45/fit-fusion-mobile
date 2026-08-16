@@ -11,5 +11,21 @@
     "allowMixedContent": false,
     "captureInput": true,
     "webContentsDebuggingEnabled": false
+  },
+  "ios": {
+    "contentInset": "always",
+    "limitsNavigationsToAppBoundDomains": false
+  },
+  "plugins": {
+    "Keyboard": {
+      "resize": "native",
+      "resizeOnFullScreen": true
+    },
+    "StatusBar": {
+      "overlaysWebView": false,
+      "style": "DEFAULT"
+    },
+    "Haptics": {},
+    "Network": {}
   }
 }
