@@ -98,6 +98,7 @@ const AppContent: React.FC = () => {
   return (
     <>
       <SEOManager>
+      <NativeShell />
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           {/* Public */}
