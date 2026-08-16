@@ -614,6 +614,7 @@ export function SettingsContainer() {
                 <L><DataNextExtras /></L>
                 <L><DataUltraExtras /></L>
                 <L><DataHyperExtras /></L>
+                <L><NetworkRealtimePanel /></L>
                 <L><NetworkLabPanel /></L>
                 <L><SystemHealthPanel /></L>
 
