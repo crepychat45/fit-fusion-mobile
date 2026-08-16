@@ -9,6 +9,7 @@ import { BootLoader } from "@/components/common/boot-loader";
 import { prefetchAllRoutes } from "@/utils/route-prefetch";
 import { SEOManager } from "@/components/seo-manager";
 import { AppLockGate } from "@/components/security/app-lock-gate";
+import { NativeShell } from "@/components/native/native-shell";
 
 const Loader = BootLoader;
 
@@ -98,6 +99,7 @@ const AppContent: React.FC = () => {
   return (
     <>
       <SEOManager>
+      <NativeShell />
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           {/* Public */}

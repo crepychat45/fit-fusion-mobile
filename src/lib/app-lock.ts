@@ -58,12 +58,42 @@ export async function digestPin(pin: string, identity?: string): Promise<string>
 }
 
 export async function savePinHash(pin: string, identity: string) {
+  const hash = await digestPin(pin, identity);
   localStorage.setItem(LS_PIN_ID, identity);
-  localStorage.setItem(LS_PIN, await digestPin(pin, identity));
+  localStorage.setItem(LS_PIN, hash);
+  // Mirror into the device keychain on native builds so the PIN survives
+  // web-view storage clears.
+  try {
+    const { nativeSecureSet } = await import("@/lib/native-bridge");
+    await nativeSecureSet("applock", `${identity}::${hash}`);
+  } catch {
+    /* noop */
+  }
+}
+
+/** Restore the PIN hash from the device keychain if local storage was wiped. */
+export async function restorePinFromKeychain(): Promise<boolean> {
+  try {
+    if (localStorage.getItem(LS_PIN)) return true;
+    const { nativeSecureGet } = await import("@/lib/native-bridge");
+    const raw = await nativeSecureGet("applock");
+    if (!raw?.includes("::")) return false;
+    const [identity, hash] = raw.split("::");
+    if (!hash) return false;
+    localStorage.setItem(LS_PIN_ID, identity);
+    localStorage.setItem(LS_PIN, hash);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export async function verifyPin(pin: string): Promise<boolean> {
-  const stored = localStorage.getItem(LS_PIN);
+  let stored = localStorage.getItem(LS_PIN);
+  if (!stored) {
+    await restorePinFromKeychain();
+    stored = localStorage.getItem(LS_PIN);
+  }
   if (!stored) return false;
   return (await digestPin(pin)) === stored;
 }
@@ -73,6 +103,9 @@ export function clearPin() {
   localStorage.removeItem(LS_PIN_ID);
   localStorage.removeItem(LS_FAILS);
   localStorage.removeItem(LS_UNLOCKED_AT);
+  void import("@/lib/native-bridge")
+    .then(({ nativeSecureDelete }) => nativeSecureDelete("applock"))
+    .catch(() => undefined);
   window.dispatchEvent(new CustomEvent(APP_LOCK_EVENT, { detail: { enabled: false } }));
 }
 
@@ -102,15 +135,39 @@ export function notifyLockPrefsChanged() {
   window.dispatchEvent(new Event("fitfusion-app-lock-prefs"));
 }
 
-/* ------------- Platform biometric (WebAuthn) helpers ------------- */
+/* ------------- Platform biometric (native + WebAuthn) helpers ------------- */
+
+import { checkBiometry, isNative, nativeBiometricVerify } from "@/lib/native-bridge";
 
 export async function biometricAvailable(): Promise<boolean> {
-  const PKC = (window as unknown as { PublicKeyCredential?: any }).PublicKeyCredential;
-  if (!PKC) return false;
   try {
-    return !!(await PKC.isUserVerifyingPlatformAuthenticatorAvailable?.());
+    const info = await checkBiometry();
+    return info.available;
   } catch {
     return false;
+  }
+}
+
+/** Human label for the available biometry ("Face ID", "Fingerprint", …). */
+export async function biometricLabel(): Promise<string> {
+  try {
+    const info = await checkBiometry();
+    switch (info.kind) {
+      case "face":
+        return "Face unlock";
+      case "fingerprint":
+        return "Fingerprint";
+      case "iris":
+        return "Iris scan";
+      case "device-credential":
+        return "Device credential";
+      case "platform":
+        return "Biometrics";
+      default:
+        return "Biometrics";
+    }
+  } catch {
+    return "Biometrics";
   }
 }
 
@@ -121,10 +178,16 @@ function b64urlToBytes(v: string): ArrayBuffer {
 }
 
 /**
- * Prompt the platform authenticator (Face ID / Touch ID / Windows Hello).
- * Falls back to a discoverable-credential prompt if no credential ids exist.
+ * Prompt the platform authenticator.
+ * On Capacitor builds this uses the OS biometric prompt (Face ID / Touch ID /
+ * BiometricPrompt); on the web it falls back to WebAuthn.
  */
 export async function promptBiometric(credentialIds: string[] = []): Promise<boolean> {
+  if (isNative()) {
+    const ok = await nativeBiometricVerify("Unlock FitXFusion");
+    if (ok) return true;
+    // fall through to WebAuthn only if the platform authenticator exists
+  }
   if (!(await biometricAvailable())) return false;
   const challenge = new Uint8Array(32);
   crypto.getRandomValues(challenge);
