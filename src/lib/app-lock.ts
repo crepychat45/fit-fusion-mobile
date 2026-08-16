@@ -58,12 +58,42 @@ export async function digestPin(pin: string, identity?: string): Promise<string>
 }
 
 export async function savePinHash(pin: string, identity: string) {
+  const hash = await digestPin(pin, identity);
   localStorage.setItem(LS_PIN_ID, identity);
-  localStorage.setItem(LS_PIN, await digestPin(pin, identity));
+  localStorage.setItem(LS_PIN, hash);
+  // Mirror into the device keychain on native builds so the PIN survives
+  // web-view storage clears.
+  try {
+    const { nativeSecureSet } = await import("@/lib/native-bridge");
+    await nativeSecureSet("applock", `${identity}::${hash}`);
+  } catch {
+    /* noop */
+  }
+}
+
+/** Restore the PIN hash from the device keychain if local storage was wiped. */
+export async function restorePinFromKeychain(): Promise<boolean> {
+  try {
+    if (localStorage.getItem(LS_PIN)) return true;
+    const { nativeSecureGet } = await import("@/lib/native-bridge");
+    const raw = await nativeSecureGet("applock");
+    if (!raw?.includes("::")) return false;
+    const [identity, hash] = raw.split("::");
+    if (!hash) return false;
+    localStorage.setItem(LS_PIN_ID, identity);
+    localStorage.setItem(LS_PIN, hash);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export async function verifyPin(pin: string): Promise<boolean> {
-  const stored = localStorage.getItem(LS_PIN);
+  let stored = localStorage.getItem(LS_PIN);
+  if (!stored) {
+    await restorePinFromKeychain();
+    stored = localStorage.getItem(LS_PIN);
+  }
   if (!stored) return false;
   return (await digestPin(pin)) === stored;
 }
