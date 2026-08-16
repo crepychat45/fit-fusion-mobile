@@ -103,6 +103,9 @@ export function clearPin() {
   localStorage.removeItem(LS_PIN_ID);
   localStorage.removeItem(LS_FAILS);
   localStorage.removeItem(LS_UNLOCKED_AT);
+  void import("@/lib/native-bridge")
+    .then(({ nativeSecureDelete }) => nativeSecureDelete("applock"))
+    .catch(() => undefined);
   window.dispatchEvent(new CustomEvent(APP_LOCK_EVENT, { detail: { enabled: false } }));
 }
 
