@@ -84,6 +84,7 @@ const ChatNextExtras = lazy(() => import("./settings-nextgen-extras").then(m => 
 const DataNextExtras = lazy(() => import("./settings-nextgen-extras").then(m => ({ default: m.DataNextExtras })));
 const SecurityNextExtras = lazy(() => import("./settings-nextgen-extras").then(m => ({ default: m.SecurityNextExtras })));
 const NetworkLabPanel = lazy(() => import("./network-lab-panel").then(m => ({ default: m.NetworkLabPanel })));
+const NetworkRealtimePanel = lazy(() => import("./network-realtime-panel").then(m => ({ default: m.NetworkRealtimePanel })));
 const AccountUltraExtras = lazy(() => import("./settings-ultra-extras").then(m => ({ default: m.AccountUltraExtras })));
 const SecurityUltraExtras = lazy(() => import("./settings-ultra-extras").then(m => ({ default: m.SecurityUltraExtras })));
 const DisplayUltraExtras = lazy(() => import("./settings-ultra-extras").then(m => ({ default: m.DisplayUltraExtras })));
