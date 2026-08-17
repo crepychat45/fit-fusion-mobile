@@ -12,7 +12,8 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "test": "echo 'No tests yet' && exit 0",
     "cap:add": "cap add android",
-    "cap:sync": "cap sync android"
+    "cap:sync": "bun run build && cap sync",
+    "cap:assets": "capacitor-assets generate --iconBackgroundColor '#2563eb' --iconBackgroundColorDark '#0a0a0f' --splashBackgroundColor '#0a0a0f' --splashBackgroundColorDark '#0a0a0f'"
   },
   "engines": {
     "node": ">=22"
@@ -26,6 +27,7 @@
     "@capacitor/ios": "^8.4.2",
     "@capacitor/keyboard": "^8.0.5",
     "@capacitor/network": "^8.0.1",
+    "@capacitor/splash-screen": "^8.0.2",
     "@capacitor/status-bar": "^8.0.3",
     "@hookform/resolvers": "^5.7.1",
     "@lovable.dev/cloud-auth-js": "^1.1.2",
@@ -95,6 +97,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^8.4.2",
     "@types/node": "^22.20.0",
     "@types/react": "^18.3.31",

@@ -110,6 +110,17 @@ jobs:
           echo "✅ Capacitor Android sync passed"
           echo "::endgroup::"
 
+      - name: 🎨 Generate FitXFusion app icons & splash
+        run: |
+          echo "::group::capacitor-assets generate"
+          bun run cap:assets
+          echo "::endgroup::"
+          ls -la android/app/src/main/res/mipmap-xxxhdpi || true
+
+      - name: Re-sync Android after branding
+        run: bunx cap sync android
+
+
       - name: 🔍 Dry-run — Gradle wrapper validation
         working-directory: android
         run: |

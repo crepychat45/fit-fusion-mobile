@@ -2,6 +2,7 @@
   "appId": "com.fitxfusion.app",
   "appName": "FitXFusion",
   "webDir": "dist",
+  "backgroundColor": "#0a0a0f",
   "server": {
     "url": "https://fitxfusion.lovable.app",
     "cleartext": true,
@@ -10,22 +11,37 @@
   "android": {
     "allowMixedContent": false,
     "captureInput": true,
-    "webContentsDebuggingEnabled": false
+    "webContentsDebuggingEnabled": false,
+    "backgroundColor": "#0a0a0f",
+    "adjustMarginsForEdgeToEdge": "auto"
   },
   "ios": {
     "contentInset": "always",
-    "limitsNavigationsToAppBoundDomains": false
+    "limitsNavigationsToAppBoundDomains": false,
+    "backgroundColor": "#0a0a0f"
   },
   "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "launchAutoHide": true,
+      "backgroundColor": "#0a0a0f",
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": false,
+      "splashFullScreen": true,
+      "splashImmersive": false
+    },
     "Keyboard": {
       "resize": "native",
       "resizeOnFullScreen": true
     },
     "StatusBar": {
       "overlaysWebView": false,
-      "style": "DEFAULT"
+      "style": "DARK",
+      "backgroundColor": "#0a0a0f"
     },
     "Haptics": {},
-    "Network": {}
+    "Network": {},
+    "App": {}
   }
 }
