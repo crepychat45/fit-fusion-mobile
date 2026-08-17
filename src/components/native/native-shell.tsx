@@ -39,8 +39,19 @@ export function NativeShell() {
     }
     if (!isNative()) return;
 
+    // Hide the native splash once the web UI has painted.
+    (async () => {
+      try {
+        const { SplashScreen } = await import("@capacitor/splash-screen");
+        await SplashScreen.hide({ fadeOutDuration: 250 });
+      } catch {
+        /* plugin unavailable */
+      }
+    })();
+
     let removeBack: (() => void) | undefined;
     let removeResume: (() => void) | undefined;
+
 
     const closeTopOverlay = (): boolean => {
       const overlay = document.querySelector<HTMLElement>(
