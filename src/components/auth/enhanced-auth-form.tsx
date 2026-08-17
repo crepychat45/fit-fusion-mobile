@@ -256,8 +256,38 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
       toast({ title: "Enter your email", description: "We'll send a magic sign-in link.", variant: "destructive" });
       return;
     }
-    await signInWithMagicLink(email);
+    const { error } = await signInWithMagicLink(email);
+    if (!error) {
+      setOtpSent(true);
+      setOtpCooldown(45);
+    }
   };
+
+  const handleVerifyOtp = async () => {
+    const code = otpCode.replace(/\D/g, "");
+    if (code.length !== 6) {
+      toast({ title: "Enter the 6-digit code", description: "Check the email we just sent.", variant: "destructive" });
+      return;
+    }
+    setOtpVerifying(true);
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({ email, token: code, type: "email" });
+      if (error) throw error;
+      if (data.session) {
+        toast({ title: "Signed in", description: "Passwordless sign-in successful." });
+        onSuccess?.();
+      }
+    } catch (e: any) {
+      toast({
+        title: "Invalid or expired code",
+        description: e?.message || "Request a new code and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setOtpVerifying(false);
+    }
+  };
+
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
