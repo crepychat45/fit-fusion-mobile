@@ -70,13 +70,23 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [capsLock, setCapsLock] = useState(false);
   const [passkeyLoading, setPasskeyLoading] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpVerifying, setOtpVerifying] = useState(false);
+  const [otpCooldown, setOtpCooldown] = useState(0);
 
+  useEffect(() => {
+    if (otpCooldown <= 0) return;
+    const t = window.setInterval(() => setOtpCooldown((s) => Math.max(0, s - 1)), 1000);
+    return () => window.clearInterval(t);
+  }, [otpCooldown]);
 
   useEffect(() => {
     if (resendCooldown <= 0) return;
     const t = window.setInterval(() => setResendCooldown((s) => Math.max(0, s - 1)), 1000);
     return () => window.clearInterval(t);
   }, [resendCooldown]);
+
 
 
   useEffect(() => {
