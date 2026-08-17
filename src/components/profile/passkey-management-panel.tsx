@@ -116,7 +116,7 @@ export function PasskeyManagementPanel({ userEmail }: Props) {
     if (!userEmail) return;
     const { error } = await supabase.auth.signInWithOtp({
       email: userEmail,
-      options: { emailRedirectTo: `${window.location.origin}/auth-callback` },
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
     });
     if (error) toast({ title: "Failed to send link", description: error.message, variant: "destructive" });
     else toast({ title: "Magic link sent", description: `Check ${userEmail}` });
