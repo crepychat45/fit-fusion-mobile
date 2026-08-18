@@ -563,11 +563,43 @@ export function EnhancedAuthForm({ onSuccess }: EnhancedAuthFormProps) {
             variant="outline"
             className="w-full h-11"
             onClick={handleMagicLink}
-            disabled={loading || !emailValid}
+            disabled={loading || !emailValid || otpCooldown > 0}
           >
             <Mail className="h-4 w-4 mr-2" />
-            Email me a magic link
+            {otpCooldown > 0
+              ? `Resend link / code in ${otpCooldown}s`
+              : otpSent
+                ? "Send a new link & code"
+                : "Email me a magic link"}
           </Button>
+
+          {otpSent && (
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 space-y-2">
+              <p className="text-xs text-muted-foreground">
+                Tap the link in your inbox, or enter the 6-digit code here (works on any device).
+              </p>
+              <div className="flex gap-2">
+                <Input
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  placeholder="123456"
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  className="h-11 tracking-[0.4em] text-center font-mono"
+                />
+                <Button
+                  type="button"
+                  className="h-11 shrink-0"
+                  onClick={handleVerifyOtp}
+                  disabled={otpVerifying || otpCode.length !== 6}
+                >
+                  {otpVerifying ? "Verifying…" : "Verify"}
+                </Button>
+              </div>
+            </div>
+          )}
+
 
           <div className="text-center">
             <Button variant="link" className="text-sm" onClick={() => setIsSignUp(!isSignUp)}>

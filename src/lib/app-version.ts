@@ -1,6 +1,6 @@
 // Single source of truth for app version + changelog
-export const APP_VERSION = "7.5.0";
-export const APP_RELEASE_DATE = "2026-08-13";
+export const APP_VERSION = "7.6.0";
+export const APP_RELEASE_DATE = "2026-08-17";
 
 
 export const VERSION_STORAGE_KEYS = ["fitfusion-app-version", "app-version"] as const;
@@ -25,6 +25,45 @@ export interface ReleaseNote {
 }
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "7.6.0",
+    date: "2026-08-17",
+    type: "Major Release",
+    highlight:
+      "Passwordless sign-in release. Magic links now work on every device, with a 6-digit email code fallback, a rebuilt auth callback that understands every link format, refreshed Capacitor native shell with branded icons, and new install & diagnostics tools.",
+    sections: [
+      {
+        title: "New Features",
+        icon: "sparkles",
+        items: [
+          "6-digit email sign-in code as a cross-device fallback for magic links",
+          "Rebuilt auth callback handling PKCE codes, token hashes and legacy hash tokens",
+          "Native splash screen with the FitXFusion brand mark on Android and iOS",
+          "Automatic app icon and splash generation in the mobile build pipeline",
+        ],
+      },
+      {
+        title: "Improvements",
+        icon: "zap",
+        items: [
+          "Magic link redirects now always point at the real callback route",
+          "Clear guidance when a link is opened in a different browser than requested",
+          "Service worker v10 with refreshed cache namespaces",
+          "Capacitor updated with splash-screen plugin and dark theme status bar",
+        ],
+      },
+      {
+        title: "Bug Fixes",
+        icon: "bug",
+        items: [
+          "Fixed passwordless login failing silently from Settings → Advanced Authentication",
+          "Fixed magic links landing on a non-existent /auth-callback route",
+          "Fixed callback timing out before Supabase finished exchanging the code",
+        ],
+      },
+    ],
+  },
+
   {
     version: "7.5.0",
     date: "2026-08-13",
