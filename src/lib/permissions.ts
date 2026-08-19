@@ -513,7 +513,9 @@ export function installPermissionGuards() {
       cb?.(r);
       return r;
     };
-    Guarded.maxActions = OriginalNotification.maxActions;
+    (Guarded as unknown as Record<string, unknown>).maxActions =
+      (OriginalNotification as unknown as Record<string, unknown>).maxActions;
+
 
     try {
       Object.defineProperty(window, "Notification", {

@@ -12,6 +12,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { randomBase32Secret, buildOtpAuthUrl, verifyTOTP, generateTOTP } from "@/lib/totp";
+import { PermissionCenter } from "@/components/permissions/permission-center";
 import { PasskeyManagementPanel } from "./passkey-management-panel";
 
 const LS_2FA_ENABLED = "ff.security.2fa.enabled";
@@ -337,41 +338,7 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
       <PasskeyManagementPanel userEmail={userEmail} />
 
       {/* Permissions */}
-      <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Shield className="h-4 w-4 text-primary" /> App Permissions
-          </CardTitle>
-          <CardDescription>Grant or review the access FitFusion uses.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          {PERMISSIONS.map((p) => (
-            <div key={p.key} className="flex items-center justify-between gap-3 rounded-xl border border-border/20 bg-muted/20 p-2.5">
-              <div className="flex items-center gap-2 min-w-0">
-                <p.icon className="h-4 w-4 text-primary shrink-0" />
-                <div className="min-w-0">
-                  <div className="text-xs font-semibold truncate">{p.label}</div>
-                  <div className="text-[10px] text-muted-foreground capitalize">
-                    {permissions[p.key] ?? "unknown"}
-                  </div>
-                </div>
-              </div>
-              <Button
-                size="sm"
-                variant={permissions[p.key] === "granted" ? "outline" : "default"}
-                className="h-7 text-[11px] shrink-0"
-                onClick={() => requestPermission(p.key)}
-                disabled={permissions[p.key] === "granted"}
-              >
-                {permissions[p.key] === "granted" ? "Granted" : "Allow"}
-              </Button>
-            </div>
-          ))}
-          <Button size="sm" variant="ghost" className="w-full" onClick={refreshPermissions}>
-            <RefreshCw className="h-3.5 w-3.5 mr-1.5" /> Re-check permissions
-          </Button>
-        </CardContent>
-      </Card>
+      <PermissionCenter />
 
       {/* 2FA */}
       <Card className="border-border/20 bg-card/60 backdrop-blur-sm">

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { isEnabled, requestPermission } from '@/lib/permissions';
+
 import type { Database } from '@/integrations/supabase/types';
 
 export interface PushSubscriptionData {
@@ -40,27 +42,48 @@ export function usePushNotifications() {
 
   const subscribe = async () => {
     try {
-      const permission = await Notification.requestPermission();
-      
-      if (permission !== 'granted') {
+      if (!isEnabled('push')) {
+        toast({
+          title: 'Push notifications are off',
+          description: 'Turn Push Notifications on in the Permission Center first.',
+          variant: 'destructive',
+        });
+        return false;
+      }
+
+      const result = await requestPermission('push');
+
+      if (!result.ok) {
         toast({
           title: 'Permission Denied',
-          description: 'Please enable notifications to receive updates.',
+          description: result.message,
           variant: 'destructive',
         });
         return false;
       }
 
       const registration = await navigator.serviceWorker.ready;
-      
-      // Generate VAPID public key (in production, this should come from your server)
-      const vapidPublicKey = 'YOUR_VAPID_PUBLIC_KEY';
-      
+
+      // Public VAPID key comes from the environment; without it web push
+      // cannot be established (native builds use FCM/APNs instead).
+      const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined;
+
+      if (!vapidPublicKey) {
+        toast({
+          title: 'Notifications enabled',
+          description:
+            'In-app and scheduled reminders are active. Background web push needs a server push key.',
+        });
+        setIsSubscribed(true);
+        return true;
+      }
+
       const vapidKey = urlBase64ToUint8Array(vapidPublicKey);
       const sub = await (registration as any).pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: new Uint8Array(vapidKey),
       });
+
 
       const { data: { user } } = await supabase.auth.getUser();
       
