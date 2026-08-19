@@ -36,6 +36,9 @@ export const RELEASE_NOTES: ReleaseNote[] = [
         title: "New Features",
         icon: "sparkles",
         items: [
+          "Permission Center: one place to allow or block Notifications, Push, Camera, Microphone, Location, Motion, Offline Storage and Clipboard",
+          "Turning a permission off now blocks it app-wide on Web, PWA and the APK — not just in the UI",
+          "Native permission plugins for push, local notifications, camera and location in the Android/iOS build",
           "6-digit email sign-in code as a cross-device fallback for magic links",
           "Rebuilt auth callback handling PKCE codes, token hashes and legacy hash tokens",
           "Native splash screen with the FitXFusion brand mark on Android and iOS",
@@ -56,6 +59,8 @@ export const RELEASE_NOTES: ReleaseNote[] = [
         title: "Bug Fixes",
         icon: "bug",
         items: [
+          "Fixed push subscription crashing on a placeholder server key",
+          "Fixed permission states showing \"unknown\" and never refreshing after a device change",
           "Fixed passwordless login failing silently from Settings → Advanced Authentication",
           "Fixed magic links landing on a non-existent /auth-callback route",
           "Fixed callback timing out before Supabase finished exchanging the code",
