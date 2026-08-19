@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { isEnabled as permEnabled } from "@/lib/permissions";
 
 export interface SensorSupport {
   motion: boolean;
@@ -70,7 +71,7 @@ export function useMobileSensors(options: { motion?: boolean; orientation?: bool
     let motionListener: ((e: DeviceMotionEvent) => void) | null = null;
     let orientListener: ((e: DeviceOrientationEvent) => void) | null = null;
 
-    if (options.motion && "DeviceMotionEvent" in window) {
+    if (options.motion && permEnabled("motion") && "DeviceMotionEvent" in window) {
       motionListener = (e) => {
         setMotion({
           acceleration: {
