@@ -44,6 +44,7 @@ import {
 } from "@/components/ui/select";
 
 import { ConfirmDialog } from "./confirm-dialog";
+import { PermissionCenter } from "@/components/permissions/permission-center";
 
 /**
  * Persist a value under a `fitfusion-*` key so it flows through the
@@ -218,6 +219,9 @@ export function PrivacySettings() {
 
   return (
     <div className="space-y-6 h-full overflow-y-auto">
+      {/* Device permissions */}
+      <PermissionCenter />
+
       {/* Privacy Overview */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
