@@ -184,11 +184,12 @@ function b64urlToBytes(v: string): ArrayBuffer {
  */
 export async function promptBiometric(credentialIds: string[] = []): Promise<boolean> {
   if (isNative()) {
-    const ok = await nativeBiometricVerify("Unlock FitXFusion");
-    if (ok) return true;
-    // fall through to WebAuthn only if the platform authenticator exists
+    // Android/iOS WebViews have no usable WebAuthn platform authenticator,
+    // so the OS prompt is the only (and correct) path here.
+    return await nativeBiometricVerify("Unlock FitXFusion");
   }
   if (!(await biometricAvailable())) return false;
+
   const challenge = new Uint8Array(32);
   crypto.getRandomValues(challenge);
   try {
