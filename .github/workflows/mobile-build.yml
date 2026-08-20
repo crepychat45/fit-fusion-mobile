@@ -63,96 +63,139 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # ---------- DRY-RUN PREFLIGHT ----------
-      - name: 🔍 Dry-run — Environment info
+      # ---------- PREFLIGHT ----------
+      - name: Environment info
         run: |
-          echo "::group::Toolchain versions"
           node --version
           bun --version
           java -version
           echo "ANDROID_HOME=$ANDROID_HOME"
-          echo "::endgroup::"
-          echo "::group::Repository lockfiles"
-          ls -la bun.lock package.json capacitor.config.json
-          test ! -f package-lock.json && echo "✅ no stale package-lock.json" || (echo "❌ package-lock.json present — Bun-only project" && exit 1)
-          test ! -f yarn.lock && echo "✅ no stale yarn.lock" || (echo "❌ yarn.lock present — Bun-only project" && exit 1)
-          echo "::endgroup::"
+          if [ -f package-lock.json ] || [ -f yarn.lock ]; then
+            echo "::error::Bun-only project — remove package-lock.json / yarn.lock"
+            exit 1
+          fi
 
-      - name: 🔍 Dry-run — Bun install (frozen lockfile)
-        run: |
-          echo "::group::bun install --frozen-lockfile"
-          bun install --frozen-lockfile
-          echo "✅ Bun install passed"
-          echo "::endgroup::"
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
 
-      - name: 🔍 Dry-run — TypeScript typecheck
-        run: |
-          echo "::group::tsc --noEmit"
-          bunx tsc --noEmit
-          echo "✅ Typecheck passed"
-          echo "::endgroup::"
+      - name: Typecheck
+        run: bunx tsc --noEmit
 
-      - name: 🔍 Dry-run — Web build
+      - name: Web build
         run: |
-          echo "::group::bun run build"
           bun run build
-          echo "✅ Web build passed"
           du -sh dist || true
-          echo "::endgroup::"
 
-      - name: 🔍 Dry-run — Capacitor add + sync Android
+      - name: Capacitor add + sync Android
         run: |
-          echo "::group::cap add/sync android"
           if [ ! -d "android" ]; then
             bunx cap add android
           fi
           bunx cap sync android
-          echo "✅ Capacitor Android sync passed"
-          echo "::endgroup::"
 
-      - name: 🎨 Generate FitXFusion app icons & splash
-        run: |
-          echo "::group::capacitor-assets generate"
-          bun run cap:assets
-          echo "::endgroup::"
-          ls -la android/app/src/main/res/mipmap-xxxhdpi || true
+      - name: Generate FitXFusion app icons & splash
+        run: bun run cap:assets
 
       - name: Re-sync Android after branding
         run: bunx cap sync android
 
+      # ---------- SIGNING ----------
+      - name: Prepare release signing
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -e
+          KS=android/app/fitxfusion-release.keystore
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$KS"
+            STORE_PASS="$KEYSTORE_PASSWORD"; ALIAS="${KEY_ALIAS:-fitxfusion}"; KEY_PASS="${KEY_PASSWORD:-$KEYSTORE_PASSWORD}"
+            echo "Using repository release keystore"
+          else
+            STORE_PASS="fitxfusion"; ALIAS="fitxfusion"; KEY_PASS="fitxfusion"
+            keytool -genkeypair -v -keystore "$KS" -alias "$ALIAS" \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass "$STORE_PASS" -keypass "$KEY_PASS" \
+              -dname "CN=FitXFusion, OU=Mobile, O=FitXFusion, L=NA, ST=NA, C=IN"
+            echo "::warning::No ANDROID_KEYSTORE_BASE64 secret — generated a throwaway keystore (not Play-Store upload ready)"
+          fi
+          cat > android/keystore.properties <<EOF
+          storeFile=fitxfusion-release.keystore
+          storePassword=$STORE_PASS
+          keyAlias=$ALIAS
+          keyPassword=$KEY_PASS
+          EOF
 
-      - name: 🔍 Dry-run — Gradle wrapper validation
+      - name: Wire signing config into Gradle
+        run: |
+          python3 - <<'PY'
+          import re, pathlib
+          p = pathlib.Path("android/app/build.gradle")
+          s = p.read_text()
+          if "fitxfusionSigning" not in s:
+              props = '''
+def keystorePropsFile = rootProject.file("keystore.properties")
+def keystoreProps = new Properties()
+if (keystorePropsFile.exists()) { keystoreProps.load(new FileInputStream(keystorePropsFile)) }
+'''
+              s = props + s
+              signing = '''    signingConfigs {
+        fitxfusionSigning {
+            if (keystorePropsFile.exists()) {
+                storeFile file(keystoreProps['storeFile'])
+                storePassword keystoreProps['storePassword']
+                keyAlias keystoreProps['keyAlias']
+                keyPassword keystoreProps['keyPassword']
+            }
+        }
+    }
+'''
+              s = re.sub(r'android \{\n', 'android {\n' + signing, s, count=1)
+              s = re.sub(r'(buildTypes \{\s*\n\s*release \{\n)',
+                         r'\1            signingConfig signingConfigs.fitxfusionSigning\n', s, count=1)
+              p.write_text(s)
+              print("signing config injected")
+          else:
+              print("signing config already present")
+          PY
+          grep -n "fitxfusionSigning" android/app/build.gradle
+
+      # ---------- BUILD ----------
+      - name: Gradle wrapper check
         working-directory: android
         run: |
           chmod +x ./gradlew
-          echo "::group::gradlew tasks"
-          ./gradlew tasks --no-daemon | head -40
-          echo "::endgroup::"
-          echo "✅ Gradle wrapper is functional"
+          ./gradlew --version
 
-      # ---------- ACTUAL BUILD ----------
       - name: Build Debug APK
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon --stacktrace
 
+      - name: Build Release APK
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon --stacktrace
+
       - name: Build Release AAB
         working-directory: android
         run: ./gradlew bundleRelease --no-daemon --stacktrace
-        continue-on-error: true
 
       - name: Collect artifacts
         run: |
           mkdir -p artifacts
-          cp android/app/build/outputs/apk/debug/app-debug.apk artifacts/fitxfusion.apk || true
+          cp android/app/build/outputs/apk/debug/app-debug.apk artifacts/fitxfusion-debug.apk || true
+          cp android/app/build/outputs/apk/release/app-release.apk artifacts/fitxfusion.apk || true
           cp android/app/build/outputs/bundle/release/app-release.aab artifacts/fitxfusion.aab || true
           ls -la artifacts
+          test -s artifacts/fitxfusion.apk || test -s artifacts/fitxfusion-debug.apk
 
       - name: Upload workflow artifacts
         uses: actions/upload-artifact@v4
         with:
           name: android-builds
           path: artifacts/*
-          if-no-files-found: warn
+          if-no-files-found: error
 
       - name: Compute release tag
         id: tag
@@ -167,6 +210,7 @@ jobs:
           name: FitXFusion ${{ steps.tag.outputs.tag }}
           generate_release_notes: true
           files: |
+            artifacts/fitxfusion-debug.apk
             artifacts/fitxfusion.apk
             artifacts/fitxfusion.aab
           fail_on_unmatched_files: false
