@@ -372,7 +372,29 @@ export async function verifyPasskey(preferredId?: string): Promise<PasskeyRecord
     );
   const target = preferredId ? list.find((p) => p.id === preferredId) : undefined;
   const candidates = target ? [target] : list;
+
+  // Native builds: confirm with the OS biometric prompt.
   try {
+    const { isNative, nativeBiometricVerify } = await import("@/lib/native-bridge");
+    if (isNative()) {
+      const ok = await nativeBiometricVerify("Unlock FitXFusion with your passkey");
+      if (!ok)
+        throw new PasskeyError(
+          "not-allowed",
+          "Biometric confirmation was cancelled.",
+          "Try again, or sign in with an email magic link.",
+        );
+      const rec = candidates.find((p) => p.isDefault) || candidates[0];
+      rec.lastUsedAt = Date.now();
+      await saveList(list);
+      return rec;
+    }
+  } catch (e) {
+    if (e instanceof PasskeyError) throw e;
+  }
+
+  try {
+
     const challenge = crypto.getRandomValues(new Uint8Array(32));
     const assertion = (await navigator.credentials.get({
       publicKey: {
