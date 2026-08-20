@@ -174,11 +174,31 @@ async function migrateLegacy(): Promise<void> {
 
 /* -------------------- capability probe -------------------- */
 
+/**
+ * Android/iOS WebView (Capacitor) does not expose a usable WebAuthn platform
+ * authenticator. On native builds we back passkeys with the OS biometric
+ * prompt (BiometricPrompt / Face ID) + the device keystore instead, so the
+ * same UI keeps working end to end.
+ */
 export async function probePasskeySupport(): Promise<{
   supported: boolean;
   platformAvailable: boolean;
   conditionalMediation: boolean;
+  native?: boolean;
 }> {
+  try {
+    const { isNative, checkBiometry } = await import("@/lib/native-bridge");
+    if (isNative()) {
+      const bio = await checkBiometry();
+      return {
+        supported: true,
+        platformAvailable: bio.available,
+        conditionalMediation: false,
+        native: true,
+      };
+    }
+  } catch { /* web fallback below */ }
+
   const supported =
     typeof window !== "undefined" && !!(window as any).PublicKeyCredential;
   if (!supported) return { supported: false, platformAvailable: false, conditionalMediation: false };
@@ -195,6 +215,7 @@ export async function probePasskeySupport(): Promise<{
   } catch { /* noop */ }
   return { supported, platformAvailable, conditionalMediation };
 }
+
 
 /* -------------------- error mapping -------------------- */
 
