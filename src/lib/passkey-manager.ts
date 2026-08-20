@@ -247,6 +247,44 @@ function mapError(e: any): PasskeyError {
 
 /* -------------------- enrollment & authentication -------------------- */
 
+/** Native (Capacitor) passkey: OS biometric prompt + keystore-backed secret. */
+async function enrollNativePasskey(opts: { email: string; name?: string }): Promise<PasskeyRecord> {
+  const { nativeBiometricVerify, nativeSecureSet } = await import("@/lib/native-bridge");
+  const ok = await nativeBiometricVerify("Register this device as a passkey");
+  if (!ok)
+    throw new PasskeyError(
+      "not-allowed",
+      "Biometric confirmation was cancelled.",
+      "Try again and confirm with your fingerprint or face.",
+    );
+  const id = b64urlEncode(crypto.getRandomValues(new Uint8Array(24)));
+  const rec: PasskeyRecord = {
+    id,
+    name: opts.name?.trim() || defaultLabel(),
+    email: opts.email,
+    createdAt: Date.now(),
+    isDefault: false,
+    deviceUA: navigator.userAgent.slice(0, 100),
+  };
+  const list = await listPasskeys();
+  if (!list.some((p) => p.isDefault)) rec.isDefault = true;
+  list.push(rec);
+  await saveList(list);
+  // Mirror into the OS keychain/keystore so it survives WebView storage clears.
+  await nativeSecureSet(`passkey.${id}`, opts.email).catch(() => false);
+  try {
+    const mod = await import("@/integrations/supabase/client");
+    const { data } = await mod.supabase.auth.getSession();
+    if (data.session?.refresh_token) {
+      await attachSessionToPasskey(rec.id, {
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token,
+      });
+    }
+  } catch { /* noop */ }
+  return rec;
+}
+
 export async function enrollPasskey(opts: {
   email: string;
   name?: string;
@@ -265,6 +303,8 @@ export async function enrollPasskey(opts: {
       "No platform authenticator (fingerprint / Face ID / Windows Hello) is set up on this device.",
       "Enable biometrics in your device settings, or use email magic link.",
     );
+  if (probe.native) return enrollNativePasskey(opts);
+
   try {
     const challenge = crypto.getRandomValues(new Uint8Array(32));
     const userId = new TextEncoder().encode(opts.email);
