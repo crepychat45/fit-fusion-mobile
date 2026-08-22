@@ -34,6 +34,16 @@ const DataManagementPanel = lazy(() => import("./data-management-panel").then(m 
 const PerformanceMetricsPanel = lazy(() => import("./performance-metrics-panel").then(m => ({ default: m.PerformanceMetricsPanel })));
 const AdvancedSettingsReset = lazy(() => import("./advanced-settings-reset").then(m => ({ default: m.AdvancedSettingsReset })));
 const UnifiedUpdateManager = lazy(() => import("./unified-update-manager").then(m => ({ default: m.UnifiedUpdateManager })));
+const AccountQuantumExtras = lazy(() => import("./settings-quantum-extras").then(m => ({ default: m.AccountQuantumExtras })));
+const SecurityQuantumExtras = lazy(() => import("./settings-quantum-extras").then(m => ({ default: m.SecurityQuantumExtras })));
+const DisplayQuantumExtras = lazy(() => import("./settings-quantum-extras").then(m => ({ default: m.DisplayQuantumExtras })));
+const PrivacyQuantumExtras = lazy(() => import("./settings-quantum-extras").then(m => ({ default: m.PrivacyQuantumExtras })));
+const NotificationQuantumExtras = lazy(() => import("./settings-quantum-extras").then(m => ({ default: m.NotificationQuantumExtras })));
+const UnitsQuantumExtras = lazy(() => import("./settings-quantum-extras").then(m => ({ default: m.UnitsQuantumExtras })));
+const ChatQuantumExtras = lazy(() => import("./settings-quantum-extras").then(m => ({ default: m.ChatQuantumExtras })));
+const DataQuantumExtras = lazy(() => import("./settings-quantum-extras").then(m => ({ default: m.DataQuantumExtras })));
+const DeveloperQuantumExtras = lazy(() => import("./settings-quantum-extras").then(m => ({ default: m.DeveloperQuantumExtras })));
+const AboutQuantumExtras = lazy(() => import("./settings-quantum-extras").then(m => ({ default: m.AboutQuantumExtras })));
 const AccountHyperExtras = lazy(() => import("./settings-hyper-extras").then(m => ({ default: m.AccountHyperExtras })));
 const SecurityHyperExtras = lazy(() => import("./settings-hyper-extras").then(m => ({ default: m.SecurityHyperExtras })));
 const DisplayHyperExtras = lazy(() => import("./settings-hyper-extras").then(m => ({ default: m.DisplayHyperExtras })));
@@ -459,7 +469,7 @@ export function SettingsContainer() {
                 <L><AccountProExtras /></L>
                 <L><AccountNextExtras /></L>
                 <L><AccountUltraExtras /></L>
-                <L><AccountHyperExtras /></L>
+                <L><AccountQuantumExtras /></L>
               </div>
             </TabsContent>
 
@@ -470,7 +480,7 @@ export function SettingsContainer() {
                 <L><SecurityProExtras /></L>
                 <L><SecurityNextExtras /></L>
                 <L><SecurityUltraExtras /></L>
-                <L><SecurityHyperExtras /></L>
+                <L><SecurityQuantumExtras /></L>
               </div>
             </TabsContent>
 
@@ -482,7 +492,7 @@ export function SettingsContainer() {
                 <L><DisplayProExtras /></L>
                 <L><DisplayNextExtras /></L>
                 <L><DisplayUltraExtras /></L>
-                <L><DisplayHyperExtras /></L>
+                <L><DisplayQuantumExtras /></L>
               </div>
             </TabsContent>
 
@@ -492,7 +502,7 @@ export function SettingsContainer() {
                 <L><PrivacyExtras /></L>
                 <L><PrivacyProExtras /></L>
                 <L><PrivacyUltraExtras /></L>
-                <L><PrivacyHyperExtras /></L>
+                <L><PrivacyQuantumExtras /></L>
               </div>
             </TabsContent>
 
@@ -504,7 +514,7 @@ export function SettingsContainer() {
                 <L><NotificationProExtras /></L>
                 <L><NotificationNextExtras /></L>
                 <L><NotificationUltraExtras /></L>
-                <L><NotificationHyperExtras /></L>
+                <L><NotificationQuantumExtras /></L>
               </div>
             </TabsContent>
 
@@ -515,7 +525,7 @@ export function SettingsContainer() {
                 <L><UnitsProExtras /></L>
                 <L><UnitsNextExtras /></L>
                 <L><UnitsUltraExtras /></L>
-                <L><UnitsHyperExtras /></L>
+                <L><UnitsQuantumExtras /></L>
               </div>
             </TabsContent>
 
@@ -526,7 +536,7 @@ export function SettingsContainer() {
                 <L><ChatProExtras /></L>
                 <L><ChatNextExtras /></L>
                 <L><ChatUltraExtras /></L>
-                <L><ChatHyperExtras /></L>
+                <L><ChatQuantumExtras /></L>
               </div>
             </TabsContent>
 
@@ -538,6 +548,7 @@ export function SettingsContainer() {
                 <L><UpdateCenter /></L>
                 <L><PwaVaultPanel /></L>
                 <L><UnifiedUpdateManager /></L>
+                <L><DataQuantumExtras /></L>
               </div>
             </TabsContent>
 
@@ -548,6 +559,7 @@ export function SettingsContainer() {
             <TabsContent value="enhanced" className="mt-0">
               <div className="space-y-6">
                 <L><EnhancedValidationExtras /></L>
+                <L><DeveloperQuantumExtras /></L>
                 <L><PerformanceMetricsPanel /></L>
                 <L><AdvancedSettingsReset /></L>
                 <L><SettingsBackupRestore /></L>
@@ -602,7 +614,7 @@ export function SettingsContainer() {
                 <L><DeveloperExtras /></L>
                 <L><DeveloperProExtras /></L>
                 <L><DeveloperUltraExtras /></L>
-                <L><DeveloperHyperExtras /></L>
+                <L><DeveloperQuantumExtras /></L>
               </div>
             </TabsContent>
 
@@ -613,7 +625,7 @@ export function SettingsContainer() {
                 <L><DataProExtras /></L>
                 <L><DataNextExtras /></L>
                 <L><DataUltraExtras /></L>
-                <L><DataHyperExtras /></L>
+                <L><DataQuantumExtras /></L>
                 <L><NetworkRealtimePanel /></L>
                 <L><NetworkLabPanel /></L>
                 <L><SystemHealthPanel /></L>
@@ -667,6 +679,7 @@ export function SettingsContainer() {
                 <L><AboutExtras /></L>
                 <L><AboutProExtras /></L>
                 <L><AboutUltraExtras /></L>
+                <L><AboutQuantumExtras /></L>
               </div>
             </TabsContent>
 
