@@ -19,6 +19,7 @@ import { AIWorkoutVideos } from "@/components/workout/ai-workout-videos";
 import { AIWorkoutBuilder } from "@/components/features/ai-workout-builder";
 import { RecoveryFocusWidget } from "@/components/workout/recovery-focus-widget";
 import { WorkoutCategories } from "@/components/workout/workout-categories";
+import { WorkoutVideoLab } from "@/components/workout/workout-video-lab";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { Workout } from "@/data/workouts";
 
@@ -135,6 +136,11 @@ const Workouts = () => {
           {/* Recovery & Focus */}
           <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-5">
             <RecoveryFocusWidget onStart={() => navigate("/workouts?quick=true")} />
+          </motion.div>
+
+          {/* Video Training Lab */}
+          <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-5">
+            <WorkoutVideoLab />
           </motion.div>
 
           {/* Categories */}
