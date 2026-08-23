@@ -469,6 +469,7 @@ export function SettingsContainer() {
                 <L><AccountProExtras /></L>
                 <L><AccountNextExtras /></L>
                 <L><AccountUltraExtras /></L>
+                <L><AccountHyperExtras /></L>
                 <L><AccountQuantumExtras /></L>
               </div>
             </TabsContent>
@@ -480,6 +481,7 @@ export function SettingsContainer() {
                 <L><SecurityProExtras /></L>
                 <L><SecurityNextExtras /></L>
                 <L><SecurityUltraExtras /></L>
+                <L><SecurityHyperExtras /></L>
                 <L><SecurityQuantumExtras /></L>
               </div>
             </TabsContent>
@@ -492,6 +494,7 @@ export function SettingsContainer() {
                 <L><DisplayProExtras /></L>
                 <L><DisplayNextExtras /></L>
                 <L><DisplayUltraExtras /></L>
+                <L><DisplayHyperExtras /></L>
                 <L><DisplayQuantumExtras /></L>
               </div>
             </TabsContent>
@@ -502,6 +505,7 @@ export function SettingsContainer() {
                 <L><PrivacyExtras /></L>
                 <L><PrivacyProExtras /></L>
                 <L><PrivacyUltraExtras /></L>
+                <L><PrivacyHyperExtras /></L>
                 <L><PrivacyQuantumExtras /></L>
               </div>
             </TabsContent>
@@ -514,6 +518,7 @@ export function SettingsContainer() {
                 <L><NotificationProExtras /></L>
                 <L><NotificationNextExtras /></L>
                 <L><NotificationUltraExtras /></L>
+                <L><NotificationHyperExtras /></L>
                 <L><NotificationQuantumExtras /></L>
               </div>
             </TabsContent>
@@ -525,6 +530,7 @@ export function SettingsContainer() {
                 <L><UnitsProExtras /></L>
                 <L><UnitsNextExtras /></L>
                 <L><UnitsUltraExtras /></L>
+                <L><UnitsHyperExtras /></L>
                 <L><UnitsQuantumExtras /></L>
               </div>
             </TabsContent>
@@ -536,6 +542,7 @@ export function SettingsContainer() {
                 <L><ChatProExtras /></L>
                 <L><ChatNextExtras /></L>
                 <L><ChatUltraExtras /></L>
+                <L><ChatHyperExtras /></L>
                 <L><ChatQuantumExtras /></L>
               </div>
             </TabsContent>
@@ -548,6 +555,7 @@ export function SettingsContainer() {
                 <L><UpdateCenter /></L>
                 <L><PwaVaultPanel /></L>
                 <L><UnifiedUpdateManager /></L>
+                <L><DataHyperExtras /></L>
                 <L><DataQuantumExtras /></L>
               </div>
             </TabsContent>
@@ -559,6 +567,7 @@ export function SettingsContainer() {
             <TabsContent value="enhanced" className="mt-0">
               <div className="space-y-6">
                 <L><EnhancedValidationExtras /></L>
+                <L><DeveloperHyperExtras /></L>
                 <L><DeveloperQuantumExtras /></L>
                 <L><PerformanceMetricsPanel /></L>
                 <L><AdvancedSettingsReset /></L>
