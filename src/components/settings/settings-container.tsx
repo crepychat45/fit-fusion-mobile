@@ -44,6 +44,16 @@ const ChatQuantumExtras = lazy(() => import("./settings-quantum-extras").then(m 
 const DataQuantumExtras = lazy(() => import("./settings-quantum-extras").then(m => ({ default: m.DataQuantumExtras })));
 const DeveloperQuantumExtras = lazy(() => import("./settings-quantum-extras").then(m => ({ default: m.DeveloperQuantumExtras })));
 const AboutQuantumExtras = lazy(() => import("./settings-quantum-extras").then(m => ({ default: m.AboutQuantumExtras })));
+const AccountFusionExtras = lazy(() => import("./settings-fusion-extras").then(m => ({ default: m.AccountFusionExtras })));
+const SecurityFusionExtras = lazy(() => import("./settings-fusion-extras").then(m => ({ default: m.SecurityFusionExtras })));
+const DisplayFusionExtras = lazy(() => import("./settings-fusion-extras").then(m => ({ default: m.DisplayFusionExtras })));
+const PrivacyFusionExtras = lazy(() => import("./settings-fusion-extras").then(m => ({ default: m.PrivacyFusionExtras })));
+const NotificationFusionExtras = lazy(() => import("./settings-fusion-extras").then(m => ({ default: m.NotificationFusionExtras })));
+const UnitsFusionExtras = lazy(() => import("./settings-fusion-extras").then(m => ({ default: m.UnitsFusionExtras })));
+const ChatFusionExtras = lazy(() => import("./settings-fusion-extras").then(m => ({ default: m.ChatFusionExtras })));
+const DataFusionExtras = lazy(() => import("./settings-fusion-extras").then(m => ({ default: m.DataFusionExtras })));
+const DeveloperFusionExtras = lazy(() => import("./settings-fusion-extras").then(m => ({ default: m.DeveloperFusionExtras })));
+const AboutFusionExtras = lazy(() => import("./settings-fusion-extras").then(m => ({ default: m.AboutFusionExtras })));
 const AccountHyperExtras = lazy(() => import("./settings-hyper-extras").then(m => ({ default: m.AccountHyperExtras })));
 const SecurityHyperExtras = lazy(() => import("./settings-hyper-extras").then(m => ({ default: m.SecurityHyperExtras })));
 const DisplayHyperExtras = lazy(() => import("./settings-hyper-extras").then(m => ({ default: m.DisplayHyperExtras })));
@@ -471,6 +481,7 @@ export function SettingsContainer() {
                 <L><AccountUltraExtras /></L>
                 <L><AccountHyperExtras /></L>
                 <L><AccountQuantumExtras /></L>
+                <L><AccountFusionExtras /></L>
               </div>
             </TabsContent>
 
@@ -483,6 +494,7 @@ export function SettingsContainer() {
                 <L><SecurityUltraExtras /></L>
                 <L><SecurityHyperExtras /></L>
                 <L><SecurityQuantumExtras /></L>
+                <L><SecurityFusionExtras /></L>
               </div>
             </TabsContent>
 
@@ -496,6 +508,7 @@ export function SettingsContainer() {
                 <L><DisplayUltraExtras /></L>
                 <L><DisplayHyperExtras /></L>
                 <L><DisplayQuantumExtras /></L>
+                <L><DisplayFusionExtras /></L>
               </div>
             </TabsContent>
 
@@ -507,6 +520,7 @@ export function SettingsContainer() {
                 <L><PrivacyUltraExtras /></L>
                 <L><PrivacyHyperExtras /></L>
                 <L><PrivacyQuantumExtras /></L>
+                <L><PrivacyFusionExtras /></L>
               </div>
             </TabsContent>
 
@@ -520,6 +534,7 @@ export function SettingsContainer() {
                 <L><NotificationUltraExtras /></L>
                 <L><NotificationHyperExtras /></L>
                 <L><NotificationQuantumExtras /></L>
+                <L><NotificationFusionExtras /></L>
               </div>
             </TabsContent>
 
@@ -532,6 +547,7 @@ export function SettingsContainer() {
                 <L><UnitsUltraExtras /></L>
                 <L><UnitsHyperExtras /></L>
                 <L><UnitsQuantumExtras /></L>
+                <L><UnitsFusionExtras /></L>
               </div>
             </TabsContent>
 
@@ -544,6 +560,7 @@ export function SettingsContainer() {
                 <L><ChatUltraExtras /></L>
                 <L><ChatHyperExtras /></L>
                 <L><ChatQuantumExtras /></L>
+                <L><ChatFusionExtras /></L>
               </div>
             </TabsContent>
 
@@ -557,6 +574,7 @@ export function SettingsContainer() {
                 <L><UnifiedUpdateManager /></L>
                 <L><DataHyperExtras /></L>
                 <L><DataQuantumExtras /></L>
+                <L><DataFusionExtras /></L>
               </div>
             </TabsContent>
 
@@ -569,6 +587,7 @@ export function SettingsContainer() {
                 <L><EnhancedValidationExtras /></L>
                 <L><DeveloperHyperExtras /></L>
                 <L><DeveloperQuantumExtras /></L>
+                <L><DeveloperFusionExtras /></L>
                 <L><PerformanceMetricsPanel /></L>
                 <L><AdvancedSettingsReset /></L>
                 <L><SettingsBackupRestore /></L>
@@ -624,6 +643,7 @@ export function SettingsContainer() {
                 <L><DeveloperProExtras /></L>
                 <L><DeveloperUltraExtras /></L>
                 <L><DeveloperQuantumExtras /></L>
+                <L><DeveloperFusionExtras /></L>
               </div>
             </TabsContent>
 
@@ -635,6 +655,7 @@ export function SettingsContainer() {
                 <L><DataNextExtras /></L>
                 <L><DataUltraExtras /></L>
                 <L><DataQuantumExtras /></L>
+                <L><DataFusionExtras /></L>
                 <L><NetworkRealtimePanel /></L>
                 <L><NetworkLabPanel /></L>
                 <L><SystemHealthPanel /></L>
@@ -689,6 +710,7 @@ export function SettingsContainer() {
                 <L><AboutProExtras /></L>
                 <L><AboutUltraExtras /></L>
                 <L><AboutQuantumExtras /></L>
+                <L><AboutFusionExtras /></L>
               </div>
             </TabsContent>
 
