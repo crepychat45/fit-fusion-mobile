@@ -52,23 +52,9 @@ export const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
     };
   }, [enableAnalytics, enableCaching]);
 
-  // Monitor page visibility for performance optimization
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        // Page is hidden, reduce resource usage
-        console.log("Page hidden - reducing performance monitoring");
-      } else {
-        // Page is visible, resume full monitoring
-        console.log("Page visible - resuming performance monitoring");
-        PerformanceUtils.measurePerformance();
-      }
-    };
+  // Visibility changes no longer re-run measurement: repeating the Web Vitals
+  // pass on every tab switch burned main-thread CPU for no new data.
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () =>
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, []);
 
   // Component doesn't render anything, it's just for side effects
   return null;
