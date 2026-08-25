@@ -31,17 +31,17 @@
       content="camera=(self), microphone=(self), geolocation=(), payment=()"
     />
 
-    <!-- Performance Optimization -->
+    <!-- Performance: proactively open the connections we always need -->
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
-    <link rel="preconnect" href="https://cdn.gpteng.co" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="preconnect"
       href="https://einebfmuguagxtpanaek.supabase.co"
       crossorigin
     />
+    <link rel="dns-prefetch" href="https://einebfmuguagxtpanaek.supabase.co" />
     <link rel="dns-prefetch" href="https://images.unsplash.com" />
-    <link rel="dns-prefetch" href="https://randomuser.me" />
-    <link rel="modulepreload" href="/src/main.tsx" />
+
 
     <!-- PWA Support -->
     <meta name="theme-color" content="#6366f1" />
