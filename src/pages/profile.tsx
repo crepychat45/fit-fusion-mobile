@@ -349,6 +349,11 @@ const Profile = () => {
               </TabsContent>
 
               <TabsContent value="stats" className="space-y-3 mt-0">
+                <StatsFusionPanel
+                  workouts={localStats.workoutsCompleted || 0}
+                  streak={localStats.streakDays || 0}
+                  calories={localStats.caloriesBurned || 0}
+                />
                 <StatsExtras
                   workouts={localStats.workoutsCompleted || 0}
                   streak={localStats.streakDays || 0}
