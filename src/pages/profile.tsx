@@ -4,7 +4,7 @@ import { MobileNav } from "@/components/mobile-nav";
 import { ProfileEditor } from "@/components/profile-editor";
 import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, CreditCard, Settings, User, Bell, Trophy, Activity, Share2, Target, Sparkles, Apple, PlugZap } from "lucide-react";
+import { Shield, CreditCard, Settings, User, Bell, Trophy, Activity, Share2, Target, Sparkles, Apple, PlugZap, HeartPulse } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { userProfile } from "@/data/user";
 import { motion, AnimatePresence } from "framer-motion";
@@ -36,6 +36,10 @@ import { BadgesCollection } from "@/components/profile/badges-collection";
 import { NutritionSummary } from "@/components/profile/nutrition-summary";
 import { GoalsTracker } from "@/components/profile/goals-tracker";
 import { DevicesPanel } from "@/components/profile/devices-panel";
+import {
+  SecurityFusionPanel, AwardsFusionPanel, StatsFusionPanel, NutritionFusionPanel,
+  GoalsFusionPanel, DevicesFusionPanel, WellnessFusionPanel,
+} from "@/components/profile/profile-fusion-extras";
 
 const Profile = () => {
   const { toast } = useToast();
@@ -199,7 +203,7 @@ const Profile = () => {
 
       <div className="px-4 py-5">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-4xl mx-auto">
-          <TabsList className="grid grid-cols-4 sm:grid-cols-7 mb-5 bg-muted/40 backdrop-blur-sm rounded-xl h-auto gap-1 p-1">
+          <TabsList className="grid grid-cols-4 sm:grid-cols-8 mb-5 bg-muted/40 backdrop-blur-sm rounded-xl h-auto gap-1 p-1">
             <TabsTrigger value="profile" className="text-[11px] rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><User className="h-3.5 w-3.5 mr-1" />Profile</TabsTrigger>
             <TabsTrigger value="security" className="text-[11px] rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Shield className="h-3.5 w-3.5 mr-1" />Security</TabsTrigger>
             <TabsTrigger value="achievements" className="text-[11px] rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Trophy className="h-3.5 w-3.5 mr-1" />Awards</TabsTrigger>
@@ -207,6 +211,7 @@ const Profile = () => {
             <TabsTrigger value="nutrition" className="text-[11px] rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Apple className="h-3.5 w-3.5 mr-1" />Nutrition</TabsTrigger>
             <TabsTrigger value="goals" className="text-[11px] rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Target className="h-3.5 w-3.5 mr-1" />Goals</TabsTrigger>
             <TabsTrigger value="devices" className="text-[11px] rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><PlugZap className="h-3.5 w-3.5 mr-1" />Devices</TabsTrigger>
+            <TabsTrigger value="wellness" className="text-[11px] rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><HeartPulse className="h-3.5 w-3.5 mr-1" />Wellness</TabsTrigger>
           </TabsList>
 
           <AnimatePresence mode="wait">
@@ -273,6 +278,7 @@ const Profile = () => {
                 <SecurityPanel userEmail={userEmail} />
                 <RecoveryQuestionsCard />
                 <PrivacySecurityExtras userEmail={userEmail} />
+                <SecurityFusionPanel />
               </TabsContent>
 
 
@@ -339,9 +345,15 @@ const Profile = () => {
                   streak={localStats.streakDays || 0}
                   calories={localStats.caloriesBurned || 0}
                 />
+                <AwardsFusionPanel />
               </TabsContent>
 
               <TabsContent value="stats" className="space-y-3 mt-0">
+                <StatsFusionPanel
+                  workouts={localStats.workoutsCompleted || 0}
+                  streak={localStats.streakDays || 0}
+                  calories={localStats.caloriesBurned || 0}
+                />
                 <StatsExtras
                   workouts={localStats.workoutsCompleted || 0}
                   streak={localStats.streakDays || 0}
@@ -430,14 +442,21 @@ const Profile = () => {
 
               <TabsContent value="nutrition" className="space-y-3 mt-0">
                 <NutritionSummary />
+                <NutritionFusionPanel />
               </TabsContent>
 
               <TabsContent value="goals" className="space-y-3 mt-0">
                 <GoalsTracker />
+                <GoalsFusionPanel />
               </TabsContent>
 
               <TabsContent value="devices" className="space-y-3 mt-0">
                 <DevicesPanel />
+                <DevicesFusionPanel />
+              </TabsContent>
+
+              <TabsContent value="wellness" className="space-y-3 mt-0">
+                <WellnessFusionPanel />
               </TabsContent>
 
             </motion.div>
