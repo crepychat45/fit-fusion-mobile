@@ -50,10 +50,21 @@ if (typeof window !== "undefined") {
     const font = localStorage.getItem("fitfusion-font-family");
     if (font) document.documentElement.style.setProperty("--font-family", font);
   } catch { /* storage disabled */ }
+  // rAF-batched so pointer moves never trigger a synchronous style/layout pass.
+  let rulerY = 0;
+  let rulerQueued = false;
+  const flushRuler = () => {
+    rulerQueued = false;
+    document.documentElement.style.setProperty("--ruler-y", `${rulerY}px`);
+  };
   window.addEventListener("mousemove", (e) => {
     if (!document.documentElement.classList.contains("reading-ruler")) return;
-    document.documentElement.style.setProperty("--ruler-y", `${e.clientY - 14}px`);
+    rulerY = e.clientY - 14;
+    if (rulerQueued) return;
+    rulerQueued = true;
+    requestAnimationFrame(flushRuler);
   }, { passive: true });
+
 }
 
 installAppRecovery({ startupTimeoutMs: 14_000 });
