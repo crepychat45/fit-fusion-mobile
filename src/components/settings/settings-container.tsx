@@ -116,6 +116,18 @@ const DataUltraExtras = lazy(() => import("./settings-ultra-extras").then(m => (
 const DeveloperUltraExtras = lazy(() => import("./settings-ultra-extras").then(m => ({ default: m.DeveloperUltraExtras })));
 const AboutUltraExtras = lazy(() => import("./settings-ultra-extras").then(m => ({ default: m.AboutUltraExtras })));
 
+const AccountNovaExtras = lazy(() => import("./settings-nova-extras").then(m => ({ default: m.AccountNovaExtras })));
+const SecurityNovaExtras = lazy(() => import("./settings-nova-extras").then(m => ({ default: m.SecurityNovaExtras })));
+const DisplayNovaExtras = lazy(() => import("./settings-nova-extras").then(m => ({ default: m.DisplayNovaExtras })));
+const PrivacyNovaExtras = lazy(() => import("./settings-nova-extras").then(m => ({ default: m.PrivacyNovaExtras })));
+const NotificationNovaExtras = lazy(() => import("./settings-nova-extras").then(m => ({ default: m.NotificationNovaExtras })));
+const UnitsNovaExtras = lazy(() => import("./settings-nova-extras").then(m => ({ default: m.UnitsNovaExtras })));
+const ChatNovaExtras = lazy(() => import("./settings-nova-extras").then(m => ({ default: m.ChatNovaExtras })));
+const DataNovaExtras = lazy(() => import("./settings-nova-extras").then(m => ({ default: m.DataNovaExtras })));
+const DeveloperNovaExtras = lazy(() => import("./settings-nova-extras").then(m => ({ default: m.DeveloperNovaExtras })));
+const AboutNovaExtras = lazy(() => import("./settings-nova-extras").then(m => ({ default: m.AboutNovaExtras })));
+const UpdateNovaCenter = lazy(() => import("./settings-nova-extras").then(m => ({ default: m.UpdateNovaCenter })));
+
 const PanelLoader = () => (
   <div className="flex items-center justify-center py-12">
     <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
@@ -482,6 +494,7 @@ export function SettingsContainer() {
                 <L><AccountHyperExtras /></L>
                 <L><AccountQuantumExtras /></L>
                 <L><AccountFusionExtras /></L>
+                <L><AccountNovaExtras /></L>
               </div>
             </TabsContent>
 
@@ -495,6 +508,7 @@ export function SettingsContainer() {
                 <L><SecurityHyperExtras /></L>
                 <L><SecurityQuantumExtras /></L>
                 <L><SecurityFusionExtras /></L>
+                <L><SecurityNovaExtras /></L>
               </div>
             </TabsContent>
 
@@ -509,6 +523,7 @@ export function SettingsContainer() {
                 <L><DisplayHyperExtras /></L>
                 <L><DisplayQuantumExtras /></L>
                 <L><DisplayFusionExtras /></L>
+                <L><DisplayNovaExtras /></L>
               </div>
             </TabsContent>
 
@@ -521,6 +536,7 @@ export function SettingsContainer() {
                 <L><PrivacyHyperExtras /></L>
                 <L><PrivacyQuantumExtras /></L>
                 <L><PrivacyFusionExtras /></L>
+                <L><PrivacyNovaExtras /></L>
               </div>
             </TabsContent>
 
@@ -535,6 +551,7 @@ export function SettingsContainer() {
                 <L><NotificationHyperExtras /></L>
                 <L><NotificationQuantumExtras /></L>
                 <L><NotificationFusionExtras /></L>
+                <L><NotificationNovaExtras /></L>
               </div>
             </TabsContent>
 
@@ -548,6 +565,7 @@ export function SettingsContainer() {
                 <L><UnitsHyperExtras /></L>
                 <L><UnitsQuantumExtras /></L>
                 <L><UnitsFusionExtras /></L>
+                <L><UnitsNovaExtras /></L>
               </div>
             </TabsContent>
 
@@ -561,11 +579,13 @@ export function SettingsContainer() {
                 <L><ChatHyperExtras /></L>
                 <L><ChatQuantumExtras /></L>
                 <L><ChatFusionExtras /></L>
+                <L><ChatNovaExtras /></L>
               </div>
             </TabsContent>
 
             <TabsContent value="updates" className="mt-0">
               <div className="space-y-6">
+                <L><UpdateNovaCenter /></L>
                 <L><VersionControlPanel /></L>
                 <L><UpdateExtras /></L>
                 <L><UpdateProExtras /></L>
@@ -588,6 +608,7 @@ export function SettingsContainer() {
                 <L><DeveloperHyperExtras /></L>
                 <L><DeveloperQuantumExtras /></L>
                 <L><DeveloperFusionExtras /></L>
+                <L><DeveloperNovaExtras /></L>
                 <L><PerformanceMetricsPanel /></L>
                 <L><AdvancedSettingsReset /></L>
                 <L><SettingsBackupRestore /></L>
@@ -644,6 +665,7 @@ export function SettingsContainer() {
                 <L><DeveloperUltraExtras /></L>
                 <L><DeveloperQuantumExtras /></L>
                 <L><DeveloperFusionExtras /></L>
+                <L><DeveloperNovaExtras /></L>
               </div>
             </TabsContent>
 
@@ -656,6 +678,7 @@ export function SettingsContainer() {
                 <L><DataUltraExtras /></L>
                 <L><DataQuantumExtras /></L>
                 <L><DataFusionExtras /></L>
+                <L><DataNovaExtras /></L>
                 <L><NetworkRealtimePanel /></L>
                 <L><NetworkLabPanel /></L>
                 <L><SystemHealthPanel /></L>
@@ -711,6 +734,7 @@ export function SettingsContainer() {
                 <L><AboutUltraExtras /></L>
                 <L><AboutQuantumExtras /></L>
                 <L><AboutFusionExtras /></L>
+                <L><AboutNovaExtras /></L>
               </div>
             </TabsContent>
 
