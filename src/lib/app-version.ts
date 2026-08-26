@@ -1,6 +1,6 @@
 // Single source of truth for app version + changelog
-export const APP_VERSION = "7.6.0";
-export const APP_RELEASE_DATE = "2026-08-17";
+export const APP_VERSION = "7.7.0";
+export const APP_RELEASE_DATE = "2026-08-25";
 
 
 export const VERSION_STORAGE_KEYS = ["fitfusion-app-version", "app-version"] as const;
@@ -25,6 +25,51 @@ export interface ReleaseNote {
 }
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "7.7.0",
+    date: "2026-08-25",
+    type: "Major Release",
+    highlight:
+      "Settings supercharged: a brand-new panel in every tab plus a rebuilt Version Management Center with update channels, install history, one-tap rollback and a searchable changelog.",
+    sections: [
+      {
+        title: "New Features",
+        icon: "sparkles",
+        items: [
+          "Version Management Center: stable / beta / canary channels, install progress, rollback and install history",
+          "Searchable changelog — find any feature, fix or improvement across every release",
+          "Account: Training Identity panel (split, weekly volume, experience, coach tone, auto rest days, calendar sync)",
+          "Security: Device Trust & Hardening with live hardening score, trusted-device expiry and biometric-gated exports",
+          "Display: Interface Studio with live corner radius, glass blur, accent hue and compact card controls",
+          "Privacy: Data Minimisation — anonymous leaderboards, blurred progress photos, metadata stripping, incognito workouts",
+          "Notifications: Smart Reminders with hydration intervals, streak rescue, PR celebrations and a real test notification",
+          "Units: Measurement Studio with energy, pace, temperature, water and clock formats plus a live pace converter",
+          "Chat: Conversation Controls for bubble style, send-on-Enter, translation, receipts and history limits",
+          "Data: Storage & Sync Rules showing local footprint, backup frequency, conflict strategy and cache clearing",
+          "Developer: Live Diagnostics with real-time FPS, viewport info, feature flags and copyable diagnostics",
+          "About: Build Information card with the exact running build details",
+        ],
+      },
+      {
+        title: "Improvements",
+        icon: "zap",
+        items: [
+          "Update flow now refreshes the service worker registration when checking for updates",
+          "Every new panel persists instantly and broadcasts settings changes app-wide",
+          "All new panels are lazy-loaded per tab so first paint stays fast",
+        ],
+      },
+      {
+        title: "Bug Fixes",
+        icon: "bug",
+        items: [
+          "Fixed update timers leaking when leaving the Updates tab mid-install",
+          "Fixed corrupted update-history entries breaking the updates screen",
+          "Fixed rollback offering the version that was already installed",
+        ],
+      },
+    ],
+  },
   {
     version: "7.6.0",
     date: "2026-08-17",
