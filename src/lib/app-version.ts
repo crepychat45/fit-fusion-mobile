@@ -1,6 +1,6 @@
 // Single source of truth for app version + changelog
-export const APP_VERSION = "7.7.0";
-export const APP_RELEASE_DATE = "2026-08-25";
+export const APP_VERSION = "7.8.0";
+export const APP_RELEASE_DATE = "2026-08-27";
 
 
 export const VERSION_STORAGE_KEYS = ["fitfusion-app-version", "app-version"] as const;
