@@ -1,6 +1,6 @@
 // Single source of truth for app version + changelog
-export const APP_VERSION = "7.7.0";
-export const APP_RELEASE_DATE = "2026-08-25";
+export const APP_VERSION = "7.8.0";
+export const APP_RELEASE_DATE = "2026-08-27";
 
 
 export const VERSION_STORAGE_KEYS = ["fitfusion-app-version", "app-version"] as const;
@@ -25,6 +25,46 @@ export interface ReleaseNote {
 }
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "7.8.0",
+    date: "2026-08-27",
+    type: "Major Release",
+    highlight:
+      "One-Tap Update: every install pack is now bundled into a single signed package that downloads, verifies, installs and restarts the app automatically — with a live changelog, update channels and full version management.",
+    sections: [
+      {
+        title: "New Features",
+        icon: "sparkles",
+        items: [
+          "One-Tap Update Center — a single Download & Install button handles the complete bundle (app shell, assets, service worker, offline cache, database schema)",
+          "Live install pipeline with per-pack progress: download → verify signature → install → activate → restart",
+          "Automatic restart after install, with an optional 'Restart later' choice",
+          "Bundled package manifest showing every pack, its size and install state",
+          "Update channels (stable / beta / canary) with auto-update and Wi-Fi-only download rules",
+          "What's New sheet shown after the update completes with the full changelog",
+          "Install history with timestamps, channel and one-tap rollback",
+        ],
+      },
+      {
+        title: "Improvements",
+        icon: "zap",
+        items: [
+          "Network-Adaptive Engine now lives only in Settings → Account instead of appearing on every tab",
+          "Updates tab decluttered: duplicate update panels merged into one center",
+          "Update checks now refresh the service worker registration before reporting status",
+        ],
+      },
+      {
+        title: "Bug Fixes",
+        icon: "bug",
+        items: [
+          "Fixed multiple competing update panels reporting conflicting versions",
+          "Fixed installs that finished without persisting the new version number",
+          "Fixed progress timers continuing after leaving the Updates tab",
+        ],
+      },
+    ],
+  },
   {
     version: "7.7.0",
     date: "2026-08-25",
