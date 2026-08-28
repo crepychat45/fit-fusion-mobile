@@ -446,7 +446,7 @@ export function SettingsContainer() {
       />
 
       <div className="max-w-screen-xl mx-auto py-6 px-4 space-y-4">
-        <L><NetworkAdaptiveBanner /></L>
+        
         <L><SettingsCopilot /></L>
         <motion.div
           key={activeTab}
