@@ -71,6 +71,7 @@ const DataBackupPanel = lazy(() => import("./data-backup-panel").then(m => ({ de
 const SystemHealthPanel = lazy(() => import("./system-health-panel").then(m => ({ default: m.SystemHealthPanel })));
 const PwaVaultPanel = lazy(() => import("./pwa-vault-panel").then(m => ({ default: m.PwaVaultPanel })));
 const NetworkAdaptiveBanner = lazy(() => import("./network-adaptive-banner").then(m => ({ default: m.NetworkAdaptiveBanner })));
+const OneTapUpdateCenter = lazy(() => import("./one-tap-update-center").then(m => ({ default: m.OneTapUpdateCenter })));
 const SettingsCopilot = lazy(() => import("./settings-copilot").then(m => ({ default: m.SettingsCopilot })));
 const AccountExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.AccountExtras })));
 const SecurityExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.SecurityExtras })));
