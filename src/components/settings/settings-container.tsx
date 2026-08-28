@@ -585,18 +585,13 @@ export function SettingsContainer() {
 
             <TabsContent value="updates" className="mt-0">
               <div className="space-y-6">
-                <L><UpdateNovaCenter /></L>
+                <L><OneTapUpdateCenter /></L>
                 <L><VersionControlPanel /></L>
-                <L><UpdateExtras /></L>
-                <L><UpdateProExtras /></L>
-                <L><UpdateCenter /></L>
                 <L><PwaVaultPanel /></L>
-                <L><UnifiedUpdateManager /></L>
-                <L><DataHyperExtras /></L>
-                <L><DataQuantumExtras /></L>
                 <L><DataFusionExtras /></L>
               </div>
             </TabsContent>
+
 
 
 
