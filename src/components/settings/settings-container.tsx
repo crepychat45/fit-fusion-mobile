@@ -71,6 +71,7 @@ const DataBackupPanel = lazy(() => import("./data-backup-panel").then(m => ({ de
 const SystemHealthPanel = lazy(() => import("./system-health-panel").then(m => ({ default: m.SystemHealthPanel })));
 const PwaVaultPanel = lazy(() => import("./pwa-vault-panel").then(m => ({ default: m.PwaVaultPanel })));
 const NetworkAdaptiveBanner = lazy(() => import("./network-adaptive-banner").then(m => ({ default: m.NetworkAdaptiveBanner })));
+const OneTapUpdateCenter = lazy(() => import("./one-tap-update-center").then(m => ({ default: m.OneTapUpdateCenter })));
 const SettingsCopilot = lazy(() => import("./settings-copilot").then(m => ({ default: m.SettingsCopilot })));
 const AccountExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.AccountExtras })));
 const SecurityExtras = lazy(() => import("./settings-power-extras").then(m => ({ default: m.SecurityExtras })));
@@ -446,7 +447,7 @@ export function SettingsContainer() {
       />
 
       <div className="max-w-screen-xl mx-auto py-6 px-4 space-y-4">
-        <L><NetworkAdaptiveBanner /></L>
+        
         <L><SettingsCopilot /></L>
         <motion.div
           key={activeTab}
@@ -495,6 +496,7 @@ export function SettingsContainer() {
                 <L><AccountQuantumExtras /></L>
                 <L><AccountFusionExtras /></L>
                 <L><AccountNovaExtras /></L>
+                <L><NetworkAdaptiveBanner /></L>
               </div>
             </TabsContent>
 
@@ -585,18 +587,13 @@ export function SettingsContainer() {
 
             <TabsContent value="updates" className="mt-0">
               <div className="space-y-6">
-                <L><UpdateNovaCenter /></L>
+                <L><OneTapUpdateCenter /></L>
                 <L><VersionControlPanel /></L>
-                <L><UpdateExtras /></L>
-                <L><UpdateProExtras /></L>
-                <L><UpdateCenter /></L>
                 <L><PwaVaultPanel /></L>
-                <L><UnifiedUpdateManager /></L>
-                <L><DataHyperExtras /></L>
-                <L><DataQuantumExtras /></L>
                 <L><DataFusionExtras /></L>
               </div>
             </TabsContent>
+
 
 
 
