@@ -495,6 +495,7 @@ export function SettingsContainer() {
                 <L><AccountQuantumExtras /></L>
                 <L><AccountFusionExtras /></L>
                 <L><AccountNovaExtras /></L>
+                <L><NetworkAdaptiveBanner /></L>
               </div>
             </TabsContent>
 
