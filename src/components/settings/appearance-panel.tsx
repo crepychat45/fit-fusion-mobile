@@ -37,7 +37,7 @@ function load(): Prefs {
     const v = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
     if (v) return v;
   } catch { /* ignore */ }
-  return { theme: "system", accent: "#2563EB", fontSize: 16, reduceMotion: false };
+  return { theme: "light", accent: "#2563EB", fontSize: 16, reduceMotion: false };
 }
 
 function applyTheme(theme: Theme) {
