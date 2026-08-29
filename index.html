@@ -88,6 +88,23 @@
     <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
     <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
+    <!-- Early theme bootstrap: default to LIGHT, only apply dark if the user explicitly chose it (or system mode). Prevents dark flash on app open. -->
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem("fitfusion-theme") || "light";
+          var root = document.documentElement;
+          root.classList.remove("dark", "light");
+          var dark =
+            saved === "dark" ||
+            (saved === "system" &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          root.classList.add(dark ? "dark" : "light");
+        } catch (e) {
+          /* storage unavailable — stay light */
+        }
+      })();
+    </script>
   </head>
 
   <body>
