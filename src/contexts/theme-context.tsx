@@ -24,7 +24,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
     if (typeof window !== "undefined") {
       try {
         const savedTheme = localStorage.getItem("fitfusion-theme") as Theme;
-        return savedTheme || "system";
+        return savedTheme || "light";
       } catch (error) {
         console.warn("Failed to read theme from localStorage:", error);
       }
