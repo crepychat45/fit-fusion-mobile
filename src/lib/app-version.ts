@@ -1,6 +1,6 @@
 // Single source of truth for app version + changelog
-export const APP_VERSION = "7.8.0";
-export const APP_RELEASE_DATE = "2026-08-27";
+export const APP_VERSION = "7.9.0";
+export const APP_RELEASE_DATE = "2026-08-28";
 
 
 export const VERSION_STORAGE_KEYS = ["fitfusion-app-version", "app-version"] as const;
@@ -25,6 +25,41 @@ export interface ReleaseNote {
 }
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "7.9.0",
+    date: "2026-08-28",
+    type: "Major Release",
+    highlight:
+      "Settings Prime: a new panel in every settings tab plus an upgraded Updates experience with preflight install checks, maintenance windows, rollback slots and update-cache repair.",
+    sections: [
+      {
+        title: "New Features",
+        icon: "sparkles",
+        items: [
+          "Update Guard — preflight readiness check for network, data saver, battery, free storage, service worker and rollback slots before installing",
+          "Maintenance window, metered-data blocking, minimum battery threshold and background pre-download policies",
+          "Update Health — repair stuck downloads by clearing stale caches and refreshing the service worker",
+          "Routine Profile in Account — handle, time zone, week start, training window, daily move goal and automatic deload weeks",
+          "Session Shield in Security — re-auth for sensitive actions, clipboard auto-clear, trusted-network warnings and a live hardening score",
+          "Readability Studio in Display — live content width, line height, letter spacing, bold text, high contrast and media dimming",
+          "Sharing & Retention in Privacy — summary sharing, hidden body metrics, anonymous leaderboard and history retention",
+          "Delivery Rules in Notifications — daily digest hour, streak saver, hydration pings, alert grouping and a daily cap",
+          "Plate Math in Units — instant per-side barbell loading with bar weight and rounding step",
+          "Conversation Studio in Chat — persona, context memory, quick replies and a standing instruction",
+          "Backup & Footprint in Data — scheduled backups, Wi-Fi only sync, storage scan and settings export",
+          "Environment Self-Test in Developer and Release Summary with copyable diagnostics in About",
+        ],
+      },
+      {
+        title: "Improvements",
+        icon: "zap",
+        items: [
+          "All new panels are lazy-loaded per tab so Settings still opens instantly",
+          "Every new control persists locally and broadcasts a settings-changed event for live sync",
+        ],
+      },
+    ],
+  },
   {
     version: "7.8.0",
     date: "2026-08-27",
