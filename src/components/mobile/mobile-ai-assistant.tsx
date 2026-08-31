@@ -1,44 +1,40 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Brain,
   Mic,
-  MicOff,
   Send,
   Sparkles,
   Zap,
-  Shield,
   Heart,
-  Activity,
-  Target,
-  Camera,
-  Settings,
   Volume2,
   VolumeX,
-  Phone,
-  PhoneOff,
-  MessageCircle,
   Bot,
   User,
-  TrendingUp,
+  Square,
+  RefreshCw,
+  Copy,
+  Trash2,
+  Gauge,
+  Apple,
+  Dumbbell,
+  Moon,
+  X,
 } from "lucide-react";
+
+/* ─────────────────────────── types ─────────────────────────── */
 
 interface Message {
   id: string;
-  type: "user" | "ai" | "system";
+  role: "user" | "assistant";
   content: string;
-  timestamp: Date;
-  metadata?: {
-    confidence?: number;
-    processingTime?: number;
-    voiceEnabled?: boolean;
-  };
+  ts: number;
+  ms?: number;
 }
 
 interface MobileAIAssistantProps {
@@ -46,275 +42,321 @@ interface MobileAIAssistantProps {
   onClose: () => void;
 }
 
-export function MobileAIAssistant({ isOpen, onClose }: MobileAIAssistantProps) {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [inputValue, setInputValue] = useState("");
-  const [isRecording, setIsRecording] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
-  const [voiceEnabled, setVoiceEnabled] = useState(true);
-  const [aiStatus, setAiStatus] = useState<"idle" | "thinking" | "responding">(
-    "idle",
-  );
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { toast } = useToast();
+type Model = "google/gemini-3-flash-preview" | "google/gemini-3-pro-preview";
+type Coach = "balanced" | "strength" | "nutrition" | "recovery";
 
-  // Initialize with welcome message
-  useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      const welcomeMessage: Message = {
-        id: "welcome",
-        type: "system",
-        content:
-          "👋 Hi! I'm your mobile AI fitness assistant. I can help with workouts, nutrition, form corrections, and motivation. What can I help you with today?",
-        timestamp: new Date(),
-        metadata: {
-          confidence: 100,
-          voiceEnabled: true,
-        },
+const STORAGE_KEY = "fitfusion-mobile-coach-history";
+const PREFS_KEY = "fitfusion-mobile-coach-prefs";
+
+const COACH_PRESETS: Record<Coach, { label: string; icon: React.ElementType; primer: string }> = {
+  balanced: {
+    label: "Balanced",
+    icon: Sparkles,
+    primer: "Act as a well-rounded fitness coach covering training, nutrition and recovery.",
+  },
+  strength: {
+    label: "Strength",
+    icon: Dumbbell,
+    primer:
+      "Act as a strength & hypertrophy coach. Prioritise progressive overload, sets/reps/RPE prescriptions and technique cues.",
+  },
+  nutrition: {
+    label: "Nutrition",
+    icon: Apple,
+    primer:
+      "Act as a sports nutritionist. Give macro targets, meal timing and practical food swaps with approximate calories.",
+  },
+  recovery: {
+    label: "Recovery",
+    icon: Moon,
+    primer:
+      "Act as a recovery and sleep specialist. Focus on mobility, deload strategy, sleep hygiene and stress management.",
+  },
+};
+
+const QUICK_PROMPTS = [
+  "Build me a 20-minute full-body workout with no equipment",
+  "How much protein should I eat to build muscle?",
+  "My lower back hurts after deadlifts — what should I fix?",
+  "Plan my training week around 4 gym days",
+  "Give me a 5-minute mobility routine for tight hips",
+  "How do I break through a bench press plateau?",
+];
+
+/* ─────────────────────────── helpers ─────────────────────────── */
+
+function loadHistory(): Message[] {
+  try {
+    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    if (Array.isArray(raw)) return raw.slice(-60);
+  } catch {
+    /* ignore */
+  }
+  return [];
+}
+
+function loadPrefs(): { model: Model; coach: Coach; speak: boolean } {
+  try {
+    const raw = JSON.parse(localStorage.getItem(PREFS_KEY) || "null");
+    if (raw && typeof raw === "object") {
+      return {
+        model: raw.model === "google/gemini-3-pro-preview" ? raw.model : "google/gemini-3-flash-preview",
+        coach: (["balanced", "strength", "nutrition", "recovery"].includes(raw.coach) ? raw.coach : "balanced") as Coach,
+        speak: raw.speak === true,
       };
-      setMessages([welcomeMessage]);
     }
-  }, [isOpen, messages.length]);
+  } catch {
+    /* ignore */
+  }
+  return { model: "google/gemini-3-flash-preview", coach: "balanced", speak: false };
+}
 
-  // Auto-scroll to bottom
+const stripForSpeech = (t: string) =>
+  t
+    .replace(/[*_`#>]/g, "")
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "")
+    .slice(0, 600);
+
+/* ─────────────────────────── component ─────────────────────────── */
+
+export function MobileAIAssistant({ isOpen, onClose }: MobileAIAssistantProps) {
+  const { toast } = useToast();
+  const [messages, setMessages] = useState<Message[]>(loadHistory);
+  const [input, setInput] = useState("");
+  const [streaming, setStreaming] = useState(false);
+  const [listening, setListening] = useState(false);
+  const [prefs, setPrefs] = useState(loadPrefs);
+  const [latency, setLatency] = useState<number | null>(null);
+
+  const abortRef = useRef<AbortController | null>(null);
+  const endRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
+
+  /* persistence */
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages.slice(-60)));
+    } catch {
+      /* ignore */
+    }
   }, [messages]);
 
-  // Mobile-optimized AI responses
-  const generateMobileAIResponse = async (
-    userMessage: string,
-  ): Promise<Message> => {
-    setAiStatus("thinking");
-
-    // Simulate processing time (shorter for mobile)
-    await new Promise((resolve) =>
-      setTimeout(resolve, 800 + Math.random() * 1500),
-    );
-
-    setAiStatus("responding");
-
-    const mobileResponses = {
-      workout: [
-        "🏋️ Perfect! Let's create a quick mobile-friendly workout. I can guide you through exercises step-by-step with voice commands. Say 'start workout' to begin!",
-        "💪 Great question! I'll show you proper form with visual cues optimized for your phone screen. Your current form score is 8.5/10 - excellent work!",
-        "🎯 Your progress is amazing! You've completed 12 workouts this month with 85% consistency. Tap the stats to see detailed mobile analytics.",
-        "🔥 Let's do a 5-minute HIIT session! I'll count down and motivate you through each exercise. Ready? 3... 2... 1... GO!",
-        "⚡ Based on your heart rate data, I recommend a moderate intensity workout today. Your recovery is at 92% - perfect for strength training!",
-        "🏃‍♂️ Your running pace has improved by 15% this month! Let's build on that momentum with interval training.",
-        "🎵 I've curated a high-energy playlist that matches your workout rhythm. Music sync activated!",
-      ],
-      nutrition: [
-        "🥗 I'll create a personalized meal plan based on your goals: muscle gain with 2,200 calories daily. Saved to your mobile for grocery shopping!",
-        "⚡ Smart choice! Here's your macro breakdown: 40% carbs, 30% protein, 30% fats. Screenshot this for easy reference.",
-        "💧 Hydration reminder set! You need 2.5L daily. I'll notify you every 2 hours - next reminder in 1h 45m.",
-        "📱 Scan your meals with your camera - I can analyze nutrition content instantly! Just point and tap the scan button.",
-        "🍎 Your vitamin D levels look low. Consider adding salmon, eggs, or supplements. I've added suggestions to your meal plan.",
-        "⏰ Perfect meal timing! Eating protein within 30 minutes post-workout maximizes muscle recovery.",
-        "🌟 Your nutrition consistency is 88% this week - fantastic! Small improvements lead to big results.",
-      ],
-      motivation: [
-        "🔥 You're unstoppable! Your mobile stats show 5-day streak with 95% goal completion. That's champion-level consistency!",
-        "⭐ Every rep counts! You've lifted 12,540 lbs this week - that's literally a small car! I'm tracking your amazing progress.",
-        "💎 Champions are made in moments like this. You've overcome 3 plateau challenges - your dedication is inspiring!",
-        "🚀 Your mobile fitness journey is inspiring. 847 calories burned today, heart rate peaked at 165 BPM - you crushed those goals!",
-        "🏆 Remember why you started. You wanted to feel stronger, healthier, more confident. Look how far you've come!",
-        "⚡ Your body is adapting perfectly. Recovery heart rate improved by 8 BPM - your cardiovascular fitness is through the roof!",
-        "🌟 Tough day? I've got your back. Even 10 minutes of movement counts. Let's start small and build momentum together.",
-      ],
-      mobile: [
-        "📱 I'm your pocket fitness expert! Try voice commands ('start workout'), camera nutrition scanning, or shake for quick suggestions!",
-        "🎯 Mobile fitness revolution! I adapt to your screen, track your movements, sync with wearables, and optimize for one-handed use.",
-        "⚡ Pro mobile tips: Double-tap for quick workouts, long-press for voice mode, swipe up for stats, and use landscape for exercise videos!",
-        "📊 Your mobile dashboard: 12 workouts completed, 5-day streak, 847 cal burned today, next workout: Upper Body (tomorrow 7 AM).",
-        "🔋 Battery-optimized AI: I use 15% less power than other fitness apps while providing 3x more personalized insights!",
-        "📲 Offline mode activated! Your workouts, progress, and AI coaching work even without internet. Sync when connected.",
-        "🎮 Gamified fitness: You've unlocked 'Consistency Champion' badge! Next: 'Calorie Crusher' (burn 1000+ in one session).",
-      ],
-      smartwatch: [
-        "⌚ Your smartwatch data shows optimal workout timing at 7 AM when your HRV is highest. Shall I schedule your next session?",
-        "📡 Smartwatch sync complete! Real-time heart rate, calories, steps, and sleep quality all integrated for perfect coaching.",
-        "🔔 Your watch detected elevated stress. I recommend 5 minutes of guided breathing. Watch will vibrate with breathing cues.",
-        "📈 Watch analytics: You're most active on Tuesdays (avg 8,500 steps) and least on Sundays (4,200 steps). Let's balance this!",
-      ],
-    };
-
-    // Determine response category
-    let category = "mobile";
-    if (
-      userMessage.toLowerCase().includes("workout") ||
-      userMessage.toLowerCase().includes("exercise")
-    ) {
-      category = "workout";
-    } else if (
-      userMessage.toLowerCase().includes("nutrition") ||
-      userMessage.toLowerCase().includes("diet")
-    ) {
-      category = "nutrition";
-    } else if (
-      userMessage.toLowerCase().includes("motivate") ||
-      userMessage.toLowerCase().includes("help")
-    ) {
-      category = "motivation";
-    }
-
-    const responseTexts =
-      mobileResponses[category as keyof typeof mobileResponses];
-    const randomResponse =
-      responseTexts[Math.floor(Math.random() * responseTexts.length)];
-
-    setAiStatus("idle");
-
-    return {
-      id: `ai-${Date.now()}`,
-      type: "ai",
-      content: randomResponse,
-      timestamp: new Date(),
-      metadata: {
-        confidence: Math.floor(Math.random() * 15) + 85,
-        processingTime: Math.floor(Math.random() * 1500) + 500,
-        voiceEnabled: voiceEnabled,
-      },
-    };
-  };
-
-  const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
-
-    const userMessage: Message = {
-      id: `user-${Date.now()}`,
-      type: "user",
-      content: inputValue.trim(),
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setInputValue("");
-    setIsTyping(true);
-
+  useEffect(() => {
     try {
-      const aiResponse = await generateMobileAIResponse(userMessage.content);
-      setMessages((prev) => [...prev, aiResponse]);
-
-      // Voice feedback for mobile
-      if (voiceEnabled && "speechSynthesis" in window) {
-        const utterance = new SpeechSynthesisUtterance(
-          aiResponse.content.replace(/[🔥💪🎯⭐💎🚀📱⚡📊🥗💧]/g, ""),
-        );
-        utterance.rate = 0.9;
-        utterance.pitch = 1.1;
-        speechSynthesis.speak(utterance);
-      }
-
-      toast({
-        title: "AI Response Ready",
-        description: `Mobile-optimized response with ${aiResponse.metadata?.confidence}% confidence`,
-      });
-    } catch (error) {
-      toast({
-        title: "Connection Error",
-        description: "Please check your mobile connection and try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsTyping(false);
+      localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+    } catch {
+      /* ignore */
     }
-  };
+  }, [prefs]);
 
-  const handleVoiceRecording = () => {
-    setIsRecording(!isRecording);
-    if (!isRecording) {
-      // Start voice recording
-      if (
-        "webkitSpeechRecognition" in window ||
-        "SpeechRecognition" in window
-      ) {
-        const SpeechRecognition =
-          (window as any).SpeechRecognition ||
-          (window as any).webkitSpeechRecognition;
-        const recognition = new SpeechRecognition();
+  useEffect(() => {
+    if (isOpen) endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isOpen]);
 
-        recognition.continuous = false;
-        recognition.interimResults = false;
-        recognition.lang = "en-US";
+  /* stop everything when the sheet closes */
+  useEffect(() => {
+    if (isOpen) return;
+    abortRef.current?.abort();
+    try {
+      recognitionRef.current?.stop();
+      window.speechSynthesis?.cancel();
+    } catch {
+      /* ignore */
+    }
+  }, [isOpen]);
 
-        recognition.onstart = () => {
-          toast({
-            title: "🎤 Voice Recording Started",
-            description: "Speak your fitness question now...",
-          });
-        };
+  const speak = useCallback(
+    (text: string) => {
+      if (!prefs.speak || typeof window === "undefined" || !("speechSynthesis" in window)) return;
+      try {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(stripForSpeech(text));
+        u.rate = 1.02;
+        u.pitch = 1.05;
+        window.speechSynthesis.speak(u);
+      } catch {
+        /* ignore */
+      }
+    },
+    [prefs.speak],
+  );
 
-        recognition.onresult = (event) => {
-          const transcript = event.results[0][0].transcript;
-          setInputValue(transcript);
-          setIsRecording(false);
-          toast({
-            title: "✅ Voice Captured",
-            description: `Transcribed: "${transcript}"`,
-          });
+  /* ── core: real streaming request to the Gemini-backed edge function ── */
+  const ask = useCallback(
+    async (text: string, history?: Message[]) => {
+      const question = text.trim();
+      if (!question || streaming) return;
 
-          // Auto-send the message after voice input
-          setTimeout(() => {
-            if (transcript.trim()) {
-              handleSendMessage();
+      const base = history ?? messages;
+      const userMsg: Message = { id: `u-${Date.now()}`, role: "user", content: question, ts: Date.now() };
+      const nextMessages = [...base, userMsg];
+      setMessages(nextMessages);
+      setInput("");
+      setStreaming(true);
+
+      const started = performance.now();
+      const controller = new AbortController();
+      abortRef.current = controller;
+      const assistantId = `a-${Date.now()}`;
+
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData.session?.access_token;
+        if (!token) throw new Error("Please sign in to use the AI Coach.");
+
+        const payload = [
+          { role: "system", content: COACH_PRESETS[prefs.coach].primer },
+          ...nextMessages.slice(-16).map((m) => ({ role: m.role, content: m.content })),
+        ];
+
+        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/fitfusion-chat`, {
+          method: "POST",
+          signal: controller.signal,
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: payload,
+            model: prefs.model,
+            language: (typeof navigator !== "undefined" ? navigator.language : "en") || "en",
+          }),
+        });
+
+        if (!res.ok || !res.body) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body.error || "The AI Coach is unavailable right now.");
+        }
+
+        setMessages((prev) => [...prev, { id: assistantId, role: "assistant", content: "", ts: Date.now() }]);
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        let answer = "";
+        let firstToken = 0;
+
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() ?? "";
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith("data:")) continue;
+            const data = trimmed.slice(5).trim();
+            if (!data || data === "[DONE]") continue;
+            try {
+              const delta = JSON.parse(data)?.choices?.[0]?.delta?.content;
+              if (typeof delta === "string" && delta) {
+                if (!firstToken) {
+                  firstToken = performance.now() - started;
+                  setLatency(Math.round(firstToken));
+                }
+                answer += delta;
+                setMessages((prev) =>
+                  prev.map((m) => (m.id === assistantId ? { ...m, content: answer } : m)),
+                );
+              }
+            } catch {
+              /* partial JSON chunk */
             }
-          }, 500);
-        };
+          }
+        }
 
-        recognition.onerror = (event) => {
-          setIsRecording(false);
+        if (!answer) throw new Error("Empty response from the AI Coach.");
+        const total = Math.round(performance.now() - started);
+        setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, ms: total } : m)));
+        speak(answer);
+      } catch (err: any) {
+        if (err?.name === "AbortError") {
+          setMessages((prev) => prev.filter((m) => m.id !== assistantId || m.content.length > 0));
+        } else {
+          setMessages((prev) => prev.filter((m) => m.id !== assistantId));
           toast({
-            title: "❌ Voice Error",
-            description: "Speech recognition failed. Please try again.",
+            title: "AI Coach error",
+            description: err?.message || "Please check your connection and try again.",
             variant: "destructive",
           });
-        };
-
-        recognition.onend = () => {
-          setIsRecording(false);
-        };
-
-        recognition.start();
-      } else {
-        toast({
-          title: "Voice Not Supported",
-          description: "Voice recognition not available on this device.",
-          variant: "destructive",
-        });
-        setIsRecording(false);
+        }
+      } finally {
+        abortRef.current = null;
+        setStreaming(false);
       }
-    } else {
-      // Stop recording
-      setIsRecording(false);
-      toast({
-        title: "🔄 Processing Voice",
-        description: "Converting your speech to text...",
-      });
+    },
+    [messages, prefs.coach, prefs.model, speak, streaming, toast],
+  );
+
+  const stop = () => {
+    abortRef.current?.abort();
+    try {
+      window.speechSynthesis?.cancel();
+    } catch {
+      /* ignore */
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "thinking":
-        return "text-yellow-500 border-yellow-500";
-      case "responding":
-        return "text-blue-500 border-blue-500";
-      default:
-        return "text-green-500 border-green-500";
+  const regenerate = () => {
+    const lastUser = [...messages].reverse().find((m) => m.role === "user");
+    if (!lastUser) return;
+    const idx = messages.lastIndexOf(lastUser);
+    void ask(lastUser.content, messages.slice(0, idx));
+  };
+
+  const clearChat = () => {
+    stop();
+    setMessages([]);
+    setLatency(null);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      /* ignore */
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "thinking":
-        return <Brain className="h-3 w-3 animate-pulse" />;
-      case "responding":
-        return <TrendingUp className="h-3 w-3 animate-bounce" />;
-      default:
-        return <Heart className="h-3 w-3 animate-pulse" />;
+  const copy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({ title: "Copied to clipboard" });
+    } catch {
+      toast({ title: "Copy failed", variant: "destructive" });
     }
   };
+
+  /* voice input */
+  const toggleVoice = () => {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) {
+      toast({ title: "Voice not supported", description: "This device has no speech recognition.", variant: "destructive" });
+      return;
+    }
+    if (listening) {
+      recognitionRef.current?.stop();
+      setListening(false);
+      return;
+    }
+    const rec = new SR();
+    recognitionRef.current = rec;
+    rec.continuous = false;
+    rec.interimResults = true;
+    rec.lang = navigator.language || "en-US";
+    rec.onresult = (e: any) => {
+      const transcript = Array.from(e.results)
+        .map((r: any) => r[0].transcript)
+        .join(" ");
+      setInput(transcript);
+      if (e.results[e.results.length - 1].isFinal) {
+        setListening(false);
+        void ask(transcript);
+      }
+    };
+    rec.onerror = () => setListening(false);
+    rec.onend = () => setListening(false);
+    rec.start();
+    setListening(true);
+  };
+
+  const modelLabel = prefs.model.includes("pro") ? "Gemini 3 Pro" : "Gemini 3 Flash";
+  const showQuick = useMemo(() => messages.length === 0, [messages.length]);
 
   return (
     <AnimatePresence>
@@ -323,234 +365,232 @@ export function MobileAIAssistant({ isOpen, onClose }: MobileAIAssistantProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 z-50 bg-background/70 backdrop-blur-sm"
+          onClick={onClose}
         >
           <motion.div
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
-            transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl shadow-2xl max-h-[90vh] flex flex-col safe-area-padding"
+            transition={{ type: "spring", damping: 32, stiffness: 320 }}
+            onClick={(e) => e.stopPropagation()}
+            className="absolute bottom-0 left-0 right-0 flex h-[92vh] flex-col rounded-t-3xl border border-border/40 bg-card shadow-2xl"
+            role="dialog"
+            aria-label="Mobile AI Coach"
           >
             {/* Header */}
-            <div className="p-4 border-b bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 rounded-t-3xl">
+            <div className="rounded-t-3xl border-b border-border/40 bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <motion.div
-                    animate={{ rotate: [0, 360] }}
-                    transition={{
-                      duration: 4,
-                      repeat: Infinity,
-                      ease: "linear",
-                    }}
-                    className="p-2 bg-primary/20 rounded-full"
-                  >
-                    <Brain className="h-6 w-6 text-primary" />
-                  </motion.div>
+                  <span className="rounded-full bg-primary/15 p-2">
+                    <Brain className="h-5 w-5 text-primary" />
+                  </span>
                   <div>
-                    <h3 className="font-bold text-lg">Mobile AI Coach</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Fitness Assistant • Touch Optimized
+                    <h3 className="text-base font-bold leading-tight">Mobile AI Coach</h3>
+                    <p className="text-xs text-muted-foreground">
+                      {modelLabel} • real-time streaming
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Badge
-                    variant="outline"
-                    className={`text-xs ${getStatusColor(aiStatus)}`}
-                  >
-                    {getStatusIcon(aiStatus)}
-                    {aiStatus}
-                  </Badge>
-                  <Button variant="ghost" size="sm" onClick={onClose}>
-                    ✕
+                <div className="flex items-center gap-1">
+                  {latency !== null && (
+                    <Badge variant="outline" className="hidden text-[10px] sm:inline-flex">
+                      <Gauge className="mr-1 h-3 w-3" />
+                      {latency} ms
+                    </Badge>
+                  )}
+                  <Button variant="ghost" size="icon" onClick={onClose} aria-label="Close AI coach">
+                    <X className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
 
-              {/* Mobile Controls */}
-              <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50">
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setVoiceEnabled(!voiceEnabled)}
-                    className="flex items-center gap-1"
-                  >
-                    {voiceEnabled ? (
-                      <Volume2 className="h-3 w-3" />
-                    ) : (
-                      <VolumeX className="h-3 w-3" />
-                    )}
-                    Voice
-                  </Button>
-                  <Badge variant="secondary" className="text-xs">
-                    <Shield className="h-3 w-3 mr-1" />
-                    Secure
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                  <span className="text-xs text-muted-foreground">Online</span>
-                </div>
+              {/* Controls */}
+              <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 rounded-full text-xs"
+                  onClick={() =>
+                    setPrefs((p) => ({
+                      ...p,
+                      model:
+                        p.model === "google/gemini-3-flash-preview"
+                          ? "google/gemini-3-pro-preview"
+                          : "google/gemini-3-flash-preview",
+                    }))
+                  }
+                >
+                  <Zap className="mr-1 h-3 w-3" />
+                  {prefs.model.includes("pro") ? "Pro (deep)" : "Flash (fast)"}
+                </Button>
+                <Button
+                  size="sm"
+                  variant={prefs.speak ? "default" : "outline"}
+                  className="h-8 rounded-full text-xs"
+                  onClick={() => {
+                    if (prefs.speak) window.speechSynthesis?.cancel();
+                    setPrefs((p) => ({ ...p, speak: !p.speak }));
+                  }}
+                >
+                  {prefs.speak ? <Volume2 className="mr-1 h-3 w-3" /> : <VolumeX className="mr-1 h-3 w-3" />}
+                  Voice
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 rounded-full text-xs"
+                  onClick={regenerate}
+                  disabled={streaming || !messages.some((m) => m.role === "user")}
+                >
+                  <RefreshCw className="mr-1 h-3 w-3" />
+                  Retry
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8 rounded-full text-xs"
+                  onClick={clearChat}
+                  disabled={messages.length === 0}
+                >
+                  <Trash2 className="mr-1 h-3 w-3" />
+                  Clear
+                </Button>
+              </div>
+
+              {/* Coach persona */}
+              <div className="mt-2 flex gap-1.5 overflow-x-auto pb-0.5">
+                {(Object.keys(COACH_PRESETS) as Coach[]).map((key) => {
+                  const Icon = COACH_PRESETS[key].icon;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setPrefs((p) => ({ ...p, coach: key }))}
+                      className={`flex shrink-0 items-center gap-1 rounded-full border px-3 py-1 text-xs transition-colors ${
+                        prefs.coach === key
+                          ? "border-primary bg-primary/15 text-primary"
+                          : "border-border/50 text-muted-foreground"
+                      }`}
+                    >
+                      <Icon className="h-3 w-3" />
+                      {COACH_PRESETS[key].label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-3 space-y-3 max-h-[50vh] custom-scrollbar xs:p-4 xs:space-y-4 sm:max-h-[55vh]">
-              <AnimatePresence>
-                {messages.map((message) => (
-                  <motion.div
-                    key={message.id}
-                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                    className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}
-                  >
-                    <div
-                      className={`max-w-[85%] p-3 rounded-2xl ${
-                        message.type === "user"
-                          ? "bg-primary text-primary-foreground ml-4"
-                          : message.type === "ai"
-                            ? "bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 mr-4"
-                            : "bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 mr-4"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        {message.type === "user" && (
-                          <User className="h-3 w-3" />
-                        )}
-                        {message.type === "ai" && <Bot className="h-3 w-3" />}
-                        {message.type === "system" && (
-                          <Sparkles className="h-3 w-3" />
-                        )}
-                        <span className="text-xs font-medium opacity-70">
-                          {message.type === "ai"
-                            ? "AI Coach"
-                            : message.type === "user"
-                              ? "You"
-                              : "System"}
-                        </span>
-                        <span className="text-xs opacity-50">
-                          {message.timestamp.toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </span>
-                      </div>
-                      <p className="text-sm leading-relaxed">
-                        {message.content}
-                      </p>
-                      {message.metadata && (
-                        <div className="mt-2 pt-2 border-t border-current/20">
-                          <div className="flex items-center gap-3 text-xs opacity-60">
-                            {message.metadata.confidence && (
-                              <span>
-                                Confidence: {message.metadata.confidence}%
-                              </span>
-                            )}
-                            {message.metadata.processingTime && (
-                              <span>
-                                ⚡ {message.metadata.processingTime}ms
-                              </span>
-                            )}
-                            {message.metadata.voiceEnabled && (
-                              <Volume2 className="h-3 w-3" />
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-
-              {isTyping && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="flex justify-start"
-                >
-                  <div className="bg-muted p-3 rounded-2xl mr-4">
-                    <div className="flex items-center gap-2">
-                      <Bot className="h-4 w-4" />
-                      <span className="text-sm text-muted-foreground">
-                        AI is thinking
-                      </span>
-                      <div className="flex gap-1">
-                        <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" />
-                        <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:0.1s]" />
-                        <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:0.2s]" />
-                      </div>
-                    </div>
+            <div className="flex-1 space-y-3 overflow-y-auto p-4">
+              {showQuick && (
+                <div className="space-y-3">
+                  <div className="rounded-2xl border border-border/40 bg-muted/40 p-4 text-sm">
+                    <p className="font-medium">Hi! I'm your real-time AI fitness coach.</p>
+                    <p className="mt-1 text-muted-foreground">
+                      Ask anything about training, nutrition, recovery or motivation — answers stream instantly.
+                    </p>
                   </div>
-                </motion.div>
+                  <div className="grid gap-2">
+                    {QUICK_PROMPTS.map((q) => (
+                      <button
+                        key={q}
+                        type="button"
+                        onClick={() => void ask(q)}
+                        className="rounded-xl border border-border/40 bg-card px-3 py-2 text-left text-xs hover:border-primary/50 hover:bg-primary/5"
+                      >
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               )}
-              <div ref={messagesEndRef} />
+
+              {messages.map((m) => (
+                <div key={m.id} className={`flex gap-2 ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                  {m.role === "assistant" && (
+                    <span className="mt-1 h-7 w-7 shrink-0 rounded-full bg-primary/15 p-1.5">
+                      <Bot className="h-4 w-4 text-primary" />
+                    </span>
+                  )}
+                  <div
+                    className={`max-w-[82%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${
+                      m.role === "user"
+                        ? "bg-primary text-primary-foreground"
+                        : "border border-border/40 bg-muted/50"
+                    }`}
+                  >
+                    <p className="whitespace-pre-wrap break-words">
+                      {m.content}
+                      {streaming && m.role === "assistant" && m.id === messages[messages.length - 1]?.id && (
+                        <span className="ml-0.5 inline-block h-3 w-1.5 animate-pulse bg-primary align-middle" />
+                      )}
+                    </p>
+                    {m.role === "assistant" && !!m.content && (
+                      <div className="mt-1.5 flex items-center gap-2 text-[10px] text-muted-foreground">
+                        {m.ms ? <span>{(m.ms / 1000).toFixed(1)}s</span> : null}
+                        <button type="button" className="inline-flex items-center gap-1" onClick={() => copy(m.content)}>
+                          <Copy className="h-3 w-3" /> Copy
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  {m.role === "user" && (
+                    <span className="mt-1 h-7 w-7 shrink-0 rounded-full bg-accent/20 p-1.5">
+                      <User className="h-4 w-4 text-accent-foreground" />
+                    </span>
+                  )}
+                </div>
+              ))}
+
+              {streaming && messages[messages.length - 1]?.role === "user" && (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Heart className="h-3 w-3 animate-pulse text-primary" /> Coach is thinking…
+                </div>
+              )}
+              <div ref={endRef} />
             </div>
 
-            {/* Mobile Input */}
-            <div className="p-4 border-t bg-muted/20">
+            {/* Composer */}
+            <div className="border-t border-border/40 bg-card p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
               <div className="flex items-end gap-2">
-                <div className="flex-1">
-                  <Textarea
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    placeholder="Ask about workouts, nutrition, or motivation..."
-                    className="min-h-[50px] max-h-[100px] resize-none text-base rounded-2xl border-2 focus:border-primary"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSendMessage();
-                      }
-                    }}
-                  />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={handleVoiceRecording}
-                    className={`rounded-full ${isRecording ? "bg-red-100 border-red-300" : ""}`}
-                  >
-                    {isRecording ? (
-                      <MicOff className="h-4 w-4 text-red-600" />
-                    ) : (
-                      <Mic className="h-4 w-4" />
-                    )}
+                <Button
+                  variant={listening ? "default" : "outline"}
+                  size="icon"
+                  className="h-11 w-11 shrink-0 rounded-xl"
+                  onClick={toggleVoice}
+                  aria-label="Voice input"
+                >
+                  <Mic className={`h-4 w-4 ${listening ? "animate-pulse" : ""}`} />
+                </Button>
+                <Textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      void ask(input);
+                    }
+                  }}
+                  placeholder="Ask your coach anything…"
+                  rows={1}
+                  className="max-h-32 min-h-[44px] flex-1 resize-none rounded-xl text-sm"
+                />
+                {streaming ? (
+                  <Button size="icon" variant="destructive" className="h-11 w-11 shrink-0 rounded-xl" onClick={stop} aria-label="Stop">
+                    <Square className="h-4 w-4" />
                   </Button>
-
+                ) : (
                   <Button
-                    onClick={handleSendMessage}
-                    disabled={!inputValue.trim() || isTyping}
-                    className="rounded-full bg-primary hover:bg-primary/90"
                     size="icon"
+                    className="h-11 w-11 shrink-0 rounded-xl"
+                    onClick={() => void ask(input)}
+                    disabled={!input.trim()}
+                    aria-label="Send"
                   >
                     <Send className="h-4 w-4" />
                   </Button>
-                </div>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="flex items-center gap-2 mt-3 overflow-x-auto">
-                {[
-                  { label: "Quick Workout", icon: Activity },
-                  { label: "Nutrition Tips", icon: Heart },
-                  { label: "Form Check", icon: Target },
-                  { label: "Motivation", icon: Zap },
-                ].map((action) => (
-                  <Button
-                    key={action.label}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setInputValue(action.label)}
-                    className="flex items-center gap-1 whitespace-nowrap rounded-full"
-                  >
-                    <action.icon className="h-3 w-3" />
-                    {action.label}
-                  </Button>
-                ))}
+                )}
               </div>
             </div>
           </motion.div>
@@ -559,3 +599,5 @@ export function MobileAIAssistant({ isOpen, onClose }: MobileAIAssistantProps) {
     </AnimatePresence>
   );
 }
+
+export default MobileAIAssistant;
