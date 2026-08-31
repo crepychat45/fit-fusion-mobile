@@ -277,10 +277,10 @@ export function AccountSettings() {
   const handleGlobalLogout = async () => {
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.signOut({ scope: "global" });
-      if (error) throw error;
+      const { signOutAndRedirect } = await import("@/lib/sign-out");
       toast({ title: "Signed out everywhere", description: "All sessions revoked." });
       setLogoutDialogOpen(false);
+      await signOutAndRedirect("global");
     } catch (e: any) {
       toast({ title: "Sign out failed", description: e.message, variant: "destructive" });
     } finally {
