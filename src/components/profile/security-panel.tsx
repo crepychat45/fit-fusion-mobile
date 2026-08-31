@@ -238,8 +238,9 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
 
   async function signOutAll() {
     await logEvent("session.signout_all", "Signed out of all devices");
-    await supabase.auth.signOut({ scope: "global" as any });
+    const { signOutAndRedirect } = await import("@/lib/sign-out");
     toast({ title: "Signed out of all devices" });
+    await signOutAndRedirect("global");
   }
 
   const [passkeyCount, setPasskeyCount] = useState(0);

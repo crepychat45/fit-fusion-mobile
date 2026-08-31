@@ -225,7 +225,7 @@ export const EnhancedSettingsProvider = ({
   // Theme settings
   const [theme, setThemeState] = useState<"system" | "light" | "dark">(() => {
     const saved = localStorage.getItem("fitfusion-theme");
-    return (saved as any) || "system";
+    return (saved as any) || "light";
   });
 
   const [fontSize, setFontSizeState] = useState<"small" | "medium" | "large">(

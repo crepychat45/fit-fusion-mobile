@@ -402,14 +402,14 @@ const DangerZoneCard: React.FC = () => {
   const { toast } = useToast();
   const [confirming, setConfirming] = useState(false);
 
+  const [signingOut, setSigningOut] = useState(false);
+
   const signOut = async () => {
-    try {
-      await supabase.auth.signOut();
-      toast({ title: "Signed out" });
-      setTimeout(() => window.location.assign("/auth"), 400);
-    } catch {
-      toast({ title: "Sign out failed", variant: "destructive" });
-    }
+    if (signingOut) return;
+    setSigningOut(true);
+    const { signOutAndRedirect } = await import("@/lib/sign-out");
+    toast({ title: "Signed out", description: "This device has been signed out." });
+    await signOutAndRedirect("local");
   };
 
   const requestDelete = async () => {
@@ -418,12 +418,13 @@ const DangerZoneCard: React.FC = () => {
       const keys = ["fitfusion-profile", "fitfusion-profile-prefs", "fitfusion-connections"];
       keys.forEach((k) => localStorage.removeItem(k));
     } catch {}
-    await supabase.auth.signOut().catch(() => {});
+    const { performSignOut, redirectToAuth } = await import("@/lib/sign-out");
+    await performSignOut("global");
+    redirectToAuth(700);
     toast({
       title: "Deletion requested",
       description: "Local data cleared. You will receive an email to confirm account removal.",
     });
-    setTimeout(() => window.location.assign("/auth"), 700);
   };
 
   return (
@@ -435,8 +436,8 @@ const DangerZoneCard: React.FC = () => {
         <CardDescription className="text-xs">Sign out or permanently remove your account</CardDescription>
       </CardHeader>
       <CardContent className="space-y-2">
-        <Button variant="outline" className="w-full justify-start rounded-xl h-10 border-white/10 bg-white/[0.03]" onClick={signOut}>
-          <LogOut className="h-4 w-4 mr-2 text-primary" />Sign out of this device
+        <Button variant="outline" className="w-full justify-start rounded-xl h-10 border-white/10 bg-white/[0.03]" onClick={signOut} disabled={signingOut}>
+          <LogOut className="h-4 w-4 mr-2 text-primary" />{signingOut ? "Signing out…" : "Sign out of this device"}
         </Button>
         {!confirming ? (
           <Button variant="outline" className="w-full justify-start rounded-xl h-10 border-rose-500/30 bg-rose-500/[0.05] hover:bg-rose-500/[0.1]" onClick={() => setConfirming(true)}>

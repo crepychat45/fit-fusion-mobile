@@ -88,23 +88,35 @@
     <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
     <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
-    <!-- Early theme bootstrap: default to LIGHT, only apply dark if the user explicitly chose it (or system mode). Prevents dark flash on app open. -->
+    <!-- Early theme bootstrap: default to LIGHT. Only dark when the user explicitly picked Dark (or System with a dark OS after opting in). -->
     <script>
       (function () {
+        var root = document.documentElement;
+        var dark = false;
         try {
-          var saved = localStorage.getItem("fitfusion-theme") || "light";
-          var root = document.documentElement;
-          root.classList.remove("dark", "light");
-          var dark =
+          var saved = localStorage.getItem("fitfusion-theme");
+          // One-time migration: legacy "system" default made the app open dark.
+          if (!localStorage.getItem("fitfusion-theme-light-default")) {
+            if (!saved || saved === "system") {
+              saved = "light";
+              localStorage.setItem("fitfusion-theme", "light");
+            }
+            localStorage.setItem("fitfusion-theme-light-default", "1");
+          }
+          saved = saved || "light";
+          dark =
             saved === "dark" ||
             (saved === "system" &&
               window.matchMedia("(prefers-color-scheme: dark)").matches);
-          root.classList.add(dark ? "dark" : "light");
         } catch (e) {
           /* storage unavailable — stay light */
         }
+        root.classList.remove("dark", "light");
+        root.classList.add(dark ? "dark" : "light");
+        root.style.colorScheme = dark ? "dark" : "light";
       })();
     </script>
+
   </head>
 
   <body>
