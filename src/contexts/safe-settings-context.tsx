@@ -226,8 +226,8 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
 
   // Theme settings
   const [theme, setTheme] = useState<"system" | "light" | "dark">(() => {
-    const saved = safeLocalStorage.getItem("fitfusion-theme", "system");
-    return (saved as any) || "system";
+    const saved = safeLocalStorage.getItem("fitfusion-theme", "light");
+    return (saved as any) || "light";
   });
 
   const [fontSize, setFontSize] = useState<"small" | "medium" | "large">(() => {
