@@ -251,7 +251,7 @@ export function AdvancedAISecurity() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <AnimatePresence mode="popLayout">
+          <AnimatePresence mode="sync">
             {threats.length === 0 ? (
               <motion.div
                 initial={{ opacity: 0 }}
