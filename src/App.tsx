@@ -146,6 +146,7 @@ const AppContent: React.FC = () => {
 
           <Route path="*" element={<P><NotFound /></P>} />
         </Routes>
+        </motion.div>
       </AnimatePresence>
       {assistantEnabled && location.pathname !== "/chat" && (
         <Suspense fallback={null}>
