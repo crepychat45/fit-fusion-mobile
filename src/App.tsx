@@ -2,7 +2,7 @@ import React, { lazy, Suspense, useEffect, useState } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { AppWrapper } from "./components/app-wrapper";
 import { ProtectedRoute } from "./components/auth/protected-route";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { ErrorBoundary } from "@/components/common/error-boundary";
 import { clearAppCaches, isRecoverableResourceError, markAppReady, recoverApp } from "@/utils/app-recovery";
 import { BootLoader } from "@/components/common/boot-loader";
@@ -100,8 +100,15 @@ const AppContent: React.FC = () => {
     <>
       <SEOManager>
       <NativeShell />
-      <AnimatePresence mode="wait">
-        <Routes location={location} key={location.pathname}>
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={location.pathname}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18, ease: "easeOut" }}
+        >
+        <Routes location={location}>
           {/* Public */}
           <Route path="/" element={<P><Index /></P>} />
           <Route path="/auth" element={<P><AuthPage /></P>} />
@@ -139,6 +146,7 @@ const AppContent: React.FC = () => {
 
           <Route path="*" element={<P><NotFound /></P>} />
         </Routes>
+        </motion.div>
       </AnimatePresence>
       {assistantEnabled && location.pathname !== "/chat" && (
         <Suspense fallback={null}>

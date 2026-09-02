@@ -208,7 +208,7 @@ export const DailyWorkouts: React.FC = () => {
       </CardHeader>
 
       <CardContent className="space-y-4">
-        <AnimatePresence mode="popLayout">
+        <AnimatePresence mode="sync">
           {workouts.map((workout, index) => (
             <motion.div
               key={workout.id}

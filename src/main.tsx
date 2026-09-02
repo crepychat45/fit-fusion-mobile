@@ -6,25 +6,38 @@ import "@/utils/perf-telemetry";
 import { mark } from "@/utils/perf-telemetry";
 import { installAppRecovery } from "@/utils/app-recovery";
 import { installGlobalErrorHandler } from "@/utils/global-error-handler";
-import { installPermissionGuards } from "@/lib/permissions";
-import { initSettingsCloudMirror } from "@/utils/local-storage-sync";
 
 installGlobalErrorHandler();
-installPermissionGuards();
 
-// Boot the cloud mirror early so localStorage writes from any Settings
-// component are transparently pushed to Supabase and restored on sign-in.
-initSettingsCloudMirror();
+/**
+ * Run work right after the first frame is on screen. Keeping permission
+ * guards, the settings cloud mirror and origin warm-up off the critical path
+ * removes their parse + network cost from time-to-first-paint.
+ */
+const afterFirstPaint = (task: () => void) => {
+  if (typeof window === "undefined") return;
+  requestAnimationFrame(() => window.setTimeout(task, 0));
+};
 
-// Warm DNS/TLS to the API + media CDNs so the first real request skips
-// the handshake cost — the single biggest perceived-latency win on mobile.
-if (typeof window !== "undefined") {
+afterFirstPaint(() => {
+  import("@/lib/permissions")
+    .then((m) => m.installPermissionGuards())
+    .catch(() => undefined);
+
+  // Cloud mirror: localStorage writes from Settings are pushed to the backend
+  // and restored on sign-in. Only needed once the UI is interactive.
+  import("@/utils/local-storage-sync")
+    .then((m) => m.initSettingsCloudMirror())
+    .catch(() => undefined);
+
+  // Warm DNS/TLS to the API + media CDNs so the first real request skips
+  // the handshake cost — the single biggest perceived-latency win on mobile.
   import("@/utils/network-adaptive")
     .then(({ isTurboEnabled, warmCriticalOrigins }) => {
       if (isTurboEnabled()) warmCriticalOrigins();
     })
     .catch(() => undefined);
-}
+});
 
 mark("main-tsx-start");
 
