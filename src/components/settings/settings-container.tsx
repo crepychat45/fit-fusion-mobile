@@ -687,6 +687,7 @@ export function SettingsContainer() {
                 <L><DeveloperQuantumExtras /></L>
                 <L><DeveloperFusionExtras /></L>
                 <L><DeveloperNovaExtras /></L>
+                <L><PythonLabPanel /></L>
               </div>
             </TabsContent>
 
