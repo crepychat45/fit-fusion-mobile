@@ -126,6 +126,7 @@ const UnitsNovaExtras = lazy(() => import("./settings-nova-extras").then(m => ({
 const ChatNovaExtras = lazy(() => import("./settings-nova-extras").then(m => ({ default: m.ChatNovaExtras })));
 const DataNovaExtras = lazy(() => import("./settings-nova-extras").then(m => ({ default: m.DataNovaExtras })));
 const DeveloperNovaExtras = lazy(() => import("./settings-nova-extras").then(m => ({ default: m.DeveloperNovaExtras })));
+const PythonLabPanel = lazy(() => import("./python-lab-panel").then(m => ({ default: m.PythonLabPanel })));
 const AboutNovaExtras = lazy(() => import("./settings-nova-extras").then(m => ({ default: m.AboutNovaExtras })));
 const UpdateNovaCenter = lazy(() => import("./settings-nova-extras").then(m => ({ default: m.UpdateNovaCenter })));
 
