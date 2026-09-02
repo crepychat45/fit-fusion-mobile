@@ -100,8 +100,15 @@ const AppContent: React.FC = () => {
     <>
       <SEOManager>
       <NativeShell />
-      <AnimatePresence mode="wait">
-        <Routes location={location} key={location.pathname}>
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={location.pathname}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18, ease: "easeOut" }}
+        >
+        <Routes location={location}>
           {/* Public */}
           <Route path="/" element={<P><Index /></P>} />
           <Route path="/auth" element={<P><AuthPage /></P>} />
