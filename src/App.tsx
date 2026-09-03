@@ -11,7 +11,31 @@ import { SEOManager } from "@/components/seo-manager";
 import { AppLockGate } from "@/components/security/app-lock-gate";
 import { NativeShell } from "@/components/native/native-shell";
 
-const Loader = BootLoader;
+/**
+ * Route fallback. The full boot splash is only used for the very first
+ * (cold) load; later navigations show nothing for a short grace period and
+ * then a light, non-jarring placeholder — no full-screen flash.
+ */
+let coldBoot = true;
+const Loader: React.FC = () => {
+  const [firstLoad] = useState(() => coldBoot);
+  const [show, setShow] = useState(() => coldBoot);
+
+  useEffect(() => {
+    coldBoot = false;
+    if (firstLoad) return;
+    const t = window.setTimeout(() => setShow(true), 180);
+    return () => window.clearTimeout(t);
+  }, [firstLoad]);
+
+  if (firstLoad) return <BootLoader />;
+  if (!show) return null;
+  return (
+    <div className="flex min-h-[60vh] items-center justify-center" role="status" aria-label="Loading">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-primary" />
+    </div>
+  );
+};
 
 const lazyWithRetry = <T extends React.ComponentType<any>>(importer: () => Promise<{ default: T }>) =>
   lazy(() =>
