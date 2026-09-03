@@ -1,6 +1,7 @@
 // Single source of truth for app version + changelog
-export const APP_VERSION = "7.9.0";
-export const APP_RELEASE_DATE = "2026-08-28";
+export const APP_VERSION = "8.0.0";
+export const APP_RELEASE_DATE = "2026-09-03";
+
 
 
 export const VERSION_STORAGE_KEYS = ["fitfusion-app-version", "app-version"] as const;
@@ -25,6 +26,46 @@ export interface ReleaseNote {
 }
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "8.0.0",
+    date: "2026-09-03",
+    type: "Major Release",
+    highlight:
+      "Crystal Liquid Glass 2.0 across the app, a fully installable Python 3 runtime with scientific packages, light mode as the guaranteed default, and a hardened one-tap secure update pipeline on the latest dependency stack.",
+    sections: [
+      {
+        title: "New Features",
+        icon: "sparkles",
+        items: [
+          "Crystal Liquid Glass 2.0 — refractive glass surfaces with a light sweep, depth shadows and perfectly crisp, unblurred text",
+          "Settings Menu redesigned with the new crystal glass cards, animated active state and a glass mobile drawer",
+          "Python Lab now installs a complete Python 3 environment (Pyodide 0.27.7) with on-demand NumPy, Pandas, SciPy, SymPy, Matplotlib, scikit-learn and micropip",
+          "Automatic package detection — imports in your script install the matching wheel before execution",
+          "Light mode is now the guaranteed default on first launch across web, PWA and the Android app",
+        ],
+      },
+      {
+        title: "Improvements",
+        icon: "zap",
+        items: [
+          "Service worker bumped to v11 with fresh cache namespaces so updates activate immediately",
+          "Capacitor 8 shell refreshed: faster splash handoff, smoother native transitions and lighter startup work",
+          "Animation system tuned to a single expressive easing curve with full reduced-motion support",
+          "Dependencies refreshed to their latest compatible releases for better stability and performance",
+        ],
+      },
+      {
+        title: "Security & Privacy",
+        icon: "shield",
+        items: [
+          "Update packages are signature-verified before install, with rollback slots kept on device",
+          "Hardened content security policy for the Python runtime and CDN assets",
+          "No script or console output ever leaves the device — the Python runtime executes fully sandboxed in WebAssembly",
+        ],
+      },
+    ],
+  },
+
   {
     version: "7.9.0",
     date: "2026-08-28",

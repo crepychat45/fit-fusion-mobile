@@ -162,7 +162,7 @@ export function SettingsNavigation({
     },
   };
 
-  // Mobile Menu Overlay
+  // Mobile Menu Overlay — crystal glass drawer
   const MobileMenu = () => (
     <AnimatePresence>
       {showMobileMenu && (
@@ -170,24 +170,36 @@ export function SettingsNavigation({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[70] bg-black/50 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-[70] bg-background/40 backdrop-blur-md md:hidden"
           onClick={onMobileMenuToggle}
         >
           <motion.div
             initial={{ x: "-100%" }}
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 500 }}
-            className="absolute left-0 top-0 h-full w-80 bg-background shadow-2xl overflow-y-auto"
+            transition={{ type: "spring", damping: 28, stiffness: 320 }}
+            className="crystal-glass absolute left-0 top-0 h-full w-[19rem] overflow-y-auto rounded-r-3xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold">Settings Menu</h2>
-                <Button variant="ghost" size="sm" onClick={onMobileMenuToggle}>
+            <div className="p-5">
+              <div className="mb-5 flex items-center justify-between">
+                <div>
+                  <h2 className="crystal-text text-lg font-bold">Settings Menu</h2>
+                  <p className="text-xs text-muted-foreground">
+                    {settingsCategories.length} sections
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  aria-label="Close settings menu"
+                  onClick={onMobileMenuToggle}
+                >
                   ✕
                 </Button>
               </div>
+
+              <div className="crystal-divider mb-4" />
 
               <motion.div
                 variants={containerVariants}
@@ -201,41 +213,51 @@ export function SettingsNavigation({
 
                   return (
                     <motion.div key={category.id} variants={itemVariants}>
-                      <motion.button
-                        whileHover={{ x: 4 }}
-                        whileTap={{ scale: 0.98 }}
+                      <button
+                        type="button"
+                        aria-current={isActive ? "page" : undefined}
                         onClick={() => {
                           onTabChange(category.id);
                           onMobileMenuToggle();
                         }}
                         className={cn(
-                          "w-full flex items-center gap-3 p-4 rounded-lg transition-all duration-200 text-left",
-                          isActive
-                            ? "bg-primary/10 text-primary border border-primary/20"
-                            : "hover:bg-muted/50 text-muted-foreground hover:text-foreground",
+                          "crystal-glass crystal-sheen w-full overflow-hidden rounded-2xl p-3 text-left flex items-center gap-3",
+                          isActive && "crystal-glass-active",
                         )}
                       >
-                        <div className={cn("p-2 rounded-lg", category.bgColor)}>
+                        <span
+                          className={cn(
+                            "rounded-xl p-2",
+                            isActive ? "bg-primary/15" : "bg-muted/60",
+                          )}
+                        >
                           <CategoryIcon
-                            className={cn("h-5 w-5", category.color)}
+                            className={cn(
+                              "h-5 w-5",
+                              isActive ? "text-primary" : category.color,
+                            )}
                           />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm">
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span
+                            className={cn(
+                              "crystal-text block text-sm font-semibold",
+                              isActive && "text-primary",
+                            )}
+                          >
                             {category.title}
-                          </div>
-                          <div className="text-xs text-muted-foreground truncate">
+                          </span>
+                          <span className="block truncate text-xs text-muted-foreground">
                             {category.description}
-                          </div>
-                        </div>
-                        {isActive && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="w-2 h-2 bg-primary rounded-full"
-                          />
-                        )}
-                      </motion.button>
+                          </span>
+                        </span>
+                        <ChevronRight
+                          className={cn(
+                            "h-4 w-4 shrink-0",
+                            isActive ? "text-primary" : "text-muted-foreground",
+                          )}
+                        />
+                      </button>
                     </motion.div>
                   );
                 })}
@@ -247,77 +269,68 @@ export function SettingsNavigation({
     </AnimatePresence>
   );
 
-  // Desktop/Tablet Navigation
+  // Desktop/Tablet Navigation — crystal glass grid
   const DesktopMenu = () => (
     <div className="hidden md:block">
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 p-4"
+        className="grid grid-cols-2 gap-4 p-4 lg:grid-cols-3 xl:grid-cols-5"
       >
         {settingsCategories.map((category) => {
           const isActive = activeTab === category.id;
           const CategoryIcon = category.icon;
 
           return (
-            <motion.div key={category.id} variants={itemVariants}>
-              <Card
-                className={cn(
-                  "overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-lg",
-                  isActive && "ring-2 ring-primary shadow-lg",
-                )}
-              >
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => onTabChange(category.id)}
+            <motion.button
+              key={category.id}
+              type="button"
+              variants={itemVariants}
+              aria-current={isActive ? "page" : undefined}
+              onClick={() => onTabChange(category.id)}
+              className={cn(
+                "crystal-glass crystal-sheen group relative overflow-hidden rounded-2xl p-4 text-center",
+                isActive && "crystal-glass-active",
+              )}
+            >
+              <div className="flex flex-col items-center gap-3">
+                <span
+                  className={cn(
+                    "rounded-2xl p-3 transition-transform duration-300 group-hover:-translate-y-0.5",
+                    isActive ? "bg-primary/15" : "bg-muted/60",
+                  )}
                 >
-                  <CardContent className="p-4">
-                    <div className="flex flex-col items-center text-center space-y-3">
-                      <motion.div
-                        className={cn(
-                          "p-3 rounded-xl transition-all duration-200",
-                          isActive ? "bg-primary/20" : category.bgColor,
-                        )}
-                        whileHover={{ rotate: 5 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <CategoryIcon
-                          className={cn(
-                            "h-6 w-6",
-                            isActive ? "text-primary" : category.color,
-                          )}
-                        />
-                      </motion.div>
-                      <div>
-                        <h3
-                          className={cn(
-                            "font-semibold text-sm",
-                            isActive ? "text-primary" : "text-foreground",
-                          )}
-                        >
-                          {category.title}
-                        </h3>
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                          {category.description}
-                        </p>
-                      </div>
-
-                      {isActive && (
-                        <motion.div
-                          layoutId="activeIndicator"
-                          className="w-full h-1 bg-primary rounded-full"
-                          initial={{ scaleX: 0 }}
-                          animate={{ scaleX: 1 }}
-                          transition={{ duration: 0.3 }}
-                        />
-                      )}
-                    </div>
-                  </CardContent>
-                </motion.div>
-              </Card>
-            </motion.div>
+                  <CategoryIcon
+                    className={cn(
+                      "h-6 w-6",
+                      isActive ? "text-primary" : category.color,
+                    )}
+                  />
+                </span>
+                <span>
+                  <span
+                    className={cn(
+                      "crystal-text block text-sm font-semibold",
+                      isActive && "text-primary",
+                    )}
+                  >
+                    {category.title}
+                  </span>
+                  <span className="mt-1 line-clamp-2 block text-xs text-muted-foreground">
+                    {category.description}
+                  </span>
+                </span>
+                <span className="h-1 w-full overflow-hidden rounded-full bg-transparent">
+                  {isActive && (
+                    <motion.span
+                      layoutId="activeIndicator"
+                      className="block h-1 w-full rounded-full bg-gradient-to-r from-primary to-accent"
+                    />
+                  )}
+                </span>
+              </div>
+            </motion.button>
           );
         })}
       </motion.div>
