@@ -19,7 +19,7 @@ import {
 
 const SETTINGS_KEY = "fitfusion-python-lab";
 const SCRIPTS_KEY = "fitfusion-python-scripts";
-const PYODIDE_VERSION = "0.26.4";
+const PYODIDE_VERSION = "0.27.7";
 const PYODIDE_URL = `https://cdn.jsdelivr.net/pyodide/v${PYODIDE_VERSION}/full/`;
 
 interface PythonLabSettings {
@@ -227,6 +227,35 @@ type RuntimeState = "idle" | "loading" | "ready" | "running" | "error";
 
 interface SavedScript { id: string; name: string; code: string; savedAt: string }
 
+/** Python packages Pyodide can install on demand, keyed by import name. */
+const AVAILABLE_PACKAGES: Record<string, string> = {
+  numpy: "numpy",
+  pandas: "pandas",
+  scipy: "scipy",
+  sympy: "sympy",
+  matplotlib: "matplotlib",
+  sklearn: "scikit-learn",
+  statistics: "",
+  micropip: "micropip",
+  regex: "regex",
+  pytz: "pytz",
+  dateutil: "python-dateutil",
+  PIL: "Pillow",
+};
+
+/** Scan source for `import x` / `from x import ...` and map to installable wheels. */
+export function detectPackages(source: string): string[] {
+  const found = new Set<string>();
+  const re = /^\s*(?:import\s+([A-Za-z_][\w.]*)|from\s+([A-Za-z_][\w.]*)\s+import)/gm;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(source))) {
+    const root = (m[1] || m[2] || "").split(".")[0];
+    const wheel = AVAILABLE_PACKAGES[root];
+    if (wheel) found.add(wheel);
+  }
+  return Array.from(found);
+}
+
 declare global {
   interface Window { loadPyodide?: (opts: { indexURL: string }) => Promise<any> }
 }
@@ -338,11 +367,13 @@ export function PythonLabPanel() {
     setState("running");
     const started = performance.now();
     try {
-      // Auto-install packages that the snippet imports and we can supply.
-      if (/^\s*import\s+numpy|from\s+numpy\s+import/m.test(code) && !packages.includes("numpy")) {
-        appendOutput("[packages] loading numpy...");
-        await py.loadPackage("numpy");
-        setPackages((p) => [...p, "numpy"]);
+      // Auto-install every supported package the snippet imports.
+      const needed = detectPackages(code).filter((pkg) => !packages.includes(pkg));
+      if (needed.length) {
+        appendOutput(`[packages] installing ${needed.join(", ")}...`);
+        await py.loadPackage(needed);
+        setPackages((p) => Array.from(new Set([...p, ...needed])));
+        appendOutput("[packages] ready");
       }
       const exec = py.runPythonAsync(code);
       const timeout = new Promise((_, reject) =>
