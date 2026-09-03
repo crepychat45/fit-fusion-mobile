@@ -93,6 +93,13 @@ export const BootLoader: React.FC<{ subtitle?: string }> = ({
         @keyframes ff-letter-r{to{opacity:1;transform:translateY(0)}}
         @keyframes ff-fade-r{from{opacity:0}to{opacity:1}}
         @media (prefers-reduced-motion:reduce){.ff-r-r,.ff-core-r,.ff-spark-r,.ff-orb-r,.ff-grid-r,.ff-bar-fill-r,.ff-title-r span{animation:none!important}.ff-title-r span{opacity:1;transform:none}}
+        /* Light-mode variant — keeps route loaders continuous with the light boot splash */
+        html:not(.dark) .ff-boot-r{background:radial-gradient(ellipse at 20% 10%,#eef2ff 0%,#f8fafc 55%,#f1f5f9 100%);color:#0f172a}
+        html:not(.dark) .ff-sub-r{color:rgba(15,23,42,.55)}
+        html:not(.dark) .ff-bar-r{background:rgba(15,23,42,.08)}
+        html:not(.dark) .ff-title-r span{background:linear-gradient(135deg,#1e293b,#6d28d9 60%,#db2777);-webkit-background-clip:text;background-clip:text}
+        html:not(.dark) .ff-title-r .ff-x-r{background:linear-gradient(135deg,#ec4899,#f97316);-webkit-background-clip:text;background-clip:text}
+        html:not(.dark) .ff-orb-r{opacity:.32}
       `}</style>
     </div>
   );
