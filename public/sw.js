@@ -5,7 +5,7 @@
 //  - Images: cache-first with expiration
 //  - API/Supabase: network-first (no offline replay for auth/mutations)
 // Messages: SKIP_WAITING, CLEAR_CACHES, GET_CACHE_INFO
-const VERSION = "v10-7.6.0";
+const VERSION = "v11-8.0.0";
 const STATIC_CACHE = `fitfusion-static-${VERSION}`;
 const ASSET_CACHE = `fitfusion-assets-${VERSION}`;
 const IMAGE_CACHE = `fitfusion-images-${VERSION}`;
