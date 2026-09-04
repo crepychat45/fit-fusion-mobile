@@ -1,4 +1,5 @@
 import React, {
+import { getStoredTheme, onThemeChange, setTheme as persistTheme } from "@/lib/theme";
   createContext,
   useContext,
   useState,

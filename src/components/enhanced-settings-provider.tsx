@@ -7,6 +7,7 @@ import React, {
   useCallback,
 } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { getStoredTheme, setTheme as persistTheme } from "@/lib/theme";
 
 type SubscriptionPlan = "Free" | "Basic" | "Super" | "Advance";
 type PaymentMethod =
