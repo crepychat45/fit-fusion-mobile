@@ -13,6 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Sun, Moon, Monitor, Contrast, Palette, Type, Sparkles } from "lucide-react";
 import { applyAccent, applyFontSize } from "@/utils/appearance";
+import { getStoredTheme, setTheme as persistTheme } from "@/lib/theme";
 import { useToast } from "@/hooks/use-toast";
 
 type Theme = "light" | "dark" | "system" | "high-contrast";
@@ -40,16 +41,11 @@ function load(): Prefs {
   return { theme: "light", accent: "#2563EB", fontSize: 16, reduceMotion: false };
 }
 
+// Only ever called from an explicit user interaction in this panel.
 function applyTheme(theme: Theme) {
   const root = document.documentElement;
-  root.classList.remove("hc");
-  if (theme === "high-contrast") root.classList.add("hc");
-  const dark =
-    theme === "dark" ||
-    (theme === "system" &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches) ||
-    theme === "high-contrast";
-  root.classList.toggle("dark", dark);
+  root.classList.toggle("hc", theme === "high-contrast");
+  persistTheme(theme === "high-contrast" ? "dark" : theme);
 }
 
 function applyReduceMotion(on: boolean) {
@@ -58,10 +54,11 @@ function applyReduceMotion(on: boolean) {
 
 export function AppearancePanel() {
   const { toast } = useToast();
-  const [prefs, setPrefs] = useState<Prefs>(load);
+  const [prefs, setPrefs] = useState<Prefs>(() => ({ ...load(), theme: getStoredTheme() as Theme }));
 
+  // Mount/update effect never changes the theme — it only mirrors accent,
+  // typography and motion preferences.
   useEffect(() => {
-    applyTheme(prefs.theme);
     applyAccent(prefs.accent);
     applyFontSize(prefs.fontSize);
     applyReduceMotion(prefs.reduceMotion);
@@ -70,8 +67,10 @@ export function AppearancePanel() {
     } catch { /* ignore */ }
   }, [prefs]);
 
-  const update = <K extends keyof Prefs>(k: K, v: Prefs[K]) =>
+  const update = <K extends keyof Prefs>(k: K, v: Prefs[K]) => {
+    if (k === "theme") applyTheme(v as Theme);
     setPrefs((p) => ({ ...p, [k]: v }));
+  };
 
   return (
     <Card className="liquid-glass border-white/10">
