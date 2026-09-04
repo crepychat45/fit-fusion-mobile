@@ -88,34 +88,36 @@
     <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
     <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
-    <!-- Early theme bootstrap: default to LIGHT. Only dark when the user explicitly picked Dark (or System with a dark OS after opting in). -->
+    <!-- Theme bootstrap: canonical key "theme". Default is LIGHT for every first-time visitor. -->
     <script>
       (function () {
         var root = document.documentElement;
-        var dark = false;
+        var theme = "light";
         try {
-          var saved = localStorage.getItem("fitfusion-theme");
-          // One-time migration: legacy "system" default made the app open dark.
-          if (!localStorage.getItem("fitfusion-theme-light-default")) {
-            if (!saved || saved === "system") {
-              saved = "light";
-              localStorage.setItem("fitfusion-theme", "light");
-            }
-            localStorage.setItem("fitfusion-theme-light-default", "1");
+          var saved = localStorage.getItem("theme");
+          if (saved !== "light" && saved !== "dark" && saved !== "system") {
+            // migrate legacy key once, then drop it
+            var legacy = localStorage.getItem("fitfusion-theme");
+            saved = legacy === "dark" || legacy === "light" ? legacy : "light";
+            localStorage.setItem("theme", saved);
           }
-          saved = saved || "light";
-          dark =
-            saved === "dark" ||
-            (saved === "system" &&
-              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          localStorage.removeItem("fitfusion-theme");
+          localStorage.removeItem("fitfusion-theme-light-default");
+          localStorage.removeItem("app-theme");
+          theme = saved;
         } catch (e) {
           /* storage unavailable — stay light */
         }
+        var dark =
+          theme === "dark" ||
+          (theme === "system" &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches);
         root.classList.remove("dark", "light");
         root.classList.add(dark ? "dark" : "light");
         root.style.colorScheme = dark ? "dark" : "light";
       })();
     </script>
+
 
   </head>
 
