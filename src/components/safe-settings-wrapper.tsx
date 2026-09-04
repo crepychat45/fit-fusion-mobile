@@ -31,7 +31,6 @@ const SettingsErrorFallback = ({ error, retry }: { error: Error; retry: () => vo
           onClick={() => {
             // Clear settings and retry
             localStorage.removeItem('fitfusion-settings');
-            localStorage.removeItem('fitfusion-theme');
             retry();
           }}
           className="w-full"

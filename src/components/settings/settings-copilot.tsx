@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { applyAccent } from "@/utils/appearance";
 import { setManualDataSaver } from "@/utils/network-adaptive";
 import { clearAppCache } from "@/utils/version-api";
+import { setTheme as persistTheme } from "@/lib/theme";
 
 type Intent =
   | { kind: "theme"; value: "light" | "dark" | "system" }
@@ -53,9 +54,7 @@ export function SettingsCopilot() {
   const [busy, setBusy] = useState(false);
 
   const applyTheme = (v: "light" | "dark" | "system") => {
-    const root = document.documentElement;
-    const dark = v === "dark" || (v === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
-    root.classList.toggle("dark", dark);
+    persistTheme(v);
     try {
       const prev = JSON.parse(localStorage.getItem("fitfusion_appearance") || "{}");
       localStorage.setItem("fitfusion_appearance", JSON.stringify({ ...prev, theme: v }));

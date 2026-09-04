@@ -7,6 +7,7 @@ import React, {
   useCallback,
 } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { getStoredTheme, setTheme as persistTheme } from "@/lib/theme";
 
 type SubscriptionPlan = "Free" | "Basic" | "Super" | "Advance";
 type PaymentMethod =
@@ -223,10 +224,9 @@ export const EnhancedSettingsProvider = ({
   );
 
   // Theme settings
-  const [theme, setThemeState] = useState<"system" | "light" | "dark">(() => {
-    const saved = localStorage.getItem("fitfusion-theme");
-    return (saved as any) || "light";
-  });
+  const [theme, setThemeState] = useState<"system" | "light" | "dark">(
+    () => getStoredTheme(),
+  );
 
   const [fontSize, setFontSizeState] = useState<"small" | "medium" | "large">(
     () => {
@@ -474,7 +474,7 @@ export const EnhancedSettingsProvider = ({
   const setTheme = useCallback(
     (theme: "system" | "light" | "dark") => {
       setThemeState(theme);
-      persistSetting("fitfusion-theme", theme);
+      persistTheme(theme);
     },
     [persistSetting],
   );

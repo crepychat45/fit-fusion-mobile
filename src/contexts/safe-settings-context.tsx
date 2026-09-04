@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
+import { getStoredTheme, onThemeChange, setTheme as persistTheme } from "@/lib/theme";
   fetchRemoteSettings,
   createDebouncedPush,
   type SettingsSnapshot,
@@ -225,10 +226,13 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
   );
 
   // Theme settings
-  const [theme, setTheme] = useState<"system" | "light" | "dark">(() => {
-    const saved = safeLocalStorage.getItem("fitfusion-theme", "light");
-    return (saved as any) || "light";
-  });
+  const [theme, setThemeState] = useState<"system" | "light" | "dark">(
+    () => getStoredTheme(),
+  );
+  const setTheme = (t: "system" | "light" | "dark") => {
+    setThemeState(t);
+    persistTheme(t);
+  };
 
   const [fontSize, setFontSize] = useState<"small" | "medium" | "large">(() => {
     const saved = safeLocalStorage.getItem("fitfusion-font-size", "medium");
@@ -358,9 +362,7 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     safeLocalStorage.setItem("fitfusion-export-categories", JSON.stringify(exportCategories));
   }, [exportCategories]);
 
-  useEffect(() => {
-    safeLocalStorage.setItem("fitfusion-theme", theme);
-  }, [theme]);
+  useEffect(() => onThemeChange((t) => setThemeState(t)), []);
 
   useEffect(() => {
     safeLocalStorage.setItem("fitfusion-font-size", fontSize);
@@ -498,7 +500,6 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
       const remote = await fetchRemoteSettings(uid);
       if (cancelled) return;
       if (remote) {
-        if (typeof remote.theme === "string") setTheme(remote.theme as any);
         if (typeof remote.fontSize === "string") setFontSize(remote.fontSize as any);
         if (typeof remote.language === "string") setLanguage(remote.language);
         if (typeof remote.unitSystem === "string") setUnitSystem(remote.unitSystem as UnitSystem);

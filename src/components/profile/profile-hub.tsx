@@ -20,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/use-profile";
 import { applyAppearance, applyAccent } from "@/utils/appearance";
+import { setDarkMode, isDarkMode } from "@/lib/theme";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 // ---------- persistence helpers ----------
@@ -612,9 +613,9 @@ export const ProfileHub: React.FC<{ email?: string | null; displayName?: string;
             </AccordionTrigger>
             <AccordionContent className="px-6 pb-5 space-y-2">
               <Row label="Dark mode">
-                <Switch checked={state.appearance.darkMode} onCheckedChange={(v) => {
+                <Switch checked={isDarkMode()} onCheckedChange={(v) => {
                   patchNested("appearance", { darkMode: v });
-                  document.documentElement.classList.toggle("dark", v);
+                  setDarkMode(v);
                 }} />
               </Row>
               <Row label="Glassmorphism"><Switch checked={state.appearance.glass} onCheckedChange={(v) => patchNested("appearance", { glass: v })} /></Row>

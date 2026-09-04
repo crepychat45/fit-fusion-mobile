@@ -1,4 +1,5 @@
 import React, {
+import { getStoredTheme, onThemeChange, setTheme as persistTheme } from "@/lib/theme";
   createContext,
   useContext,
   useState,
@@ -194,10 +195,13 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
   });
 
   // Theme settings
-  const [theme, setTheme] = useState<"system" | "light" | "dark">(() => {
-    const saved = localStorage.getItem("fitfusion-theme");
-    return (saved as any) || "light";
-  });
+  const [theme, setThemeState] = useState<"system" | "light" | "dark">(
+    () => getStoredTheme(),
+  );
+  const setTheme = (t: "system" | "light" | "dark") => {
+    setThemeState(t);
+    persistTheme(t);
+  };
 
   const [fontSize, setFontSize] = useState<"small" | "medium" | "large">(() => {
     const saved = localStorage.getItem("fitfusion-font-size");
@@ -349,9 +353,7 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     );
   }, [exportCategories]);
 
-  useEffect(() => {
-    localStorage.setItem("fitfusion-theme", theme);
-  }, [theme]);
+  useEffect(() => onThemeChange((t) => setThemeState(t)), []);
 
   useEffect(() => {
     localStorage.setItem("fitfusion-font-size", fontSize);

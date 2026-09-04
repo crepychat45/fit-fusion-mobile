@@ -1,3 +1,5 @@
+import { setDarkMode } from "@/lib/theme";
+
 // Apply appearance preferences (accent color, dark mode, font size) globally.
 // Accent is written as an HSL triple to match shadcn's `--primary` token.
 
@@ -35,15 +37,20 @@ export function applyAccent(hex: string | null | undefined) {
 }
 
 export function applyDarkMode(on: boolean) {
-  document.documentElement.classList.toggle("dark", on);
+  // Delegate to the canonical theme module (persists under the "theme" key).
+  setDarkMode(on);
 }
 
 export function applyFontSize(px: number) {
   document.documentElement.style.setProperty("font-size", `${px}px`);
 }
 
+/**
+ * Apply appearance preferences. NOTE: theme/dark mode is intentionally NOT
+ * applied here — it is owned by `@/lib/theme` and only changes on explicit
+ * user interaction from the Appearance/Display panel.
+ */
 export function applyAppearance(a: { accent?: string; darkMode?: boolean; fontSize?: number }) {
   if (a.accent) applyAccent(a.accent);
-  if (typeof a.darkMode === "boolean") applyDarkMode(a.darkMode);
   if (typeof a.fontSize === "number") applyFontSize(a.fontSize);
 }
