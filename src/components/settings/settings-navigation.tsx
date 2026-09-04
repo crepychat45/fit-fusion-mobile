@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   User,
@@ -25,8 +24,6 @@ import {
   Heart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 interface SettingsNavigationProps {
@@ -141,8 +138,6 @@ export function SettingsNavigation({
   showMobileMenu,
   onMobileMenuToggle,
 }: SettingsNavigationProps) {
-  const location = useLocation();
-
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
