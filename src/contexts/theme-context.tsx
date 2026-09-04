@@ -1,6 +1,11 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-
-type Theme = "light" | "dark" | "system";
+import {
+  applyTheme,
+  getStoredTheme,
+  onThemeChange,
+  setTheme as persistTheme,
+  type Theme,
+} from "@/lib/theme";
 
 interface ThemeContextType {
   theme: Theme;
@@ -8,78 +13,35 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: "system",
+  theme: "light",
   setTheme: () => {},
 });
 
 export const useTheme = () => useContext(ThemeContext);
 
-export type { Theme }; // Export the Theme type
+export type { Theme };
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [theme, setTheme] = useState<Theme>(() => {
-    // Check if we're in browser environment before accessing localStorage
-    if (typeof window !== "undefined") {
-      try {
-        const savedTheme = localStorage.getItem("fitfusion-theme") as Theme;
-        return savedTheme || "light";
-      } catch (error) {
-        console.warn("Failed to read theme from localStorage:", error);
-      }
-    }
-    return "system";
-  });
+  const [theme, setThemeState] = useState<Theme>(() => getStoredTheme());
 
-  // Apply theme effect
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    
-    try {
-      const root = window.document.documentElement;
+  // Explicit user action only — persists and applies.
+  const setTheme = (next: Theme) => {
+    setThemeState(next);
+    persistTheme(next);
+  };
 
-      // Remove existing theme classes
-      root.classList.remove("light", "dark");
+  // Keep in sync with theme changes triggered elsewhere (Appearance panel etc.)
+  useEffect(() => onThemeChange((t) => setThemeState(t)), []);
 
-      // Apply theme based on selection
-      if (theme === "system") {
-        const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-          .matches
-          ? "dark"
-          : "light";
-        root.classList.add(systemTheme);
-        localStorage.setItem("fitfusion-theme", theme);
-      } else {
-        root.classList.add(theme);
-        localStorage.setItem("fitfusion-theme", theme);
-      }
-    } catch (error) {
-      console.warn("Failed to apply theme:", error);
-    }
-  }, [theme]);
-
-  // Listen for system theme changes
+  // Follow the OS only when the user explicitly chose "system".
   useEffect(() => {
     if (typeof window === "undefined" || theme !== "system") return;
-
-    try {
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-
-      const handleChange = () => {
-        const root = window.document.documentElement;
-        root.classList.remove("light", "dark");
-        root.classList.add(mediaQuery.matches ? "dark" : "light");
-      };
-
-      // Initial call to handleChange to set the correct theme on mount
-      handleChange();
-
-      mediaQuery.addEventListener("change", handleChange);
-      return () => mediaQuery.removeEventListener("change", handleChange);
-    } catch (error) {
-      console.warn("Failed to set up system theme listener:", error);
-    }
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const handle = () => applyTheme("system");
+    mq.addEventListener("change", handle);
+    return () => mq.removeEventListener("change", handle);
   }, [theme]);
 
   return (
