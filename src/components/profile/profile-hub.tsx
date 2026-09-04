@@ -613,7 +613,7 @@ export const ProfileHub: React.FC<{ email?: string | null; displayName?: string;
             </AccordionTrigger>
             <AccordionContent className="px-6 pb-5 space-y-2">
               <Row label="Dark mode">
-                <Switch checked={state.appearance.darkMode} onCheckedChange={(v) => {
+                <Switch checked={isDarkMode()} onCheckedChange={(v) => {
                   patchNested("appearance", { darkMode: v });
                   setDarkMode(v);
                 }} />
