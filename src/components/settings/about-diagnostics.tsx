@@ -291,7 +291,6 @@ export function SystemDiagnosticsPanel() {
       toast({
         title: "Diagnostic report saved",
         description: `Encrypted. Key (copied to clipboard): ${passphrase}`,
-        duration: 15000,
       });
     } catch (e) {
       toast({
