@@ -8,11 +8,11 @@ import React, {
 } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import {
-import { getStoredTheme, onThemeChange, setTheme as persistTheme } from "@/lib/theme";
   fetchRemoteSettings,
   createDebouncedPush,
   type SettingsSnapshot,
 } from "@/utils/settings-sync";
+import { getStoredTheme, onThemeChange, setTheme as persistTheme } from "@/lib/theme";
 
 type SubscriptionPlan = "Free" | "Basic" | "Super" | "Advance";
 type PaymentMethod =

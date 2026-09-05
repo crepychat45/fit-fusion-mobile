@@ -1,11 +1,11 @@
 import React, {
-import { getStoredTheme, onThemeChange, setTheme as persistTheme } from "@/lib/theme";
   createContext,
   useContext,
   useState,
   useEffect,
   ReactNode,
 } from "react";
+import { getStoredTheme, onThemeChange, setTheme as persistTheme } from "@/lib/theme";
 
 type SubscriptionPlan = "Free" | "Basic" | "Super" | "Advance";
 type PaymentMethod =
