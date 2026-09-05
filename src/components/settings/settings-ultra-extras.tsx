@@ -25,6 +25,7 @@ import {
   Trash2,
   UserCog,
 } from "lucide-react";
+import { LicenseDialog } from "@/components/settings/about-diagnostics";
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                             */
@@ -590,9 +591,13 @@ export function AboutUltraExtras() {
   return (
     <Panel icon={Info} title="Support & Resources" description="Quick links and health checks." badge="New">
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-        <Button variant="outline" size="sm" onClick={() => window.open("/licenses.html", "_blank")}>
-          Open source licenses
-        </Button>
+        <LicenseDialog
+          trigger={
+            <Button variant="outline" size="sm">
+              Open source licenses
+            </Button>
+          }
+        />
         <Button variant="outline" size="sm" onClick={() => window.open("/terms-of-service.html", "_blank")}>
           Terms of service
         </Button>

@@ -33,11 +33,14 @@ import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import { APP_VERSION, APP_RELEASE_DATE, RELEASE_NOTES } from "@/lib/app-version";
+import { getBuildNumber, getBuildCommit } from "@/utils/system-diagnostics";
+import { SystemDiagnosticsPanel, LicenseDialog, ChangelogDrawer } from "@/components/settings/about-diagnostics";
 
 export function AboutPage() {
   const { toast } = useToast();
   const [appVersion] = useState(APP_VERSION);
-  const [buildNumber] = useState(`${APP_RELEASE_DATE.replace(/-/g, "")}.001`);
+  const [buildNumber] = useState(() => getBuildNumber());
+  const [buildCommit] = useState(() => getBuildCommit());
   const [releaseDate] = useState(
     new Date(APP_RELEASE_DATE).toLocaleDateString(undefined, {
       year: "numeric",
@@ -200,6 +203,7 @@ export function AboutPage() {
                       v{appVersion}
                     </Badge>
                     <Badge variant="outline">Build {buildNumber}</Badge>
+                    <Badge variant="outline" className="font-mono text-[10px]">#{buildCommit}</Badge>
                   </div>
                 </div>
               </div>
@@ -288,6 +292,15 @@ export function AboutPage() {
         </Card>
       </motion.div>
 
+      {/* System & diagnostics */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.15 }}
+      >
+        <SystemDiagnosticsPanel />
+      </motion.div>
+
       {/* What's New */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -302,6 +315,15 @@ export function AboutPage() {
             </CardTitle>
             <CardDescription>Latest updates and improvements in this release</CardDescription>
           </CardHeader>
+          <CardContent className="pb-0">
+            <ChangelogDrawer
+              trigger={
+                <Button variant="secondary" className="w-full">
+                  Open changelog viewer
+                </Button>
+              }
+            />
+          </CardContent>
           <CardContent className="space-y-6">
             <ScrollArea className="h-96 pr-4">
               {changelog.map((release, releaseIndex) => (
@@ -433,15 +455,19 @@ export function AboutPage() {
                 </div>
               </Button>
 
-              <Button variant="outline" className="w-full justify-start h-auto p-4">
-                <div className="text-left">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Code className="h-4 w-4" />
-                    <span className="font-medium">Open Source</span>
-                  </div>
-                  <div className="text-xs text-muted-foreground">Contribute on GitHub</div>
-                </div>
-              </Button>
+              <LicenseDialog
+                trigger={
+                  <Button variant="outline" className="w-full justify-start h-auto p-4">
+                    <div className="text-left">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Code className="h-4 w-4" />
+                        <span className="font-medium">Open-source licenses</span>
+                      </div>
+                      <div className="text-xs text-muted-foreground">Read the full license texts in-app</div>
+                    </div>
+                  </Button>
+                }
+              />
             </div>
 
             <div className="pt-4 border-t text-center text-sm text-muted-foreground">

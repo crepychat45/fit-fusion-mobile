@@ -7,6 +7,9 @@ import { mark } from "@/utils/perf-telemetry";
 import { installAppRecovery } from "@/utils/app-recovery";
 import { installGlobalErrorHandler } from "@/utils/global-error-handler";
 
+import { installConsoleBuffer } from "@/utils/console-buffer";
+
+installConsoleBuffer();
 installGlobalErrorHandler();
 
 /**
