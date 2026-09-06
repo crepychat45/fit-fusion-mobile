@@ -38,6 +38,51 @@ export type Database = {
         }
         Relationships: []
       }
+      app_releases: {
+        Row: {
+          changelog: Json
+          channel: string
+          created_at: string
+          created_by: string | null
+          download_url: string | null
+          id: string
+          is_active: boolean
+          mandatory: boolean
+          min_version: string | null
+          title: string
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          changelog?: Json
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          download_url?: string | null
+          id?: string
+          is_active?: boolean
+          mandatory?: boolean
+          min_version?: string | null
+          title?: string
+          updated_at?: string
+          version: string
+        }
+        Update: {
+          changelog?: Json
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          download_url?: string | null
+          id?: string
+          is_active?: boolean
+          mandatory?: boolean
+          min_version?: string | null
+          title?: string
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           attachments: Json
@@ -307,6 +352,66 @@ export type Database = {
         }
         Relationships: []
       }
+      feature_flags: {
+        Row: {
+          allowed_roles: string[]
+          created_at: string
+          description: string | null
+          is_enabled: boolean
+          key: string
+          updated_at: string
+        }
+        Insert: {
+          allowed_roles?: string[]
+          created_at?: string
+          description?: string | null
+          is_enabled?: boolean
+          key: string
+          updated_at?: string
+        }
+        Update: {
+          allowed_roles?: string[]
+          created_at?: string
+          description?: string | null
+          is_enabled?: boolean
+          key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      global_announcements: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string | null
+          id: string
+          message: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          message: string
+          title: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          message?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       post_comments: {
         Row: {
           content: string
@@ -402,6 +507,7 @@ export type Database = {
         Row: {
           age: number | null
           avatar_url: string | null
+          beta_opt_in: boolean
           bio: string | null
           body_measurements: Json | null
           created_at: string
@@ -409,6 +515,7 @@ export type Database = {
           fitness_level: string | null
           height_cm: number | null
           id: number
+          is_disabled: boolean
           name: string | null
           updated_at: string
           user_id: string
@@ -419,6 +526,7 @@ export type Database = {
         Insert: {
           age?: number | null
           avatar_url?: string | null
+          beta_opt_in?: boolean
           bio?: string | null
           body_measurements?: Json | null
           created_at?: string
@@ -426,6 +534,7 @@ export type Database = {
           fitness_level?: string | null
           height_cm?: number | null
           id?: never
+          is_disabled?: boolean
           name?: string | null
           updated_at?: string
           user_id: string
@@ -436,6 +545,7 @@ export type Database = {
         Update: {
           age?: number | null
           avatar_url?: string | null
+          beta_opt_in?: boolean
           bio?: string | null
           body_measurements?: Json | null
           created_at?: string
@@ -443,6 +553,7 @@ export type Database = {
           fitness_level?: string | null
           height_cm?: number | null
           id?: never
+          is_disabled?: boolean
           name?: string | null
           updated_at?: string
           user_id?: string
@@ -500,6 +611,27 @@ export type Database = {
           id?: string
           metadata?: Json | null
           reason?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
         }
         Relationships: []
       }
@@ -708,6 +840,14 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin: { Args: never; Returns: boolean }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -737,7 +877,7 @@ export type Database = {
       shares_chat_thread: { Args: { _a: string; _b: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -864,6 +1004,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const
