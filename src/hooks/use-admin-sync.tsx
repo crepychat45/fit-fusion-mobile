@@ -90,8 +90,11 @@ export function useAdminSync(): AdminSyncState {
 
   useEffect(() => {
     refresh();
+    // Unique channel name per hook instance: reusing "admin-sync" across mounts
+    // makes the second instance collide with the first and Realtime throws
+    // "cannot add postgres_changes callbacks after subscribe()".
     const channel = supabase
-      .channel("admin-sync")
+      .channel(`admin-sync-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "app_releases" }, () => refresh())
       .on("postgres_changes", { event: "*", schema: "public", table: "feature_flags" }, () => refresh())
       .on(
