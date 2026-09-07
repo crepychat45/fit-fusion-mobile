@@ -33,7 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { APP_VERSION } from "@/lib/app-version";
-import { getSystemDiagnostics, type SystemDiagnostics } from "@/utils/system-diagnostics";
+import { buildDiagnosticReport, type DiagnosticReport } from "@/utils/system-diagnostics";
 
 const Panel: React.FC<{ children: React.ReactNode; className?: string }> = ({
   children,
@@ -332,7 +332,7 @@ function UsersTab() {
     load();
   }, [load]);
 
-  const update = async (userId: string, patch: Record<string, boolean>) => {
+  const update = async (userId: string, patch: { beta_opt_in?: boolean; is_disabled?: boolean }) => {
     const { error } = await supabase.from("profiles").update(patch).eq("user_id", userId);
     if (error) toast({ title: "Update failed", description: error.message, variant: "destructive" });
     else load();
@@ -486,9 +486,9 @@ function AnnouncementsPanel() {
 /* ----------------------------- Diagnostics ---------------------------- */
 
 function DiagnosticsTab() {
-  const [diag, setDiag] = useState<SystemDiagnostics | null>(null);
+  const [diag, setDiag] = useState<DiagnosticReport | null>(null);
   useEffect(() => {
-    getSystemDiagnostics().then(setDiag).catch(() => setDiag(null));
+    buildDiagnosticReport().then(setDiag).catch(() => setDiag(null));
   }, []);
 
   return (
