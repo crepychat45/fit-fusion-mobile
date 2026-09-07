@@ -10,6 +10,8 @@ import { prefetchAllRoutes } from "@/utils/route-prefetch";
 import { SEOManager } from "@/components/seo-manager";
 import { AppLockGate } from "@/components/security/app-lock-gate";
 import { NativeShell } from "@/components/native/native-shell";
+import { AdminProtectedRoute } from "@/components/admin/admin-protected-route";
+import { GlobalAnnouncementBanner } from "@/components/admin/global-announcement-banner";
 
 /**
  * Route fallback. The full boot splash is only used for the very first
@@ -96,6 +98,8 @@ const OAuthConsent = lazyWithRetry(() => import("./pages/OAuthConsent"));
 const AIWorkoutGenerator = lazyWithRetry(() => import("./pages/ai-workout-generator"));
 const PublicFitnessCard = lazyWithRetry(() => import("./pages/public-fitness-card"));
 const FitAssistant = lazyWithRetry(() => import("./components/fit-assistant").then(m => ({ default: m.FitAssistant })));
+const AdminPage = lazyWithRetry(() => import("./pages/admin"));
+const RemoteUpdateDrawer = lazy(() => import("./components/admin/remote-update-drawer").then(m => ({ default: m.RemoteUpdateDrawer })));
 const PerfDiagnosticsPanel = lazy(() => import("./components/perf-diagnostics-panel"));
 
 
@@ -124,6 +128,7 @@ const AppContent: React.FC = () => {
     <>
       <SEOManager>
       <NativeShell />
+      <GlobalAnnouncementBanner />
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={location.pathname}
@@ -168,6 +173,8 @@ const AppContent: React.FC = () => {
           <Route path="/nutrition" element={<ProtectedRoute><P><NutritionPage /></P></ProtectedRoute>} />
           <Route path="/vault" element={<ProtectedRoute><P><VaultPage /></P></ProtectedRoute>} />
 
+          <Route path="/admin" element={<AdminProtectedRoute><P><AdminPage /></P></AdminProtectedRoute>} />
+
           <Route path="*" element={<P><NotFound /></P>} />
         </Routes>
         </motion.div>
@@ -177,6 +184,9 @@ const AppContent: React.FC = () => {
           <FitAssistant />
         </Suspense>
       )}
+      <Suspense fallback={null}>
+        <RemoteUpdateDrawer />
+      </Suspense>
       <Suspense fallback={null}>
         <PerfDiagnosticsPanel />
       </Suspense>
