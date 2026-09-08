@@ -4,6 +4,7 @@ import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
 
 export interface AdminState {
   isAdmin: boolean;
+  isSuperAdmin: boolean;
   checking: boolean;
   userId: string | null;
 }
@@ -15,6 +16,7 @@ export interface AdminState {
 export function useAdmin(): AdminState {
   const { user, loading } = useEnhancedAuth();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
@@ -23,6 +25,7 @@ export function useAdmin(): AdminState {
     if (loading) return;
     if (!user) {
       setIsAdmin(false);
+      setIsSuperAdmin(false);
       setChecking(false);
       return;
     }
@@ -33,10 +36,11 @@ export function useAdmin(): AdminState {
         .from("user_roles")
         .select("role")
         .eq("user_id", user.id)
-        .eq("role", "admin")
-        .maybeSingle();
+        .in("role", ["admin", "super_admin"]);
       if (cancelled) return;
-      setIsAdmin(!error && Boolean(data));
+      const roles = new Set((error ? [] : data ?? []).map((r) => r.role as string));
+      setIsSuperAdmin(roles.has("super_admin"));
+      setIsAdmin(roles.has("admin") || roles.has("super_admin"));
       setChecking(false);
     })();
 
@@ -45,5 +49,6 @@ export function useAdmin(): AdminState {
     };
   }, [user, loading]);
 
-  return { isAdmin, checking: loading || checking, userId: user?.id ?? null };
+  return { isAdmin, isSuperAdmin, checking: loading || checking, userId: user?.id ?? null };
 }
+
