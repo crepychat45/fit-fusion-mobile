@@ -49,6 +49,7 @@ export type Database = {
           is_active: boolean
           mandatory: boolean
           min_version: string | null
+          published: boolean
           title: string
           updated_at: string
           version: string
@@ -63,6 +64,7 @@ export type Database = {
           is_active?: boolean
           mandatory?: boolean
           min_version?: string | null
+          published?: boolean
           title?: string
           updated_at?: string
           version: string
@@ -77,6 +79,7 @@ export type Database = {
           is_active?: boolean
           mandatory?: boolean
           min_version?: string | null
+          published?: boolean
           title?: string
           updated_at?: string
           version?: string
@@ -379,6 +382,39 @@ export type Database = {
         }
         Relationships: []
       }
+      feature_switches: {
+        Row: {
+          allowed_tiers: string[]
+          created_at: string
+          description: string | null
+          feature_id: string
+          is_enabled: boolean
+          min_app_version: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          allowed_tiers?: string[]
+          created_at?: string
+          description?: string | null
+          feature_id: string
+          is_enabled?: boolean
+          min_app_version?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          allowed_tiers?: string[]
+          created_at?: string
+          description?: string | null
+          feature_id?: string
+          is_enabled?: boolean
+          min_app_version?: string | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       global_announcements: {
         Row: {
           active: boolean
@@ -587,6 +623,33 @@ export type Database = {
           id?: string
           p256dh?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      site_content: {
+        Row: {
+          content: Json
+          created_at: string
+          key: string
+          last_updated_by: string | null
+          section: string
+          updated_at: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          key: string
+          last_updated_by?: string | null
+          section?: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          key?: string
+          last_updated_by?: string | null
+          section?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -848,6 +911,8 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      is_admin_or_super: { Args: { _user_id?: string }; Returns: boolean }
+      is_super_admin: { Args: { _user_id?: string }; Returns: boolean }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -877,7 +942,7 @@ export type Database = {
       shares_chat_thread: { Args: { _a: string; _b: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      app_role: "admin" | "moderator" | "user" | "super_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1005,7 +1070,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user"],
+      app_role: ["admin", "moderator", "user", "super_admin"],
     },
   },
 } as const
