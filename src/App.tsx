@@ -176,7 +176,7 @@ const AppContent: React.FC = () => {
           <Route path="/nutrition" element={<ProtectedRoute><P><NutritionPage /></P></ProtectedRoute>} />
           <Route path="/vault" element={<ProtectedRoute><P><VaultPage /></P></ProtectedRoute>} />
 
-          <Route path="/admin" element={<SuperAdminGuard><P><AdminPage /></P></SuperAdminGuard>} />
+          <Route path="/admin" element={<AdminPasswordGate><SuperAdminGuard><P><AdminPage /></P></SuperAdminGuard></AdminPasswordGate>} />
 
           <Route path="*" element={<P><NotFound /></P>} />
         </Routes>
