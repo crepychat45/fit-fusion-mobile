@@ -345,6 +345,18 @@ function UsersTab() {
     else load();
   };
 
+  const setAdminRole = async (targetId: string, makeAdmin: boolean) => {
+    const { error } = makeAdmin
+      ? await supabase.from("user_roles").insert({ user_id: targetId, role: "admin" })
+      : await supabase.from("user_roles").delete().eq("user_id", targetId).eq("role", "admin");
+    if (error) toast({ title: "Role change failed", description: error.message, variant: "destructive" });
+    else {
+      toast({ title: makeAdmin ? "Promoted to admin" : "Admin access revoked" });
+      load();
+    }
+  };
+
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return rows;
