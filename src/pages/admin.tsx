@@ -561,18 +561,27 @@ const AdminPage: React.FC = () => {
       <div className="mx-auto max-w-6xl space-y-4 px-4 pt-4">
         <Tabs defaultValue="dashboard">
           <TabsList className="flex w-full flex-wrap justify-start gap-1">
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="releases">Releases</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="dashboard">Overview</TabsTrigger>
+            <TabsTrigger value="releases">Release Center</TabsTrigger>
+            <TabsTrigger value="switches">Feature Control</TabsTrigger>
+            <TabsTrigger value="content">Content / CMS</TabsTrigger>
+            <TabsTrigger value="users">Users &amp; Beta</TabsTrigger>
             <TabsTrigger value="flags">Feature Flags</TabsTrigger>
             <TabsTrigger value="diagnostics">Diagnostics</TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard" className="mt-4 space-y-4">
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-4">
               <Panel>
                 <div className="flex items-center gap-2 text-muted-foreground"><Rocket className="h-4 w-4" /><span className="text-xs">Active releases</span></div>
                 <p className="text-2xl font-bold">{releases.filter((r) => r.is_active).length}</p>
+              </Panel>
+              <Panel>
+                <div className="flex items-center gap-2 text-muted-foreground"><Flag className="h-4 w-4" /><span className="text-xs">Enabled switches</span></div>
+                <p className="text-2xl font-bold">
+                  {Object.values(switches).filter((f) => f.is_enabled).length}
+                  <span className="text-sm font-normal text-muted-foreground">/{Object.keys(switches).length}</span>
+                </p>
               </Panel>
               <Panel>
                 <div className="flex items-center gap-2 text-muted-foreground"><Flag className="h-4 w-4" /><span className="text-xs">Enabled flags</span></div>
@@ -583,8 +592,13 @@ const AdminPage: React.FC = () => {
                 <p className="text-2xl font-bold">{announcements.filter((a) => a.active).length}</p>
               </Panel>
             </div>
+            <MaintenanceSwitch />
             <AnnouncementsPanel />
           </TabsContent>
+
+          <TabsContent value="switches" className="mt-4"><FeatureControlHub /></TabsContent>
+          <TabsContent value="content" className="mt-4"><ContentManager /></TabsContent>
+
 
           <TabsContent value="releases" className="mt-4"><ReleasesTab /></TabsContent>
           <TabsContent value="users" className="mt-4"><UsersTab /></TabsContent>
