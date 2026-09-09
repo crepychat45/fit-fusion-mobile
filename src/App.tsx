@@ -10,8 +10,11 @@ import { prefetchAllRoutes } from "@/utils/route-prefetch";
 import { SEOManager } from "@/components/seo-manager";
 import { AppLockGate } from "@/components/security/app-lock-gate";
 import { NativeShell } from "@/components/native/native-shell";
-import { AdminProtectedRoute } from "@/components/admin/admin-protected-route";
+import { SuperAdminGuard } from "@/components/admin/super-admin-guard";
 import { GlobalAnnouncementBanner } from "@/components/admin/global-announcement-banner";
+import { RemoteConfigProvider } from "@/hooks/use-remote-config";
+import { MaintenanceGate } from "@/components/admin/feature-gate";
+
 
 /**
  * Route fallback. The full boot splash is only used for the very first
@@ -173,7 +176,7 @@ const AppContent: React.FC = () => {
           <Route path="/nutrition" element={<ProtectedRoute><P><NutritionPage /></P></ProtectedRoute>} />
           <Route path="/vault" element={<ProtectedRoute><P><VaultPage /></P></ProtectedRoute>} />
 
-          <Route path="/admin" element={<AdminProtectedRoute><P><AdminPage /></P></AdminProtectedRoute>} />
+          <Route path="/admin" element={<SuperAdminGuard><P><AdminPage /></P></SuperAdminGuard>} />
 
           <Route path="*" element={<P><NotFound /></P>} />
         </Routes>
@@ -199,11 +202,16 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => (
   <ErrorBoundary>
     <AppWrapper>
-      <AppLockGate>
-        <AppContent />
-      </AppLockGate>
+      <RemoteConfigProvider>
+        <AppLockGate>
+          <MaintenanceGate>
+            <AppContent />
+          </MaintenanceGate>
+        </AppLockGate>
+      </RemoteConfigProvider>
     </AppWrapper>
   </ErrorBoundary>
 );
+
 
 export default App;

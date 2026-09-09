@@ -34,6 +34,13 @@ import {
 } from "@/components/ui/select";
 import { APP_VERSION } from "@/lib/app-version";
 import { buildDiagnosticReport, type DiagnosticReport } from "@/utils/system-diagnostics";
+import {
+  ContentManager,
+  FeatureControlHub,
+  MaintenanceSwitch,
+} from "@/components/admin/super-admin-panels";
+import { useRemoteConfig } from "@/hooks/use-remote-config";
+
 
 const Panel: React.FC<{ children: React.ReactNode; className?: string }> = ({
   children,
@@ -299,6 +306,8 @@ interface AdminUserRow {
 
 function UsersTab() {
   const { toast } = useToast();
+  const { isSuperAdmin, userId: selfId } = useAdmin();
+
   const [rows, setRows] = useState<AdminUserRow[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -337,6 +346,18 @@ function UsersTab() {
     if (error) toast({ title: "Update failed", description: error.message, variant: "destructive" });
     else load();
   };
+
+  const setAdminRole = async (targetId: string, makeAdmin: boolean) => {
+    const { error } = makeAdmin
+      ? await supabase.from("user_roles").insert({ user_id: targetId, role: "admin" })
+      : await supabase.from("user_roles").delete().eq("user_id", targetId).eq("role", "admin");
+    if (error) toast({ title: "Role change failed", description: error.message, variant: "destructive" });
+    else {
+      toast({ title: makeAdmin ? "Promoted to admin" : "Admin access revoked" });
+      load();
+    }
+  };
+
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -385,7 +406,17 @@ function UsersTab() {
                       <p className="text-xs text-muted-foreground">@{r.username ?? r.user_id.slice(0, 8)}</p>
                     </td>
                     <td className="text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</td>
-                    <td>{r.isAdmin ? <Badge>admin</Badge> : <Badge variant="outline">user</Badge>}</td>
+                    <td>
+                      <div className="flex items-center gap-2">
+                        {r.isAdmin ? <Badge>admin</Badge> : <Badge variant="outline">user</Badge>}
+                        {isSuperAdmin && r.user_id !== selfId && (
+                          <Button size="sm" variant="ghost" onClick={() => setAdminRole(r.user_id, !r.isAdmin)}>
+                            {r.isAdmin ? "Revoke" : "Promote"}
+                          </Button>
+                        )}
+                      </div>
+                    </td>
+
                     <td>
                       <Switch
                         checked={r.beta_opt_in}
@@ -508,6 +539,8 @@ function DiagnosticsTab() {
 const AdminPage: React.FC = () => {
   const navigate = useNavigate();
   const { releases, flags, announcements } = useAdminSync();
+  const { switches } = useRemoteConfig();
+
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -530,18 +563,27 @@ const AdminPage: React.FC = () => {
       <div className="mx-auto max-w-6xl space-y-4 px-4 pt-4">
         <Tabs defaultValue="dashboard">
           <TabsList className="flex w-full flex-wrap justify-start gap-1">
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="releases">Releases</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="dashboard">Overview</TabsTrigger>
+            <TabsTrigger value="releases">Release Center</TabsTrigger>
+            <TabsTrigger value="switches">Feature Control</TabsTrigger>
+            <TabsTrigger value="content">Content / CMS</TabsTrigger>
+            <TabsTrigger value="users">Users &amp; Beta</TabsTrigger>
             <TabsTrigger value="flags">Feature Flags</TabsTrigger>
             <TabsTrigger value="diagnostics">Diagnostics</TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard" className="mt-4 space-y-4">
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-4">
               <Panel>
                 <div className="flex items-center gap-2 text-muted-foreground"><Rocket className="h-4 w-4" /><span className="text-xs">Active releases</span></div>
                 <p className="text-2xl font-bold">{releases.filter((r) => r.is_active).length}</p>
+              </Panel>
+              <Panel>
+                <div className="flex items-center gap-2 text-muted-foreground"><Flag className="h-4 w-4" /><span className="text-xs">Enabled switches</span></div>
+                <p className="text-2xl font-bold">
+                  {Object.values(switches).filter((f) => f.is_enabled).length}
+                  <span className="text-sm font-normal text-muted-foreground">/{Object.keys(switches).length}</span>
+                </p>
               </Panel>
               <Panel>
                 <div className="flex items-center gap-2 text-muted-foreground"><Flag className="h-4 w-4" /><span className="text-xs">Enabled flags</span></div>
@@ -552,8 +594,13 @@ const AdminPage: React.FC = () => {
                 <p className="text-2xl font-bold">{announcements.filter((a) => a.active).length}</p>
               </Panel>
             </div>
+            <MaintenanceSwitch />
             <AnnouncementsPanel />
           </TabsContent>
+
+          <TabsContent value="switches" className="mt-4"><FeatureControlHub /></TabsContent>
+          <TabsContent value="content" className="mt-4"><ContentManager /></TabsContent>
+
 
           <TabsContent value="releases" className="mt-4"><ReleasesTab /></TabsContent>
           <TabsContent value="users" className="mt-4"><UsersTab /></TabsContent>
