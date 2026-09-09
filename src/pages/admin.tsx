@@ -539,6 +539,8 @@ function DiagnosticsTab() {
 const AdminPage: React.FC = () => {
   const navigate = useNavigate();
   const { releases, flags, announcements } = useAdminSync();
+  const { switches } = useRemoteConfig();
+
 
   return (
     <div className="min-h-screen bg-background pb-24">
