@@ -220,7 +220,7 @@ export function ContentManager() {
   const save = async (key: string, section: string) => {
     const raw = drafts[key];
     if (raw === undefined) return;
-    let parsed: Record<string, unknown>;
+    let parsed: unknown;
     try {
       parsed = JSON.parse(raw);
     } catch {
@@ -229,7 +229,8 @@ export function ContentManager() {
     }
     const { error } = await supabase
       .from("site_content")
-      .upsert({ key, section, content: parsed, last_updated_by: userId });
+      .upsert({ key, section, content: parsed as never, last_updated_by: userId });
+
     if (error) toast({ title: "Save failed", description: error.message, variant: "destructive" });
     else {
       toast({ title: "Content published", description: `${key} is live for all users.` });
