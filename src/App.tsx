@@ -199,11 +199,16 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => (
   <ErrorBoundary>
     <AppWrapper>
-      <AppLockGate>
-        <AppContent />
-      </AppLockGate>
+      <RemoteConfigProvider>
+        <AppLockGate>
+          <MaintenanceGate>
+            <AppContent />
+          </MaintenanceGate>
+        </AppLockGate>
+      </RemoteConfigProvider>
     </AppWrapper>
   </ErrorBoundary>
 );
+
 
 export default App;
