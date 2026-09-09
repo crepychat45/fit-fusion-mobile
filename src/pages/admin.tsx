@@ -34,6 +34,13 @@ import {
 } from "@/components/ui/select";
 import { APP_VERSION } from "@/lib/app-version";
 import { buildDiagnosticReport, type DiagnosticReport } from "@/utils/system-diagnostics";
+import {
+  ContentManager,
+  FeatureControlHub,
+  MaintenanceSwitch,
+} from "@/components/admin/super-admin-panels";
+import { useRemoteConfig } from "@/hooks/use-remote-config";
+
 
 const Panel: React.FC<{ children: React.ReactNode; className?: string }> = ({
   children,
