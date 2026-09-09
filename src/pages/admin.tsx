@@ -404,7 +404,17 @@ function UsersTab() {
                       <p className="text-xs text-muted-foreground">@{r.username ?? r.user_id.slice(0, 8)}</p>
                     </td>
                     <td className="text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</td>
-                    <td>{r.isAdmin ? <Badge>admin</Badge> : <Badge variant="outline">user</Badge>}</td>
+                    <td>
+                      <div className="flex items-center gap-2">
+                        {r.isAdmin ? <Badge>admin</Badge> : <Badge variant="outline">user</Badge>}
+                        {isSuperAdmin && r.user_id !== selfId && (
+                          <Button size="sm" variant="ghost" onClick={() => setAdminRole(r.user_id, !r.isAdmin)}>
+                            {r.isAdmin ? "Revoke" : "Promote"}
+                          </Button>
+                        )}
+                      </div>
+                    </td>
+
                     <td>
                       <Switch
                         checked={r.beta_opt_in}
