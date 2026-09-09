@@ -10,7 +10,7 @@ import { prefetchAllRoutes } from "@/utils/route-prefetch";
 import { SEOManager } from "@/components/seo-manager";
 import { AppLockGate } from "@/components/security/app-lock-gate";
 import { NativeShell } from "@/components/native/native-shell";
-import { AdminProtectedRoute } from "@/components/admin/admin-protected-route";
+import { SuperAdminGuard } from "@/components/admin/super-admin-guard";
 import { GlobalAnnouncementBanner } from "@/components/admin/global-announcement-banner";
 import { RemoteConfigProvider } from "@/hooks/use-remote-config";
 import { MaintenanceGate } from "@/components/admin/feature-gate";
