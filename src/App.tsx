@@ -11,6 +11,8 @@ import { SEOManager } from "@/components/seo-manager";
 import { AppLockGate } from "@/components/security/app-lock-gate";
 import { NativeShell } from "@/components/native/native-shell";
 import { SuperAdminGuard } from "@/components/admin/super-admin-guard";
+import { AdminPasswordGate } from "@/components/admin/admin-password-gate";
+
 import { GlobalAnnouncementBanner } from "@/components/admin/global-announcement-banner";
 import { RemoteConfigProvider } from "@/hooks/use-remote-config";
 import { MaintenanceGate } from "@/components/admin/feature-gate";
@@ -176,7 +178,7 @@ const AppContent: React.FC = () => {
           <Route path="/nutrition" element={<ProtectedRoute><P><NutritionPage /></P></ProtectedRoute>} />
           <Route path="/vault" element={<ProtectedRoute><P><VaultPage /></P></ProtectedRoute>} />
 
-          <Route path="/admin" element={<SuperAdminGuard><P><AdminPage /></P></SuperAdminGuard>} />
+          <Route path="/admin" element={<AdminPasswordGate><SuperAdminGuard><P><AdminPage /></P></SuperAdminGuard></AdminPasswordGate>} />
 
           <Route path="*" element={<P><NotFound /></P>} />
         </Routes>
