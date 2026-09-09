@@ -306,6 +306,8 @@ interface AdminUserRow {
 
 function UsersTab() {
   const { toast } = useToast();
+  const { isSuperAdmin, userId: selfId } = useAdmin();
+
   const [rows, setRows] = useState<AdminUserRow[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
