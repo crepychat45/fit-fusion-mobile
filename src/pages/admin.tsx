@@ -40,6 +40,17 @@ import {
   MaintenanceSwitch,
 } from "@/components/admin/super-admin-panels";
 import { useRemoteConfig } from "@/hooks/use-remote-config";
+import {
+  AnnouncementEditDialog,
+  ReleaseEditDialog,
+} from "@/components/admin/admin-edit-dialogs";
+import {
+  AnalyticsTab,
+  AuditLogTab,
+  ModerationTab,
+  PushCenter,
+  SubscriptionsTab,
+} from "@/components/admin/admin-extra-panels";
 
 
 const Panel: React.FC<{ children: React.ReactNode; className?: string }> = ({
@@ -213,9 +224,12 @@ function ReleasesTab() {
                     </Badge>
                   </div>
                 </div>
-                <Button size="sm" variant={r.is_active ? "destructive" : "outline"} onClick={() => revoke(r.id, r.is_active)}>
-                  {r.is_active ? "Revoke" : "Restore"}
-                </Button>
+                <div className="flex shrink-0 items-center gap-1">
+                  <ReleaseEditDialog release={r} onSaved={refresh} />
+                  <Button size="sm" variant={r.is_active ? "destructive" : "outline"} onClick={() => revoke(r.id, r.is_active)}>
+                    {r.is_active ? "Revoke" : "Restore"}
+                  </Button>
+                </div>
               </div>
               {r.changelog.length > 0 && (
                 <ul className="mt-2 list-disc pl-5 text-sm text-muted-foreground">
@@ -505,7 +519,10 @@ function AnnouncementsPanel() {
                 <p className="text-sm text-muted-foreground">{a.message}</p>
                 <Badge variant="secondary" className="mt-1">{a.type}</Badge>
               </div>
-              <Switch checked={a.active} aria-label="Toggle announcement" onCheckedChange={(v) => setActive(a.id, v)} />
+              <div className="flex shrink-0 items-center gap-1">
+                <AnnouncementEditDialog announcement={a} onSaved={refresh} />
+                <Switch checked={a.active} aria-label="Toggle announcement" onCheckedChange={(v) => setActive(a.id, v)} />
+              </div>
             </div>
           ))}
         </div>
@@ -562,15 +579,22 @@ const AdminPage: React.FC = () => {
 
       <div className="mx-auto max-w-6xl space-y-4 px-4 pt-4">
         <Tabs defaultValue="dashboard">
-          <TabsList className="flex w-full flex-wrap justify-start gap-1">
-            <TabsTrigger value="dashboard">Overview</TabsTrigger>
-            <TabsTrigger value="releases">Release Center</TabsTrigger>
-            <TabsTrigger value="switches">Feature Control</TabsTrigger>
-            <TabsTrigger value="content">Content / CMS</TabsTrigger>
-            <TabsTrigger value="users">Users &amp; Beta</TabsTrigger>
-            <TabsTrigger value="flags">Feature Flags</TabsTrigger>
-            <TabsTrigger value="diagnostics">Diagnostics</TabsTrigger>
-          </TabsList>
+          <div className="-mx-4 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <TabsList className="inline-flex w-max justify-start gap-1">
+              <TabsTrigger value="dashboard">Overview</TabsTrigger>
+              <TabsTrigger value="releases">Release Center</TabsTrigger>
+              <TabsTrigger value="push">Push &amp; Broadcast</TabsTrigger>
+              <TabsTrigger value="switches">Feature Control</TabsTrigger>
+              <TabsTrigger value="content">Content / CMS</TabsTrigger>
+              <TabsTrigger value="users">Users &amp; Beta</TabsTrigger>
+              <TabsTrigger value="moderation">Moderation</TabsTrigger>
+              <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              <TabsTrigger value="flags">Feature Flags</TabsTrigger>
+              <TabsTrigger value="audit">Audit Log</TabsTrigger>
+              <TabsTrigger value="diagnostics">Diagnostics</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="dashboard" className="mt-4 space-y-4">
             <div className="grid gap-3 sm:grid-cols-4">
@@ -603,8 +627,13 @@ const AdminPage: React.FC = () => {
 
 
           <TabsContent value="releases" className="mt-4"><ReleasesTab /></TabsContent>
+          <TabsContent value="push" className="mt-4"><PushCenter /></TabsContent>
           <TabsContent value="users" className="mt-4"><UsersTab /></TabsContent>
+          <TabsContent value="moderation" className="mt-4"><ModerationTab /></TabsContent>
+          <TabsContent value="subscriptions" className="mt-4"><SubscriptionsTab /></TabsContent>
+          <TabsContent value="analytics" className="mt-4"><AnalyticsTab /></TabsContent>
           <TabsContent value="flags" className="mt-4"><FlagsTab /></TabsContent>
+          <TabsContent value="audit" className="mt-4"><AuditLogTab /></TabsContent>
           <TabsContent value="diagnostics" className="mt-4"><DiagnosticsTab /></TabsContent>
         </Tabs>
 
