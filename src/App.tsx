@@ -135,6 +135,7 @@ const AppContent: React.FC = () => {
       <SEOManager>
       <NativeShell />
       <GlobalAnnouncementBanner />
+      <AdminNotificationListener />
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={location.pathname}
