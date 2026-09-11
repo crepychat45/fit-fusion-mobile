@@ -88,16 +88,21 @@ export function usePushNotifications() {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
-        const subscriptionData = sub.toJSON();
-        
-        // Store subscription using generic Database type
-        await supabase
-          .from('push_subscriptions' as any)
-          .upsert({
+        const subscriptionData = sub.toJSON() as {
+          endpoint?: string;
+          keys?: { p256dh?: string; auth?: string };
+        };
+
+        // Table stores the endpoint plus the two push keys separately.
+        await supabase.from('push_subscriptions').upsert(
+          {
             user_id: user.id,
-            subscription: subscriptionData,
-            endpoint: subscriptionData.endpoint,
-          } as any);
+            endpoint: subscriptionData.endpoint ?? '',
+            p256dh: subscriptionData.keys?.p256dh ?? null,
+            auth_key: subscriptionData.keys?.auth ?? null,
+          },
+          { onConflict: 'endpoint' },
+        );
 
         setIsSubscribed(true);
         setSubscription(subscriptionData);
