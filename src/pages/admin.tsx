@@ -41,6 +41,10 @@ import {
 } from "@/components/admin/super-admin-panels";
 import { useRemoteConfig } from "@/hooks/use-remote-config";
 import {
+  AnnouncementEditDialog,
+  ReleaseEditDialog,
+} from "@/components/admin/admin-edit-dialogs";
+import {
   AnalyticsTab,
   AuditLogTab,
   ModerationTab,
@@ -220,9 +224,12 @@ function ReleasesTab() {
                     </Badge>
                   </div>
                 </div>
-                <Button size="sm" variant={r.is_active ? "destructive" : "outline"} onClick={() => revoke(r.id, r.is_active)}>
-                  {r.is_active ? "Revoke" : "Restore"}
-                </Button>
+                <div className="flex shrink-0 items-center gap-1">
+                  <ReleaseEditDialog release={r} onSaved={refresh} />
+                  <Button size="sm" variant={r.is_active ? "destructive" : "outline"} onClick={() => revoke(r.id, r.is_active)}>
+                    {r.is_active ? "Revoke" : "Restore"}
+                  </Button>
+                </div>
               </div>
               {r.changelog.length > 0 && (
                 <ul className="mt-2 list-disc pl-5 text-sm text-muted-foreground">
@@ -512,7 +519,10 @@ function AnnouncementsPanel() {
                 <p className="text-sm text-muted-foreground">{a.message}</p>
                 <Badge variant="secondary" className="mt-1">{a.type}</Badge>
               </div>
-              <Switch checked={a.active} aria-label="Toggle announcement" onCheckedChange={(v) => setActive(a.id, v)} />
+              <div className="flex shrink-0 items-center gap-1">
+                <AnnouncementEditDialog announcement={a} onSaved={refresh} />
+                <Switch checked={a.active} aria-label="Toggle announcement" onCheckedChange={(v) => setActive(a.id, v)} />
+              </div>
             </div>
           ))}
         </div>
