@@ -94,15 +94,18 @@ export function usePushNotifications() {
         };
 
         // Table stores the endpoint plus the two push keys separately.
-        await supabase.from('push_subscriptions').upsert(
-          {
-            user_id: user.id,
-            endpoint: subscriptionData.endpoint ?? '',
-            p256dh: subscriptionData.keys?.p256dh ?? null,
-            auth_key: subscriptionData.keys?.auth ?? null,
-          },
-          { onConflict: 'endpoint' },
-        );
+        const endpoint = subscriptionData.endpoint ?? '';
+        await supabase
+          .from('push_subscriptions')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('endpoint', endpoint);
+        await supabase.from('push_subscriptions').insert({
+          user_id: user.id,
+          endpoint,
+          p256dh: subscriptionData.keys?.p256dh ?? null,
+          auth_key: subscriptionData.keys?.auth ?? null,
+        });
 
         setIsSubscribed(true);
         setSubscription(subscriptionData);
