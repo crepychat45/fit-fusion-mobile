@@ -40,6 +40,13 @@ import {
   MaintenanceSwitch,
 } from "@/components/admin/super-admin-panels";
 import { useRemoteConfig } from "@/hooks/use-remote-config";
+import {
+  AnalyticsTab,
+  AuditLogTab,
+  ModerationTab,
+  PushCenter,
+  SubscriptionsTab,
+} from "@/components/admin/admin-extra-panels";
 
 
 const Panel: React.FC<{ children: React.ReactNode; className?: string }> = ({
@@ -610,8 +617,13 @@ const AdminPage: React.FC = () => {
 
 
           <TabsContent value="releases" className="mt-4"><ReleasesTab /></TabsContent>
+          <TabsContent value="push" className="mt-4"><PushCenter /></TabsContent>
           <TabsContent value="users" className="mt-4"><UsersTab /></TabsContent>
+          <TabsContent value="moderation" className="mt-4"><ModerationTab /></TabsContent>
+          <TabsContent value="subscriptions" className="mt-4"><SubscriptionsTab /></TabsContent>
+          <TabsContent value="analytics" className="mt-4"><AnalyticsTab /></TabsContent>
           <TabsContent value="flags" className="mt-4"><FlagsTab /></TabsContent>
+          <TabsContent value="audit" className="mt-4"><AuditLogTab /></TabsContent>
           <TabsContent value="diagnostics" className="mt-4"><DiagnosticsTab /></TabsContent>
         </Tabs>
 
