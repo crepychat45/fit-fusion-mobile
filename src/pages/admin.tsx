@@ -562,15 +562,22 @@ const AdminPage: React.FC = () => {
 
       <div className="mx-auto max-w-6xl space-y-4 px-4 pt-4">
         <Tabs defaultValue="dashboard">
-          <TabsList className="flex w-full flex-wrap justify-start gap-1">
-            <TabsTrigger value="dashboard">Overview</TabsTrigger>
-            <TabsTrigger value="releases">Release Center</TabsTrigger>
-            <TabsTrigger value="switches">Feature Control</TabsTrigger>
-            <TabsTrigger value="content">Content / CMS</TabsTrigger>
-            <TabsTrigger value="users">Users &amp; Beta</TabsTrigger>
-            <TabsTrigger value="flags">Feature Flags</TabsTrigger>
-            <TabsTrigger value="diagnostics">Diagnostics</TabsTrigger>
-          </TabsList>
+          <div className="-mx-4 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <TabsList className="inline-flex w-max justify-start gap-1">
+              <TabsTrigger value="dashboard">Overview</TabsTrigger>
+              <TabsTrigger value="releases">Release Center</TabsTrigger>
+              <TabsTrigger value="push">Push &amp; Broadcast</TabsTrigger>
+              <TabsTrigger value="switches">Feature Control</TabsTrigger>
+              <TabsTrigger value="content">Content / CMS</TabsTrigger>
+              <TabsTrigger value="users">Users &amp; Beta</TabsTrigger>
+              <TabsTrigger value="moderation">Moderation</TabsTrigger>
+              <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              <TabsTrigger value="flags">Feature Flags</TabsTrigger>
+              <TabsTrigger value="audit">Audit Log</TabsTrigger>
+              <TabsTrigger value="diagnostics">Diagnostics</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="dashboard" className="mt-4 space-y-4">
             <div className="grid gap-3 sm:grid-cols-4">
