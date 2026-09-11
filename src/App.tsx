@@ -14,6 +14,7 @@ import { SuperAdminGuard } from "@/components/admin/super-admin-guard";
 import { AdminPasswordGate } from "@/components/admin/admin-password-gate";
 
 import { GlobalAnnouncementBanner } from "@/components/admin/global-announcement-banner";
+import { AdminNotificationListener } from "@/hooks/use-admin-notifications";
 import { RemoteConfigProvider } from "@/hooks/use-remote-config";
 import { MaintenanceGate } from "@/components/admin/feature-gate";
 
