@@ -9,6 +9,7 @@ import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
 import { motion } from "framer-motion";
 import { EnhancedProfileDisplay } from "./enhanced-profile-display";
 import { ProfilePhotoUpload } from "@/components/profile-photo-upload";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 interface WelcomeHeaderProps {
   userName?: string;
