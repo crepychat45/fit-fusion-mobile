@@ -7,6 +7,7 @@ import React, {
   useState,
 } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useNotificationInbox } from "@/hooks/use-notification-inbox";
 import {
   motion,
   AnimatePresence,
@@ -358,6 +359,12 @@ export function MobileNav() {
   >(null);
   const [showAiNew, setShowAiNew] = useState(true);
 
+  // Live unread count from the unified notification inbox
+  const { unreadCount: inboxUnread } = useNotificationInbox();
+  useEffect(() => {
+    setNotifications(inboxUnread);
+  }, [inboxUnread]);
+
   // Workout progress ring — reads from localStorage; refreshes on focus/route change
   const [workoutProgress, setWorkoutProgress] = useState(0);
 
@@ -377,7 +384,6 @@ export function MobileNav() {
       const raw = localStorage.getItem("nav.notifications");
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (typeof parsed.count === "number") setNotifications(parsed.count);
         if (parsed.type) setNotificationType(parsed.type);
       }
       const wp = Number(localStorage.getItem("workout.progress") || 0);

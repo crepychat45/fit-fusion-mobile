@@ -9,6 +9,7 @@ import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
 import { motion } from "framer-motion";
 import { EnhancedProfileDisplay } from "./enhanced-profile-display";
 import { ProfilePhotoUpload } from "@/components/profile-photo-upload";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 interface WelcomeHeaderProps {
   userName?: string;
@@ -265,15 +266,7 @@ export function WelcomeHeader({
 
             {/* Action Buttons */}
             <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Open notifications"
-                className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm rounded-full shadow-lg"
-                onClick={() => navigate("/notifications")}
-              >
-                <Bell className="h-5 w-5" />
-              </Button>
+              <NotificationBell className="bg-white/10 text-white hover:bg-white/20 hover:text-white backdrop-blur-sm rounded-full shadow-lg" />
               <Button
                 variant="ghost"
                 size="icon"

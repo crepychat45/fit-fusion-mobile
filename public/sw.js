@@ -173,13 +173,28 @@ self.addEventListener("push", (event) => {
     data = { title: "FitFusion", body: event.data.text() };
   }
   event.waitUntil(
-    self.registration.showNotification(data.title || "FitFusion", {
-      body: data.body,
-      icon: "/favicon.ico",
-      badge: "/favicon.ico",
-      vibrate: [180, 90, 180],
-      data,
-    }),
+    (async () => {
+      await self.registration.showNotification(data.title || "FitFusion", {
+        body: data.body,
+        icon: "/favicon.ico",
+        badge: "/favicon.ico",
+        vibrate: [180, 90, 180],
+        data,
+      });
+      // Mirror the push into the in-app notification inbox (bell icon).
+      const clients = await self.clients.matchAll({
+        type: "window",
+        includeUncontrolled: true,
+      });
+      clients.forEach((client) =>
+        client.postMessage({
+          type: "PUSH_RECEIVED",
+          title: data.title || "FitFusion",
+          body: data.body || "",
+          url: data.url || null,
+        }),
+      );
+    })(),
   );
 });
 
