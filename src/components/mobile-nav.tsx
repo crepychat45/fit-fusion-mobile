@@ -384,7 +384,6 @@ export function MobileNav() {
       const raw = localStorage.getItem("nav.notifications");
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (typeof parsed.count === "number") setNotifications(parsed.count);
         if (parsed.type) setNotificationType(parsed.type);
       }
       const wp = Number(localStorage.getItem("workout.progress") || 0);
