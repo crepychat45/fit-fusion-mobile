@@ -351,74 +351,7 @@ const NotificationsPage = () => {
         </TabsContent>
 
         <TabsContent value="recent" className="px-4 py-6">
-          <h3 className="font-medium mb-3">Recent Notifications</h3>
-          <div className="space-y-3">
-            <Card>
-              <CardContent className="p-4 flex items-start gap-3">
-                <Bell className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="font-medium">Workout Reminder</p>
-                  <p className="text-sm text-muted-foreground">
-                    Time for your scheduled upper body workout!
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    2 hours ago
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4 flex items-start gap-3">
-                <Dumbbell className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="font-medium">Achievement Unlocked!</p>
-                  <p className="text-sm text-muted-foreground">
-                    You've completed 25 workouts. Great job!
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Yesterday
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4 flex items-start gap-3">
-                <MessageSquare className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="font-medium">New Feature Available</p>
-                  <p className="text-sm text-muted-foreground">
-                    Check out our new workout analytics dashboard!
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    3 days ago
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4 flex items-start gap-3">
-                <Calendar className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="font-medium">Weekly Summary</p>
-                  <p className="text-sm text-muted-foreground">
-                    You completed 4 workouts this week - view your stats!
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    5 days ago
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="mt-4">
-            <Button variant="outline" className="w-full">
-              Clear All Notifications
-            </Button>
-          </div>
+          <NotificationInboxList />
         </TabsContent>
       </Tabs>
 
