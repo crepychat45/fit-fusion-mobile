@@ -358,6 +358,12 @@ export function MobileNav() {
   >(null);
   const [showAiNew, setShowAiNew] = useState(true);
 
+  // Live unread count from the unified notification inbox
+  const { unreadCount: inboxUnread } = useNotificationInbox();
+  useEffect(() => {
+    setNotifications(inboxUnread);
+  }, [inboxUnread]);
+
   // Workout progress ring — reads from localStorage; refreshes on focus/route change
   const [workoutProgress, setWorkoutProgress] = useState(0);
 
