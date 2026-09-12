@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
+import { NotificationInboxList } from "@/components/notifications/notification-inbox-list";
 
 const NotificationsPage = () => {
   const navigate = useNavigate();
