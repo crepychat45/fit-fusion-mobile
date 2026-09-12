@@ -265,15 +265,7 @@ export function WelcomeHeader({
 
             {/* Action Buttons */}
             <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Open notifications"
-                className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm rounded-full shadow-lg"
-                onClick={() => navigate("/notifications")}
-              >
-                <Bell className="h-5 w-5" />
-              </Button>
+              <NotificationBell className="bg-white/10 text-white hover:bg-white/20 hover:text-white backdrop-blur-sm rounded-full shadow-lg" />
               <Button
                 variant="ghost"
                 size="icon"
