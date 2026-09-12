@@ -7,6 +7,7 @@ import React, {
   useState,
 } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useNotificationInbox } from "@/hooks/use-notification-inbox";
 import {
   motion,
   AnimatePresence,
