@@ -109,7 +109,8 @@ const SECTION_ICON = { sparkles: Sparkles, zap: Zap, bug: Bug, shield: Shield } 
 
 export function OneTapUpdateCenter() {
   const { toast } = useToast();
-  const [installed, setInstalled] = useState<string>(() => getStoredVersion());
+  const remote = useRemoteUpdate();
+  const [installed, setInstalled] = useState<string>(() => cleanVersion(getStoredVersion()));
   const [phase, setPhase] = useState<Phase>("idle");
   const [percent, setPercent] = useState(0);
   const [donePacks, setDonePacks] = useState<string[]>([]);
@@ -133,13 +134,18 @@ export function OneTapUpdateCenter() {
     };
   }, []);
 
+  useEffect(() => {
+    setInstalled(cleanVersion(remote.installed));
+  }, [remote.installed]);
+
   const wait = (ms: number) =>
     new Promise<void>((resolve) => {
       const t = window.setTimeout(() => resolve(), ms);
       timers.current.push(t);
     });
 
-  const hasUpdate = installed !== APP_VERSION;
+  const targetVersion = remote.target;
+  const hasUpdate = compareVersions(targetVersion, installed) > 0;
   const latestNote = RELEASE_NOTES[0];
   const busy = phase !== "idle" && phase !== "complete";
 
@@ -157,12 +163,13 @@ export function OneTapUpdateCenter() {
     setLastChecked(new Date().toLocaleTimeString());
     setPhase("idle");
     toast({
-      title: hasUpdate ? `Update available — v${APP_VERSION}` : "You're up to date",
+      title: hasUpdate ? `Update available — v${targetVersion}` : "You're up to date",
       description: hasUpdate
         ? `${PACKS.length} install packs bundled into one ${TOTAL_MB.toFixed(1)} MB package.`
         : `FitxFusion v${installed} is the latest ${channel} build.`,
     });
   };
+
 
   const runInstall = async () => {
     setDonePacks([]);
