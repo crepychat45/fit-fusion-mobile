@@ -154,7 +154,15 @@ const L: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 export function SettingsContainer() {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("account");
+  // Deep link support: /settings?tab=updates opens that tab directly.
+  const [activeTab, setActiveTab] = useState(() => {
+    try {
+      return new URLSearchParams(window.location.search).get("tab") || "account";
+    } catch {
+      return "account";
+    }
+  });
+
   const [isLoggedOut, setIsLoggedOut] = useState(false);
   const [settingsValidated, setSettingsValidated] = useState(false);
   const [validationProgress, setValidationProgress] = useState(0);

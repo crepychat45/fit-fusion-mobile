@@ -27,6 +27,8 @@ import {
 import { APP_VERSION, APP_RELEASE_DATE, RELEASE_NOTES } from "@/lib/app-version";
 import { getStoredVersion, setStoredVersion } from "@/config/version";
 import { checkForUpdate, clearAppCache } from "@/utils/version-api";
+import { useRemoteUpdate, compareVersions, cleanVersion } from "@/hooks/use-remote-update";
+
 
 type Phase = "idle" | "checking" | "downloading" | "verifying" | "installing" | "activating" | "restarting" | "complete";
 
@@ -109,7 +111,8 @@ const SECTION_ICON = { sparkles: Sparkles, zap: Zap, bug: Bug, shield: Shield } 
 
 export function OneTapUpdateCenter() {
   const { toast } = useToast();
-  const [installed, setInstalled] = useState<string>(() => getStoredVersion());
+  const remote = useRemoteUpdate();
+  const [installed, setInstalled] = useState<string>(() => cleanVersion(getStoredVersion()));
   const [phase, setPhase] = useState<Phase>("idle");
   const [percent, setPercent] = useState(0);
   const [donePacks, setDonePacks] = useState<string[]>([]);
@@ -133,13 +136,18 @@ export function OneTapUpdateCenter() {
     };
   }, []);
 
+  useEffect(() => {
+    setInstalled(cleanVersion(remote.installed));
+  }, [remote.installed]);
+
   const wait = (ms: number) =>
     new Promise<void>((resolve) => {
       const t = window.setTimeout(() => resolve(), ms);
       timers.current.push(t);
     });
 
-  const hasUpdate = installed !== APP_VERSION;
+  const targetVersion = remote.target;
+  const hasUpdate = compareVersions(targetVersion, installed) > 0;
   const latestNote = RELEASE_NOTES[0];
   const busy = phase !== "idle" && phase !== "complete";
 
@@ -157,12 +165,13 @@ export function OneTapUpdateCenter() {
     setLastChecked(new Date().toLocaleTimeString());
     setPhase("idle");
     toast({
-      title: hasUpdate ? `Update available — v${APP_VERSION}` : "You're up to date",
+      title: hasUpdate ? `Update available — v${targetVersion}` : "You're up to date",
       description: hasUpdate
         ? `${PACKS.length} install packs bundled into one ${TOTAL_MB.toFixed(1)} MB package.`
         : `FitxFusion v${installed} is the latest ${channel} build.`,
     });
   };
+
 
   const runInstall = async () => {
     setDonePacks([]);
@@ -197,28 +206,30 @@ export function OneTapUpdateCenter() {
     if (!alive.current) return;
     setPercent(100);
 
-    setStoredVersion(APP_VERSION);
-    const entry: HistoryEntry = { version: APP_VERSION, date: new Date().toISOString(), channel };
+    setStoredVersion(targetVersion);
+    const entry: HistoryEntry = { version: targetVersion, date: new Date().toISOString(), channel };
     const next = [entry, ...history].slice(0, 12);
     setHistory(next);
     try {
       localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+      if (remote.release) localStorage.setItem("fitfusion-remote-release-installed", remote.release.id);
     } catch {
       /* ignore */
     }
-    setInstalled(APP_VERSION);
+    setInstalled(targetVersion);
     setPhase("complete");
     setShowNotes(true);
 
     if (autoRestart) {
       setPhase("restarting");
-      toast({ title: `FitxFusion v${APP_VERSION} installed`, description: "Restarting to apply the update…" });
+      toast({ title: `FitxFusion v${targetVersion} installed`, description: "Restarting to apply the update…" });
       await wait(1200);
       window.location.reload();
     } else {
-      toast({ title: `FitxFusion v${APP_VERSION} installed`, description: "Restart when you're ready to apply it." });
+      toast({ title: `FitxFusion v${targetVersion} installed`, description: "Restart when you're ready to apply it." });
     }
   };
+
 
   const rollback = (entry: HistoryEntry) => {
     setStoredVersion(entry.version);
@@ -240,8 +251,10 @@ export function OneTapUpdateCenter() {
                 One-Tap Update
               </CardTitle>
               <CardDescription className="text-xs mt-1">
-                Installed v{installed} · Latest v{APP_VERSION} ({APP_RELEASE_DATE})
+                Installed v{installed} · Latest v{targetVersion}{" "}
+                {remote.release ? `(${remote.channel} · pushed by admin)` : `(${APP_RELEASE_DATE})`}
               </CardDescription>
+
             </div>
             <Badge variant={hasUpdate ? "default" : "secondary"} className="text-[10px] uppercase shrink-0">
               {hasUpdate ? "Update ready" : "Up to date"}
@@ -374,8 +387,39 @@ export function OneTapUpdateCenter() {
         </CardContent>
       </Card>
 
+      {/* Admin-pushed release notes */}
+      {remote.release && (
+        <Card className="liquid-glass border-white/10">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Rocket className="h-4 w-4 text-primary" />
+              {remote.title}
+              <Badge variant="secondary" className="ml-auto text-[10px] uppercase">{remote.channel}</Badge>
+            </CardTitle>
+            <CardDescription className="text-xs">
+              Version {remote.target} published for all users
+              {remote.mandatory ? " · required update" : ""}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-1">
+              {remote.changelog.map((c, i) => (
+                <li key={i} className="text-xs text-muted-foreground flex gap-2">
+                  <span className="text-primary">•</span>
+                  <span>{c}</span>
+                </li>
+              ))}
+              {remote.changelog.length === 0 && (
+                <li className="text-xs text-muted-foreground">No changelog provided.</li>
+              )}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
       {/* What's new */}
       <AnimatePresence initial={false}>
+
         {(showNotes || hasUpdate) && latestNote && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
             <Card className="liquid-glass border-white/10">
