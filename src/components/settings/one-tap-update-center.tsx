@@ -387,8 +387,39 @@ export function OneTapUpdateCenter() {
         </CardContent>
       </Card>
 
+      {/* Admin-pushed release notes */}
+      {remote.release && (
+        <Card className="liquid-glass border-white/10">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Rocket className="h-4 w-4 text-primary" />
+              {remote.title}
+              <Badge variant="secondary" className="ml-auto text-[10px] uppercase">{remote.channel}</Badge>
+            </CardTitle>
+            <CardDescription className="text-xs">
+              Version {remote.target} published for all users
+              {remote.mandatory ? " · required update" : ""}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-1">
+              {remote.changelog.map((c, i) => (
+                <li key={i} className="text-xs text-muted-foreground flex gap-2">
+                  <span className="text-primary">•</span>
+                  <span>{c}</span>
+                </li>
+              ))}
+              {remote.changelog.length === 0 && (
+                <li className="text-xs text-muted-foreground">No changelog provided.</li>
+              )}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
       {/* What's new */}
       <AnimatePresence initial={false}>
+
         {(showNotes || hasUpdate) && latestNote && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
             <Card className="liquid-glass border-white/10">
