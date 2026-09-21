@@ -27,6 +27,8 @@ import {
 import { APP_VERSION, APP_RELEASE_DATE, RELEASE_NOTES } from "@/lib/app-version";
 import { getStoredVersion, setStoredVersion } from "@/config/version";
 import { checkForUpdate, clearAppCache } from "@/utils/version-api";
+import { useRemoteUpdate, compareVersions, cleanVersion } from "@/hooks/use-remote-update";
+
 
 type Phase = "idle" | "checking" | "downloading" | "verifying" | "installing" | "activating" | "restarting" | "complete";
 
