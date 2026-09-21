@@ -206,28 +206,30 @@ export function OneTapUpdateCenter() {
     if (!alive.current) return;
     setPercent(100);
 
-    setStoredVersion(APP_VERSION);
-    const entry: HistoryEntry = { version: APP_VERSION, date: new Date().toISOString(), channel };
+    setStoredVersion(targetVersion);
+    const entry: HistoryEntry = { version: targetVersion, date: new Date().toISOString(), channel };
     const next = [entry, ...history].slice(0, 12);
     setHistory(next);
     try {
       localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+      if (remote.release) localStorage.setItem("fitfusion-remote-release-installed", remote.release.id);
     } catch {
       /* ignore */
     }
-    setInstalled(APP_VERSION);
+    setInstalled(targetVersion);
     setPhase("complete");
     setShowNotes(true);
 
     if (autoRestart) {
       setPhase("restarting");
-      toast({ title: `FitxFusion v${APP_VERSION} installed`, description: "Restarting to apply the update…" });
+      toast({ title: `FitxFusion v${targetVersion} installed`, description: "Restarting to apply the update…" });
       await wait(1200);
       window.location.reload();
     } else {
-      toast({ title: `FitxFusion v${APP_VERSION} installed`, description: "Restart when you're ready to apply it." });
+      toast({ title: `FitxFusion v${targetVersion} installed`, description: "Restart when you're ready to apply it." });
     }
   };
+
 
   const rollback = (entry: HistoryEntry) => {
     setStoredVersion(entry.version);
@@ -249,8 +251,10 @@ export function OneTapUpdateCenter() {
                 One-Tap Update
               </CardTitle>
               <CardDescription className="text-xs mt-1">
-                Installed v{installed} · Latest v{APP_VERSION} ({APP_RELEASE_DATE})
+                Installed v{installed} · Latest v{targetVersion}{" "}
+                {remote.release ? `(${remote.channel} · pushed by admin)` : `(${APP_RELEASE_DATE})`}
               </CardDescription>
+
             </div>
             <Badge variant={hasUpdate ? "default" : "secondary"} className="text-[10px] uppercase shrink-0">
               {hasUpdate ? "Update ready" : "Up to date"}
