@@ -40,6 +40,8 @@ import {
   MaintenanceSwitch,
 } from "@/components/admin/super-admin-panels";
 import { useRemoteConfig } from "@/hooks/use-remote-config";
+import { DynamicLinksManager, QuickPushUpdate } from "@/components/admin/admin-links-panel";
+
 import {
   AnnouncementEditDialog,
   ReleaseEditDialog,
@@ -583,7 +585,9 @@ const AdminPage: React.FC = () => {
             <TabsList className="inline-flex w-max justify-start gap-1">
               <TabsTrigger value="dashboard">Overview</TabsTrigger>
               <TabsTrigger value="releases">Release Center</TabsTrigger>
+              <TabsTrigger value="links">Dynamic Links</TabsTrigger>
               <TabsTrigger value="push">Push &amp; Broadcast</TabsTrigger>
+
               <TabsTrigger value="switches">Feature Control</TabsTrigger>
               <TabsTrigger value="content">Content / CMS</TabsTrigger>
               <TabsTrigger value="users">Users &amp; Beta</TabsTrigger>
@@ -626,7 +630,12 @@ const AdminPage: React.FC = () => {
           <TabsContent value="content" className="mt-4"><ContentManager /></TabsContent>
 
 
-          <TabsContent value="releases" className="mt-4"><ReleasesTab /></TabsContent>
+          <TabsContent value="releases" className="mt-4 space-y-4">
+            <QuickPushUpdate />
+            <ReleasesTab />
+          </TabsContent>
+          <TabsContent value="links" className="mt-4"><DynamicLinksManager /></TabsContent>
+
           <TabsContent value="push" className="mt-4"><PushCenter /></TabsContent>
           <TabsContent value="users" className="mt-4"><UsersTab /></TabsContent>
           <TabsContent value="moderation" className="mt-4"><ModerationTab /></TabsContent>
