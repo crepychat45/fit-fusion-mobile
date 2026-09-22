@@ -57,6 +57,9 @@ import { MobileAIAssistant } from "@/components/mobile/mobile-ai-assistant";
 import { MobileSecurityCenter } from "@/components/mobile/mobile-security-center";
 import { FitnessFusionLogo } from "@/components/fitness-fusion-logo";
 import { prefetchRoute } from "@/utils/route-prefetch";
+import { useAdmin } from "@/hooks/use-admin";
+import { useRemoteUpdate } from "@/hooks/use-remote-update";
+
 import { PwaInstallDialog } from "@/components/pwa/pwa-install-dialog";
 
 /* ------------------------------------------------------------------ */
@@ -336,7 +339,10 @@ const SUGGESTIONS = [
 export function MobileNav() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isAdmin } = useAdmin();
+  const { hasUpdate: hasAppUpdate, target: updateTarget } = useRemoteUpdate();
   const isTouch = useIsTouchDevice();
+
   const reduceMotion = useReducedMotion();
   const pageVisible = useDocumentVisible();
 
