@@ -554,14 +554,40 @@ export function MobileNav() {
 
   const moreActions = useMemo(
     () => [
+      // Admin console — only rendered for verified admin/super-admin accounts.
+      ...(isAdmin
+        ? [
+            {
+              id: "admin",
+              icon: Lock,
+              label: "Admin Panel",
+              action: () => {
+                setShowMore(false);
+                navigate("/admin");
+              },
+              badge: "ADMIN" as string | null,
+            },
+          ]
+        : []),
+      {
+        id: "app-update",
+        icon: Download,
+        label: "App Update",
+        action: () => {
+          setShowMore(false);
+          navigate("/settings?tab=updates");
+        },
+        badge: hasAppUpdate ? `v${updateTarget}` : null,
+      },
       { id: "install-app", icon: Download, label: "Install App", action: () => { setShowMore(false); setShowInstall(true); }, badge: "PWA" as string | null },
       { id: "ai-assistant", icon: Brain, label: "AI Coach", action: openAI, badge: showAiNew ? "NEW" : null },
       { id: "security", icon: Shield, label: "Security", action: () => setShowSecurity(true), badge: null as string | null },
       { id: "voice", icon: Mic, label: "Voice", action: openVoice, badge: null },
       { id: "notifications", icon: Bell, label: "Alerts", action: () => navigate("/notifications"), badge: notifications > 0 ? String(notifications) : null },
     ],
-    [openAI, openVoice, navigate, notifications, showAiNew],
+    [openAI, openVoice, navigate, notifications, showAiNew, isAdmin, hasAppUpdate, updateTarget],
   );
+
 
   const [leftItems, rightItems] = useMemo(
     () => [NAV_ITEMS.slice(0, 2), NAV_ITEMS.slice(2)] as const,
