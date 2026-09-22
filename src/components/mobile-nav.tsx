@@ -59,6 +59,8 @@ import { FitnessFusionLogo } from "@/components/fitness-fusion-logo";
 import { prefetchRoute } from "@/utils/route-prefetch";
 import { useAdmin } from "@/hooks/use-admin";
 import { useRemoteUpdate } from "@/hooks/use-remote-update";
+import { useDynamicLinks } from "@/hooks/use-dynamic-links";
+
 
 import { PwaInstallDialog } from "@/components/pwa/pwa-install-dialog";
 
@@ -341,7 +343,9 @@ export function MobileNav() {
   const navigate = useNavigate();
   const { isAdmin } = useAdmin();
   const { hasUpdate: hasAppUpdate, target: updateTarget } = useRemoteUpdate();
+  const { links: dynamicLinks } = useDynamicLinks(location.pathname);
   const isTouch = useIsTouchDevice();
+
 
   const reduceMotion = useReducedMotion();
   const pageVisible = useDocumentVisible();
@@ -1049,6 +1053,43 @@ export function MobileNav() {
                   );
                 })}
               </div>
+
+              {dynamicLinks.length > 0 && (
+                <div className="mb-6">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Quick links
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {dynamicLinks.map((link) =>
+                      link.external ? (
+                        <a
+                          key={link.id}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => setShowMore(false)}
+                          className="flex items-center gap-2 rounded-xl border border-white/20 bg-muted/20 px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted/40"
+                        >
+                          <Sparkles className="h-4 w-4 text-primary shrink-0" />
+                          <span className="truncate">{link.label}</span>
+                        </a>
+                      ) : (
+                        <Link
+                          key={link.id}
+                          to={link.url}
+                          onClick={() => setShowMore(false)}
+                          className="flex items-center gap-2 rounded-xl border border-white/20 bg-muted/20 px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted/40"
+                        >
+                          <Sparkles className="h-4 w-4 text-primary shrink-0" />
+                          <span className="truncate">{link.label}</span>
+                        </Link>
+                      ),
+                    )}
+                  </div>
+                </div>
+              )}
+
+
 
               <Button
                 onClick={() => setShowMore(false)}
