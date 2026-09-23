@@ -395,7 +395,7 @@ const ChatPage = () => {
                 FitX Fusion Chat
               </h1>
               <p className="text-white/90 text-xs md:text-sm">
-                Secure fitness community • v6.2.5 • Enhanced AI with Security Patches
+                Secure fitness community • v8.0.0 • Enhanced AI with Security Patches
               </p>
             </div>
             </div>

@@ -1,5 +1,5 @@
 /**
- * Enhanced Profile Features v6.2.5
+ * Enhanced Profile Features v8.0.0
  * New profile features and customization options
  */
 

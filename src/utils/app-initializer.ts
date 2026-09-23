@@ -261,7 +261,7 @@ export class AppInitializer {
     return {
       initialized: this.initialized,
       timestamp: new Date(),
-      version: '6.2.5',
+      version: '8.0.0',
       features: [
         'Performance Optimization',
         'Mobile Optimization',

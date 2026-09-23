@@ -1,0 +1,11 @@
+# FitxFusion 8.1 roadmap
+- [ ] Shared live activity summary and Home Today strip
+- [ ] Persisted Workouts queue and equipment filters
+- [ ] Progress 7/30/90-day live session ranges
+- [ ] Chat draft recovery and retry-safe status
+- [ ] Profile privacy summary and portable export
+- [ ] Settings release status and real update lifecycle
+- [ ] Crystal Liquid Glass mobile dock
+- [ ] Admin release/link validation and auditing
+- [ ] Version/changelog/service-worker metadata 8.1.0
+- [ ] Typecheck and browser validation

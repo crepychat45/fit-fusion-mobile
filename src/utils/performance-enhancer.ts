@@ -1,5 +1,5 @@
 /**
- * Performance Enhancer v6.2.5
+ * Performance Enhancer v8.0.0
  * Comprehensive performance optimization utilities
  * Handles caching, lazy loading, and resource optimization
  */

@@ -263,7 +263,7 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
 
   // Version info
   const [appVersion, setAppVersionState] = useState(() =>
-    safeLocalStorage.getItem("fitfusion-app-version", "6.2.0")
+    safeLocalStorage.getItem("fitfusion-app-version", "8.0.0")
   );
 
   // Listen for version updates from other components
