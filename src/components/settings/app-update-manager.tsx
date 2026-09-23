@@ -27,6 +27,8 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { Changelog } from "./changelog";
 import { APP_VERSION } from "@/lib/app-version";
+import { applyUpdate } from "@/utils/version-api";
+import { useRemoteUpdate } from "@/hooks/use-remote-update";
 
 interface UpdateInfo {
   currentVersion: string;
@@ -40,10 +42,11 @@ interface UpdateInfo {
 }
 
 export function AppUpdateManager() {
+  const remoteUpdate = useRemoteUpdate();
   const { toast } = useToast();
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo>(() => {
     const currentVersion =
-      localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || "6.2.0";
+      localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || APP_VERSION;
     const latestVersion = APP_VERSION;
     return {
       currentVersion,
@@ -119,7 +122,7 @@ export function AppUpdateManager() {
   // Sync versions across the app
   const syncVersions = () => {
     const storedVersion =
-      localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || "6.2.0";
+      localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || APP_VERSION;
 
     // Always make sure localStorage has the correct version
     if (updateInfo.currentVersion !== storedVersion) {
@@ -182,7 +185,7 @@ export function AppUpdateManager() {
 
       const now = new Date();
       const currentVersion =
-        localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || "6.2.0";
+        localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || APP_VERSION;
       const latestVersion = APP_VERSION;
 
       console.log(
@@ -235,13 +238,9 @@ export function AppUpdateManager() {
     }
   };
 
-  const downloadUpdate = async () => {
+    const downloadUpdate = async () => {
     if (!isOnline) {
-      toast({
-        title: "⚠️ No Internet Connection",
-        description: "Internet connection required to download updates.",
-        variant: "destructive",
-      });
+      toast({ title: "⚠️ No Internet Connection", variant: "destructive" });
       return;
     }
 
@@ -250,52 +249,15 @@ export function AppUpdateManager() {
     setUpdateInstalled(false);
 
     try {
-      // Simulate download progress
-      for (let i = 0; i <= 100; i += 5) {
-        setDownloadProgress(i);
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      }
-
-      // Simulate installation
-      toast({
-        title: "📦 Installing Update",
-        description: "Installing the latest version...",
+      await applyUpdate((p) => {
+        setDownloadProgress(p.percent);
       });
-
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
-      // Update version info and localStorage IMMEDIATELY
-      const newVersion = updateInfo.latestVersion;
-      localStorage.setItem("fitfusion-app-version", newVersion);
-      localStorage.setItem("app-version", newVersion);
-      localStorage.setItem("fitfusion-last-update", new Date().toISOString());
-
-      console.log("Update installed, new version:", newVersion);
-
-      // Update state immediately
-      setUpdateInfo((prev) => ({
-        ...prev,
-        currentVersion: newVersion,
-        updateAvailable: false,
-      }));
-
       setUpdateInstalled(true);
-
-      // Trigger version update event for other components
-      window.dispatchEvent(
-        new CustomEvent("versionUpdated", {
-          detail: newVersion,
-        }),
-      );
-
       toast({
         title: "🎉 Update Installed Successfully",
-        description: `Welcome to version ${newVersion}! All new features are now available.`,
+        description: `Welcome to the latest version!`,
       });
-
-      console.log("Update process completed successfully");
     } catch (error) {
-      console.error("Download failed:", error);
       toast({
         title: "❌ Download Failed",
         description: "Failed to download the update. Please try again.",

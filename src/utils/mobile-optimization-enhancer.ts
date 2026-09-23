@@ -1,5 +1,5 @@
 /**
- * Mobile Optimization Enhancer v6.2.5
+ * Mobile Optimization Enhancer v8.0.0
  * Comprehensive mobile device enhancements
  */
 

@@ -22,6 +22,9 @@ import {
   Star,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { applyUpdate } from "@/utils/version-api";
+import { useRemoteUpdate } from "@/hooks/use-remote-update";
+import { APP_VERSION } from "@/lib/app-version";
 
 interface VersionUpdate {
   version: string;
@@ -33,7 +36,7 @@ interface VersionUpdate {
 }
 
 const latestVersion: VersionUpdate = {
-  version: "6.2.5",
+  version: APP_VERSION,
   releaseDate: "May 16, 2026",
   features: [
     "🎨 Global Liquid Glass Design - Elegant glass morphism on all pages",
@@ -78,6 +81,7 @@ const latestVersion: VersionUpdate = {
 };
 
 export function VersionUpdateDialog() {
+  const remoteUpdate = useRemoteUpdate();
   const [open, setOpen] = useState(false);
   const [installing, setInstalling] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -85,7 +89,7 @@ export function VersionUpdateDialog() {
 
   useEffect(() => {
     const checkUpdate = () => {
-      const currentVersion = localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || "6.2.0";
+      const currentVersion = localStorage.getItem("fitfusion-app-version") || localStorage.getItem("app-version") || APP_VERSION;
       const autoUpdateEnabled = localStorage.getItem("fitfusion-auto-update") !== "false";
       const hasInstalledUpdate = localStorage.getItem(`update-${latestVersion.version}`);
       const isUpdateSkipped = localStorage.getItem(`skip-update-${latestVersion.version}`);

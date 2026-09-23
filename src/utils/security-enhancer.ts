@@ -1,5 +1,5 @@
 /**
- * Security Enhancement v6.2.5
+ * Security Enhancement v8.0.0
  * Comprehensive security patches and vulnerability fixes
  * Addresses critical CVE vulnerabilities
  */
@@ -35,7 +35,7 @@ const SECURITY_PATCHES: SecurityPatch[] = [
     description:
       'Fixed critical authentication bypass that could allow attackers to gain unauthorized access to user accounts without proper credentials.',
     affectedVersions: ['6.0.0', '6.1.0', '6.2.0', '6.2.1', '6.2.2', '6.2.3', '6.2.4'],
-    fixedVersion: '6.2.5',
+    fixedVersion: '8.0.0',
     date: '2026-05-16',
     cvssScore: 9.8,
     status: 'applied',
@@ -48,7 +48,7 @@ const SECURITY_PATCHES: SecurityPatch[] = [
     description:
       'Patched vulnerability where user sensitive data (phone numbers, workout history, health metrics) could be exposed through unencrypted API responses.',
     affectedVersions: ['6.0.0', '6.1.0', '6.2.0', '6.2.1', '6.2.2', '6.2.3', '6.2.4'],
-    fixedVersion: '6.2.5',
+    fixedVersion: '8.0.0',
     date: '2026-05-16',
     cvssScore: 9.1,
     status: 'applied',
@@ -61,7 +61,7 @@ const SECURITY_PATCHES: SecurityPatch[] = [
     description:
       'Enhanced encryption protocol security by implementing TLS 1.3, SHA-256 hashing, and AES-256 encryption for all data transmission.',
     affectedVersions: ['6.0.0', '6.1.0', '6.2.0', '6.2.1', '6.2.2', '6.2.3', '6.2.4'],
-    fixedVersion: '6.2.5',
+    fixedVersion: '8.0.0',
     date: '2026-05-16',
     cvssScore: 7.5,
     status: 'applied',
@@ -74,7 +74,7 @@ const SECURITY_PATCHES: SecurityPatch[] = [
     description:
       'Fixed XSS vulnerability in user input handling that could allow script injection through chat messages and profile updates.',
     affectedVersions: ['6.0.0', '6.1.0', '6.2.0', '6.2.1', '6.2.2', '6.2.3', '6.2.4'],
-    fixedVersion: '6.2.5',
+    fixedVersion: '8.0.0',
     date: '2026-05-16',
     cvssScore: 6.1,
     status: 'applied',
@@ -87,7 +87,7 @@ const SECURITY_PATCHES: SecurityPatch[] = [
     description:
       'Updated to bcrypt with cost factor of 12 and PBKDF2 for improved password security.',
     affectedVersions: ['6.0.0', '6.1.0', '6.2.0', '6.2.1', '6.2.2', '6.2.3', '6.2.4'],
-    fixedVersion: '6.2.5',
+    fixedVersion: '8.0.0',
     date: '2026-05-16',
     cvssScore: 7.3,
     status: 'applied',
@@ -100,7 +100,7 @@ const SECURITY_PATCHES: SecurityPatch[] = [
     description:
       'Implemented CSRF tokens for all state-changing operations and SameSite cookie flags.',
     affectedVersions: ['6.0.0', '6.1.0', '6.2.0', '6.2.1', '6.2.2', '6.2.3', '6.2.4'],
-    fixedVersion: '6.2.5',
+    fixedVersion: '8.0.0',
     date: '2026-05-16',
     cvssScore: 5.3,
     status: 'applied',

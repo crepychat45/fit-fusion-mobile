@@ -110,7 +110,7 @@ const Workouts = () => {
                 </div>
                 <p className="text-primary-foreground/70 text-sm">AI-powered fitness routines</p>
               </div>
-              <Badge className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30">v6.2.0</Badge>
+              <Badge className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30">v8.0.0</Badge>
             </div>
 
             {/* Stats */}
