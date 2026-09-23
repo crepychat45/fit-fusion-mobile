@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { applyUpdate } from "@/utils/version-api";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,7 +26,8 @@ interface EnhancedUpdateSystemProps {
   onUpdateComplete?: () => void;
 }
 
-const LATEST_VERSION = "6.2.0";
+import { APP_VERSION as BUNDLED_VERSION, APP_RELEASE_DATE, RELEASE_NOTES } from "@/lib/app-version";
+const LATEST_VERSION = BUNDLED_VERSION;
 
 const CHANGELOG_HISTORY = [
   {
@@ -152,32 +154,27 @@ export function EnhancedUpdateSystem({
     setIsUpdating(true);
     setProgress(0);
 
-    for (let i = 0; i < INSTALL_STAGES.length; i++) {
-      const stage = INSTALL_STAGES[i];
-      setStageMsg(stage.msg);
-      setStageIcon(stage.icon);
-      const prevTarget = i > 0 ? INSTALL_STAGES[i - 1].target : 0;
-      const steps = 12;
-      for (let s = 1; s <= steps; s++) {
-        await new Promise((r) => setTimeout(r, 50));
-        setProgress(prevTarget + ((stage.target - prevTarget) * s) / steps);
-      }
-      await new Promise((r) => setTimeout(r, 150));
+    try {
+      await applyUpdate((p) => {
+        setProgress(p.percent);
+        setStageMsg(p.message);
+        // Map phases to icons if possible
+        if (p.phase === "checking") setStageIcon("🔍");
+        if (p.phase === "downloading") setStageIcon("📦");
+        if (p.phase === "verifying") setStageIcon("🛡️");
+        if (p.phase === "installing") setStageIcon("⚙️");
+        if (p.phase === "activating") setStageIcon("🚀");
+      });
+      
+      onUpdateComplete?.();
+    } catch (err) {
+      setIsUpdating(false);
+      toast({
+        title: "Update failed",
+        description: "Please check your connection and try again.",
+        variant: "destructive"
+      });
     }
-
-    localStorage.setItem("app-version", LATEST_VERSION);
-    localStorage.setItem("fitfusion-app-version", LATEST_VERSION);
-    localStorage.setItem("fitfusion-last-update", new Date().toISOString());
-    window.dispatchEvent(new CustomEvent("versionUpdated", { detail: LATEST_VERSION }));
-
-    setAvailableUpdate(null);
-    setInstalled(true);
-    setIsUpdating(false);
-    setProgress(0);
-    onUpdateComplete?.();
-
-    toast({ title: "🚀 Update Complete!", description: `FitFusion v${LATEST_VERSION} is now active.` });
-    setTimeout(() => window.location.reload(), 2000);
   };
 
   return (
