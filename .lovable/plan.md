@@ -1,63 +1,47 @@
+# FitxFusion 8.1 — Functional Feature and Update Release
 
-# Settings & Version Management — Full Refactor Plan
+## Goal
+Ship a focused major improvement across the core app instead of adding placeholder controls. Each addition will use existing workout, profile, settings, notification, and cloud data, persist changes, and remain usable on mobile.
 
-This is a large refactor touching ~15 files. Below is exactly what I'll ship. I'll implement in one pass unless you want to split it.
+## Core page improvements
+- **Home:** Add a compact “Today” command strip showing the next workout, current weekly goal, recovery state, and one-tap actions. Values will come from existing workout/progress storage and update immediately after activity changes.
+- **Workouts:** Add recent filters and a functional workout queue. Users can add, reorder, remove, and start queued workouts; the queue persists per device and keeps favorite/completed state intact.
+- **Progress:** Replace fixed summary values where possible with recorded session data. Add selectable 7/30/90-day ranges and export/share the currently selected range.
+- **Chat:** Add conversation search, local draft recovery, connection/retry status, and safe retry for failed messages without duplicating sends.
+- **Profile:** Add a privacy-aware activity summary and a portable profile/settings export with clear success and failure feedback.
+- **Settings:** Add a searchable setting index that opens the correct section, plus a release status panel showing the running build, available build, update channel, last check, and install state.
 
-## Directory layout (final)
+## Mobile navigation redesign
+- Rework the bottom dock into a clear Crystal Liquid Glass surface with crisp text, semantic theme colors, safe-area spacing, stable touch targets, reduced-motion support, and no decorative blur over labels/icons.
+- Keep the admin entry role-gated and preserve notifications, dynamic links, quick actions, long-press menus, and the update badge.
 
-```text
-src/
-  config/
-    version.ts                    NEW — single source of truth (re-exports app-version)
-  components/
-    settings/
-      version-control-panel.tsx   NEW — merges version-manager + enhanced-version-manager
-      account-security-panel.tsx  NEW — profile + password + 2FA + sessions
-      appearance-panel.tsx        NEW — theme + accent + font scale + reduce motion
-      notification-preferences.tsx NEW — push/email/haptic granular toggles
-      data-backup-panel.tsx       NEW — cloud backup + clear cache + storage bar
-      settings-copilot.tsx        NEW — AI natural-language settings bar
-      system-health-panel.tsx     NEW — latency + storage quota + 1-click fix
-      pwa-vault-panel.tsx         NEW — offline + SW update + install prompt
-      network-adaptive-banner.tsx NEW — data-saver via navigator.connection
-      settings-container.tsx      EDIT — wire new panels, replace window.confirm with AlertDialog
-      privacy-settings.tsx        EDIT — AlertDialog for destructive actions
-      update-scheduler.tsx        EDIT — fix corrupted UTF-8 glyphs, use Lucide icons
-      unified-update-manager.tsx  EDIT — use versionApi, real SW update path
-    version-manager.tsx           DELETE
-    enhanced-version-manager.tsx  DELETE
-  utils/
-    version-api.ts                NEW — SW update, applyUpdate, localStorage helpers
-    network-adaptive.ts           NEW — connection detection + data-saver toggle
-```
+## Admin improvements
+- Strengthen release publishing with validated semantic versions, duplicate-version checks, stable/beta channel targeting, required-update controls, release notes, optional signed APK/download URL, scheduled publishing, and activation/deactivation.
+- Add delivery status summaries for releases, announcements, and broadcasts using existing cloud records.
+- Keep Dynamic Links live, validate internal/external destinations, and prevent unsafe URL schemes.
+- Record release and link changes in the existing admin audit trail.
 
-## Step 1 — Bug fixes
+## Real update and version management
+- Release as **v8.1.0** and add a categorized changelog to the centralized version history.
+- Remove the simulated timer-based “installation” that only changes local storage.
+- For web/PWA, check the registered service worker, detect a waiting worker, activate it with `SKIP_WAITING`, wait for `controllerchange`, then reload into the deployed build. Display truthful states when no newer deployed assets are available.
+- For Android packages, validate and open the admin-provided HTTPS download URL; the operating system performs the actual APK install.
+- Treat admin release records as availability/notes metadata, not as executable code. A published deployment must exist before the web app can install that version.
+- Keep install history based on successfully activated builds, not button clicks, and reconcile the displayed installed version with the bundled version on startup.
+- Update the service-worker cache version and ensure stale caches are removed without clearing authentication or user data.
 
-- **Centralized version state**: `src/config/version.ts` re-exports `APP_VERSION` from `src/lib/app-version.ts`. New helper `useAppVersion()` returns `{ current, latest, storedKey: "fitfusion_app_version" }`. Every read/write goes through this hook — no more three overlapping keys.
-- **Real SW update**: `applyUpdate()` calls `navigator.serviceWorker.getRegistration()`, invokes `reg.update()`, posts `SKIP_WAITING` to the waiting worker, then reloads once `controllerchange` fires. Fallback to a controlled `window.location.reload()` only if no SW is registered.
-- **UTF-8 fixes**: Replace corrupted glyphs in `update-scheduler.tsx` with `<Clock />`, `<Calendar />`, `<Sliders />` Lucide icons.
-- **Merge duplicates**: `VersionControlPanel.tsx` combines the two managers into one responsive card (current version, changelog viewer, check-for-updates, install, rollback).
-- **Secure deletes**: Introduce reusable `ConfirmDialog` (Shadcn `AlertDialog`) and swap every `window.confirm(...)` in `settings-container.tsx` and `privacy-settings.tsx` for it (typed "DELETE" for destructive irreversible actions).
+## Performance, security, and accessibility
+- Remove the remote CSS font import that blocks startup and use the existing system font stack.
+- Lazy-load newly added secondary panels, memoize derived lists, cap persisted histories, and avoid new polling loops.
+- Validate dynamic links and release download URLs; reject `javascript:`, `data:`, and non-HTTPS external links.
+- Add accessible labels to icon controls touched in this release, keyboard/focus support, readable contrast, and minimum mobile touch sizes.
+- Preserve strict role checks and row-level access; no client-side admin bypasses or new privileged database functions.
 
-## Step 2 — Standard settings features
+## Validation
+- Run the project typecheck and focused existing checks.
+- Browser-test mobile and desktop flows for Home, Workouts, Progress, Chat, Profile, Settings → Updates, the glass dock, and admin release publishing.
+- Verify update states for: no update, update metadata without a deployed worker, waiting worker activation, required release, and APK download URL.
+- Confirm no new console errors, unsafe links, clipped navigation text, or overlapping controls.
 
-- **Account & Security panel**: Avatar upload (existing hook), display name, phone; password change via `supabase.auth.updateUser`; 2FA placeholder toggle; active sessions listed via `supabase.auth.getUser()` metadata + local device fingerprints; "Sign out of all devices" using `{ scope: "global" }`.
-- **Appearance panel**: Theme radio (Light / Dark / System / High Contrast — HC adds a `.hc` class with boosted contrast tokens), accent picker (Blue/Emerald/Purple/Amber via `applyAccent`), font scale slider (14–20px via `applyFontSize`), Reduce Motion toggle (writes `data-reduce-motion="true"` on `<html>` and gates Framer Motion via a global `MotionConfig`).
-- **Notification preferences**: Granular switches persisted per-user in `localStorage` (namespaced `fitfusion:notif:${uid}`): push, email digest weekly/monthly, in-app sound, haptic (vibration API test).
-- **Data & Backup**: Storage usage bar via `navigator.storage.estimate()`, "Clear Cache" (unregisters SW caches only, preserves auth), cloud-backup status stub with schedule dropdown (Daily/Weekly persisted).
-
-## Step 3 — Advanced AI + platform features
-
-- **Settings Copilot**: Sticky bottom bar with input + mic (Web Speech API). Parses commands with a small local intent map first (fast, offline), then falls back to Lovable AI (`google/gemini-2.5-flash`) via a new `settings-copilot` edge function only if the local matcher returns null. Supports commands: enable/disable dark mode, set accent, schedule updates at HH:MM, toggle data saver, clear cache.
-- **Network-Adaptive engine**: `network-adaptive.ts` reads `navigator.connection.effectiveType/saveData`. On `2g`/`3g`/`saveData` it sets a global `data-saver` flag; heavy widgets read the flag and skip HD assets. `<NetworkAdaptiveBanner />` surfaces the mode in Settings.
-- **System Health panel**: Runs `runStartupDiagnostics()` + measures Supabase round-trip latency + shows `navigator.storage.estimate()` quota bar + sync queue length from React Query cache. "Fix App Errors" button clears caches, unregisters app SW, and reloads — session preserved.
-- **PWA Vault**: Live offline status, "Update ready" chip driven by SW `waiting` state, custom Install button using stashed `beforeinstallprompt` event.
-
-## Notes for you
-
-- No schema changes, no migrations, no new secrets required.
-- Existing `use-enhanced-auth`, `use-profile`, `applyAccent`, `applyFontSize` are reused — no behavior regressions expected on those flows.
-- I'll delete the two duplicate version-manager files after wiring the panel.
-- All new panels use `liquid-glass` classes for consistency.
-
-Approve and I'll implement in one pass.
+## Technical note
+A web app cannot download arbitrary code from an admin record and install it safely. The real web update path installs the latest published deployment through the service worker; the admin release record controls messaging, rollout, requirements, notes, and native download links.
