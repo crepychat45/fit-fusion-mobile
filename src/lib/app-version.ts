@@ -1,6 +1,6 @@
 // Single source of truth for app version + changelog
-export const APP_VERSION = "8.0.0";
-export const APP_RELEASE_DATE = "2026-09-03";
+export const APP_VERSION = "8.1.0";
+export const APP_RELEASE_DATE = "2026-09-24";
 
 
 
@@ -26,6 +26,35 @@ export interface ReleaseNote {
 }
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "8.1.0",
+    date: "2026-09-24",
+    type: "Major Release",
+    highlight: "A functional fitness release with truthful updates, saved workout planning, live progress ranges, resilient chat drafts, portable profile data, and a clearer Crystal Liquid Glass dock.",
+    sections: [
+      { title: "New Features", icon: "sparkles", items: [
+        "Today command strip with direct workout, progress, chat, and update actions",
+        "Device-persisted workout queue with equipment filtering",
+        "Live 7, 30, and 90-day session summaries with JSON export",
+        "Per-conversation chat draft recovery and retry-safe failed messages",
+        "Privacy-aware portable profile export",
+      ] },
+      { title: "Improvements", icon: "zap", items: [
+        "Crystal Liquid Glass mobile dock with crisp semantic text and stable touch targets",
+        "Admin release publishing now validates versions, duplicates, and secure download links",
+        "Dynamic links reject unsafe URL schemes before publication and display",
+      ] },
+      { title: "Bug Fixes", icon: "bug", items: [
+        "Removed simulated update downloads and installs",
+        "Web updates now activate only a real waiting service worker before reloading",
+        "Native packages now open only validated HTTPS download URLs",
+      ] },
+      { title: "Security & Privacy", icon: "shield", items: [
+        "Release metadata can no longer mark undeployed web code as installed",
+        "Unsafe javascript, data, and insecure HTTP dynamic links are blocked",
+      ] },
+    ],
+  },
   {
     version: "8.0.0",
     date: "2026-09-03",

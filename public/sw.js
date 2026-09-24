@@ -1,11 +1,11 @@
-// FitFusion Service Worker v10 (v7.6.0)
+// FitxFusion Service Worker v12 (v8.1.0)
 // Strategies:
 //  - Navigations & HTML: network-first with 3s timeout, cache fallback
 //  - Hashed JS/CSS (Vite /assets/): stale-while-revalidate + cache
 //  - Images: cache-first with expiration
 //  - API/Supabase: network-first (no offline replay for auth/mutations)
 // Messages: SKIP_WAITING, CLEAR_CACHES, GET_CACHE_INFO
-const VERSION = "v11-8.0.0";
+const VERSION = "v12-8.1.0";
 const STATIC_CACHE = `fitfusion-static-${VERSION}`;
 const ASSET_CACHE = `fitfusion-assets-${VERSION}`;
 const IMAGE_CACHE = `fitfusion-images-${VERSION}`;
@@ -16,7 +16,7 @@ const PRECACHE = ["/", "/favicon.ico", "/placeholder.svg", "/manifest.json"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(STATIC_CACHE).then((c) => c.addAll(PRECACHE)).then(() => self.skipWaiting()),
+    caches.open(STATIC_CACHE).then((c) => c.addAll(PRECACHE)),
   );
 });
 

@@ -2,7 +2,7 @@
  * Real PWA service-worker update flow.
  * Replaces the previous setTimeout / window.location.reload() simulation.
  */
-import { APP_VERSION, setStoredVersion } from "@/config/version";
+import { setStoredVersion } from "@/config/version";
 
 export type UpdatePhase =
   | "idle"
@@ -37,65 +37,74 @@ export async function checkForUpdate(): Promise<boolean> {
  * Falls back to a controlled reload if no SW is registered.
  */
 export async function applyUpdate(
+  targetVersion: string,
   onProgress?: (p: UpdateProgress) => void,
-): Promise<void> {
+): Promise<"activated" | "current"> {
   const emit = (phase: UpdatePhase, percent: number, message: string) =>
     onProgress?.({ phase, percent, message });
 
   emit("checking", 5, "Checking for updates…");
 
-  const supportsSW = "serviceWorker" in navigator;
-  const reg = supportsSW
-    ? await navigator.serviceWorker.getRegistration()
-    : null;
-
-  emit("downloading", 25, "Downloading update package…");
-  if (reg) {
-    try {
-      await reg.update();
-    } catch {
-      /* offline */
-    }
+  if (!("serviceWorker" in navigator)) {
+    emit("error", 0, "Updates require the installed web app.");
+    throw new Error("Service workers are not supported on this device.");
+  }
+  const reg = await navigator.serviceWorker.getRegistration();
+  if (!reg) {
+    emit("error", 0, "No installed app worker was found.");
+    throw new Error("Install FitxFusion first, then retry the update.");
   }
 
-  emit("verifying", 55, "Verifying signature…");
-  await new Promise((r) => setTimeout(r, 250));
+  emit("downloading", 25, "Downloading update package…");
+  try {
+    await reg.update();
+  } catch {
+    emit("error", 0, "The update server could not be reached.");
+    throw new Error("Could not check the deployed app while offline.");
+  }
 
-  emit("installing", 80, "Installing new version…");
+  const waiting = reg.waiting;
+  if (!waiting) {
+    emit("complete", 100, "The latest deployed build is already active.");
+    return "current";
+  }
 
-  return new Promise<void>((resolve) => {
+  emit("verifying", 55, "Browser integrity checks passed.");
+  emit("installing", 80, "Activating the downloaded build…");
+
+  return new Promise<"activated">((resolve, reject) => {
+    let finished = false;
     const finalize = () => {
-      setStoredVersion(APP_VERSION);
+      if (finished) return;
+      finished = true;
+      setStoredVersion(targetVersion);
       emit("complete", 100, "Update ready. Reloading…");
-      setTimeout(() => window.location.reload(), 600);
-      resolve();
+      resolve("activated");
     };
-
-    if (reg && reg.waiting) {
-      const onController = () => {
-        navigator.serviceWorker.removeEventListener(
-          "controllerchange",
-          onController,
-        );
-        finalize();
-      };
-      navigator.serviceWorker.addEventListener(
-        "controllerchange",
-        onController,
-      );
-      reg.waiting.postMessage({ type: "SKIP_WAITING" });
-      // Safety: if controllerchange never fires, finalize anyway.
-      setTimeout(() => {
-        navigator.serviceWorker.removeEventListener(
-          "controllerchange",
-          onController,
-        );
-        finalize();
-      }, 4000);
-    } else {
+    const onController = () => {
+      navigator.serviceWorker.removeEventListener("controllerchange", onController);
       finalize();
-    }
+    };
+    navigator.serviceWorker.addEventListener("controllerchange", onController);
+    waiting.postMessage({ type: "SKIP_WAITING" });
+    window.setTimeout(() => {
+      if (finished) return;
+      navigator.serviceWorker.removeEventListener("controllerchange", onController);
+      emit("error", 0, "Activation timed out. Please retry.");
+      reject(new Error("The downloaded build did not activate."));
+    }, 10000);
   });
+}
+
+export function safeNativeDownloadUrl(value: string | null | undefined): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value, window.location.origin);
+    if (url.protocol !== "https:") return null;
+    return url.href;
+  } catch {
+    return null;
+  }
 }
 
 export async function clearAppCache(): Promise<void> {

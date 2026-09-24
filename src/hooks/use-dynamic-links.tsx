@@ -13,6 +13,17 @@ export interface DynamicLink {
 
 export const DYNAMIC_LINKS_KEY = "dynamic_links";
 
+export function normalizeSafeLink(value: string): string | null {
+  const trimmed = value.trim();
+  if (trimmed.startsWith("/") && !trimmed.startsWith("//")) return trimmed;
+  try {
+    const parsed = new URL(trimmed);
+    return parsed.protocol === "https:" ? parsed.href : null;
+  } catch {
+    return null;
+  }
+}
+
 const parse = (value: unknown): DynamicLink[] => {
   const raw = Array.isArray(value)
     ? value
@@ -22,14 +33,16 @@ const parse = (value: unknown): DynamicLink[] => {
   return raw
     .map((item, i) => {
       const l = item as Partial<DynamicLink>;
-      if (!l || typeof l.label !== "string" || typeof l.url !== "string") return null;
+       if (!l || typeof l.label !== "string" || typeof l.url !== "string") return null;
+       const safeUrl = normalizeSafeLink(l.url);
+       if (!safeUrl) return null;
       return {
         id: String(l.id ?? `link-${i}`),
         label: l.label,
-        url: l.url,
+         url: safeUrl,
         icon: typeof l.icon === "string" ? l.icon : undefined,
         pages: Array.isArray(l.pages) ? l.pages.map(String) : ["*"],
-        external: /^https?:\/\//i.test(l.url),
+         external: safeUrl.startsWith("https://"),
       } as DynamicLink;
     })
     .filter((l): l is DynamicLink => l !== null);
