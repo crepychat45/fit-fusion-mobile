@@ -249,7 +249,7 @@ export function AppUpdateManager() {
     setUpdateInstalled(false);
 
     try {
-      await applyUpdate((p) => {
+      await applyUpdate(APP_VERSION, (p) => {
         setDownloadProgress(p.percent);
       });
       setUpdateInstalled(true);

@@ -87,7 +87,7 @@ export function PwaVaultPanel() {
           badgeClass={swWaiting ? "bg-primary/15 text-primary border border-primary/30" : "bg-emerald-500/15 text-emerald-600 border border-emerald-500/30"}
           action={
             swWaiting ? (
-              <Button size="sm" onClick={() => applyUpdate()} className="rounded-xl">
+              <Button size="sm" onClick={() => applyUpdate(APP_VERSION)} className="rounded-xl">
                 Apply update
               </Button>
             ) : (
