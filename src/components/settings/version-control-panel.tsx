@@ -82,7 +82,7 @@ export function VersionControlPanel() {
 
   const handleInstall = async () => {
     try {
-      await applyUpdate(setProgress);
+      await applyUpdate(latest, setProgress);
     } catch (e: any) {
       toast({
         title: "Update failed",

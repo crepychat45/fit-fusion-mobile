@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Download, Smartphone, Wifi, WifiOff, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { checkForUpdate, applyUpdate } from "@/utils/version-api";
+import { APP_VERSION } from "@/lib/app-version";
 
 export function PwaVaultPanel() {
   const { toast } = useToast();
@@ -87,7 +88,7 @@ export function PwaVaultPanel() {
           badgeClass={swWaiting ? "bg-primary/15 text-primary border border-primary/30" : "bg-emerald-500/15 text-emerald-600 border border-emerald-500/30"}
           action={
             swWaiting ? (
-              <Button size="sm" onClick={() => applyUpdate()} className="rounded-xl">
+              <Button size="sm" onClick={() => applyUpdate(APP_VERSION)} className="rounded-xl">
                 Apply update
               </Button>
             ) : (

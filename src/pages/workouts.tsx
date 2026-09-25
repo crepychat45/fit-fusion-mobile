@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, Filter, Zap, Clock, Target, TrendingUp, Calendar, Star,
-  PlayCircle, Heart, Share2, Award, Flame, Brain, Video, Sparkles, Dumbbell,
+  PlayCircle, Heart, Share2, Award, Flame, Brain, Video, Sparkles, Dumbbell, ListPlus, X,
 } from "lucide-react";
 import { workouts } from "@/data/workouts";
 import { AIWorkoutVideos } from "@/components/workout/ai-workout-videos";
@@ -36,6 +36,8 @@ const Workouts = () => {
   const [completedWorkouts, setCompletedWorkouts] = useState<string[]>([]);
   const [aiRecommendations, setAiRecommendations] = useState<any[]>([]);
   const [personalizedPlans, setPersonalizedPlans] = useState<any[]>([]);
+  const [equipment, setEquipment] = useState("all");
+  const [queue, setQueue] = useState<string[]>([]);
 
   useEffect(() => {
     const saved = localStorage.getItem("workout-data");
@@ -43,6 +45,7 @@ const Workouts = () => {
       const data = JSON.parse(saved);
       setFavoriteWorkouts(data.favorites || []);
       setCompletedWorkouts(data.completed || []);
+      setQueue(Array.isArray(data.queue) ? data.queue.slice(0, 12) : []);
     }
     setAiRecommendations([
       { id: "ai-1", title: "AI Smart HIIT", description: "Personalized high-intensity workout", duration: "25 mins", difficulty: "Intermediate", calories: 320, icon: Brain },
@@ -63,8 +66,9 @@ const Workouts = () => {
         (w.tags || []).some((t) => t.toLowerCase().includes(q)) ||
         (w.equipment || []).some((t) => t.toLowerCase().includes(q));
       const matchesType = filterType === "all" || w.category === filterType;
-      const matchesDifficulty = filterDifficulty === "all" || w.level === filterDifficulty;
-      return matchesSearch && matchesType && matchesDifficulty;
+       const matchesDifficulty = filterDifficulty === "all" || w.level === filterDifficulty;
+       const matchesEquipment = equipment === "all" || (equipment === "none" ? !(w.equipment || []).length : (w.equipment || []).includes(equipment));
+       return matchesSearch && matchesType && matchesDifficulty && matchesEquipment;
     })
     .sort((a, b) => {
       switch (sortBy) {
@@ -86,8 +90,14 @@ const Workouts = () => {
   const toggleFavorite = (id: string) => {
     const newFavs = favoriteWorkouts.includes(id) ? favoriteWorkouts.filter((f) => f !== id) : [...favoriteWorkouts, id];
     setFavoriteWorkouts(newFavs);
-    localStorage.setItem("workout-data", JSON.stringify({ favorites: newFavs, completed: completedWorkouts }));
+    localStorage.setItem("workout-data", JSON.stringify({ favorites: newFavs, completed: completedWorkouts, queue }));
     toast({ title: favoriteWorkouts.includes(id) ? "Removed from favorites" : "Added to favorites" });
+  };
+
+  const updateQueue = (next: string[]) => {
+    const capped = next.slice(0, 12);
+    setQueue(capped);
+    localStorage.setItem("workout-data", JSON.stringify({ favorites: favoriteWorkouts, completed: completedWorkouts, queue: capped }));
   };
 
   const stats = { total: workouts.length, completed: completedWorkouts.length, favorites: favoriteWorkouts.length, streak: 7 };
@@ -193,7 +203,29 @@ const Workouts = () => {
                   <SelectItem value="advanced">Advanced</SelectItem>
                 </SelectContent>
               </Select>
+              <Select value={equipment} onValueChange={setEquipment}>
+                <SelectTrigger className="w-[140px] rounded-xl border-border/30 bg-card/60 h-9 text-sm"><SelectValue placeholder="Equipment" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All equipment</SelectItem>
+                  <SelectItem value="none">No equipment</SelectItem>
+                  <SelectItem value="dumbbells">Dumbbells</SelectItem>
+                  <SelectItem value="resistance bands">Bands</SelectItem>
+                  <SelectItem value="yoga mat">Yoga mat</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+            {queue.length > 0 && (
+              <div className="rounded-xl border border-border/30 bg-card/60 p-3">
+                <div className="mb-2 flex items-center gap-2 text-sm font-semibold"><ListPlus className="h-4 w-4 text-primary" />Workout queue <Badge variant="secondary">{queue.length}</Badge></div>
+                <div className="flex gap-2 overflow-x-auto">
+                  {queue.map((id) => {
+                    const queued = workouts.find((item) => item.id === id);
+                    if (!queued) return null;
+                    return <div key={id} className="flex shrink-0 items-center gap-2 rounded-lg bg-muted/40 px-3 py-2 text-xs"><button onClick={() => navigate(`/workout-detail/${id}`)} className="font-medium">{queued.title}</button><Button variant="ghost" size="icon" className="h-6 w-6" aria-label={`Remove ${queued.title} from queue`} onClick={() => updateQueue(queue.filter((item) => item !== id))}><X className="h-3 w-3" /></Button></div>;
+                  })}
+                </div>
+              </div>
+            )}
           </motion.div>
 
           {/* Tabs */}
@@ -252,6 +284,7 @@ const Workouts = () => {
                                   <span className="flex items-center gap-1"><Zap className="h-3.5 w-3.5" />~{workout.calories ?? 250} cal</span>
                                 </div>
                                 <div className="flex items-center gap-1.5">
+                                 <Button size="sm" variant="ghost" aria-label={`Add ${workout.title} to queue`} disabled={queue.includes(workout.id)} onClick={() => updateQueue([...queue, workout.id])} className="h-8 px-2"><ListPlus className="h-3.5 w-3.5" /></Button>
                                 {workout.videoUrl && (
                                   <Button size="sm" variant="outline" onClick={() => setPreviewWorkout(workout)}
                                     className="h-8 text-xs rounded-lg">

@@ -25,8 +25,8 @@ import {
   Wifi,
 } from "lucide-react";
 import { APP_VERSION, APP_RELEASE_DATE, RELEASE_NOTES } from "@/lib/app-version";
-import { getStoredVersion, setStoredVersion } from "@/config/version";
-import { checkForUpdate, clearAppCache } from "@/utils/version-api";
+import { getStoredVersion } from "@/config/version";
+import { applyUpdate, checkForUpdate, safeNativeDownloadUrl, type UpdateProgress } from "@/utils/version-api";
 import { useRemoteUpdate, compareVersions, cleanVersion } from "@/hooks/use-remote-update";
 
 
@@ -176,66 +176,44 @@ export function OneTapUpdateCenter() {
   const runInstall = async () => {
     setDonePacks([]);
     setPhase("downloading");
-    // Single bundled download covering every install pack.
-    for (let i = 0; i < PACKS.length; i++) {
-      await wait(420);
-      if (!alive.current) return;
-      setDonePacks((d) => [...d, PACKS[i].id]);
-      setPercent(Math.round(((i + 1) / PACKS.length) * 55));
+    const nativeUrl = safeNativeDownloadUrl(remote.downloadUrl);
+    if (nativeUrl) {
+      window.open(nativeUrl, "_blank", "noopener,noreferrer");
+      setPhase("idle");
+      toast({ title: "Native package opened", description: "Android will verify and install the signed package." });
+      return;
     }
-
-    setPhase("verifying");
-    await wait(600);
-    if (!alive.current) return;
-    setPercent(70);
-
-    setPhase("installing");
-    await wait(900);
-    if (!alive.current) return;
-    setPercent(88);
-    await clearAppCache().catch(() => undefined);
-
-    setPhase("activating");
     try {
-      const reg = "serviceWorker" in navigator ? await navigator.serviceWorker.getRegistration() : null;
-      reg?.waiting?.postMessage({ type: "SKIP_WAITING" });
-    } catch {
-      /* no sw */
-    }
-    await wait(600);
-    if (!alive.current) return;
-    setPercent(100);
-
-    setStoredVersion(targetVersion);
-    const entry: HistoryEntry = { version: targetVersion, date: new Date().toISOString(), channel };
-    const next = [entry, ...history].slice(0, 12);
-    setHistory(next);
-    try {
+      const result = await applyUpdate(targetVersion, (progress: UpdateProgress) => {
+        setPercent(progress.percent);
+        if (progress.phase !== "error") setPhase(progress.phase === "complete" ? "complete" : progress.phase);
+      });
+      if (result === "current") {
+        setPhase("idle");
+        toast({ title: "Deployment not available yet", description: "Release notes are live, but no newer web build is ready to activate." });
+        return;
+      }
+      setDonePacks(PACKS.map((pack) => pack.id));
+      const entry: HistoryEntry = { version: targetVersion, date: new Date().toISOString(), channel };
+      const next = [entry, ...history].slice(0, 12);
+      setHistory(next);
       localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
       if (remote.release) localStorage.setItem("fitfusion-remote-release-installed", remote.release.id);
-    } catch {
-      /* ignore */
-    }
-    setInstalled(targetVersion);
-    setPhase("complete");
-    setShowNotes(true);
-
-    if (autoRestart) {
-      setPhase("restarting");
-      toast({ title: `FitxFusion v${targetVersion} installed`, description: "Restarting to apply the update…" });
-      await wait(1200);
-      window.location.reload();
-    } else {
-      toast({ title: `FitxFusion v${targetVersion} installed`, description: "Restart when you're ready to apply it." });
+      setInstalled(targetVersion);
+      setShowNotes(true);
+      if (autoRestart) {
+        setPhase("restarting");
+        window.location.reload();
+      } else {
+        toast({ title: `FitxFusion v${targetVersion} activated`, description: "Restart when you're ready to load it." });
+      }
+    } catch (error) {
+      setPhase("idle");
+      setPercent(0);
+      toast({ title: "Update not installed", description: error instanceof Error ? error.message : "Please retry.", variant: "destructive" });
     }
   };
 
-
-  const rollback = (entry: HistoryEntry) => {
-    setStoredVersion(entry.version);
-    setInstalled(entry.version);
-    toast({ title: `Rolled back to v${entry.version}`, description: "Reinstall any time from this center." });
-  };
 
   return (
     <div className="space-y-4">
@@ -275,7 +253,7 @@ export function OneTapUpdateCenter() {
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              All install packs ship as one signed download — no separate installs.
+              The browser downloads deployed assets in the background, verifies them, then activates the waiting build.
             </p>
 
             {busy || phase === "complete" ? (
@@ -479,11 +457,7 @@ export function OneTapUpdateCenter() {
                     {new Date(h.date).toLocaleString()} · {h.channel}
                   </div>
                 </div>
-                {h.version !== installed && (
-                  <Button size="sm" variant="ghost" className="gap-1.5" onClick={() => rollback(h)}>
-                    <RotateCcw className="h-3.5 w-3.5" /> Rollback
-                  </Button>
-                )}
+                 {h.version !== installed && <Badge variant="outline" className="text-[10px]">Previous</Badge>}
                 {i === 0 && h.version === installed && (
                   <Badge variant="secondary" className="text-[10px]">Current</Badge>
                 )}

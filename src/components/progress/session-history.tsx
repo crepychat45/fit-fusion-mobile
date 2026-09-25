@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
-import { Activity, Clock, Flame, Loader2 } from "lucide-react";
+import { Activity, Clock, Flame, Loader2, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 
 interface Session {
@@ -19,6 +20,7 @@ export function SessionHistory() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [totals, setTotals] = useState({ count: 0, minutes: 0, calories: 0 });
+  const [range, setRange] = useState<7 | 30 | 90>(30);
 
   useEffect(() => {
     if (!user?.id) { setLoading(false); return; }
@@ -28,7 +30,8 @@ export function SessionHistory() {
         .select("id, completed_at, duration_minutes, calories_burned, notes")
         .eq("user_id", user.id)
         .order("completed_at", { ascending: false })
-        .limit(10);
+        .gte("completed_at", new Date(Date.now() - range * 86400000).toISOString())
+        .limit(100);
       const rows = (data as Session[]) || [];
       setSessions(rows);
       setTotals(
@@ -43,7 +46,17 @@ export function SessionHistory() {
       );
       setLoading(false);
     })();
-  }, [user?.id]);
+  }, [user?.id, range]);
+
+  const exportRange = () => {
+    const blob = new Blob([JSON.stringify({ rangeDays: range, totals, sessions }, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `fitxfusion-progress-${range}-days.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
@@ -51,7 +64,11 @@ export function SessionHistory() {
         <CardTitle className="flex items-center gap-2 text-base">
           <Activity className="h-4 w-4 text-primary" />Recent Sessions
         </CardTitle>
-        <CardDescription className="text-sm">Synced from your account</CardDescription>
+         <CardDescription className="text-sm">Synced from your account</CardDescription>
+         <div className="flex flex-wrap gap-1 pt-2">
+           {[7, 30, 90].map((days) => <Button key={days} size="sm" variant={range === days ? "default" : "outline"} className="h-7 px-2 text-xs" onClick={() => setRange(days as 7 | 30 | 90)}>{days} days</Button>)}
+           <Button size="sm" variant="ghost" className="ml-auto h-7 px-2 text-xs" onClick={exportRange} disabled={!sessions.length}><Download className="mr-1 h-3 w-3" />Export</Button>
+         </div>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-3 gap-2 mb-4">

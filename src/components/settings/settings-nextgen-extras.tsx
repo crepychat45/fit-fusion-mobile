@@ -135,7 +135,7 @@ export function UpdateCenter() {
   const handleInstall = useCallback(async () => {
     setBusy(true);
     try {
-      await applyUpdate((p) => setProgress(p));
+      await applyUpdate(APP_VERSION, (p) => setProgress(p));
       setHistory([
         { version: APP_VERSION, at: new Date().toISOString(), channel },
         ...history,

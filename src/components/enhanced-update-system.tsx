@@ -155,7 +155,7 @@ export function EnhancedUpdateSystem({
     setProgress(0);
 
     try {
-      await applyUpdate((p) => {
+      await applyUpdate(availableUpdate.version, (p) => {
         setProgress(p.percent);
         setStageMsg(p.message);
         // Map phases to icons if possible

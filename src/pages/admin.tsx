@@ -33,6 +33,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { APP_VERSION } from "@/lib/app-version";
+import { compareVersions, cleanVersion } from "@/hooks/use-remote-update";
+import { safeNativeDownloadUrl } from "@/utils/version-api";
 import { buildDiagnosticReport, type DiagnosticReport } from "@/utils/system-diagnostics";
 import {
   ContentManager,
@@ -80,19 +82,34 @@ function ReleasesTab() {
   const [saving, setSaving] = useState(false);
 
   const publish = async () => {
-    if (!version.trim()) {
-      toast({ title: "Version required", variant: "destructive" });
+    const normalized = cleanVersion(version);
+    if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(normalized)) {
+      toast({ title: "Valid version required", description: "Example: 8.1.0", variant: "destructive" });
+      return;
+    }
+    if (releases.some((release) => cleanVersion(release.version) === normalized)) {
+      toast({ title: "Version already exists", variant: "destructive" });
+      return;
+    }
+    if (compareVersions(normalized, APP_VERSION) < 0) {
+      toast({ title: "Version is older than this build", variant: "destructive" });
+      return;
+    }
+    if (downloadUrl.trim() && !safeNativeDownloadUrl(downloadUrl.trim())) {
+      toast({ title: "Secure download URL required", description: "Native packages must use https://.", variant: "destructive" });
       return;
     }
     setSaving(true);
     const { error } = await supabase.from("app_releases").insert({
-      version: version.trim(),
+       version: normalized,
       min_version: minVersion.trim() || null,
       channel,
-      title: title.trim() || `Release ${version.trim()}`,
+       title: title.trim() || `Release ${normalized}`,
       changelog: items.map((i) => i.trim()).filter(Boolean),
       mandatory,
-      download_url: downloadUrl.trim() || null,
+       download_url: safeNativeDownloadUrl(downloadUrl.trim()),
+       published: true,
+       is_active: true,
       created_by: userId,
     });
     setSaving(false);
