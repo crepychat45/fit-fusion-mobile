@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAdmin } from "@/hooks/use-admin";
 import { useAdminSync } from "@/hooks/use-admin-sync";
-import { useDynamicLinks, DYNAMIC_LINKS_KEY, type DynamicLink } from "@/hooks/use-dynamic-links";
+import { useDynamicLinks, DYNAMIC_LINKS_KEY, normalizeSafeLink, type DynamicLink } from "@/hooks/use-dynamic-links";
 import { APP_VERSION } from "@/lib/app-version";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,12 +49,17 @@ export function DynamicLinksManager() {
     ]);
 
   const save = async () => {
+    const invalid = draft.find((link) => link.label.trim() && link.url.trim() && !normalizeSafeLink(link.url));
+    if (invalid) {
+      toast({ title: "Unsafe destination blocked", description: "Use an internal /route or a secure https:// URL.", variant: "destructive" });
+      return;
+    }
     const clean = draft
       .filter((l) => l.label.trim() && l.url.trim())
       .map((l) => ({
         id: l.id,
         label: l.label.trim(),
-        url: l.url.trim(),
+         url: normalizeSafeLink(l.url) ?? "",
         pages: l.pages?.length ? l.pages : ["*"],
       }));
     setSaving(true);
@@ -174,15 +179,20 @@ export function QuickPushUpdate() {
   };
 
   const push = async () => {
-    if (!version.trim()) {
-      toast({ title: "Enter a version first", variant: "destructive" });
+    const normalized = version.trim().replace(/^v/i, "");
+    if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(normalized)) {
+      toast({ title: "Use a valid version", description: "Example: 8.1.0", variant: "destructive" });
+      return;
+    }
+    if (releases.some((release) => release.version.replace(/^v/i, "") === normalized)) {
+      toast({ title: "Version already exists", description: `v${normalized} is already in release history.`, variant: "destructive" });
       return;
     }
     setBusy(true);
     const { error } = await supabase.from("app_releases").insert({
-      version: version.trim().replace(/^v/i, ""),
+       version: normalized,
       channel: "stable",
-      title: `FitxFusion ${version.trim()}`,
+       title: `FitxFusion ${normalized}`,
       changelog: note
         .split("\n")
         .map((l) => l.trim())
