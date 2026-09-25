@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Download, Smartphone, Wifi, WifiOff, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { checkForUpdate, applyUpdate } from "@/utils/version-api";
+import { APP_VERSION } from "@/lib/app-version";
 
 export function PwaVaultPanel() {
   const { toast } = useToast();
