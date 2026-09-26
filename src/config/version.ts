@@ -16,17 +16,9 @@ export interface VersionInfo {
 }
 
 export function getStoredVersion(): string {
-  try {
-    return (
-      localStorage.getItem(VERSION_STORAGE_KEY) ||
-      // Legacy fallback keys — read only, migration happens on next write.
-      localStorage.getItem("fitfusion-app-version") ||
-      localStorage.getItem("app-version") ||
-      APP_VERSION
-    );
-  } catch {
-    return APP_VERSION;
-  }
+  // The running bundle, not editable local storage or remote release metadata,
+  // is the authoritative web version.
+  return APP_VERSION;
 }
 
 export function setStoredVersion(v: string) {

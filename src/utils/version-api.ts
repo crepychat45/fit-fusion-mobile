@@ -2,7 +2,6 @@
  * Real PWA service-worker update flow.
  * Replaces the previous setTimeout / window.location.reload() simulation.
  */
-import { setStoredVersion } from "@/config/version";
 
 export type UpdatePhase =
   | "idle"
@@ -37,7 +36,7 @@ export async function checkForUpdate(): Promise<boolean> {
  * Never marks an announced release installed until its deployed build loads.
  */
 export async function applyUpdate(
-  targetVersion: string,
+  _targetVersion: string,
   onProgress?: (p: UpdateProgress) => void,
 ): Promise<"activated" | "current"> {
   const emit = (phase: UpdatePhase, percent: number, message: string) =>
@@ -77,9 +76,6 @@ export async function applyUpdate(
     const finalize = () => {
       if (finished) return;
       finished = true;
-      // The waiting worker may belong to another build than an admin announcement.
-      // Only the loaded bundle can establish its own version after reload.
-      setStoredVersion(APP_VERSION);
       emit("complete", 100, "Update ready. Reloading…");
       resolve("activated");
     };
