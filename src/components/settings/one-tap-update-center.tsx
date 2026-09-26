@@ -193,18 +193,13 @@ export function OneTapUpdateCenter() {
         toast({ title: "Deployment not available yet", description: "Release notes are live, but no newer web build is ready to activate." });
         return;
       }
-      const entry: HistoryEntry = { version: targetVersion, date: new Date().toISOString(), channel };
-      const next = [entry, ...history].slice(0, 12);
-      setHistory(next);
-      localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
-      if (remote.release) localStorage.setItem("fitfusion-remote-release-installed", remote.release.id);
-      setInstalled(targetVersion);
-      setShowNotes(true);
+      // The activated worker may not match the announced remote version.
+      // The newly loaded bundle reports its version after restart.
       if (autoRestart) {
         setPhase("restarting");
         window.location.reload();
       } else {
-        toast({ title: `FitxFusion v${targetVersion} activated`, description: "Restart when you're ready to load it." });
+        toast({ title: "Deployed build activated", description: "Restart to load it and check its version." });
       }
     } catch (error) {
       setPhase("idle");
