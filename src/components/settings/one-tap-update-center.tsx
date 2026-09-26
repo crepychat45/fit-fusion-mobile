@@ -167,7 +167,7 @@ export function OneTapUpdateCenter() {
     toast({
       title: hasUpdate ? `Update available — v${targetVersion}` : "You're up to date",
       description: hasUpdate
-        ? `${PACKS.length} install packs bundled into one ${TOTAL_MB.toFixed(1)} MB package.`
+        ? "A new release was announced. Installation begins when its deployed build is available."
         : `FitxFusion v${installed} is the latest ${channel} build.`,
     });
   };
@@ -193,7 +193,6 @@ export function OneTapUpdateCenter() {
         toast({ title: "Deployment not available yet", description: "Release notes are live, but no newer web build is ready to activate." });
         return;
       }
-      setDonePacks(PACKS.map((pack) => pack.id));
       const entry: HistoryEntry = { version: targetVersion, date: new Date().toISOString(), channel };
       const next = [entry, ...history].slice(0, 12);
       setHistory(next);
@@ -235,26 +234,14 @@ export function OneTapUpdateCenter() {
 
             </div>
             <Badge variant={hasUpdate ? "default" : "secondary"} className="text-[10px] uppercase shrink-0">
-              {hasUpdate ? "Update ready" : "Up to date"}
+              {hasUpdate ? "Release announced" : "Up to date"}
             </Badge>
           </div>
         </CardHeader>
 
         <CardContent className="space-y-4">
-          {/* Bundle summary */}
-          <div className="rounded-xl border border-white/10 bg-background/40 p-3">
-            <div className="flex items-center justify-between text-sm font-medium">
-              <span className="flex items-center gap-2">
-                <Package className="h-4 w-4 text-primary" />
-                Bundled package
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {PACKS.length} packs · {TOTAL_MB.toFixed(1)} MB
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              The browser downloads deployed assets in the background, verifies them, then activates the waiting build.
-            </p>
+          <div className="rounded-lg border border-border/40 bg-background/40 p-3">
+            <p className="text-xs text-muted-foreground">A published release announces the version. Web installation activates only after a newer deployed app is available; native packages open through your device installer.</p>
 
             {busy || phase === "complete" ? (
               <div className="mt-3 space-y-2">
@@ -263,31 +250,9 @@ export function OneTapUpdateCenter() {
                   <span className="font-semibold">{percent}%</span>
                 </div>
                 <Progress value={percent} className="h-2" />
-                {phase === "downloading" && (
-                  <div className="text-[11px] text-muted-foreground">
-                    {downloadedMb.toFixed(1)} MB of {TOTAL_MB.toFixed(1)} MB
-                  </div>
-                )}
               </div>
             ) : null}
 
-            <div className="mt-3 space-y-1.5">
-              {PACKS.map((p) => {
-                const done = donePacks.includes(p.id) || (!hasUpdate && phase === "idle");
-                return (
-                  <div key={p.id} className="flex items-center gap-2 text-xs">
-                    {done ? (
-                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                    ) : (
-                      <Download className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                    )}
-                    <span className="font-medium">{p.name}</span>
-                    <span className="text-muted-foreground truncate hidden sm:inline">— {p.detail}</span>
-                    <span className="ml-auto text-muted-foreground">{p.sizeMb.toFixed(1)} MB</span>
-                  </div>
-                );
-              })}
-            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-2">

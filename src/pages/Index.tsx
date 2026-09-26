@@ -212,31 +212,6 @@ const Index = () => {
 
 
 
-          {/* Weekly Summary Card */}
-          <motion.div variants={fadeUp} className="px-4">
-            <div className="rounded-2xl border border-border/20 bg-card/60 backdrop-blur-xl shadow-lg p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <TrendingUp className="h-4 w-4 text-primary" />
-                <h2 className="text-sm font-bold text-foreground">This Week</h2>
-                <Badge className="ml-auto bg-accent/20 text-accent-foreground border-accent/30 text-[10px]">+12%</Badge>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                <div className="p-2.5 bg-muted/30 rounded-xl text-center">
-                  <div className="text-lg font-bold text-foreground">4</div>
-                  <div className="text-[10px] text-muted-foreground">Workouts</div>
-                </div>
-                <div className="p-2.5 bg-muted/30 rounded-xl text-center">
-                  <div className="text-lg font-bold text-foreground">2.1k</div>
-                  <div className="text-[10px] text-muted-foreground">Calories</div>
-                </div>
-                <div className="p-2.5 bg-muted/30 rounded-xl text-center">
-                  <div className="text-lg font-bold text-foreground">128m</div>
-                  <div className="text-[10px] text-muted-foreground">Active</div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
           {/* AI Banner */}
           <motion.div variants={fadeUp} className="px-4">
             <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-primary via-primary/80 to-accent-foreground p-5 shadow-lg">
