@@ -118,6 +118,7 @@ function ReleasesTab() {
       return;
     }
     toast({ title: "Release published", description: `${version} pushed to ${channel} channel.` });
+    await logAdminAction("release.publish", normalized, { channel, mandatory });
     setVersion("");
     setMinVersion("");
     setTitle("");

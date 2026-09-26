@@ -26,6 +26,7 @@ import { SecurityPanel } from "@/components/profile/security-panel";
 import { PrivacySecurityExtras } from "@/components/profile/privacy-security-extras";
 import { RecoveryQuestionsCard } from "@/components/security/recovery-questions-card";
 import { ProfilePowerExtras } from "@/components/profile/profile-power-extras";
+import { supabase } from "@/integrations/supabase/client";
 
 import { AwardsExtras } from "@/components/profile/awards-extras";
 import { StatsExtras } from "@/components/profile/stats-extras";

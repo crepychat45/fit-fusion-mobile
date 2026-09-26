@@ -173,15 +173,6 @@ export function AdvancedChatInterface({
     catch { setInput(""); }
   }, [currentUser?.id, activeThreadId]);
 
-  useEffect(() => {
-    if (!currentUser?.id || !activeThreadId) return;
-    try {
-      const key = `fitxfusion-draft:${currentUser.id}:${activeThreadId}`;
-      if (input) sessionStorage.setItem(key, input.slice(0, 10000));
-      else sessionStorage.removeItem(key);
-    } catch { /* storage may be disabled */ }
-  }, [input, currentUser?.id, activeThreadId]);
-
   const filteredThreads = useMemo(() => {
     const q = threadSearch.trim().toLowerCase();
     const base = defaultMode === "ai" ? threads.filter((thread) => thread.thread_type === "ai") : threads;
@@ -949,7 +940,17 @@ export function AdvancedChatInterface({
                 )}
                 <Textarea
                   value={input}
-                  onChange={(event) => setInput(event.target.value)}
+                   onChange={(event) => {
+                     const value = event.target.value;
+                     setInput(value);
+                     if (currentUser?.id && activeThreadId) {
+                       try {
+                         const key = `fitxfusion-draft:${currentUser.id}:${activeThreadId}`;
+                         if (value) sessionStorage.setItem(key, value.slice(0, 10000));
+                         else sessionStorage.removeItem(key);
+                       } catch { /* storage may be disabled */ }
+                     }
+                   }}
                   onKeyDown={(event) => {
                     if (event.key === "Enter" && !event.shiftKey) {
                       event.preventDefault();
