@@ -141,6 +141,7 @@ export function AdvancedChatInterface({
   const [messages, setMessages] = useState<ChatMessageRow[]>([]);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   const [input, setInput] = useState("");
+  const [failedSend, setFailedSend] = useState(false);
   const [threadSearch, setThreadSearch] = useState("");
   const [messageSearch, setMessageSearch] = useState("");
   const [contacts, setContacts] = useState<ContactPick[]>([]);
@@ -164,6 +165,13 @@ export function AdvancedChatInterface({
     () => threads.find((thread) => thread.id === activeThreadId) ?? null,
     [threads, activeThreadId],
   );
+
+  useEffect(() => {
+    setFailedSend(false);
+    if (!currentUser?.id || !activeThreadId) { setInput(""); return; }
+    try { setInput(sessionStorage.getItem(`fitxfusion-draft:${currentUser.id}:${activeThreadId}`) || ""); }
+    catch { setInput(""); }
+  }, [currentUser?.id, activeThreadId]);
 
   const filteredThreads = useMemo(() => {
     const q = threadSearch.trim().toLowerCase();
@@ -452,7 +460,7 @@ export function AdvancedChatInterface({
   const handleSend = async (directContent?: string) => {
     const content = (directContent ?? input).trim();
     if (!content || !currentUser || !activeThread || sending) return;
-    setInput("");
+    setFailedSend(false);
     setSending(true);
 
     try {
@@ -466,11 +474,14 @@ export function AdvancedChatInterface({
         metadata: { encrypted: true, securityLevel },
       });
       setMessages((prev) => mergeMessage(prev, savedUserMessage));
+      setInput("");
+      try { sessionStorage.removeItem(`fitxfusion-draft:${currentUser.id}:${activeThread.id}`); } catch { /* ignore */ }
       await loadThreads(activeThread.id);
       if (activeThread.thread_type === "ai") await callAi(activeThread.id, content);
     } catch (error) {
       console.error("Send failed", error);
       toast({ title: "Message not sent", description: "Your message was not saved. Try again.", variant: "destructive" });
+      setFailedSend(true);
       setInput(content);
     } finally {
       setSending(false);
@@ -904,6 +915,7 @@ export function AdvancedChatInterface({
             </ScrollArea>
 
             <footer className="border-t bg-card/80 p-3 backdrop-blur-xl">
+              {failedSend && <p role="alert" className="mx-auto mb-2 max-w-3xl text-xs text-destructive">Message not sent. Your draft is saved here; tap send to retry.</p>}
               <div className="mx-auto flex max-w-3xl items-end gap-2">
                 <input
                   ref={fileInputRef}
@@ -928,7 +940,17 @@ export function AdvancedChatInterface({
                 )}
                 <Textarea
                   value={input}
-                  onChange={(event) => setInput(event.target.value)}
+                   onChange={(event) => {
+                     const value = event.target.value;
+                     setInput(value);
+                     if (currentUser?.id && activeThreadId) {
+                       try {
+                         const key = `fitxfusion-draft:${currentUser.id}:${activeThreadId}`;
+                         if (value) sessionStorage.setItem(key, value.slice(0, 10000));
+                         else sessionStorage.removeItem(key);
+                       } catch { /* storage may be disabled */ }
+                     }
+                   }}
                   onKeyDown={(event) => {
                     if (event.key === "Enter" && !event.shiftKey) {
                       event.preventDefault();

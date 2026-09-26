@@ -2,7 +2,6 @@
  * Real PWA service-worker update flow.
  * Replaces the previous setTimeout / window.location.reload() simulation.
  */
-import { setStoredVersion } from "@/config/version";
 
 export type UpdatePhase =
   | "idle"
@@ -34,10 +33,10 @@ export async function checkForUpdate(): Promise<boolean> {
 
 /**
  * Applies the update by messaging the waiting service worker.
- * Falls back to a controlled reload if no SW is registered.
+ * Never marks an announced release installed until its deployed build loads.
  */
 export async function applyUpdate(
-  targetVersion: string,
+  _targetVersion: string,
   onProgress?: (p: UpdateProgress) => void,
 ): Promise<"activated" | "current"> {
   const emit = (phase: UpdatePhase, percent: number, message: string) =>
@@ -77,7 +76,6 @@ export async function applyUpdate(
     const finalize = () => {
       if (finished) return;
       finished = true;
-      setStoredVersion(targetVersion);
       emit("complete", 100, "Update ready. Reloading…");
       resolve("activated");
     };
@@ -110,6 +108,6 @@ export function safeNativeDownloadUrl(value: string | null | undefined): string 
 export async function clearAppCache(): Promise<void> {
   if ("caches" in window) {
     const names = await caches.keys();
-    await Promise.all(names.map((n) => caches.delete(n)));
+    await Promise.all(names.filter((n) => n.startsWith("fitxfusion-")).map((n) => caches.delete(n)));
   }
 }

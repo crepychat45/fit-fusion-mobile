@@ -252,9 +252,9 @@ const DockIcon = memo(function DockIcon({
         style={{ width: sizePx, height: sizePx, y: lift, willChange: "transform" }}
         whileTap={{ scale: 0.82 }}
         className={cn(
-          "relative flex items-center justify-center rounded-2xl border overflow-hidden",
+          "relative flex items-center justify-center rounded-2xl border overflow-hidden transition-colors",
           isActive
-            ? "border-white/30 shadow-lg shadow-primary/30"
+            ? "border-primary/40 bg-primary/15 shadow-md shadow-primary/20"
             : "bg-card/50 border-border/30 hover:bg-muted/50",
         )}
       >
@@ -658,18 +658,16 @@ export function MobileNav() {
             }}
             transition={{ duration: 0.25 }}
             className={cn(
-              "pointer-events-auto relative flex items-end gap-0.5 px-2 pt-3 pb-2 rounded-3xl border shadow-2xl shadow-black/30 transition-[backdrop-filter,border-color] duration-300 w-full max-w-[440px]",
-              compact ? "backdrop-blur-xl border-white/10" : "backdrop-blur-2xl border-white/20",
+               "pointer-events-auto relative flex items-end gap-0.5 px-2 pt-3 pb-2 rounded-3xl border bg-card/85 shadow-xl shadow-foreground/10 transition-[backdrop-filter,border-color] duration-300 w-full max-w-[440px]",
+               compact ? "backdrop-blur-xl border-border/30" : "backdrop-blur-2xl border-border/50",
             )}
             style={{
               backgroundImage:
                 "linear-gradient(135deg, hsl(var(--card)/0.78), hsl(var(--card)/0.42)), radial-gradient(120% 80% at 50% 0%, hsl(var(--nav-accent)/0.18), transparent 60%)",
             }}
           >
-            {/* Liquid top highlight */}
-            <div className="absolute inset-x-4 top-1 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
-            {/* Bottom soft shadow */}
-            <div className="absolute inset-x-6 -bottom-2 h-3 bg-black/40 blur-xl rounded-full pointer-events-none" />
+             {/* Liquid top highlight */}
+             <div className="absolute inset-x-4 top-1 h-px bg-gradient-to-r from-transparent via-primary/35 to-transparent pointer-events-none" />
 
             {leftItems.map((item) => (
               <DockIcon

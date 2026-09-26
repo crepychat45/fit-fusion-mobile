@@ -34,27 +34,18 @@ const Workouts = () => {
   const [previewWorkout, setPreviewWorkout] = useState<Workout | null>(null);
   const [favoriteWorkouts, setFavoriteWorkouts] = useState<string[]>([]);
   const [completedWorkouts, setCompletedWorkouts] = useState<string[]>([]);
-  const [aiRecommendations, setAiRecommendations] = useState<any[]>([]);
-  const [personalizedPlans, setPersonalizedPlans] = useState<any[]>([]);
   const [equipment, setEquipment] = useState("all");
   const [queue, setQueue] = useState<string[]>([]);
 
   useEffect(() => {
-    const saved = localStorage.getItem("workout-data");
-    if (saved) {
-      const data = JSON.parse(saved);
-      setFavoriteWorkouts(data.favorites || []);
-      setCompletedWorkouts(data.completed || []);
-      setQueue(Array.isArray(data.queue) ? data.queue.slice(0, 12) : []);
-    }
-    setAiRecommendations([
-      { id: "ai-1", title: "AI Smart HIIT", description: "Personalized high-intensity workout", duration: "25 mins", difficulty: "Intermediate", calories: 320, icon: Brain },
-      { id: "ai-2", title: "Adaptive Strength", description: "AI-optimized strength training", duration: "35 mins", difficulty: "Advanced", calories: 280, icon: Zap },
-    ]);
-    setPersonalizedPlans([
-      { id: "plan-1", title: "30-Day Transform", description: "Comprehensive plan tailored to your goals", workouts: 24, duration: "30 days", difficulty: "Progressive" },
-      { id: "plan-2", title: "Strength Builder", description: "Build muscle with progressive overload", workouts: 18, duration: "6 weeks", difficulty: "Intermediate" },
-    ]);
+     try {
+       const saved = localStorage.getItem("workout-data");
+       if (!saved) return;
+       const data = JSON.parse(saved);
+       setFavoriteWorkouts(Array.isArray(data.favorites) ? data.favorites : []);
+       setCompletedWorkouts(Array.isArray(data.completed) ? data.completed : []);
+       setQueue(Array.isArray(data.queue) ? data.queue.slice(0, 12) : []);
+     } catch { /* Ignore unavailable or corrupt local data */ }
   }, []);
 
   const filteredWorkouts = workouts
@@ -67,7 +58,7 @@ const Workouts = () => {
         (w.equipment || []).some((t) => t.toLowerCase().includes(q));
       const matchesType = filterType === "all" || w.category === filterType;
        const matchesDifficulty = filterDifficulty === "all" || w.level === filterDifficulty;
-       const matchesEquipment = equipment === "all" || (equipment === "none" ? !(w.equipment || []).length : (w.equipment || []).includes(equipment));
+        const matchesEquipment = equipment === "all" || (equipment === "none" ? !(w.equipment || []).length : (w.equipment || []).some((item) => item.toLowerCase().includes(equipment)));
        return matchesSearch && matchesType && matchesDifficulty && matchesEquipment;
     })
     .sort((a, b) => {
@@ -100,7 +91,7 @@ const Workouts = () => {
     localStorage.setItem("workout-data", JSON.stringify({ favorites: favoriteWorkouts, completed: completedWorkouts, queue: capped }));
   };
 
-  const stats = { total: workouts.length, completed: completedWorkouts.length, favorites: favoriteWorkouts.length, streak: 7 };
+   const stats = { total: workouts.length, completed: completedWorkouts.length, favorites: favoriteWorkouts.length, streak: 0 };
 
   const fadeUp = { hidden: { y: 12, opacity: 0 }, visible: { y: 0, opacity: 1, transition: { duration: 0.4 } } };
 
@@ -221,7 +212,7 @@ const Workouts = () => {
                   {queue.map((id) => {
                     const queued = workouts.find((item) => item.id === id);
                     if (!queued) return null;
-                    return <div key={id} className="flex shrink-0 items-center gap-2 rounded-lg bg-muted/40 px-3 py-2 text-xs"><button onClick={() => navigate(`/workout-detail/${id}`)} className="font-medium">{queued.title}</button><Button variant="ghost" size="icon" className="h-6 w-6" aria-label={`Remove ${queued.title} from queue`} onClick={() => updateQueue(queue.filter((item) => item !== id))}><X className="h-3 w-3" /></Button></div>;
+                     return <div key={id} className="flex shrink-0 items-center gap-2 rounded-lg bg-muted/40 px-3 py-2 text-xs"><Button variant="link" size="sm" onClick={() => navigate(`/workout-detail/${id}`)} className="h-7 px-0 font-medium">{queued.title}</Button><Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Remove ${queued.title} from queue`} onClick={() => updateQueue(queue.filter((item) => item !== id))}><X className="h-3 w-3" /></Button></div>;
                   })}
                 </div>
               </div>

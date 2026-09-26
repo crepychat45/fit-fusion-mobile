@@ -35,6 +35,7 @@ import {
 import { APP_VERSION } from "@/lib/app-version";
 import { compareVersions, cleanVersion } from "@/hooks/use-remote-update";
 import { safeNativeDownloadUrl } from "@/utils/version-api";
+import { logAdminAction } from "@/lib/admin-audit";
 import { buildDiagnosticReport, type DiagnosticReport } from "@/utils/system-diagnostics";
 import {
   ContentManager,
@@ -118,6 +119,7 @@ function ReleasesTab() {
       return;
     }
     toast({ title: "Release published", description: `${version} pushed to ${channel} channel.` });
+    await logAdminAction("release.publish", normalized, { channel, mandatory });
     setVersion("");
     setMinVersion("");
     setTitle("");

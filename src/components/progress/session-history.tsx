@@ -31,7 +31,7 @@ export function SessionHistory() {
         .eq("user_id", user.id)
         .order("completed_at", { ascending: false })
         .gte("completed_at", new Date(Date.now() - range * 86400000).toISOString())
-        .limit(100);
+        .limit(1000);
       const rows = (data as Session[]) || [];
       setSessions(rows);
       setTotals(
@@ -55,7 +55,7 @@ export function SessionHistory() {
     link.href = url;
     link.download = `fitxfusion-progress-${range}-days.json`;
     link.click();
-    URL.revokeObjectURL(url);
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
   return (

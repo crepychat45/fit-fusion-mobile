@@ -4,7 +4,7 @@ import { MobileNav } from "@/components/mobile-nav";
 import { ProfileEditor } from "@/components/profile-editor";
 import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, CreditCard, Settings, User, Bell, Trophy, Activity, Share2, Target, Sparkles, Apple, PlugZap, HeartPulse } from "lucide-react";
+import { Shield, CreditCard, Settings, User, Bell, Trophy, Activity, Share2, Target, Sparkles, Apple, PlugZap, HeartPulse, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { userProfile } from "@/data/user";
 import { motion, AnimatePresence } from "framer-motion";
@@ -26,6 +26,7 @@ import { SecurityPanel } from "@/components/profile/security-panel";
 import { PrivacySecurityExtras } from "@/components/profile/privacy-security-extras";
 import { RecoveryQuestionsCard } from "@/components/security/recovery-questions-card";
 import { ProfilePowerExtras } from "@/components/profile/profile-power-extras";
+import { supabase } from "@/integrations/supabase/client";
 
 import { AwardsExtras } from "@/components/profile/awards-extras";
 import { StatsExtras } from "@/components/profile/stats-extras";
@@ -105,6 +106,18 @@ const Profile = () => {
       // user cancelled
     }
   }, [localStats, toast]);
+
+  const exportProfile = useCallback(async () => {
+    if (!user?.id) return;
+    const { data, error } = await supabase.from("workout_sessions").select("completed_at,duration_minutes,calories_burned,notes")
+      .eq("user_id", user.id).order("completed_at", { ascending: false }).limit(1000);
+    if (error) { toast({ title: "Export unavailable", description: error.message, variant: "destructive" }); return; }
+    const payload = { exportedAt: new Date().toISOString(), profile: { name: cloudProfile?.name, fitnessGoals: cloudProfile?.fitness_goals }, sessions: data ?? [] };
+    const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" }));
+    const link = document.createElement("a"); link.href = url; link.download = "fitxfusion-my-fitness-data.json"; link.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast({ title: "Fitness data exported", description: "Keep this file private; it includes your workout history." });
+  }, [user?.id, cloudProfile, toast]);
 
   // Skeleton loader — prevents flicker and demo-value flash on refresh.
   if (authLoading || (user && profileLoading && !cloudProfile)) {
@@ -239,6 +252,10 @@ const Profile = () => {
                 <ProfileHub email={userEmail} displayName={displayName} userId={user?.id ?? null} />
                 <div id="profile-editor" />
                 <ProfileEditor onSave={() => toast({ title: "✅ Profile Updated" })} />
+                <div className="flex flex-wrap items-center justify-between gap-3 border-y border-border/40 py-4">
+                  <div><p className="text-sm font-semibold">Your fitness data</p><p className="text-xs text-muted-foreground">Export your profile goals and saved workout sessions. Only you can download this file.</p></div>
+                  <Button variant="outline" onClick={exportProfile}><Download className="mr-2 h-4 w-4" />Export data</Button>
+                </div>
                 <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
                   <CardHeader className="pb-3">
                     <CardTitle className="flex items-center gap-2 text-base"><Settings className="h-4 w-4" />Quick Actions</CardTitle>
