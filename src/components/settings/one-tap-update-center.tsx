@@ -253,11 +253,11 @@ export function OneTapUpdateCenter() {
           <div className="flex flex-col sm:flex-row gap-2">
             <Button
               className="flex-1 gap-2"
-              disabled={busy || (!hasUpdate && phase !== "idle")}
+               disabled={busy || !hasUpdate}
               onClick={runInstall}
             >
               <Download className="h-4 w-4" />
-              {busy ? PHASE_LABEL[phase] : hasUpdate ? "Download & Install" : "Reinstall latest"}
+               {busy ? PHASE_LABEL[phase] : "Check and install"}
             </Button>
             <Button variant="outline" className="gap-2" disabled={busy} onClick={handleCheck}>
               <RefreshCw className={`h-4 w-4 ${phase === "checking" ? "animate-spin" : ""}`} />
@@ -279,41 +279,6 @@ export function OneTapUpdateCenter() {
 
           {/* Update management */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between gap-3">
-              <div className="text-sm font-medium flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-primary" /> Update channel
-              </div>
-              <Select value={channel} onValueChange={setChannel}>
-                <SelectTrigger className="h-9 w-36">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="stable">Stable</SelectItem>
-                  <SelectItem value="beta">Beta</SelectItem>
-                  <SelectItem value="canary">Canary</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-center justify-between rounded-lg border border-white/10 bg-background/40 p-3">
-              <div>
-                <div className="text-sm font-medium">Automatic updates</div>
-                <div className="text-xs text-muted-foreground">Install new builds as soon as they land.</div>
-              </div>
-              <Switch checked={autoUpdate} onCheckedChange={setAutoUpdate} />
-            </div>
-
-            <div className="flex items-center justify-between rounded-lg border border-white/10 bg-background/40 p-3">
-              <div className="flex items-center gap-3">
-                <Wifi className="h-4 w-4 text-primary" />
-                <div>
-                  <div className="text-sm font-medium">Download on Wi-Fi only</div>
-                  <div className="text-xs text-muted-foreground">Skip large downloads on cellular data.</div>
-                </div>
-              </div>
-              <Switch checked={wifiOnly} onCheckedChange={setWifiOnly} />
-            </div>
-
             <div className="flex items-center justify-between rounded-lg border border-white/10 bg-background/40 p-3">
               <div>
                 <div className="text-sm font-medium">Restart automatically after install</div>
