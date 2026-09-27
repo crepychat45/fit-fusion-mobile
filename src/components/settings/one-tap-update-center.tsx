@@ -1,19 +1,16 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Download,
   ShieldCheck,
   RefreshCw,
-  CheckCircle2,
-  Package,
   Rocket,
   History,
   RotateCcw,
@@ -22,9 +19,8 @@ import {
   Zap,
   Shield,
   Clock,
-  Wifi,
 } from "lucide-react";
-import { APP_VERSION, APP_RELEASE_DATE, RELEASE_NOTES } from "@/lib/app-version";
+import { APP_RELEASE_DATE, RELEASE_NOTES } from "@/lib/app-version";
 import { getStoredVersion } from "@/config/version";
 import { applyUpdate, checkForUpdate, safeNativeDownloadUrl, type UpdateProgress } from "@/utils/version-api";
 import { useRemoteUpdate, compareVersions, cleanVersion } from "@/hooks/use-remote-update";
@@ -32,29 +28,7 @@ import { useRemoteUpdate, compareVersions, cleanVersion } from "@/hooks/use-remo
 
 type Phase = "idle" | "checking" | "downloading" | "verifying" | "installing" | "activating" | "restarting" | "complete";
 
-interface Pack {
-  id: string;
-  name: string;
-  detail: string;
-  sizeMb: number;
-}
-
-/** Every install pack that ships inside the single bundled package. */
-const PACKS: Pack[] = [
-  { id: "core", name: "App core", detail: "React shell, routing and state engine", sizeMb: 8.4 },
-  { id: "ui", name: "UI & theme pack", detail: "Liquid Glass styles, icons and fonts", sizeMb: 4.1 },
-  { id: "workouts", name: "Workout & video pack", detail: "Exercise library, players and timers", sizeMb: 6.2 },
-  { id: "sw", name: "Service worker", detail: "Offline cache and background sync", sizeMb: 1.3 },
-  { id: "schema", name: "Local data schema", detail: "Settings, cache and migration scripts", sizeMb: 0.9 },
-  { id: "native", name: "Native bridge", detail: "Biometrics, haptics and permissions", sizeMb: 2.0 },
-];
-
-const TOTAL_MB = PACKS.reduce((a, p) => a + p.sizeMb, 0);
-
 const HISTORY_KEY = "fitfusion-update-history";
-const CHANNEL_KEY = "fitfusion-update-channel";
-const AUTO_KEY = "fitfusion-update-auto";
-const WIFI_KEY = "fitfusion-update-wifi-only";
 const AUTO_RESTART_KEY = "fitfusion-update-auto-restart";
 
 interface HistoryEntry {
@@ -99,9 +73,9 @@ function usePref<T extends string | boolean>(key: string, initial: T): [T, (v: T
 const PHASE_LABEL: Record<Phase, string> = {
   idle: "Ready",
   checking: "Checking for updates…",
-  downloading: "Downloading bundled package…",
-  verifying: "Verifying signature…",
-  installing: "Installing packs…",
+  downloading: "Checking deployed build…",
+  verifying: "Checking update…",
+  installing: "Activating deployed build…",
   activating: "Activating new version…",
   restarting: "Restarting FitxFusion…",
   complete: "Up to date",
@@ -115,66 +89,36 @@ export function OneTapUpdateCenter() {
   const [installed, setInstalled] = useState<string>(() => cleanVersion(getStoredVersion()));
   const [phase, setPhase] = useState<Phase>("idle");
   const [percent, setPercent] = useState(0);
-  const [donePacks, setDonePacks] = useState<string[]>([]);
   const [history, setHistory] = useState<HistoryEntry[]>(() => readHistory());
-  const [showNotes, setShowNotes] = useState(false);
   const [lastChecked, setLastChecked] = useState<string | null>(null);
 
-  const [channel, setChannel] = usePref<string>(CHANNEL_KEY, "stable");
-  const [autoUpdate, setAutoUpdate] = usePref<boolean>(AUTO_KEY, true);
-  const [wifiOnly, setWifiOnly] = usePref<boolean>(WIFI_KEY, false);
   const [autoRestart, setAutoRestart] = usePref<boolean>(AUTO_RESTART_KEY, true);
-
-  const timers = useRef<number[]>([]);
-  const alive = useRef(true);
-  useEffect(() => {
-    alive.current = true;
-    return () => {
-      alive.current = false;
-      timers.current.forEach((t) => window.clearTimeout(t));
-      timers.current = [];
-    };
-  }, []);
 
   useEffect(() => {
     setInstalled(cleanVersion(remote.installed));
   }, [remote.installed]);
-
-  const wait = (ms: number) =>
-    new Promise<void>((resolve) => {
-      const t = window.setTimeout(() => resolve(), ms);
-      timers.current.push(t);
-    });
 
   const targetVersion = remote.target;
   const hasUpdate = compareVersions(targetVersion, installed) > 0;
   const latestNote = RELEASE_NOTES[0];
   const busy = phase !== "idle" && phase !== "complete";
 
-  const downloadedMb = useMemo(
-    () => (TOTAL_MB * Math.min(100, percent)) / 100,
-    [percent],
-  );
-
   const handleCheck = async () => {
     setPhase("checking");
     setPercent(0);
     await checkForUpdate().catch(() => false);
-    await wait(700);
-    if (!alive.current) return;
     setLastChecked(new Date().toLocaleTimeString());
     setPhase("idle");
     toast({
-      title: hasUpdate ? `Update available — v${targetVersion}` : "You're up to date",
+      title: hasUpdate ? `Release announced — v${targetVersion}` : "You're up to date",
       description: hasUpdate
         ? "A new release was announced. Installation begins when its deployed build is available."
-        : `FitxFusion v${installed} is the latest ${channel} build.`,
+        : `FitxFusion v${installed} is the current build.`,
     });
   };
 
 
   const runInstall = async () => {
-    setDonePacks([]);
     setPhase("downloading");
     const nativeUrl = safeNativeDownloadUrl(remote.downloadUrl);
     if (nativeUrl) {
@@ -220,11 +164,11 @@ export function OneTapUpdateCenter() {
                 <span className="p-1.5 rounded-lg bg-primary/10 text-primary">
                   <Rocket className="h-4 w-4" />
                 </span>
-                One-Tap Update
+                 App Updates
               </CardTitle>
               <CardDescription className="text-xs mt-1">
                 Installed v{installed} · Latest v{targetVersion}{" "}
-                {remote.release ? `(${remote.channel} · pushed by admin)` : `(${APP_RELEASE_DATE})`}
+               {remote.release ? `(${remote.channel} · announced by admin)` : `(${APP_RELEASE_DATE})`}
               </CardDescription>
 
             </div>
@@ -257,7 +201,7 @@ export function OneTapUpdateCenter() {
               onClick={runInstall}
             >
               <Download className="h-4 w-4" />
-               {busy ? PHASE_LABEL[phase] : "Check and install"}
+               {busy ? PHASE_LABEL[phase] : "Check deployed build"}
             </Button>
             <Button variant="outline" className="gap-2" disabled={busy} onClick={handleCheck}>
               <RefreshCw className={`h-4 w-4 ${phase === "checking" ? "animate-spin" : ""}`} />
@@ -323,7 +267,7 @@ export function OneTapUpdateCenter() {
       {/* What's new */}
       <AnimatePresence initial={false}>
 
-        {(showNotes || hasUpdate) && latestNote && (
+         {latestNote && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
             <Card className="liquid-glass border-white/10">
               <CardHeader className="pb-3">
