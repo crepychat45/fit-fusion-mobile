@@ -20,7 +20,6 @@ import {
   Zap,
   Bug,
   Shield,
-  RotateCcw,
   History,
 } from "lucide-react";
 import { getVersionInfo, RELEASE_NOTES } from "@/config/version";
@@ -82,7 +81,9 @@ export function VersionControlPanel() {
 
   const handleInstall = async () => {
     try {
-      await applyUpdate(latest, setProgress);
+      const result = await applyUpdate(latest, setProgress);
+      if (result === "activated") window.location.reload();
+      else toast({ title: "Release announced", description: "A newer deployed web build is not available yet." });
     } catch (e: any) {
       toast({
         title: "Update failed",
@@ -91,15 +92,6 @@ export function VersionControlPanel() {
       });
       setProgress({ phase: "error", percent: 0, message: "Failed" });
     }
-  };
-
-  const handleRollback = () => {
-    toast({
-      title: "Rollback initiated",
-      description:
-        "Restoring previous verified version. The app will reload shortly.",
-    });
-    setTimeout(() => window.location.reload(), 900);
   };
 
   const latestNote = RELEASE_NOTES[0];
@@ -118,7 +110,7 @@ export function VersionControlPanel() {
                 Version Control
               </CardTitle>
               <CardDescription>
-                Signed release channel · unified version state
+                 Deployed build · version history
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
@@ -192,14 +184,6 @@ export function VersionControlPanel() {
             >
               <Download className="h-4 w-4 mr-2" />
               {hasUpdate ? `Install v${latest}` : "Installed"}
-            </Button>
-            <Button
-              onClick={handleRollback}
-              variant="ghost"
-              className="rounded-xl"
-            >
-              <RotateCcw className="h-4 w-4 mr-2" />
-              Rollback
             </Button>
           </div>
         </CardContent>

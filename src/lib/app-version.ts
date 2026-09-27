@@ -6,8 +6,7 @@ export const APP_RELEASE_DATE = "2026-09-24";
 
 export const VERSION_STORAGE_KEYS = ["fitfusion-app-version", "app-version"] as const;
 export const FEATURE_UNLOCK_KEY = "fitfusion-active-feature-release";
-// Expected SHA-256 signature of the update package (mocked for client-side demo).
-// In a real deployment this is delivered by a signed manifest from the update server.
+// Legacy compatibility constant; not evidence of a signed or installed package.
 export const APP_UPDATE_SIGNATURE =
   "6b8f2a1e0d4c9b3a5e7f1c2d8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b";
 

@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/drawer";
 
 const DISMISS_KEY = "fitfusion-remote-release-dismissed";
-const HISTORY_KEY = "fitfusion-update-history";
 
 /** Shows the update popup as soon as an admin publishes a newer release. */
 export function RemoteUpdateDrawer() {
@@ -59,11 +58,6 @@ export function RemoteUpdateDrawer() {
         setInstalling(false);
         return;
       }
-      const prev = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
-      localStorage.setItem(HISTORY_KEY, JSON.stringify([
-        { version: remote.target, date: new Date().toISOString(), channel: release.channel },
-        ...(Array.isArray(prev) ? prev : []),
-      ].slice(0, 12)));
       localStorage.setItem(DISMISS_KEY, release.id);
       window.location.reload();
     } catch (error) {
@@ -85,7 +79,7 @@ export function RemoteUpdateDrawer() {
             {release.mandatory && <Badge variant="destructive">required</Badge>}
           </DrawerTitle>
           <DrawerDescription>
-            Version {remote.target} is available — you have v{remote.installed}.
+             Version {remote.target} has been announced — you have v{remote.installed}.
           </DrawerDescription>
         </DrawerHeader>
         <div className="px-4 space-y-3">
@@ -110,7 +104,7 @@ export function RemoteUpdateDrawer() {
         <DrawerFooter className="flex-row flex-wrap gap-2">
           <Button className="flex-1" onClick={install} disabled={installing}>
             <Download className="mr-2 h-4 w-4" />
-            {installing ? "Installing…" : "Download & install"}
+             {installing ? "Checking…" : "Check deployed build"}
           </Button>
           {!installing && (
             <Button

@@ -22,6 +22,7 @@ import { WorkoutCategories } from "@/components/workout/workout-categories";
 import { WorkoutVideoLab } from "@/components/workout/workout-video-lab";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { Workout } from "@/data/workouts";
+import { APP_VERSION } from "@/lib/app-version";
 
 const Workouts = () => {
   const { toast } = useToast();
@@ -111,7 +112,7 @@ const Workouts = () => {
                 </div>
                 <p className="text-primary-foreground/70 text-sm">AI-powered fitness routines</p>
               </div>
-              <Badge className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30">v8.0.0</Badge>
+              <Badge className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30">v{APP_VERSION}</Badge>
             </div>
 
             {/* Stats */}
@@ -120,7 +121,7 @@ const Workouts = () => {
                 { icon: Target, value: stats.total, label: "Available" },
                 { icon: Award, value: stats.completed, label: "Done" },
                 { icon: Heart, value: stats.favorites, label: "Saved" },
-                { icon: Flame, value: stats.streak, label: "Streak" },
+                { icon: ListPlus, value: queue.length, label: "Queued" },
               ].map((s, i) => (
                 <motion.div key={s.label} initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: i * 0.08 }}
                   className="bg-primary-foreground/10 backdrop-blur-sm rounded-xl p-2.5 text-center border border-primary-foreground/10">
@@ -311,26 +312,25 @@ const Workouts = () => {
                     </CardHeader>
                   </Card>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {aiRecommendations.map((w, i) => (
+                    {workouts.filter((w) => w.level === "beginner").slice(0, 2).map((w, i) => (
                       <motion.div key={w.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
                         <Card className="border-primary/20 bg-card/60 backdrop-blur-sm hover:shadow-lg transition-all">
                           <CardHeader className="pb-2">
                             <div className="flex items-center gap-3">
-                              <div className="p-2 bg-primary/10 rounded-xl"><w.icon className="h-5 w-5 text-primary" /></div>
+                              <div className="p-2 bg-primary/10 rounded-xl"><Dumbbell className="h-5 w-5 text-primary" /></div>
                               <div className="flex-1 min-w-0">
                                 <CardTitle className="text-base">{w.title}</CardTitle>
                                 <CardDescription className="text-sm">{w.description}</CardDescription>
                               </div>
-                              <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] shrink-0">AI</Badge>
+                              <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] shrink-0">Beginner</Badge>
                             </div>
                           </CardHeader>
                           <CardContent className="pt-0">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{w.duration}</span>
-                                <span className="flex items-center gap-1"><Flame className="h-3.5 w-3.5" />{w.calories} cal</span>
+                                <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{w.duration}m</span>
                               </div>
-                              <Button size="sm" className="h-8 text-xs rounded-lg"><PlayCircle className="h-3.5 w-3.5 mr-1" />Try Now</Button>
+                              <Button size="sm" onClick={() => navigate(`/workout-detail/${w.id}`)} className="h-8 text-xs rounded-lg"><PlayCircle className="h-3.5 w-3.5 mr-1" />Try Now</Button>
                             </div>
                           </CardContent>
                         </Card>
@@ -346,7 +346,7 @@ const Workouts = () => {
                       <CardDescription>Structured programs for your goals</CardDescription>
                     </CardHeader>
                   </Card>
-                  {personalizedPlans.map((p, i) => (
+                  {workouts.filter((w) => w.level === "intermediate").slice(0, 2).map((p, i) => (
                     <motion.div key={p.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
                       <Card className="border-border/20 bg-card/60 backdrop-blur-sm hover:shadow-lg transition-all">
                         <CardHeader className="pb-2">
@@ -356,11 +356,11 @@ const Workouts = () => {
                         <CardContent className="pt-0">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                              <span>{p.workouts} workouts</span>
-                              <span>{p.duration}</span>
-                              <Badge variant="outline" className="text-[10px] h-5">{p.difficulty}</Badge>
+                              <span>{p.exercises.length} exercises</span>
+                              <span>{p.duration}m</span>
+                              <Badge variant="outline" className="text-[10px] h-5">{p.level}</Badge>
                             </div>
-                            <Button size="sm" className="h-8 text-xs rounded-lg">Start Plan</Button>
+                            <Button size="sm" onClick={() => navigate(`/workout-detail/${p.id}`)} className="h-8 text-xs rounded-lg">Start</Button>
                           </div>
                         </CardContent>
                       </Card>
