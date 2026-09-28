@@ -1,11 +1,12 @@
 # FitxFusion 8.1 roadmap
-- [ ] Shared live activity summary and Home Today strip
-- [ ] Persisted Workouts queue and equipment filters
-- [ ] Progress 7/30/90-day live session ranges
-- [ ] Chat draft recovery and retry-safe status
-- [ ] Profile privacy summary and portable export
-- [ ] Settings release status and real update lifecycle
-- [ ] Crystal Liquid Glass mobile dock
-- [ ] Admin release/link validation and auditing
-- [ ] Version/changelog/service-worker metadata 8.1.0
-- [ ] Typecheck and browser validation
+- [x] Shared live activity summary and Home Today strip
+- [x] Persisted Workouts queue and equipment filters
+- [x] Progress 7/30/90-day live session ranges
+- [x] Chat draft recovery and retry-safe status
+- [x] Profile privacy summary and portable export
+- [x] Settings release status and real update lifecycle
+- [x] Crystal Liquid Glass mobile dock
+- [x] Admin release/link validation and auditing
+- [x] Version/changelog/service-worker metadata 8.1.0
+- [x] Typecheck and authenticated page-load browser validation
+- [ ] Verify authenticated click-through interactions — blocked by unavailable browser session after sandbox reset

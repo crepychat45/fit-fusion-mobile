@@ -226,8 +226,8 @@ const Workouts = () => {
               <TabsTrigger value="all" className="text-xs rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Target className="h-3.5 w-3.5 mr-1" />All</TabsTrigger>
               <TabsTrigger value="builder" className="text-xs rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Sparkles className="h-3.5 w-3.5 mr-1" />Build</TabsTrigger>
               <TabsTrigger value="videos" className="text-xs rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Video className="h-3.5 w-3.5 mr-1" />Videos</TabsTrigger>
-              <TabsTrigger value="ai" className="text-xs rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Brain className="h-3.5 w-3.5 mr-1" />AI</TabsTrigger>
-              <TabsTrigger value="plans" className="text-xs rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Calendar className="h-3.5 w-3.5 mr-1" />Plans</TabsTrigger>
+              <TabsTrigger value="ai" className="text-xs rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Brain className="h-3.5 w-3.5 mr-1" />Beginner</TabsTrigger>
+              <TabsTrigger value="plans" className="text-xs rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Calendar className="h-3.5 w-3.5 mr-1" />Next</TabsTrigger>
               <TabsTrigger value="favorites" className="text-xs rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Heart className="h-3.5 w-3.5 mr-1" />Saved</TabsTrigger>
             </TabsList>
 
@@ -307,8 +307,8 @@ const Workouts = () => {
                 <TabsContent value="ai" className="space-y-3 mt-0">
                   <Card className="border-border/20 bg-gradient-to-r from-primary/5 to-accent/5 backdrop-blur-sm">
                     <CardHeader className="pb-3">
-                      <CardTitle className="flex items-center gap-2 text-base"><Brain className="h-5 w-5 text-primary" />AI-Generated Workouts</CardTitle>
-                      <CardDescription>Personalized based on your fitness profile</CardDescription>
+                       <CardTitle className="flex items-center gap-2 text-base"><Brain className="h-5 w-5 text-primary" />Beginner Workouts</CardTitle>
+                       <CardDescription>Explore guided sessions from the workout library</CardDescription>
                     </CardHeader>
                   </Card>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -342,8 +342,8 @@ const Workouts = () => {
                 <TabsContent value="plans" className="space-y-3 mt-0">
                   <Card className="border-border/20 bg-gradient-to-r from-primary/5 to-accent/5 backdrop-blur-sm">
                     <CardHeader className="pb-3">
-                      <CardTitle className="flex items-center gap-2 text-base"><Calendar className="h-5 w-5 text-primary" />Training Plans</CardTitle>
-                      <CardDescription>Structured programs for your goals</CardDescription>
+                       <CardTitle className="flex items-center gap-2 text-base"><Calendar className="h-5 w-5 text-primary" />Intermediate Workouts</CardTitle>
+                       <CardDescription>Choose a session to view exercises and get started</CardDescription>
                     </CardHeader>
                   </Card>
                   {workouts.filter((w) => w.level === "intermediate").slice(0, 2).map((p, i) => (

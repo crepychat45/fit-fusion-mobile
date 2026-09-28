@@ -982,12 +982,7 @@ export const RELEASE_NOTES: ReleaseNote[] = [
 ];
 
 export function getInstalledVersion(): string {
-  if (typeof window === "undefined") return APP_VERSION;
-  for (const key of VERSION_STORAGE_KEYS) {
-    const v = localStorage.getItem(key);
-    if (v) return v;
-  }
-  return "6.2.5";
+  return APP_VERSION;
 }
 
 export function setInstalledVersion(version: string) {
