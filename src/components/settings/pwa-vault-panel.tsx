@@ -84,15 +84,15 @@ export function PwaVaultPanel() {
         <Row
           icon={<RefreshCw className="h-4 w-4" />}
           title="Service worker"
-          value={swWaiting ? "Update ready" : "Up to date"}
+          value={swWaiting ? "Update ready" : "No waiting update"}
           badgeClass={swWaiting ? "bg-primary/15 text-primary border border-primary/30" : "bg-emerald-500/15 text-emerald-600 border border-emerald-500/30"}
           action={
             swWaiting ? (
-              <Button size="sm" onClick={() => applyUpdate(APP_VERSION)} className="rounded-xl">
+              <Button size="sm" onClick={async () => { try { if (await applyUpdate(APP_VERSION) === "activated") window.location.reload(); else setSwWaiting(false); } catch { toast({ title: "Update not available", description: "Try again when the deployed build is ready.", variant: "destructive" }); } }} className="rounded-xl">
                 Apply update
               </Button>
             ) : (
-              <Button size="sm" variant="outline" onClick={() => checkForUpdate()} className="rounded-xl">
+              <Button size="sm" variant="outline" onClick={async () => setSwWaiting(await checkForUpdate())} className="rounded-xl">
                 Check
               </Button>
             )

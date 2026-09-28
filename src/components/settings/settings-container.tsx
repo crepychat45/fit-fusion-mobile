@@ -617,7 +617,6 @@ export function SettingsContainer() {
             <TabsContent value="updates" className="mt-0">
               <div className="space-y-6">
                 <L><OneTapUpdateCenter /></L>
-                <L><UpdatePrimePanel /></L>
                 <L><UpdateHealthPanel /></L>
                 <L><VersionControlPanel /></L>
                 <L><PwaVaultPanel /></L>

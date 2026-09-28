@@ -68,10 +68,10 @@ export function VersionControlPanel() {
     try {
       const found = await checkForUpdate();
       toast({
-        title: found ? "Update available" : "You're up to date",
+        title: found ? "Deployed update ready" : "No deployed update waiting",
         description: found
           ? `Version ${latest} is ready to install.`
-          : `Running the latest FitFusion v${latest}.`,
+          : `Running FitFusion v${current}. A release announcement does not install a build.`,
       });
       setInfo(getVersionInfo());
     } finally {
@@ -119,11 +119,11 @@ export function VersionControlPanel() {
               </Badge>
               {hasUpdate ? (
                 <Badge className="bg-gradient-to-r from-primary to-accent text-primary-foreground">
-                  Update → v{latest}
+                  Release announced → v{latest}
                 </Badge>
               ) : (
                 <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                  Up to date
+                  Current build
                 </Badge>
               )}
             </div>
@@ -183,7 +183,7 @@ export function VersionControlPanel() {
               className="rounded-xl bg-gradient-to-r from-primary to-accent text-primary-foreground"
             >
               <Download className="h-4 w-4 mr-2" />
-              {hasUpdate ? `Install v${latest}` : "Installed"}
+              {hasUpdate ? "Check deployed build" : "Current build"}
             </Button>
           </div>
         </CardContent>
