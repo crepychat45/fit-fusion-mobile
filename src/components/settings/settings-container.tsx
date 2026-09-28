@@ -140,7 +140,6 @@ const ChatPrimeExtras = lazy(() => import("./settings-prime-extras").then(m => (
 const DataPrimeExtras = lazy(() => import("./settings-prime-extras").then(m => ({ default: m.DataPrimeExtras })));
 const DeveloperPrimeExtras = lazy(() => import("./settings-prime-extras").then(m => ({ default: m.DeveloperPrimeExtras })));
 const AboutPrimeExtras = lazy(() => import("./settings-prime-extras").then(m => ({ default: m.AboutPrimeExtras })));
-const UpdatePrimePanel = lazy(() => import("./settings-prime-extras").then(m => ({ default: m.UpdatePrimePanel })));
 const UpdateHealthPanel = lazy(() => import("./settings-prime-extras").then(m => ({ default: m.UpdateHealthPanel })));
 
 const PanelLoader = () => (

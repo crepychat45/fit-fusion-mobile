@@ -54,7 +54,7 @@ export async function applyUpdate(
     throw new Error("Install FitxFusion first, then retry the update.");
   }
 
-  emit("downloading", 25, "Downloading update package…");
+  emit("downloading", 25, "Checking for a deployed build…");
   try {
     await reg.update();
   } catch {
@@ -68,8 +68,8 @@ export async function applyUpdate(
     return "current";
   }
 
-  emit("verifying", 55, "Browser integrity checks passed.");
-  emit("installing", 80, "Activating the downloaded build…");
+  emit("verifying", 55, "A newer build is waiting.");
+  emit("installing", 80, "Activating the deployed build…");
 
   return new Promise<"activated">((resolve, reject) => {
     let finished = false;

@@ -226,8 +226,8 @@ const Workouts = () => {
               <TabsTrigger value="all" className="text-xs rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Target className="h-3.5 w-3.5 mr-1" />All</TabsTrigger>
               <TabsTrigger value="builder" className="text-xs rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Sparkles className="h-3.5 w-3.5 mr-1" />Build</TabsTrigger>
               <TabsTrigger value="videos" className="text-xs rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Video className="h-3.5 w-3.5 mr-1" />Videos</TabsTrigger>
-              <TabsTrigger value="ai" className="text-xs rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Brain className="h-3.5 w-3.5 mr-1" />AI</TabsTrigger>
-              <TabsTrigger value="plans" className="text-xs rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Calendar className="h-3.5 w-3.5 mr-1" />Plans</TabsTrigger>
+              <TabsTrigger value="ai" className="text-xs rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Brain className="h-3.5 w-3.5 mr-1" />Beginner</TabsTrigger>
+              <TabsTrigger value="plans" className="text-xs rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Calendar className="h-3.5 w-3.5 mr-1" />Next</TabsTrigger>
               <TabsTrigger value="favorites" className="text-xs rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Heart className="h-3.5 w-3.5 mr-1" />Saved</TabsTrigger>
             </TabsList>
 
