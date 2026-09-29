@@ -31,6 +31,9 @@ import {
   EVT,
   loadCustomFaces,
   loadState,
+  disconnectWatch,
+  isWatchConnected,
+  syncWatch,
   loadWorkout,
   saveState,
   saveWorkout,
@@ -92,11 +95,8 @@ export const SmartwatchControlWidget: React.FC = () => {
         const next = {
           ...w,
           duration,
-          avgHr: Math.round((w.avgHr * duration + r.hr) / (duration + 1)),
-          maxHr: Math.max(w.maxHr, r.hr),
-          calories: +(w.calories + 0.15).toFixed(1),
-          steps: w.steps + Math.floor(Math.random() * 3),
-          distance: +(w.distance + 0.003).toFixed(3),
+          avgHr: r.hr === null ? w.avgHr : Math.round((w.avgHr * duration + r.hr) / (duration + 1)),
+          maxHr: Math.max(w.maxHr, r.hr ?? 0),
         };
         saveWorkout(next);
         return next;
@@ -106,35 +106,25 @@ export const SmartwatchControlWidget: React.FC = () => {
   }, [workout?.active]);
 
   const toggleConnect = () => {
-    const next = { ...state, connected: !state.connected, lastSync: Date.now() };
-    saveState(next);
-    setState(next);
-    toast[next.connected ? "success" : "message"](
-      next.connected ? "Watch connected" : "Watch disconnected",
-      { description: state.deviceName }
-    );
+    if (!isWatchConnected()) { navigate("/smartwatch-settings"); return; }
+    disconnectWatch();
+    setState(loadState());
+    toast.message("Bluetooth disconnected");
   };
 
   const findMyWatch = () => {
-    if (!state.connected) return toast.error("Connect your watch first");
-    setPinging(true);
-    toast.success("Ringing your watch…", { description: "Buzzing and chiming at full volume." });
-    window.setTimeout(() => setPinging(false), 4500);
+    toast.error("Find Watch unavailable", { description: "This device does not expose a remote-ring command." });
   };
 
-  const quickSync = () => {
-    if (!state.connected) return toast.error("Connect your watch first");
-    toast.message("Syncing…", { description: "Fetching HR, SpO₂, sleep and workouts." });
-    window.setTimeout(() => {
-      const next = { ...state, lastSync: Date.now(), battery: Math.min(100, state.battery + 1) };
-      saveState(next);
+  const quickSync = async () => {
+    try {
+      const next = await syncWatch();
       setState(next);
-      toast.success("Sync complete", { description: "All health data up to date." });
-    }, 1300);
+      toast.success("Available device data refreshed");
+    } catch (error) { toast.error(error instanceof Error ? error.message : "Refresh failed"); }
   };
 
   const toggleWorkout = () => {
-    if (!state.connected) return toast.error("Connect your watch first");
     if (workout?.active) {
       const ended = stopWorkout(workout);
       setWorkout(null);
@@ -144,11 +134,12 @@ export const SmartwatchControlWidget: React.FC = () => {
     } else {
       const w = startWorkout("run");
       setWorkout(w);
-      toast.success("Workout started", { description: "Live tracking active on your watch." });
+      toast.success("Workout timer started", { description: "Only supported sensor readings are shown." });
     }
   };
 
   const hrZone = useMemo(() => {
+    if (reading.hr === null) return { label: "No sensor", tone: "text-muted-foreground" };
     if (reading.hr < 65) return { label: "Resting", tone: "text-emerald-400" };
     if (reading.hr < 85) return { label: "Fat Burn", tone: "text-cyan-400" };
     if (reading.hr < 105) return { label: "Cardio", tone: "text-amber-400" };
@@ -180,7 +171,7 @@ export const SmartwatchControlWidget: React.FC = () => {
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <h2 className="text-sm font-bold text-foreground truncate">Smartwatch</h2>
-                <Badge className="text-[10px] bg-primary/15 text-primary border-primary/30">LIVE</Badge>
+                <Badge className="text-[10px] bg-primary/15 text-primary border-primary/30">{state.connected ? "CONNECTED" : "PREVIEW"}</Badge>
               </div>
               <p className="text-xs text-muted-foreground truncate">{state.deviceName}</p>
             </div>
@@ -195,7 +186,7 @@ export const SmartwatchControlWidget: React.FC = () => {
               }`}
             >
               {state.connected ? <BluetoothConnected className="h-3 w-3" /> : <Bluetooth className="h-3 w-3" />}
-              {state.connected ? "Paired" : "Off"}
+               {state.connected ? "Connected" : "Off"}
             </Badge>
             <Button
               size="icon"
@@ -215,20 +206,20 @@ export const SmartwatchControlWidget: React.FC = () => {
             <div className="flex items-center justify-center gap-1 text-[10px] text-muted-foreground">
               <BatteryFull className="h-3 w-3" /> Battery
             </div>
-            <div className="text-sm font-bold text-foreground">{state.battery}%</div>
+             <div className="text-sm font-bold text-foreground">{state.connected && state.battery ? `${state.battery}%` : "—"}</div>
           </div>
           <div className="rounded-xl bg-muted/30 border border-border/20 p-2 text-center">
             <div className="flex items-center justify-center gap-1 text-[10px] text-muted-foreground">
               <Radio className="h-3 w-3" /> Signal
             </div>
-            <div className="text-sm font-bold text-foreground">{state.bleSignal}%</div>
+             <div className="text-sm font-bold text-foreground">—</div>
           </div>
           <div className="rounded-xl bg-muted/30 border border-border/20 p-2 text-center">
             <div className="flex items-center justify-center gap-1 text-[10px] text-muted-foreground">
               <Wifi className="h-3 w-3" /> Sync
             </div>
             <div className="text-sm font-bold text-foreground">
-              {Math.max(0, Math.round((Date.now() - state.lastSync) / 1000))}s
+               {state.connected ? new Date(state.lastSync).toLocaleTimeString() : "—"}
             </div>
           </div>
         </div>
@@ -256,7 +247,7 @@ export const SmartwatchControlWidget: React.FC = () => {
               <Heart className="h-3 w-3 text-rose-400" /> Heart
             </div>
             <div className="text-base font-bold text-foreground leading-tight">
-              {reading.hr}
+               {reading.hr ?? "—"}
               <span className="text-[10px] text-muted-foreground font-medium ml-1">bpm</span>
             </div>
             <div className={`text-[9px] font-medium ${hrZone.tone}`}>{hrZone.label}</div>
@@ -267,10 +258,10 @@ export const SmartwatchControlWidget: React.FC = () => {
               <Droplets className="h-3 w-3 text-cyan-400" /> SpO₂
             </div>
             <div className="text-base font-bold text-foreground leading-tight">
-              {reading.spo2}
+               {reading.spo2 ?? "—"}
               <span className="text-[10px] text-muted-foreground font-medium ml-1">%</span>
             </div>
-            <div className="text-[9px] font-medium text-cyan-400">Normal</div>
+             <div className="text-[9px] font-medium text-muted-foreground">Sensor unavailable</div>
           </div>
 
           <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-2">
@@ -278,17 +269,17 @@ export const SmartwatchControlWidget: React.FC = () => {
               <Activity className="h-3 w-3 text-emerald-400" /> Steps
             </div>
             <div className="text-base font-bold text-foreground leading-tight tabular-nums">
-              {reading.steps.toLocaleString()}
+               {reading.steps?.toLocaleString() ?? "—"}
             </div>
-            <div className="text-[9px] font-medium text-emerald-400">{reading.distance.toFixed(2)} km</div>
+             <div className="text-[9px] font-medium text-muted-foreground">{reading.distance?.toFixed(2) ?? "—"} km</div>
           </div>
 
           <div className="rounded-xl border border-indigo-500/25 bg-indigo-500/5 p-2">
             <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
               <Moon className="h-3 w-3 text-indigo-400" /> Stress
             </div>
-            <div className="text-base font-bold text-foreground leading-tight">{reading.stress}</div>
-            <div className="text-[9px] font-medium text-indigo-400">{reading.temperature}°C</div>
+             <div className="text-base font-bold text-foreground leading-tight">{reading.stress ?? "—"}</div>
+             <div className="text-[9px] font-medium text-muted-foreground">{reading.temperature ?? "—"}°C</div>
           </div>
         </div>
       </div>
@@ -324,7 +315,7 @@ export const SmartwatchControlWidget: React.FC = () => {
 
       {/* Quick actions */}
       <div className="px-4 pb-3 grid grid-cols-5 gap-2">
-        <ActionTile icon={<MapPin className="h-4 w-4" />} label="Find" onClick={findMyWatch} active={pinging} />
+         <ActionTile icon={<MapPin className="h-4 w-4" />} label="Find" onClick={findMyWatch} active={pinging} />
         <ActionTile icon={<Zap className="h-4 w-4" />} label="Sync" onClick={quickSync} />
         <ActionTile
           icon={<Phone className="h-4 w-4" />}

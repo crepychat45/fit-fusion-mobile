@@ -143,11 +143,11 @@ export const WatchFacePreview: React.FC<Props> = ({
                 style={{ fontSize: statSize }}
               >
                 <Heart className="h-2.5 w-2.5" style={{ color: face.accent }} />
-                {reading.hr}
+                 {reading.hr ?? "—"}
                 <Droplets className="h-2.5 w-2.5 ml-1" style={{ color: face.accent }} />
-                {reading.spo2}%
+                 {reading.spo2 ?? "—"}%
                 <Activity className="h-2.5 w-2.5 ml-1" style={{ color: face.accent }} />
-                {(reading.steps / 1000).toFixed(1)}k
+                 {reading.steps === null ? "—" : `${(reading.steps / 1000).toFixed(1)}k`}
               </div>
             )}
           </>
