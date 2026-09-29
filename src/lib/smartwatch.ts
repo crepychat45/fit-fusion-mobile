@@ -104,22 +104,24 @@ export type WatchState = {
 };
 
 export const DEFAULT_STATE: WatchState = {
-  connected: true,
-  paired: true,
-  deviceName: "FitFusion Watch Pro",
-  deviceModel: "FFW-Pro Series 3",
-  battery: 78,
-  bleSignal: 92,
+  connected: false,
+  paired: false,
+  deviceName: "No device connected",
+  deviceModel: "Bluetooth device",
+  battery: 0,
+  bleSignal: 0,
   face: "aurora",
   font: "system",
   lastSync: Date.now(),
-  firmwareVersion: "7.1.0",
+  firmwareVersion: "Unknown",
 };
 
 export const loadState = (): WatchState => {
   try {
     const raw = localStorage.getItem(STATE_KEY);
-    return raw ? { ...DEFAULT_STATE, ...JSON.parse(raw) } : DEFAULT_STATE;
+    const saved = raw ? JSON.parse(raw) as Partial<WatchState> : {};
+    // A Bluetooth connection cannot survive a page reload, even if a previous UI saved it.
+    return { ...DEFAULT_STATE, ...saved, connected: false, battery: 0, bleSignal: 0 };
   } catch {
     return DEFAULT_STATE;
   }
@@ -152,58 +154,86 @@ export type PairingStep = "idle" | "scanning" | "found" | "pairing" | "syncing" 
 
 export type DiscoveredDevice = { id: string; name: string; model: string; rssi: number };
 
-const MOCK_DEVICES: DiscoveredDevice[] = [
-  { id: "ffw-pro-3", name: "FitFusion Watch Pro", model: "FFW-Pro Series 3", rssi: -42 },
-  { id: "ffw-air-2", name: "FitFusion Air 2", model: "FFW-Air Series 2", rssi: -58 },
-  { id: "ffw-lite", name: "FitFusion Lite", model: "FFW-Lite", rssi: -71 },
-];
+type BleDevice = {
+  id: string;
+  name?: string;
+  gatt?: { connected: boolean; connect: () => Promise<BleServer>; disconnect: () => void };
+  addEventListener: (name: string, handler: () => void) => void;
+};
+type BleServer = { getPrimaryService: (name: string) => Promise<{ getCharacteristic: (name: string) => Promise<{ readValue: () => Promise<DataView>; startNotifications: () => Promise<{ addEventListener: (name: string, handler: (e: Event) => void) => void }> }> }> };
+let discoveredDevice: BleDevice | null = null;
+let activeDevice: BleDevice | null = null;
+export const isWatchConnected = () => Boolean(activeDevice?.gatt?.connected);
+export const disconnectWatch = () => { activeDevice?.gatt?.disconnect(); activeDevice = null; saveState({ ...loadState(), connected: false }); };
 
-// Attempts Web Bluetooth if available, otherwise returns mock devices after a delay
+// The browser only exposes devices the user explicitly chooses; no background scan.
 export const scanDevices = async (): Promise<DiscoveredDevice[]> => {
-  const nav = navigator as Navigator & { bluetooth?: { requestDevice: (opts: unknown) => Promise<{ name?: string; id: string }> } };
-  if (nav.bluetooth) {
-    try {
-      const dev = await nav.bluetooth.requestDevice({
-        acceptAllDevices: true,
-        optionalServices: ["heart_rate", "battery_service"],
-      });
-      return [
-        {
-          id: dev.id,
-          name: dev.name || "Unknown Watch",
-          model: "BLE Device",
-          rssi: -50,
-        },
-      ];
-    } catch {
-      // fall through to mock
-    }
-  }
-  await new Promise((r) => setTimeout(r, 1500));
-  return MOCK_DEVICES;
+  const nav = navigator as Navigator & { bluetooth?: { requestDevice: (opts: unknown) => Promise<BleDevice> } };
+  if (!nav.bluetooth) throw new Error("Bluetooth device access is unavailable in this browser. Use a supported browser on a secure connection.");
+  discoveredDevice = await nav.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: ["heart_rate", "battery_service"] });
+  return [{ id: discoveredDevice.id, name: discoveredDevice.name || "Bluetooth device", model: "Bluetooth LE", rssi: 0 }];
+};
+
+export const pairWatch = async (id: string): Promise<WatchState> => {
+  const device = discoveredDevice;
+  if (!device || device.id !== id || !device.gatt) throw new Error("This device does not support a Bluetooth data connection.");
+  const server = await device.gatt.connect();
+  activeDevice = device;
+  device.addEventListener("gattserverdisconnected", () => { activeDevice = null; sensorHub.clear(); saveState({ ...loadState(), connected: false }); });
+  let battery = 0;
+  try {
+    const service = await server.getPrimaryService("battery_service");
+    battery = (await (await service.getCharacteristic("battery_level")).readValue()).getUint8(0);
+  } catch { /* Battery service is optional. */ }
+  try {
+    const service = await server.getPrimaryService("heart_rate");
+    const characteristic = await service.getCharacteristic("heart_rate_measurement");
+    const notifier = await characteristic.startNotifications();
+    notifier.addEventListener("characteristicvaluechanged", (event: Event) => {
+      const value = (event.target as unknown as { value?: DataView }).value;
+      if (!value) return;
+      const hr = value.getUint8(0) & 1 ? value.getUint16(1, true) : value.getUint8(1);
+      sensorHub.setHeartRate(hr);
+    });
+  } catch { /* Heart-rate service is optional. */ }
+  const next = { ...loadState(), connected: true, paired: true, deviceName: device.name || "Bluetooth device", deviceModel: "Bluetooth LE", battery, bleSignal: 0, lastSync: Date.now() };
+  saveState(next);
+  return next;
+};
+
+export const syncWatch = async (): Promise<WatchState> => {
+  if (!activeDevice?.gatt?.connected) throw new Error("Connect a Bluetooth device first.");
+  let battery = 0;
+  try {
+    const service = await (await activeDevice.gatt.connect()).getPrimaryService("battery_service");
+    battery = (await (await service.getCharacteristic("battery_level")).readValue()).getUint8(0);
+  } catch { /* Not all devices provide battery data. */ }
+  const next = { ...loadState(), connected: true, battery, lastSync: Date.now() };
+  saveState(next);
+  return next;
 };
 
 /* ---------- Sensor hub (simulated + optional real HR) ---------- */
 
 export type SensorReading = {
-  hr: number;
-  spo2: number;
-  steps: number;
-  calories: number;
-  distance: number; // km
-  stress: number; // 0-100
-  temperature: number; // °C
+  hr: number | null;
+  spo2: number | null;
+  steps: number | null;
+  calories: number | null;
+  distance: number | null; // km
+  stress: number | null; // 0-100
+  temperature: number | null; // °C
   timestamp: number;
 };
 
 const DEFAULT_READING: SensorReading = {
-  hr: 72,
-  spo2: 98,
-  steps: 6200,
-  calories: 340,
-  distance: 4.8,
-  stress: 28,
-  temperature: 36.6,
+  hr: null,
+  spo2: null,
+  steps: null,
+  calories: null,
+  distance: null,
+  stress: null,
+  temperature: null,
   timestamp: Date.now(),
 };
 
@@ -216,22 +246,11 @@ class SensorHub {
   private realHrCleanup: (() => void) | null = null;
 
   start() {
-    if (this.timer !== null) return;
-    this.timer = window.setInterval(() => {
-      this.reading = {
-        ...this.reading,
-        hr: clamp(this.reading.hr + Math.round((Math.random() - 0.5) * 6), 55, 130),
-        spo2: clamp(this.reading.spo2 + (Math.random() > 0.75 ? (Math.random() > 0.5 ? 1 : -1) : 0), 94, 100),
-        steps: this.reading.steps + Math.floor(Math.random() * 8),
-        calories: this.reading.calories + Math.random() * 0.4,
-        distance: this.reading.distance + Math.random() * 0.006,
-        stress: clamp(this.reading.stress + Math.round((Math.random() - 0.5) * 4), 5, 90),
-        temperature: +(36.4 + Math.random() * 0.6).toFixed(1),
-        timestamp: Date.now(),
-      };
-      this.emit();
-    }, 2000);
+    // Readings only arrive from an actual supported Bluetooth characteristic.
   }
+
+  setHeartRate(hr: number) { this.reading = { ...this.reading, hr, timestamp: Date.now() }; this.emit(); }
+  clear() { this.reading = { ...DEFAULT_READING, timestamp: Date.now() }; this.emit(); }
 
   stop() {
     if (this.timer !== null) {
@@ -280,7 +299,8 @@ class SensorHub {
       const device = await nav.bluetooth.requestDevice({
         filters: [{ services: ["heart_rate"] }],
       });
-      const server = await device.gatt!.connect();
+        if (!device.gatt) return false;
+        const server = await device.gatt.connect();
       const service = await server.getPrimaryService("heart_rate");
       const char = await service.getCharacteristic("heart_rate_measurement");
       const notifier = await char.startNotifications();
@@ -290,8 +310,7 @@ class SensorHub {
         if (!value) return;
         const flags = value.getUint8(0);
         const hr = flags & 0x1 ? value.getUint16(1, true) : value.getUint8(1);
-        this.reading = { ...this.reading, hr, timestamp: Date.now() };
-        this.emit();
+        this.setHeartRate(hr);
       };
       notifier.addEventListener("characteristicvaluechanged", handler);
       this.realHrCleanup = () => notifier.removeEventListener("characteristicvaluechanged", handler);
@@ -301,8 +320,6 @@ class SensorHub {
     }
   }
 }
-
-const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
 
 export const sensorHub = new SensorHub();
 
@@ -346,8 +363,8 @@ export const startWorkout = (type: WorkoutType): WorkoutSession => {
     type,
     startedAt: Date.now(),
     duration: 0,
-    avgHr: r.hr,
-    maxHr: r.hr,
+    avgHr: r.hr ?? 0,
+    maxHr: r.hr ?? 0,
     calories: 0,
     steps: 0,
     distance: 0,

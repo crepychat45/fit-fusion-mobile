@@ -50,6 +50,9 @@ import {
   CUSTOM_FACES_KEY,
   EVT,
   scanDevices,
+  pairWatch,
+  disconnectWatch,
+  isWatchConnected,
   saveCustomFaces,
   loadCustomFaces,
   loadState,
@@ -284,11 +287,8 @@ const SmartwatchSettings: React.FC = () => {
         const next = {
           ...w,
           duration,
-          avgHr: Math.round((w.avgHr * duration + r.hr) / (duration + 1)),
-          maxHr: Math.max(w.maxHr, r.hr),
-          calories: +(w.calories + 0.15).toFixed(1),
-          steps: w.steps + Math.floor(Math.random() * 3),
-          distance: +(w.distance + 0.003).toFixed(3),
+           avgHr: r.hr === null ? w.avgHr : Math.round((w.avgHr * duration + r.hr) / (duration + 1)),
+           maxHr: Math.max(w.maxHr, r.hr ?? 0),
         };
         saveWorkout(next);
         return next;
@@ -304,38 +304,30 @@ const SmartwatchSettings: React.FC = () => {
     setDevices([]);
     setSelectedDevice(null);
     setPairProgress(0);
-    const found = await scanDevices();
-    setDevices(found);
-    setPairStep("select");
+    try {
+      const found = await scanDevices();
+      setDevices(found);
+      setPairStep("select");
+    } catch (error) {
+      setPairOpen(false);
+      toast.error(error instanceof Error ? error.message : "Bluetooth selection cancelled");
+    }
   };
 
   const selectAndPair = async (d: DiscoveredDevice) => {
     setSelectedDevice(d);
     setPairStep("connecting");
     setPairProgress(0);
-    for (let i = 1; i <= 40; i++) {
-      await new Promise((r) => setTimeout(r, 30));
-      setPairProgress(i * 2.5);
+    try {
+      const next = await pairWatch(d.id);
+      setWatchState(next);
+      setPairProgress(100);
+      setPairStep("done");
+      toast.success("Bluetooth device connected", { description: `${d.name} · supported readings only` });
+    } catch (error) {
+      setPairOpen(false);
+      toast.error(error instanceof Error ? error.message : "Connection failed");
     }
-    setPairStep("syncing");
-    setPairProgress(0);
-    for (let i = 1; i <= 40; i++) {
-      await new Promise((r) => setTimeout(r, 40));
-      setPairProgress(i * 2.5);
-    }
-    const next: WatchState = {
-      ...loadState(),
-      connected: true,
-      paired: true,
-      deviceName: d.name,
-      deviceModel: d.model,
-      bleSignal: Math.max(60, 100 + d.rssi),
-      lastSync: Date.now(),
-    };
-    saveState(next);
-    setWatchState(next);
-    setPairStep("done");
-    toast.success("Watch paired", { description: `${d.name} · synced` });
   };
 
   /* ------- Real HR ------- */
@@ -407,15 +399,12 @@ const SmartwatchSettings: React.FC = () => {
     } else {
       const w = startWorkout(type);
       setWorkout(w);
-      toast.success(`${type.toUpperCase()} started`, { description: "Live tracking active on your watch." });
+      toast.success(`${type.toUpperCase()} timer started`, { description: "Only supported sensor readings will be shown." });
     }
   };
 
   const findWatch = () => {
-    if (!watchState.connected) return toast.error("Connect your watch first");
-    setPinging(true);
-    toast.success("Ringing your watch…", { description: `Volume ${s.ringVolume}%` });
-    window.setTimeout(() => setPinging(false), 4000);
+    toast.error("Find Watch unavailable", { description: "This device has no supported remote-ringing command." });
   };
 
   const factoryReset = () => {
@@ -537,9 +526,9 @@ const SmartwatchSettings: React.FC = () => {
           {/* Device / Pairing */}
           <Section icon={<Watch className="h-4 w-4" />} title="Device">
             <div className="grid grid-cols-3 gap-2">
-              <Stat icon={<BatteryLow className="h-3 w-3" />} label="Battery" value={`${watchState.battery}%`} />
-              <Stat icon={<Radio className="h-3 w-3" />} label="Signal" value={`${watchState.bleSignal}%`} />
-              <Stat icon={<Wifi className="h-3 w-3" />} label="Last sync" value={`${Math.round((Date.now() - watchState.lastSync) / 1000)}s`} />
+               <Stat icon={<BatteryLow className="h-3 w-3" />} label="Battery" value={watchState.connected && watchState.battery ? `${watchState.battery}%` : "—"} />
+               <Stat icon={<Radio className="h-3 w-3" />} label="Signal" value="—" />
+               <Stat icon={<Wifi className="h-3 w-3" />} label="Last sync" value={watchState.connected ? new Date(watchState.lastSync).toLocaleTimeString() : "—"} />
             </div>
             <Row label="Device name">
               <Input
@@ -553,23 +542,16 @@ const SmartwatchSettings: React.FC = () => {
               />
             </Row>
             <Row label="Connection">
-              <Switch
-                checked={watchState.connected}
-                onCheckedChange={(v) => {
-                  const next = { ...watchState, connected: v, lastSync: Date.now() };
-                  saveState(next);
-                  setWatchState(next);
-                }}
-              />
+               <Switch checked={watchState.connected && isWatchConnected()} onCheckedChange={(v) => v ? openPair() : disconnectWatch()} />
             </Row>
             <div className="grid grid-cols-2 gap-2">
               <Button variant="outline" onClick={openPair}>
                 <RadioTower className="h-4 w-4 mr-2" />
                 Pair / Sync
               </Button>
-              <Button variant="outline" onClick={findWatch} disabled={pinging}>
+               <Button variant="outline" onClick={findWatch} disabled>
                 <MapPin className="h-4 w-4 mr-2" />
-                {pinging ? "Ringing…" : "Find Watch"}
+                 Find Watch unavailable
               </Button>
             </div>
             <Button variant="outline" className="w-full" onClick={tryRealHr}>
@@ -608,7 +590,7 @@ const SmartwatchSettings: React.FC = () => {
               </>
             ) : (
               <>
-                <p className="text-xs text-muted-foreground">Start a live workout — HR, calories and distance stream from the watch.</p>
+                 <p className="text-xs text-muted-foreground">Start a workout timer. Heart rate appears only if your Bluetooth device supports it; other measurements are unavailable without a data source.</p>
                 <div className="grid grid-cols-3 gap-2">
                   {WORKOUT_TYPES.map((t) => (
                     <button
@@ -1177,10 +1159,10 @@ const SmartwatchSettings: React.FC = () => {
               <motion.div key="progress" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="py-6 space-y-3">
                 <div className="text-center">
                   <p className="text-sm font-semibold text-foreground">
-                    {pairStep === "connecting" ? "Pairing" : "Syncing data"} — {selectedDevice?.name}
+                     {pairStep === "connecting" ? "Connecting" : "Reading available data"} — {selectedDevice?.name}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {pairStep === "connecting" ? "Establishing secure BLE channel…" : "Fetching HR, SpO₂, sleep and workouts…"}
+                     {pairStep === "connecting" ? "Connecting over Bluetooth…" : "Reading supported characteristics…"}
                   </p>
                 </div>
                 <Progress value={pairProgress} className="h-2" />
@@ -1192,8 +1174,8 @@ const SmartwatchSettings: React.FC = () => {
                 <div className="mx-auto h-14 w-14 rounded-full bg-emerald-500/15 flex items-center justify-center">
                   <Check className="h-8 w-8 text-emerald-500" />
                 </div>
-                <p className="text-sm font-semibold text-foreground">Paired &amp; synced</p>
-                <p className="text-xs text-muted-foreground">{selectedDevice?.name} is ready to go.</p>
+                 <p className="text-sm font-semibold text-foreground">Bluetooth connected</p>
+                 <p className="text-xs text-muted-foreground">{selectedDevice?.name} · available data only.</p>
                 <Button className="w-full" onClick={() => setPairOpen(false)}>Done</Button>
               </motion.div>
             )}
