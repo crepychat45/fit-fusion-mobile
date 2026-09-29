@@ -10,3 +10,9 @@
 - [x] Version/changelog/service-worker metadata 8.1.0
 - [x] Typecheck and authenticated page-load browser validation
 - [ ] Verify authenticated click-through interactions — blocked by unavailable browser session after sandbox reset
+
+# FitxFusion 8.2 roadmap
+- [ ] Refine mobile glass dock motion, contrast and touch behavior
+- [ ] Replace simulated smartwatch pairing, sensors, sync and find-watch claims with honest available capabilities
+- [ ] Add 8.2 changelog/version and release visibility without claiming undeployed code is installed
+- [ ] Verify mobile preview and update/watch interactions
