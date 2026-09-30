@@ -15,4 +15,4 @@
 - [x] Refine mobile glass dock motion, contrast and touch behavior
 - [x] Replace simulated smartwatch pairing, sensors, sync and find-watch claims with honest available capabilities
 - [x] Add 8.2 changelog/version and release visibility without claiming undeployed code is installed
-- [ ] Verify mobile preview and update/watch interactions
+- [x] Verify mobile preview and update/watch interactions
