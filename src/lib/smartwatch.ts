@@ -154,61 +154,149 @@ export type PairingStep = "idle" | "scanning" | "found" | "pairing" | "syncing" 
 
 export type DiscoveredDevice = { id: string; name: string; model: string; rssi: number };
 
-type BleDevice = {
-  id: string;
-  name?: string;
-  gatt?: { connected: boolean; connect: () => Promise<BleServer>; disconnect: () => void };
-  addEventListener: (name: string, handler: () => void) => void;
+// Standard Bluetooth GATT UUIDs.
+const HR_SERVICE = "0000180d-0000-1000-8000-00805f9b34fb";
+const HR_MEASURE = "00002a37-0000-1000-8000-00805f9b34fb";
+const BATTERY_SERVICE = "0000180f-0000-1000-8000-00805f9b34fb";
+const BATTERY_LEVEL = "00002a19-0000-1000-8000-00805f9b34fb";
+const PLX_SERVICE = "00001822-0000-1000-8000-00805f9b34fb";
+const PLX_CONTINUOUS = "00002a5f-0000-1000-8000-00805f9b34fb";
+const DEVICE_INFO = "0000180a-0000-1000-8000-00805f9b34fb";
+const FIRMWARE_REV = "00002a26-0000-1000-8000-00805f9b34fb";
+const MODEL_NUMBER = "00002a24-0000-1000-8000-00805f9b34fb";
+const OPTIONAL_SERVICES = [HR_SERVICE, BATTERY_SERVICE, PLX_SERVICE, DEVICE_INFO];
+
+const isNative = () => {
+  const cap = (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor;
+  return Boolean(cap?.isNativePlatform?.());
 };
-type BleServer = { getPrimaryService: (name: string) => Promise<{ getCharacteristic: (name: string) => Promise<{ readValue: () => Promise<DataView>; startNotifications: () => Promise<{ addEventListener: (name: string, handler: (e: Event) => void) => void }> }> }> };
-let discoveredDevice: BleDevice | null = null;
-let activeDevice: BleDevice | null = null;
-export const isWatchConnected = () => Boolean(activeDevice?.gatt?.connected);
-export const disconnectWatch = () => { activeDevice?.gatt?.disconnect(); activeDevice = null; saveState({ ...loadState(), connected: false }); };
+const inIframe = () => { try { return window.self !== window.top; } catch { return true; } };
+
+export type BluetoothSupport = { supported: boolean; reason?: string; canOpenNewTab?: boolean };
+export const getBluetoothSupport = async (): Promise<BluetoothSupport> => {
+  if (isNative()) return { supported: true };
+  const nav = navigator as Navigator & { bluetooth?: { getAvailability?: () => Promise<boolean> } };
+  if (!window.isSecureContext) return { supported: false, reason: "Bluetooth needs a secure (https) page." };
+  if (!nav.bluetooth) {
+    const ios = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    return { supported: false, reason: ios
+      ? "iPhone/iPad browsers don't allow Bluetooth. Use the FitxFusion Android app, or Chrome/Edge on Android, Windows, Mac or ChromeOS."
+      : "This browser doesn't allow Bluetooth. Open FitxFusion in Chrome or Edge, or use the Android app." };
+  }
+  if (inIframe()) return { supported: false, canOpenNewTab: true, reason: "Bluetooth is blocked inside this embedded preview. Open the app in its own tab to connect." };
+  try { if (nav.bluetooth.getAvailability && !(await nav.bluetooth.getAvailability())) return { supported: false, reason: "Bluetooth is turned off or no adapter was found. Turn Bluetooth on and try again." }; } catch { /* ignore */ }
+  return { supported: true };
+};
+
+const parseSfloat = (raw: number) => {
+  let mantissa = raw & 0x0fff; const exp = raw >> 12;
+  if (mantissa >= 0x0800) mantissa -= 0x1000;
+  return mantissa * Math.pow(10, exp >= 0x08 ? exp - 0x10 : exp);
+};
+const parseHr = (v: DataView) => (v.getUint8(0) & 1 ? v.getUint16(1, true) : v.getUint8(1));
+const parseSpo2 = (v: DataView) => { const s = parseSfloat(v.getUint16(1, true)); return s > 0 && s <= 100 ? Math.round(s) : null; };
+const text = (v: DataView) => new TextDecoder().decode(v.buffer.slice(v.byteOffset, v.byteOffset + v.byteLength)).replace(/\0/g, "").trim();
+
+/* ---- Web Bluetooth driver ---- */
+type WebChar = { readValue: () => Promise<DataView>; startNotifications: () => Promise<WebChar>; addEventListener: (n: string, h: (e: Event) => void) => void };
+type WebServer = { getPrimaryService: (n: string) => Promise<{ getCharacteristic: (n: string) => Promise<WebChar> }> };
+type WebDevice = { id: string; name?: string; gatt?: { connected: boolean; connect: () => Promise<WebServer>; disconnect: () => void }; addEventListener: (n: string, h: (e: Event) => void) => void; watchAdvertisements?: () => Promise<void> };
+
+let webDevice: WebDevice | null = null;
+let webServer: WebServer | null = null;
+let nativeId: string | null = null;
+let nativeConnected = false;
+let pendingNative: DiscoveredDevice | null = null;
+
+export const isWatchConnected = () => (isNative() ? nativeConnected : Boolean(webDevice?.gatt?.connected));
+
+const onDisconnected = () => { webServer = null; nativeConnected = false; sensorHub.clear(); saveState({ ...loadState(), connected: false, bleSignal: 0 }); };
+
+export const disconnectWatch = async () => {
+  try {
+    if (isNative() && nativeId) { const { BleClient } = await import("@capacitor-community/bluetooth-le"); await BleClient.disconnect(nativeId); }
+    else webDevice?.gatt?.disconnect();
+  } catch { /* already disconnected */ }
+  webDevice = null; nativeId = null; onDisconnected();
+};
 
 // The browser only exposes devices the user explicitly chooses; no background scan.
 export const scanDevices = async (): Promise<DiscoveredDevice[]> => {
-  const nav = navigator as Navigator & { bluetooth?: { requestDevice: (opts: unknown) => Promise<BleDevice> } };
-  if (!nav.bluetooth) throw new Error("Bluetooth device access is unavailable in this browser. Use a supported browser on a secure connection.");
-  discoveredDevice = await nav.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: ["heart_rate", "battery_service"] });
-  return [{ id: discoveredDevice.id, name: discoveredDevice.name || "Bluetooth device", model: "Bluetooth LE", rssi: 0 }];
+  const support = await getBluetoothSupport();
+  if (!support.supported) throw new Error(support.reason);
+  if (isNative()) {
+    const { BleClient } = await import("@capacitor-community/bluetooth-le");
+    await BleClient.initialize({ androidNeverForLocation: true });
+    if (!(await BleClient.isEnabled())) { try { await BleClient.requestEnable(); } catch { throw new Error("Turn on Bluetooth to connect your watch."); } }
+    const d = await BleClient.requestDevice({ optionalServices: OPTIONAL_SERVICES });
+    pendingNative = { id: d.deviceId, name: d.name || "Bluetooth device", model: "Bluetooth LE", rssi: 0 };
+    return [pendingNative];
+  }
+  const nav = navigator as Navigator & { bluetooth: { requestDevice: (o: unknown) => Promise<WebDevice> } };
+  try {
+    webDevice = await nav.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: OPTIONAL_SERVICES });
+  } catch (e) {
+    const name = (e as { name?: string }).name;
+    if (name === "NotFoundError") throw new Error("No device selected.");
+    if (name === "SecurityError") throw new Error("Bluetooth was blocked by the browser. Open the app in its own tab and try again.");
+    throw e;
+  }
+  return [{ id: webDevice.id, name: webDevice.name || "Bluetooth device", model: "Bluetooth LE", rssi: 0 }];
 };
 
+const readAll = async (read: (s: string, c: string) => Promise<DataView>) => {
+  const out: { battery: number; firmware?: string; model?: string } = { battery: 0 };
+  try { out.battery = (await read(BATTERY_SERVICE, BATTERY_LEVEL)).getUint8(0); } catch { /* optional */ }
+  try { out.firmware = text(await read(DEVICE_INFO, FIRMWARE_REV)); } catch { /* optional */ }
+  try { out.model = text(await read(DEVICE_INFO, MODEL_NUMBER)); } catch { /* optional */ }
+  return out;
+};
+
+const rssiToPercent = (rssi: number) => Math.max(0, Math.min(100, Math.round(((rssi + 100) / 60) * 100)));
+
 export const pairWatch = async (id: string): Promise<WatchState> => {
-  const device = discoveredDevice;
-  if (!device || device.id !== id || !device.gatt) throw new Error("This device does not support a Bluetooth data connection.");
-  const server = await device.gatt.connect();
-  activeDevice = device;
-  device.addEventListener("gattserverdisconnected", () => { activeDevice = null; sensorHub.clear(); saveState({ ...loadState(), connected: false }); });
-  let battery = 0;
-  try {
-    const service = await server.getPrimaryService("battery_service");
-    battery = (await (await service.getCharacteristic("battery_level")).readValue()).getUint8(0);
-  } catch { /* Battery service is optional. */ }
-  try {
-    const service = await server.getPrimaryService("heart_rate");
-    const characteristic = await service.getCharacteristic("heart_rate_measurement");
-    const notifier = await characteristic.startNotifications();
-    notifier.addEventListener("characteristicvaluechanged", (event: Event) => {
-      const value = (event.target as unknown as { value?: DataView }).value;
-      if (!value) return;
-      const hr = value.getUint8(0) & 1 ? value.getUint16(1, true) : value.getUint8(1);
-      sensorHub.setHeartRate(hr);
-    });
-  } catch { /* Heart-rate service is optional. */ }
-  const next = { ...loadState(), connected: true, paired: true, deviceName: device.name || "Bluetooth device", deviceModel: "Bluetooth LE", battery, bleSignal: 0, lastSync: Date.now() };
+  let info: Awaited<ReturnType<typeof readAll>>; let name = "Bluetooth device"; let signal = 0;
+  if (isNative()) {
+    const { BleClient } = await import("@capacitor-community/bluetooth-le");
+    await BleClient.connect(id, () => onDisconnected());
+    nativeId = id; nativeConnected = true; name = pendingNative?.name || name;
+    info = await readAll((s, c) => BleClient.read(id, s, c));
+    try { await BleClient.startNotifications(id, HR_SERVICE, HR_MEASURE, (v) => sensorHub.setReading({ hr: parseHr(v) })); } catch { /* optional */ }
+    try { await BleClient.startNotifications(id, PLX_SERVICE, PLX_CONTINUOUS, (v) => sensorHub.setReading({ spo2: parseSpo2(v) })); } catch { /* optional */ }
+    try { signal = rssiToPercent(await BleClient.readRssi(id)); } catch { /* optional */ }
+  } else {
+    const device = webDevice;
+    if (!device || device.id !== id || !device.gatt) throw new Error("This device does not support a Bluetooth data connection.");
+    webServer = await device.gatt.connect();
+    name = device.name || name;
+    device.addEventListener("gattserverdisconnected", onDisconnected);
+    const server = webServer;
+    const char = async (s: string, c: string) => (await server.getPrimaryService(s)).getCharacteristic(c);
+    info = await readAll(async (s, c) => (await char(s, c)).readValue());
+    const listen = async (s: string, c: string, fn: (v: DataView) => void) => {
+      try { const ch = await (await char(s, c)).startNotifications(); ch.addEventListener("characteristicvaluechanged", (e) => { const v = (e.target as unknown as { value?: DataView }).value; if (v) fn(v); }); } catch { /* optional */ }
+    };
+    await listen(HR_SERVICE, HR_MEASURE, (v) => sensorHub.setReading({ hr: parseHr(v) }));
+    await listen(PLX_SERVICE, PLX_CONTINUOUS, (v) => sensorHub.setReading({ spo2: parseSpo2(v) }));
+  }
+  const next = { ...loadState(), connected: true, paired: true, deviceName: name, deviceModel: info.model || "Bluetooth LE", firmwareVersion: info.firmware || "Unknown", battery: info.battery, bleSignal: signal, lastSync: Date.now() };
   saveState(next);
   return next;
 };
 
 export const syncWatch = async (): Promise<WatchState> => {
-  if (!activeDevice?.gatt?.connected) throw new Error("Connect a Bluetooth device first.");
-  let battery = 0;
-  try {
-    const service = await (await activeDevice.gatt.connect()).getPrimaryService("battery_service");
-    battery = (await (await service.getCharacteristic("battery_level")).readValue()).getUint8(0);
-  } catch { /* Not all devices provide battery data. */ }
-  const next = { ...loadState(), connected: true, battery, lastSync: Date.now() };
+  if (!isWatchConnected()) throw new Error("Connect a Bluetooth device first.");
+  let info: Awaited<ReturnType<typeof readAll>>; let signal = loadState().bleSignal;
+  if (isNative() && nativeId) {
+    const { BleClient } = await import("@capacitor-community/bluetooth-le");
+    const id = nativeId;
+    info = await readAll((s, c) => BleClient.read(id, s, c));
+    try { signal = rssiToPercent(await BleClient.readRssi(id)); } catch { /* optional */ }
+  } else {
+    const server = webServer!;
+    info = await readAll(async (s, c) => (await (await server.getPrimaryService(s)).getCharacteristic(c)).readValue());
+  }
+  const next = { ...loadState(), connected: true, battery: info.battery, bleSignal: signal, firmwareVersion: info.firmware || loadState().firmwareVersion, lastSync: Date.now() };
   saveState(next);
   return next;
 };
@@ -249,6 +337,7 @@ class SensorHub {
     // Readings only arrive from an actual supported Bluetooth characteristic.
   }
 
+  setReading(r: Partial<SensorReading>) { this.reading = { ...this.reading, ...r, timestamp: Date.now() }; this.emit(); }
   setHeartRate(hr: number) { this.reading = { ...this.reading, hr, timestamp: Date.now() }; this.emit(); }
   clear() { this.reading = { ...DEFAULT_READING, timestamp: Date.now() }; this.emit(); }
 
