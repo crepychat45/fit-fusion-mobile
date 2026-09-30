@@ -927,34 +927,32 @@ const SmartwatchSettings: React.FC = () => {
               <RemoteAction
                 icon={<Waves className="h-4 w-4 text-cyan-400" />}
                 label="Stress Check"
-                hint="HRV analysis"
-                onClick={() => toast.success("Stress analysis running")}
+                hint="Requires watch support"
+                onClick={() => toast.error("Stress analysis unavailable", { description: "No compatible HRV stream is connected." })}
               />
               <RemoteAction
                 icon={<Thermometer className="h-4 w-4 text-amber-400" />}
                 label="Skin Temp"
-                hint="Baseline"
-                onClick={() => toast.success("Measuring skin temperature")}
+                hint="Requires watch support"
+                onClick={() => toast.error("Skin temperature unavailable", { description: "No compatible temperature sensor is connected." })}
               />
               <RemoteAction
                 icon={<ShieldAlert className="h-4 w-4 text-emerald-400" />}
                 label="Fall Detect"
-                hint="Enabled"
-                onClick={() => toast.success("Fall detection is active")}
+                hint="Managed on watch"
+                onClick={() => toast.message("Use your watch safety settings", { description: "Web Bluetooth cannot enable fall detection." })}
               />
               <RemoteAction
                 icon={<Activity className="h-4 w-4 text-primary" />}
                 label="VO₂ Max"
-                hint="Estimate"
-                onClick={() =>
-                  toast.success("VO₂ Max estimate", { description: `${(38 + Math.random() * 8).toFixed(1)} ml/kg/min` })
-                }
+                hint="Requires workout data"
+                onClick={() => toast.error("VO₂ Max unavailable", { description: "A compatible watch workout record is required." })}
               />
               <RemoteAction
                 icon={<Moon className="h-4 w-4 text-indigo-400" />}
                 label="Nap Timer"
                 hint="20 min"
-                onClick={() => toast.success("Nap timer set", { description: "Watch will wake you gently in 20m" })}
+                onClick={() => toast.message("Set the timer on your watch", { description: "Remote alarm control is not exposed by this device." })}
               />
             </div>
           </Section>

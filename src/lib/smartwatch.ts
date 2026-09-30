@@ -213,7 +213,7 @@ export const syncWatch = async (): Promise<WatchState> => {
   return next;
 };
 
-/* ---------- Sensor hub (simulated + optional real HR) ---------- */
+/* ---------- Sensor hub (supported live device readings only) ---------- */
 
 export type SensorReading = {
   hr: number | null;
