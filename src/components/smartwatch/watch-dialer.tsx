@@ -81,12 +81,14 @@ export const WatchDialer: React.FC = () => {
 
   const startCall = (name: string, number: string) => {
     if (!number.trim()) return toast.error("Enter a number first");
-    setInCall({ name, number, started: Date.now() });
-    setCallSec(0);
-    setMuted(false);
-    setSpeaker(false);
-    toast.success(`Calling ${name}`, { description: number });
+    const sanitized = number.trim().replace(/[^+0-9*#]/g, "");
+    if (!sanitized) return toast.error("Enter a valid number");
+    const started = Date.now();
+    const entry: CallLogEntry = { id: `log-${started}`, name, number: sanitized, type: "outgoing", timestamp: started, duration: 0 };
+    update({ callLog: [entry, ...state.callLog].slice(0, 30) });
+    toast.message(`Opening phone dialer for ${name}`, { description: sanitized });
     if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
+    window.location.href = `tel:${encodeURIComponent(sanitized)}`;
   };
 
   const endCall = () => {

@@ -1,6 +1,6 @@
 // Single source of truth for app version + changelog
-export const APP_VERSION = "8.1.0";
-export const APP_RELEASE_DATE = "2026-09-24";
+export const APP_VERSION = "8.2.0";
+export const APP_RELEASE_DATE = "2026-09-30";
 
 
 
@@ -25,6 +25,31 @@ export interface ReleaseNote {
 }
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "8.2.0",
+    date: "2026-09-30",
+    type: "Major Release",
+    highlight: "A more responsive Crystal Liquid Glass dock and honest smartwatch connectivity powered by supported Bluetooth device data.",
+    sections: [
+      { title: "New Features", icon: "sparkles", items: [
+        "User-selected Bluetooth LE watch connection with supported heart-rate notifications",
+        "Live battery reading when the connected device provides a standard battery service",
+        "Phone dialer handoff using the device's real calling application",
+      ] },
+      { title: "Improvements", icon: "zap", items: [
+        "Crystal Liquid Glass mobile dock with larger touch targets and clearer active states",
+        "Watch connection, refresh, workout and sensor availability now report their real state",
+      ] },
+      { title: "Bug Fixes", icon: "bug", items: [
+        "Removed generated heart rate, oxygen, steps, stress, temperature and workout readings",
+        "Removed simulated pairing, synchronization, remote ringing and health-test success messages",
+      ] },
+      { title: "Security & Privacy", icon: "shield", items: [
+        "Bluetooth devices are accessed only after explicit user selection",
+        "Connection state is cleared after reload because browser Bluetooth sessions are not persistent",
+      ] },
+    ],
+  },
   {
     version: "8.1.0",
     date: "2026-09-24",

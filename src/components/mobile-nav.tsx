@@ -244,7 +244,7 @@ const DockIcon = memo(function DockIcon({
       onMouseUp={cancelLongPress}
       onMouseLeave={cancelLongPress}
       onClick={handleClick}
-      className="flex flex-col items-center justify-end gap-0.5 flex-1 min-w-0 basis-0 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded-2xl"
+      className="flex flex-col items-center justify-end gap-1 flex-1 min-w-0 basis-0 min-h-[48px] touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded-2xl"
       aria-label={item.label}
       aria-current={isActive ? "page" : undefined}
     >
@@ -252,7 +252,7 @@ const DockIcon = memo(function DockIcon({
         style={{ width: sizePx, height: sizePx, y: lift, willChange: "transform" }}
         whileTap={{ scale: 0.82 }}
         className={cn(
-          "relative flex items-center justify-center rounded-2xl border overflow-hidden transition-colors",
+          "relative flex items-center justify-center rounded-2xl border overflow-hidden transition-colors isolate",
           isActive
             ? "border-primary/40 bg-primary/15 shadow-md shadow-primary/20"
             : "bg-card/50 border-border/30 hover:bg-muted/50",
@@ -305,19 +305,19 @@ const DockIcon = memo(function DockIcon({
         <Icon
           className={cn(
             "relative h-5 w-5 drop-shadow-sm",
-            isActive ? "text-white" : "text-foreground/70",
+            isActive ? "text-primary-foreground" : "text-foreground/70",
           )}
         />
         {isActive && (
           <motion.span
             layoutId="dock-dot"
-            className="absolute -bottom-1.5 w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]"
+            className="absolute -bottom-1.5 w-1.5 h-1.5 rounded-full bg-primary-foreground shadow-sm"
           />
         )}
       </motion.div>
       <span
         className={cn(
-          "text-[9px] font-semibold tracking-wide max-w-full truncate leading-none",
+          "text-[10px] font-semibold max-w-full truncate leading-none",
           isActive ? "text-primary" : "text-muted-foreground",
         )}
       >
@@ -649,7 +649,7 @@ export function MobileNav() {
           } as React.CSSProperties
         }
       >
-        <div className="flex justify-center px-2 pb-3 pointer-events-none">
+         <div className="flex justify-center px-2 pb-2 pointer-events-none">
           <motion.div
             onMouseMove={enableMagnify ? (e) => mouseX.set(e.pageX) : undefined}
             onMouseLeave={enableMagnify ? () => mouseX.set(Infinity) : undefined}
@@ -658,7 +658,7 @@ export function MobileNav() {
             }}
             transition={{ duration: 0.25 }}
             className={cn(
-               "pointer-events-auto relative flex items-end gap-0.5 px-2 pt-3 pb-2 rounded-3xl border bg-card/85 shadow-xl shadow-foreground/10 transition-[backdrop-filter,border-color] duration-300 w-full max-w-[440px]",
+                "pointer-events-auto relative flex items-end gap-1 px-2 pt-3 pb-2 rounded-3xl border bg-card/90 shadow-xl shadow-foreground/10 transition-[backdrop-filter,border-color,transform] duration-300 w-full max-w-[440px] overflow-visible",
                compact ? "backdrop-blur-xl border-border/30" : "backdrop-blur-2xl border-border/50",
             )}
             style={{
@@ -667,7 +667,7 @@ export function MobileNav() {
             }}
           >
              {/* Liquid top highlight */}
-             <div className="absolute inset-x-4 top-1 h-px bg-gradient-to-r from-transparent via-primary/35 to-transparent pointer-events-none" />
+             <div className="absolute inset-x-5 top-1 h-px bg-gradient-to-r from-transparent via-primary/45 to-transparent pointer-events-none" />
 
             {leftItems.map((item) => (
               <DockIcon
@@ -692,7 +692,7 @@ export function MobileNav() {
                 whileHover={{ scale: 1.08 }}
                 animate={pulse ? { scale: [1, 1.15, 1] } : { scale: 1 }}
                 transition={{ duration: 1.2 }}
-                className="relative -mt-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded-full"
+                className="relative -mt-5 touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded-full"
                 aria-label="Open quick launch"
                 aria-expanded={showQuickLaunch}
               >
@@ -725,7 +725,7 @@ export function MobileNav() {
                   </motion.span>
                 )}
               </motion.button>
-              <span className="text-[9px] font-bold tracking-wider bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent leading-none">
+              <span className="text-[10px] font-bold text-primary leading-none">
                 FITX
               </span>
             </div>
@@ -747,7 +747,7 @@ export function MobileNav() {
                 haptic(8);
                 setShowMore(true);
               }}
-              className="flex flex-col items-center justify-end gap-0.5 flex-1 min-w-0 basis-0 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded-2xl"
+              className="flex flex-col items-center justify-end gap-1 flex-1 min-w-0 basis-0 min-h-[48px] touch-manipulation focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded-2xl"
               aria-label="More options"
             >
               <motion.div
@@ -764,7 +764,7 @@ export function MobileNav() {
                   />
                 )}
               </motion.div>
-              <span className="text-[9px] font-semibold tracking-wide text-muted-foreground leading-none">
+              <span className="text-[10px] font-semibold text-muted-foreground leading-none">
                 More
               </span>
             </button>
