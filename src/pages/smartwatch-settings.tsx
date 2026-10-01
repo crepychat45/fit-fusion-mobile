@@ -50,6 +50,7 @@ import {
   CUSTOM_FACES_KEY,
   EVT,
   scanDevices,
+  getBluetoothSupport,
   pairWatch,
   disconnectWatch,
   isWatchConnected,
