@@ -50,6 +50,7 @@ import {
   CUSTOM_FACES_KEY,
   EVT,
   scanDevices,
+  getBluetoothSupport,
   pairWatch,
   disconnectWatch,
   isWatchConnected,
@@ -299,6 +300,13 @@ const SmartwatchSettings: React.FC = () => {
 
   /* ------- Pairing / Sync flow ------- */
   const openPair = async () => {
+    const support = await getBluetoothSupport();
+    if (!support.supported) {
+      if (support.canOpenNewTab) {
+        toast.error(support.reason, { action: { label: "Open in new tab", onClick: () => window.open(window.location.href, "_blank", "noopener") } });
+      } else toast.error(support.reason);
+      return;
+    }
     setPairOpen(true);
     setPairStep("scan");
     setDevices([]);
