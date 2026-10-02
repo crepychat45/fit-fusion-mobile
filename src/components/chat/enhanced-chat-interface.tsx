@@ -1,3 +1,4 @@
+import { askCoach } from "@/lib/ai-coach";
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -125,21 +126,15 @@ export function EnhancedChatInterface({
     setMessages((prev) => [...prev, message]);
     setNewMessage("");
 
-    // Simulate bot response
+    if (selectedUser) return; // real people reply themselves; no fake auto-replies
     setIsTyping(true);
-    setTimeout(() => {
-      const botResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        sender: "FitBot",
-        content: getBotResponse(newMessage),
-        timestamp: new Date(),
-        isOwnMessage: false,
-        avatar: "🤖",
-      };
-
-      setMessages((prev) => [...prev, botResponse]);
-      setIsTyping(false);
-    }, 1500);
+    const asked = newMessage;
+    askCoach([{ role: "user", content: asked }])
+      .catch((e: any) => `⚠️ ${e?.message ?? "AI Coach unavailable."}`)
+      .then((reply) => {
+        setMessages((prev) => [...prev, { id: (Date.now() + 1).toString(), sender: "FitBot", content: reply, timestamp: new Date(), isOwnMessage: false, avatar: "🤖" } as Message]);
+        setIsTyping(false);
+      });
 
     toast({
       title: "Message sent",
