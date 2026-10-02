@@ -1,3 +1,4 @@
+import { askCoach } from "@/lib/ai-coach";
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -121,40 +122,11 @@ export function EnhancedAIAssistant({ isOpen, onClose }: EnhancedAIAssistantProp
   const generateAIResponse = async (userMessage: string): Promise<string> => {
     setIsThinking(true);
     
-    // Simulate AI processing delay
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-    
-    const lowerMessage = userMessage.toLowerCase();
-    
-    // Smart response generation based on keywords
-    if (lowerMessage.includes('workout') || lowerMessage.includes('exercise')) {
-      return "I've analyzed your fitness goals and current level. Here's a personalized workout plan:\n\n🏋️ **Today's Recommended Workout:**\n• Warm-up: 5 minutes dynamic stretching\n• Strength: 3 sets of compound movements\n• Cardio: 15 minutes HIIT\n• Cool-down: 5 minutes stretching\n\nWould you like me to create a detailed routine or adjust the intensity?";
+    try {
+      return await askCoach(messages.filter(m => m.sender !== 'ai' || m.content).map(m => ({ role: m.sender === 'ai' ? 'assistant' : 'user', content: m.content } as const)).concat([{ role: 'user', content: userMessage }]));
+    } catch (e: any) {
+      return `⚠️ ${e?.message ?? 'The AI Coach is unavailable right now.'}`;
     }
-    
-    if (lowerMessage.includes('nutrition') || lowerMessage.includes('diet') || lowerMessage.includes('meal')) {
-      return "🥗 **Personalized Nutrition Advice:**\n\nBased on your goals, here's what I recommend:\n• Protein: 1.6-2.2g per kg body weight\n• Hydration: 2.5-3L water daily\n• Meal timing: Eat within 30 mins post-workout\n\n**Today's Meal Suggestion:**\nBreakfast: Oats with berries and protein powder\nLunch: Grilled chicken with quinoa and vegetables\nDinner: Salmon with sweet potato and greens\n\nShall I create a full weekly meal plan?";
-    }
-    
-    if (lowerMessage.includes('progress') || lowerMessage.includes('analyze')) {
-      return "📊 **Progress Analysis Complete:**\n\nGreat news! You're making excellent progress:\n• Strength increased by 15% this month\n• Consistency rate: 85% (excellent!)\n• Body composition improving steadily\n\n**Key Insights:**\n✅ Your dedication is paying off\n🎯 Focus area: Core strength\n🚀 Next milestone: Increase cardio endurance\n\nWould you like a detailed breakdown or specific recommendations?";
-    }
-    
-    if (lowerMessage.includes('motivat') || lowerMessage.includes('encourage')) {
-      const motivationalQuotes = [
-        "💪 You're stronger than you think! Every rep, every step, every healthy choice is building the best version of yourself.",
-        "🔥 Remember why you started! Your goals are within reach - consistency is your superpower.",
-        "⭐ Progress isn't always visible, but it's always happening. Trust the process and keep pushing forward!",
-        "🚀 You've overcome challenges before, and you'll conquer this one too. Your determination is inspiring!"
-      ];
-      return motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)] + "\n\nWhat specific challenge can I help you overcome today?";
-    }
-    
-    if (lowerMessage.includes('form') || lowerMessage.includes('technique')) {
-      return "🎯 **AI Form Analysis:**\n\nBased on common technique issues, here are key form tips:\n\n**Squat Form:**\n• Keep chest up, core engaged\n• Knees track over toes\n• Hip hinge movement pattern\n\n**Deadlift Form:**\n• Neutral spine throughout\n• Bar close to body\n• Drive through heels\n\nWould you like specific guidance for any particular exercise?";
-    }
-    
-    // Default intelligent response
-    return "I understand you're looking for fitness guidance. As your AI assistant, I can help with:\n\n🎯 **Workout Planning** - Custom routines for your goals\n🥗 **Nutrition Coaching** - Meal plans and dietary advice\n📊 **Progress Tracking** - Data-driven insights\n💪 **Motivation Support** - Keep you on track\n\nWhat specific area would you like to focus on? I'm here to help you succeed!";
   };
 
   const handleSendMessage = async () => {

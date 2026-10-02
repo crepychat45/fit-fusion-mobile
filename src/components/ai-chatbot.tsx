@@ -1,3 +1,4 @@
+import { askCoach } from "@/lib/ai-coach";
 import React, { useState, useRef, useEffect } from "react";
 import {
   Send,
@@ -212,31 +213,16 @@ export function AIChatbot() {
     };
     setMessages((prev) => [...prev, thinkingMessage]);
 
-    setTimeout(
-      () => {
+    const history = messages.filter((m) => !m.isThinking && m.text).map((m) => ({ role: m.isBot ? "assistant" : "user", content: m.text } as const));
+    void (async () => {
+        let responseText: string;
+        try {
+          responseText = await askCoach([...history, { role: "user", content: input }]);
+        } catch (e: any) {
+          responseText = `⚠️ ${e?.message ?? "The AI Coach is unavailable right now."}`;
+        }
         setMessages((prev) => prev.filter((m) => !m.isThinking));
-
-        const lowercaseInput = input.toLowerCase();
-        let responseText = responses.default;
-        let confidence = 0.85 + Math.random() * 0.15;
-
-        for (const [keyword, response] of Object.entries(responses)) {
-          if (lowercaseInput.includes(keyword)) {
-            responseText = response;
-            confidence = 0.9 + Math.random() * 0.1;
-            break;
-          }
-        }
-
-        // Enhanced personalization
-        if (lowercaseInput.includes("name")) {
-          responseText = `Your name is set as ${userProfile.name}. You can update it in your profile settings.`;
-        } else if (
-          lowercaseInput.includes("hello") ||
-          lowercaseInput.includes("hi")
-        ) {
-          responseText = `Hello ${userProfile.name}! I'm your enhanced AI assistant with advanced security and AI features. How can I help you today?`;
-        }
+        const confidence = undefined;
 
         const replyAudio = new Audio("/sounds/message-received.mp3");
         replyAudio.volume = 0.3;
@@ -257,9 +243,7 @@ export function AIChatbot() {
 
         setIsTyping(false);
         setMessages((prev) => [...prev, botMessage]);
-      },
-      Math.random() * 800 + 1200,
-    );
+    })();
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

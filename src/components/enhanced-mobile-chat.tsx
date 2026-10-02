@@ -1,3 +1,4 @@
+import { askCoach } from "@/lib/ai-coach";
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -147,12 +148,12 @@ export function EnhancedMobileChat({ onClose }: EnhancedMobileChatProps) {
     setMessages(prev => [...prev, newMessage]);
     setMessage("");
 
-    // Simulate bot response
-    setTimeout(() => {
+    const asked = message.trim();
+    void askCoach([{ role: "user", content: asked }]).catch((e: any) => `⚠️ ${e?.message ?? "AI Coach unavailable."}`).then((reply) => {
       const botResponse: Message = {
         id: (Date.now() + 1).toString(),
         sender: selectedConversation?.name || "AI Fitness Coach",
-        content: generateResponse(message),
+        content: reply,
         timestamp: new Date().toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
@@ -161,7 +162,7 @@ export function EnhancedMobileChat({ onClose }: EnhancedMobileChatProps) {
       };
 
       setMessages(prev => [...prev, botResponse]);
-    }, 1500);
+    });
 
     toast({
       title: "Message sent",
@@ -169,16 +170,6 @@ export function EnhancedMobileChat({ onClose }: EnhancedMobileChatProps) {
     });
   };
 
-  const generateResponse = (userMessage: string): string => {
-    const responses = [
-      "That's fantastic! Keep pushing your limits! 💪",
-      "You're doing amazing! Consistency is key to success! 🌟",
-      "Great progress! Let's keep building on this momentum! 🚀",
-      "Excellent work! Your dedication is truly inspiring! ⭐",
-      "Keep it up! Every workout brings you closer to your goals! 🎯",
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
-  };
 
   const handleConversationSelect = (conversation: Conversation) => {
     setSelectedConversation(conversation);
