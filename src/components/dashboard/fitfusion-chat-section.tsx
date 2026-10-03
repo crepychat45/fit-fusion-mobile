@@ -1,3 +1,5 @@
+import { useOnlinePresence } from "@/hooks/use-online-presence";
+import { supabase } from "@/integrations/supabase/client";
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -60,20 +62,14 @@ export function FitfusionChatSection() {
     "standard" | "high" | "maximum"
   >("high");
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [availableUsers, setAvailableUsers] = useState(
-    Math.floor(Math.random() * 100) + 120,
-  );
-  const [activeConversations, setActiveConversations] = useState(3);
-
+  const { onlineCount: availableUsers } = useOnlinePresence();
+  const [activeConversations, setActiveConversations] = useState(0);
   useEffect(() => {
-    // Simulate changing online users
-    const interval = setInterval(() => {
-      setAvailableUsers((prev) =>
-        Math.max(100, prev + Math.floor(Math.random() * 7) - 3),
-      );
-    }, 60000);
-
-    return () => clearInterval(interval);
+    supabase.auth.getUser().then(async ({ data }) => {
+      if (!data.user) return;
+      const { count } = await supabase.from("chat_threads").select("id", { count: "exact", head: true }).contains("participant_ids", [data.user.id]).eq("is_archived", false);
+      setActiveConversations(count ?? 0);
+    });
   }, []);
 
   const handleOpenFullChat = () => {
@@ -369,7 +365,7 @@ export function FitfusionChatSection() {
               className="text-xs bg-blue-50 text-blue-700 border-blue-200 animate-pulse"
             >
               <Users className="h-3 w-3 mr-1" />
-              {availableUsers}+ Online
+              {availableUsers} online now
             </Badge>
             <Badge
               variant="secondary"
@@ -456,7 +452,7 @@ export function FitfusionChatSection() {
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 <span className="text-sm font-medium">Chat System Ready</span>
                 <Badge variant="outline" className="text-xs">
-                  {availableUsers}+ online
+                  {availableUsers} online now
                 </Badge>
                 {isMobile && (
                   <Smartphone className="h-4 w-4 text-primary ml-1" />
