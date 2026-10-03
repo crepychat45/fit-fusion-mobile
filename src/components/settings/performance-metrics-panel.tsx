@@ -69,7 +69,7 @@ export function PerformanceMetricsPanel() {
 
       const newMetrics: PerformanceMetrics = {
         memoryUsage: jsHeapSize,
-        cpuLoad: Math.random() * 50 + 20, // Simulated CPU load
+        cpuLoad: Math.min(100, Math.round((renderTime / 16.7) * 100)), // frame budget used
         storageUsed: storageUsed / 1048576, // Convert to MB
         renderTime: Math.min(Math.max(renderTime, 10), 50),
         jsHeapSize: jsHeapSize,
@@ -200,7 +200,7 @@ export function PerformanceMetricsPanel() {
               <p className="text-2xl font-bold text-orange-600">
                 {metrics.cpuLoad.toFixed(0)}%
               </p>
-              <p className="text-xs mt-1 text-muted-foreground">Simulated</p>
+              <p className="text-xs mt-1 text-muted-foreground">Frame budget</p>
             </motion.div>
 
             {/* Storage */}

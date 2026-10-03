@@ -171,18 +171,6 @@ export function AboutPage() {
     });
   };
 
-  useEffect(() => {
-    // Simulate real-time stats updates
-    const interval = setInterval(() => {
-      setUserStats((prev) => ({
-        ...prev,
-        activeToday: prev.activeToday + Math.floor(Math.random() * 3),
-        workoutsCompleted: prev.workoutsCompleted + Math.floor(Math.random() * 5),
-      }));
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <div className="space-y-6 h-full overflow-y-auto">

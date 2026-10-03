@@ -1,3 +1,4 @@
+import { runSecurityChecks } from "@/lib/security-checks";
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -146,13 +147,7 @@ export function MobileSecurityCenter({
   const handleSecurityScan = async () => {
     setLoading(true);
 
-    // Simulate security scan
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    const newScore =
-      Math.random() > 0.8
-        ? Math.floor(Math.random() * 10) + 85
-        : Math.floor(Math.random() * 5) + 90;
+    const { score: newScore } = await runSecurityChecks();
 
     setSecurityScore(newScore);
     setLoading(false);

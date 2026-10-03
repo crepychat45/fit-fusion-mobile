@@ -1,3 +1,4 @@
+import { runSecurityChecks } from "@/lib/security-checks";
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -59,14 +60,12 @@ export function EnhancedMobileSecurityCenter({ isOpen, onClose }: MobileSecurity
 
   const handleSecurityScan = async () => {
     setScanning(true);
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    const { checks } = await runSecurityChecks();
     setScanning(false);
-    
-    const threats = Math.random() > 0.8 ? 1 : 0;
+    const failed = checks.filter((c) => !c.passed);
     toast({
-      title: threats > 0 ? "⚠️ Potential Threat Found" : "✅ Scan Complete",
-      description: threats > 0 ? "1 suspicious activity detected. Review recommended." : "No threats detected. Your device is secure.",
-      variant: threats > 0 ? "destructive" : "default",
+      title: failed.length ? `${failed.length} item(s) to improve` : "✅ All checks passed",
+      description: failed.length ? failed.slice(0, 3).map((c) => c.tip).join(" ") : "Every device security check passed.",
     });
   };
 

@@ -1,3 +1,4 @@
+import { runSecurityChecks } from "@/lib/security-checks";
 import React, { useState, useEffect } from "react";
 import {
   Shield,
@@ -136,18 +137,13 @@ export function AISecuritySystem() {
   const runSecurityScan = async () => {
     setIsScanning(true);
 
-    // Simulate security scan
-    for (let i = 0; i <= 100; i += 10) {
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      setSecurityScore(i);
-    }
-
-    setSecurityScore(96 + Math.floor(Math.random() * 4));
+    const { score } = await runSecurityChecks();
+    setSecurityScore(score);
     setIsScanning(false);
 
     toast({
       title: "Security Scan Complete",
-      description: `System security level: ${securityScore}%`,
+      description: `Security level: ${score}% from real device checks`,
     });
   };
 

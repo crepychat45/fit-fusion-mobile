@@ -1,3 +1,4 @@
+import { APP_VERSION } from "@/lib/app-version";
 import React, { useState } from "react";
 import {
   Card,
@@ -49,19 +50,7 @@ export function SettingsBackupRestore() {
     setBackupProgress(0);
 
     try {
-      // Simulate backup creation
-      const stages = [
-        { message: "Collecting settings...", progress: 20 },
-        { message: "Compressing data...", progress: 50 },
-        { message: "Creating checksum...", progress: 80 },
-        { message: "Finalizing backup...", progress: 100 },
-      ];
-
-      for (const stage of stages) {
-        setBackupProgress(stage.progress);
-        await new Promise((resolve) => setTimeout(resolve, 500));
-      }
-
+      
       // Get all settings from localStorage
       const settingsToBackup = {
         account: localStorage.getItem("account-settings"),
@@ -77,9 +66,9 @@ export function SettingsBackupRestore() {
       const backupString = JSON.stringify(settingsToBackup);
       const backupData: BackupData = {
         timestamp: Date.now(),
-        version: "6.2.5",
+        version: APP_VERSION,
         size: new Blob([backupString]).size,
-        hash: Math.random().toString(36).substring(7),
+        hash: Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(backupString)))).slice(0, 6).map((b) => b.toString(16).padStart(2, "0")).join(""),
         includes: Object.keys(settingsToBackup).filter(
           (key) => settingsToBackup[key as keyof typeof settingsToBackup] !== null,
         ),
