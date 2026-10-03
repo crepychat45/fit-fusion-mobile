@@ -1,3 +1,4 @@
+import { runSecurityChecks } from "@/lib/security-checks";
 import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Shield, ShieldCheck, RefreshCw, Lock, Eye, Database } from "lucide-react";
@@ -57,9 +58,9 @@ export function MonthlySecurityScanWidget() {
       await new Promise((r) => setTimeout(r, 55));
       setProgress((i / steps) * 100);
     }
-    // Simulated checks — deterministic on this client
-    const total = 12;
-    const passed = 11 + Math.round(Math.random());
+    const { checks } = await runSecurityChecks();
+    const total = checks.length;
+    const passed = checks.filter((c) => c.passed).length;
     const result: ScanResult = {
       lastRun: new Date().toISOString(),
       score: Math.round((passed / total) * 100),

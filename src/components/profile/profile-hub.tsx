@@ -568,7 +568,7 @@ export const ProfileHub: React.FC<{ email?: string | null; displayName?: string;
               <Row label="Email verification"><Badge variant="outline" className="text-[10px]">Verified</Badge></Row>
               <Row label="Two-factor auth"><Button size="sm" variant="outline" onClick={() => toast({ title: "Enable in Settings → Security" })}>Enable</Button></Row>
               <Row label="Backup codes"><Button size="sm" variant="outline" onClick={() => {
-                const codes = Array.from({ length: 8 }, () => Math.random().toString(36).slice(2, 8).toUpperCase());
+                const codes = Array.from(crypto.getRandomValues(new Uint32Array(8)), (n) => n.toString(36).slice(-6).toUpperCase().padStart(6, "0"));
                 navigator.clipboard.writeText(codes.join("\n"));
                 toast({ title: "Backup codes copied", description: "Store them somewhere safe." });
               }}>Generate</Button></Row>

@@ -48,7 +48,6 @@ import {
 import { AIChatAssistant } from "./chat/ai-chat-assistant";
 import { SecurePaymentGateway } from "./chat/secure-payment-gateway";
 import { AISecuritySystem } from "./chat/ai-security-system";
-import { EnhancedAIFeatures } from "./enhanced-ai-features";
 import { EnhancedSecurityCenter } from "./enhanced-security-center";
 
 interface Message {
@@ -585,7 +584,7 @@ export function AIChatbot() {
           <DialogHeader>
             <DialogTitle>Enhanced AI Features</DialogTitle>
           </DialogHeader>
-          <EnhancedAIFeatures />
+          <p className="text-sm text-muted-foreground p-4">The AI Coach answers using a live AI model. Ask anything in the chat.</p>
         </DialogContent>
       </Dialog>
 

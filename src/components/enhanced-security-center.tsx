@@ -1,3 +1,4 @@
+import { runSecurityChecks } from "@/lib/security-checks";
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -85,15 +86,10 @@ export function EnhancedSecurityCenter() {
     setIsScanning(true);
     setScanProgress(0);
 
-    // Simulate security scan
-    for (let i = 0; i <= 100; i += 5) {
-      setScanProgress(i);
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    }
-
-    // Update security score
-    const newScore = Math.min(securityScore + Math.random() * 5, 100);
-    setSecurityScore(Math.round(newScore));
+    setScanProgress(30);
+    const { score: newScore } = await runSecurityChecks();
+    setScanProgress(100);
+    setSecurityScore(newScore);
 
     // Update check timestamps
     setSecurityChecks((prev) =>

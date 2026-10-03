@@ -1,3 +1,4 @@
+import { useLiveHealth } from "@/hooks/use-live-health";
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -48,12 +49,7 @@ export function AboutPage() {
       day: "numeric",
     }),
   );
-  const [userStats, setUserStats] = useState({
-    totalUsers: 125000,
-    activeToday: 8500,
-    workoutsCompleted: 2500000,
-    countriesServed: 85,
-  });
+  const live = useLiveHealth();
 
   const features = [
     {
@@ -171,18 +167,6 @@ export function AboutPage() {
     });
   };
 
-  useEffect(() => {
-    // Simulate real-time stats updates
-    const interval = setInterval(() => {
-      setUserStats((prev) => ({
-        ...prev,
-        activeToday: prev.activeToday + Math.floor(Math.random() * 3),
-        workoutsCompleted: prev.workoutsCompleted + Math.floor(Math.random() * 5),
-      }));
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <div className="space-y-6 h-full overflow-y-auto">
@@ -217,23 +201,23 @@ export function AboutPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
                 <Users className="h-6 w-6 text-blue-600 mx-auto mb-1" />
-                <p className="text-lg font-bold">{userStats.totalUsers.toLocaleString()}</p>
-                <p className="text-xs text-muted-foreground">Total Users</p>
+                <p className="text-lg font-bold">{live.streakDays}</p>
+                <p className="text-xs text-muted-foreground">Day streak</p>
               </div>
               <div className="text-center p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
                 <TrendingUp className="h-6 w-6 text-green-600 mx-auto mb-1" />
-                <p className="text-lg font-bold">{userStats.activeToday.toLocaleString()}</p>
-                <p className="text-xs text-muted-foreground">Active Today</p>
+                <p className="text-lg font-bold">{live.todayMinutes} min</p>
+                <p className="text-xs text-muted-foreground">Active today</p>
               </div>
               <div className="text-center p-3 bg-purple-50 dark:bg-purple-950/20 rounded-lg">
                 <Award className="h-6 w-6 text-purple-600 mx-auto mb-1" />
-                <p className="text-lg font-bold">{(userStats.workoutsCompleted / 1000000).toFixed(1)}M</p>
-                <p className="text-xs text-muted-foreground">Workouts</p>
+                <p className="text-lg font-bold">{live.weekSessions}</p>
+                <p className="text-xs text-muted-foreground">Workouts this week</p>
               </div>
               <div className="text-center p-3 bg-orange-50 dark:bg-orange-950/20 rounded-lg">
                 <Globe className="h-6 w-6 text-orange-600 mx-auto mb-1" />
-                <p className="text-lg font-bold">{userStats.countriesServed}</p>
-                <p className="text-xs text-muted-foreground">Countries</p>
+                <p className="text-lg font-bold">{(live.waterMl/1000).toFixed(1)} L</p>
+                <p className="text-xs text-muted-foreground">Water today</p>
               </div>
             </div>
           </CardContent>

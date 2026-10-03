@@ -1,3 +1,4 @@
+import { askCoach } from "@/lib/ai-coach";
 import React, { useState, useRef, useEffect } from "react";
 import {
   Send,
@@ -62,16 +63,8 @@ export function AIChatAssistant({ onClose }: AIChatAssistantProps) {
     scrollToBottom();
   }, [messages]);
 
-  const generateAIResponse = async (userMessage: string): Promise<string> => {
-    // Simulate AI processing with different responses based on model
-    const responses = {
-      "fitfusion-ai": `Based on your FitFusion data and advanced AI analysis, here's my personalized response to: "${userMessage}". I've analyzed your fitness patterns, nutrition habits, and health metrics to provide the most relevant guidance.`,
-      "gpt-4": `Using GPT-4 technology to analyze your query: "${userMessage}". I can provide comprehensive fitness and health insights based on the latest research and your personal data.`,
-      claude: `Through Claude's advanced reasoning capabilities, I understand you're asking about: "${userMessage}". Let me provide you with detailed, contextual fitness guidance.`,
-    };
-
-    return responses[selectedModel] || responses["fitfusion-ai"];
-  };
+  const generateAIResponse = (userMessage: string): Promise<string> =>
+    askCoach([...messages.map((m) => ({ role: m.isBot ? "assistant" : "user", content: m.content } as const)), { role: "user", content: userMessage }]);
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -89,11 +82,7 @@ export function AIChatAssistant({ onClose }: AIChatAssistantProps) {
     setIsTyping(true);
 
     try {
-      // Simulate AI processing time
-      await new Promise((resolve) =>
-        setTimeout(resolve, 1500 + Math.random() * 1000),
-      );
-
+      
       const aiResponse = await generateAIResponse(input);
 
       const botMessage: AIMessage = {
@@ -103,14 +92,14 @@ export function AIChatAssistant({ onClose }: AIChatAssistantProps) {
         timestamp: new Date(),
         isSecure: true,
         aiModel: selectedModel,
-        confidence: 0.85 + Math.random() * 0.15,
+        
       };
 
       setMessages((prev) => [...prev, botMessage]);
 
       toast({
         title: "AI Response Generated",
-        description: `Response from ${selectedModel} with ${Math.round((botMessage.confidence || 0) * 100)}% confidence`,
+        description: "Answered by the FitxFusion AI Coach",
       });
     } catch (error) {
       toast({
