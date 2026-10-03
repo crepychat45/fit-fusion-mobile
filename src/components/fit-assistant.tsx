@@ -12,7 +12,6 @@ import {
   Zap
 } from "lucide-react";
 import { EnhancedAIAssistant } from "@/components/ai/enhanced-ai-assistant";
-import { WorkoutAIAnalyzer } from "@/components/features/workout-ai-analyzer";
 
 export function FitAssistant() {
   const [isOpen, setIsOpen] = useState(false);
@@ -203,7 +202,7 @@ export function FitAssistant() {
               </Button>
             </div>
             <div className="flex-1 overflow-auto p-4">
-              <WorkoutAIAnalyzer />
+              <p className="text-sm text-muted-foreground p-4">Camera form scoring isn't available yet. Ask the AI Coach for form tips on any exercise.</p>
             </div>
           </Card>
         </motion.div>
