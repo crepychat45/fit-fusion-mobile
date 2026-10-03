@@ -25,6 +25,11 @@ const DisplaySettings = lazy(() => import("./display-settings").then(m => ({ def
 const PrivacySettings = lazy(() => import("./privacy-settings").then(m => ({ default: m.PrivacySettings })));
 const DeveloperOptions = lazy(() => import("./developer-options").then(m => ({ default: m.DeveloperOptions })));
 const ChatSettingsPanel = lazy(() => import("./chat-settings").then(m => ({ default: m.ChatSettingsPanel })));
+const SecurityLiveCenter = lazy(() => import("./settings-live-extras").then(m => ({ default: m.SecurityLiveCenter })));
+const PrivacyLivePanel = lazy(() => import("./settings-live-extras").then(m => ({ default: m.PrivacyLivePanel })));
+const NotificationLivePanel = lazy(() => import("./settings-live-extras").then(m => ({ default: m.NotificationLivePanel })));
+const WorkoutLivePanel = lazy(() => import("./settings-live-extras").then(m => ({ default: m.WorkoutLivePanel })));
+const StorageLivePanel = lazy(() => import("./settings-live-extras").then(m => ({ default: m.StorageLivePanel })));
 const AboutPage = lazy(() => import("./about-page").then(m => ({ default: m.AboutPage })));
 const SecurityCenter = lazy(() => import("./security-center").then(m => ({ default: m.SecurityCenter })));
 const NotificationSettings = lazy(() => import("./notification-settings").then(m => ({ default: m.NotificationSettings })));
@@ -524,6 +529,7 @@ export function SettingsContainer() {
 
             <TabsContent value="security" className="mt-0">
               <div className="space-y-6">
+                <L><SecurityLiveCenter /></L>
                 <L><SecurityCenter /></L>
                 <L><SecurityExtras /></L>
                 <L><SecurityProExtras /></L>
@@ -555,6 +561,7 @@ export function SettingsContainer() {
 
             <TabsContent value="privacy" className="mt-0">
               <div className="space-y-6">
+                <L><PrivacyLivePanel /></L>
                 <L><PrivacySettings /></L>
                 <L><PrivacyExtras /></L>
                 <L><PrivacyProExtras /></L>
@@ -569,6 +576,7 @@ export function SettingsContainer() {
 
             <TabsContent value="notifications" className="mt-0">
               <div className="space-y-6">
+                <L><NotificationLivePanel /></L>
                 <L><NotificationPreferences /></L>
                 <L><NotificationSettings /></L>
                 <L><NotificationExtras /></L>
@@ -585,6 +593,7 @@ export function SettingsContainer() {
 
             <TabsContent value="units" className="mt-0">
               <div className="space-y-6">
+                <L><WorkoutLivePanel /></L>
                 <L><UnitPreferences /></L>
                 <L><UnitsExtras /></L>
                 <L><UnitsProExtras /></L>
