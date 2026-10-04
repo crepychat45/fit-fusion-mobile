@@ -1,6 +1,6 @@
 // Single source of truth for app version + changelog
-export const APP_VERSION = "8.2.0";
-export const APP_RELEASE_DATE = "2026-09-30";
+export const APP_VERSION = "8.3.0";
+export const APP_RELEASE_DATE = "2026-10-01";
 
 
 
@@ -25,6 +25,35 @@ export interface ReleaseNote {
 }
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "8.3.0",
+    date: "2026-10-01",
+    type: "Major Release",
+    highlight: "Real data everywhere: made-up numbers, scans and canned replies removed, plus live sync and a stronger Settings page.",
+    sections: [
+      { title: "New Features", icon: "sparkles", items: [
+        "Live Security Check with real device and account checks",
+        "Sign out other devices or everywhere; change password with current-password check",
+        "Live Privacy, Notification and Workout preference panels synced across devices instantly",
+        "Quiet hours and a real test notification",
+        "Water tracking, weekly goal and live workout streak on Home",
+        "Real online count in Chat",
+      ] },
+      { title: "Improvements", icon: "zap", items: [
+        "Every AI chat now answers through the real AI Coach",
+        "Health widgets show only watch readings and recorded workouts",
+        "Device storage usage and offline cache controls",
+      ] },
+      { title: "Fixes", icon: "bug", items: [
+        "Removed fake app integrations, fake device scans, fake form scores and fake stats",
+        "Backup checksums now use real SHA-256",
+      ] },
+      { title: "Security", icon: "shield", items: [
+        "Leaked-password protection enabled",
+        "Recovery codes generated with secure randomness",
+      ] },
+    ],
+  },
   {
     version: "8.2.0",
     date: "2026-09-30",
