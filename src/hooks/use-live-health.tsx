@@ -16,6 +16,11 @@ export type LiveHealth = {
   weekSessions: number;
   weeklyGoal: number;
   streakDays: number;
+  bestStreak: number;
+  weekDaysDone: boolean[];
+  totalWorkouts: number;
+  totalCalories: number;
+  avgHeartRate: number | null;
   waterMl: number;
   waterGoalMl: number;
   loading: boolean;
@@ -108,6 +113,23 @@ export function useLiveHealth() {
     cursor.setDate(cursor.getDate() - 1);
   }
 
+  const sortedDays = [...days].sort();
+  let best = 0, run = 0, prev: number | null = null;
+  for (const d of sortedDays) {
+    const t = new Date(d).getTime();
+    run = prev !== null && t - prev === 86400000 ? run + 1 : 1;
+    best = Math.max(best, run);
+    prev = t;
+  }
+  const monday = new Date();
+  monday.setHours(0, 0, 0, 0);
+  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+  const weekDaysDone = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return days.has(dayKey(d));
+  });
+
   const health: LiveHealth = {
     reading,
     watchConnected: watch.connected,
@@ -118,6 +140,11 @@ export function useLiveHealth() {
     weekSessions: sessions.filter((s) => new Date(s.completed_at).getTime() >= weekStart).length,
     weeklyGoal,
     streakDays: streak,
+    bestStreak: Math.max(best, streak),
+    weekDaysDone,
+    totalWorkouts: sessions.length,
+    totalCalories: sessions.reduce((a, s) => a + (s.calories_burned ?? 0), 0),
+    avgHeartRate: reading.hr,
     waterMl,
     waterGoalMl: 2500,
     loading,

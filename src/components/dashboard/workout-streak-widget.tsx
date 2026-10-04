@@ -1,3 +1,4 @@
+import { useLiveHealth } from "@/hooks/use-live-health";
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -5,11 +6,12 @@ import { motion } from "framer-motion";
 import { Flame, Trophy, Calendar, TrendingUp } from "lucide-react";
 
 const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const completedDays = [true, true, true, false, true, true, false]; // This week
 
 export function WorkoutStreakWidget() {
-  const streakDays = 12;
-  const bestStreak = 21;
+  const live = useLiveHealth();
+  const completedDays = live.weekDaysDone;
+  const streakDays = live.streakDays;
+  const bestStreak = live.bestStreak;
   const thisWeekCompleted = completedDays.filter(Boolean).length;
 
   return (

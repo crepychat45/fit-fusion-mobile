@@ -16,3 +16,9 @@
 - [x] Replace simulated smartwatch pairing, sensors, sync and find-watch claims with honest available capabilities
 - [x] Add 8.2 changelog/version and release visibility without claiming undeployed code is installed
 - [x] Verify mobile preview and update/watch interactions
+
+## 8.3.0 (2026-10-01)
+- [x] Removed fake data/scans/replies across Home, chat, security, about, backup
+- [x] Live health, streak, presence, cross-device Settings sync
+- [x] Settings: live security check, sessions, password change, privacy, quiet hours, workout prefs, storage
+- [ ] Publish so the service worker can deliver 8.3.0 (needs user to publish)

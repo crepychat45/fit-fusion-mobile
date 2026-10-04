@@ -1,11 +1,11 @@
-// FitxFusion Service Worker v13 (v8.2.0)
+// FitxFusion Service Worker v14 (v8.3.0)
 // Strategies:
 //  - Navigations & HTML: network-first with 3s timeout, cache fallback
 //  - Hashed JS/CSS (Vite /assets/): stale-while-revalidate + cache
 //  - Images: cache-first with expiration
 //  - API/Supabase: network-first (no offline replay for auth/mutations)
 // Messages: SKIP_WAITING, CLEAR_CACHES, GET_CACHE_INFO
-const VERSION = "v13-8.2.0";
+const VERSION = "v14-8.3.0";
 const STATIC_CACHE = `fitfusion-static-${VERSION}`;
 const ASSET_CACHE = `fitfusion-assets-${VERSION}`;
 const IMAGE_CACHE = `fitfusion-images-${VERSION}`;

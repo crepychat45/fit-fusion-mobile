@@ -708,6 +708,7 @@ export function SettingsContainer() {
 
             <TabsContent value="data" className="mt-0">
               <div className="space-y-6">
+                <L><StorageLivePanel /></L>
                 <L><DataBackupPanel /></L>
                 <L><DataExtras /></L>
                 <L><DataProExtras /></L>
