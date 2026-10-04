@@ -1,3 +1,4 @@
+import { useLiveHealth } from "@/hooks/use-live-health";
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +21,7 @@ export function WelcomeHeader({
   userName,
   showCompactProfile = false,
 }: WelcomeHeaderProps) {
+  const live = useLiveHealth();
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState<string>("User");
   const [userEmail, setUserEmail] = useState<string>("user@example.com");
@@ -297,15 +299,15 @@ export function WelcomeHeader({
           className="grid grid-cols-3 gap-4"
         >
           <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 text-center shadow-lg border border-white/20">
-            <div className="text-white font-bold text-2xl mb-1">12</div>
+            <div className="text-white font-bold text-2xl mb-1">{live.totalWorkouts}</div>
             <div className="text-white/80 text-sm font-medium">Workouts</div>
           </div>
           <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 text-center shadow-lg border border-white/20">
-            <div className="text-white font-bold text-2xl mb-1">5</div>
+            <div className="text-white font-bold text-2xl mb-1">{live.streakDays}</div>
             <div className="text-white/80 text-sm font-medium">Day Streak</div>
           </div>
           <div className="bg-white/15 backdrop-blur-md rounded-xl p-4 text-center shadow-lg border border-white/20">
-            <div className="text-white font-bold text-2xl mb-1">842</div>
+            <div className="text-white font-bold text-2xl mb-1">{live.totalCalories}</div>
             <div className="text-white/80 text-sm font-medium">Calories</div>
           </div>
         </motion.div>

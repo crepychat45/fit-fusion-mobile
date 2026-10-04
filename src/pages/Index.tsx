@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { MainLayout } from "@/components/layout/main-layout";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ActivitySummary } from "@/components/activity-summary";
-import { userProfile } from "@/data/user";
+import { useLiveHealth } from "@/hooks/use-live-health";
 import { WelcomeHeader } from "@/components/dashboard/welcome-header";
 import { ProfileHeader } from "@/components/profile-header";
 import { motion } from "framer-motion";
@@ -89,7 +89,7 @@ const Index = () => {
           <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-accent/5 rounded-full blur-3xl animate-float" style={{ animationDelay: "2s" }} />
         </div>
 
-        <WelcomeHeader userName={userProfile.name} showCompactProfile={true} />
+        <WelcomeHeader userName="" showCompactProfile={true} />
 
         <motion.div variants={fadeUp} initial="hidden" animate="visible" className="px-4 mt-4">
           <ProfileHeader />
@@ -152,12 +152,7 @@ const Index = () => {
           {/* Activity Summary */}
           <motion.div variants={fadeUp} className="px-4">
             <div className="rounded-2xl border border-border/20 bg-card/60 backdrop-blur-xl shadow-lg overflow-hidden">
-              <ActivitySummary
-                workoutsCompleted={userProfile.stats.workoutsCompleted}
-                streakDays={userProfile.stats.streakDays}
-                caloriesBurned={userProfile.stats.caloriesBurned}
-                avgHeartRate={userProfile.stats.avgHeartRate}
-              />
+              <LiveActivitySummary />
             </div>
           </motion.div>
 
@@ -354,3 +349,15 @@ const Index = () => {
 };
 
 export default Index;
+
+function LiveActivitySummary() {
+  const live = useLiveHealth();
+  return (
+    <ActivitySummary
+      workoutsCompleted={live.totalWorkouts}
+      streakDays={live.streakDays}
+      caloriesBurned={live.totalCalories}
+      avgHeartRate={live.avgHeartRate ?? 0}
+    />
+  );
+}
