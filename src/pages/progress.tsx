@@ -1,3 +1,4 @@
+import { ProgressToolkit } from "@/components/extras/page-toolkits";
 import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -320,6 +321,7 @@ const ProgressPage = () => {
         </Tabs>
       </div>
 
+      <ProgressToolkit />
       <MobileNav />
     </div>
   );

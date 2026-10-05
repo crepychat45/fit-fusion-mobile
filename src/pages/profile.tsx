@@ -1,3 +1,4 @@
+import { ProfileToolkit } from "@/components/extras/page-toolkits";
 import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { MobileNav } from "@/components/mobile-nav";
@@ -481,6 +482,7 @@ const Profile = () => {
         </Tabs>
       </div>
 
+      <ProfileToolkit />
       <MobileNav />
     </div>
   );

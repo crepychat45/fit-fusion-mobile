@@ -256,7 +256,7 @@ export function ProfileToolkit() {
     <div className="px-4 py-4 space-y-4">
       <Section icon={Target} title={`My goals (${done}/${goals.length})`}>
         <div className="flex gap-2">
-          <Input placeholder="e.g. Run 5 km without stopping" maxLength={100} value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && (e.currentTarget.form, null)} />
+          <Input placeholder="e.g. Run 5 km without stopping" maxLength={100} value={text} onChange={(e) => setText(e.target.value)} />
           <Button onClick={() => { const t = text.trim(); if (!t) return; setGoals([...goals, { id: crypto.randomUUID(), text: t, done: false }].slice(0, 50)); setText(""); }}>Add</Button>
         </div>
         {goals.length === 0 && <p className="text-xs text-muted-foreground">Add goals to track them here. They sync across your devices.</p>}
@@ -297,7 +297,7 @@ export function SettingsTransferPanel() {
   const importFile = async (f: File) => {
     try {
       if (f.size > 1_000_000) throw new Error("File too large");
-      const parsed = z.object({ app: z.literal("FitFusion"), data: z.record(z.string()) }).parse(JSON.parse(await f.text()));
+      const parsed = z.object({ app: z.literal("FitFusion"), data: z.record(z.string(), z.string()) }).parse(JSON.parse(await f.text()));
       let n = 0;
       for (const [k, v] of Object.entries(parsed.data)) {
         if ((k.startsWith("fitfusion") || k === "theme") && !/token|pin|passkey|lock|secret|totp/i.test(k) && v.length < 200_000) { localStorage.setItem(k, v); n++; }

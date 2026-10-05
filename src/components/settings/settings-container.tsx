@@ -1,3 +1,4 @@
+import { SettingsTransferPanel } from "@/components/extras/page-toolkits";
 import React, { lazy, Suspense, useState, useEffect } from "react";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { SettingsNavigation } from "./settings-navigation";
@@ -709,6 +710,7 @@ export function SettingsContainer() {
             <TabsContent value="data" className="mt-0">
               <div className="space-y-6">
                 <L><StorageLivePanel /></L>
+                <SettingsTransferPanel />
                 <L><DataBackupPanel /></L>
                 <L><DataExtras /></L>
                 <L><DataProExtras /></L>
