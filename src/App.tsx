@@ -1,3 +1,4 @@
+import { VersionChip } from "@/components/common/version-chip";
 import React, { lazy, Suspense, useEffect, useState } from "react";
 import { Routes, Route, useLocation , Navigate} from "react-router-dom";
 import { AppWrapper } from "./components/app-wrapper";
@@ -202,6 +203,12 @@ const AppContent: React.FC = () => {
 };
 
 
+function VersionChipMount() {
+  const { pathname } = useLocation();
+  if (pathname.startsWith("/auth")) return null;
+  return <VersionChip />;
+}
+
 const App: React.FC = () => (
   <ErrorBoundary>
     <AppWrapper>
@@ -209,6 +216,7 @@ const App: React.FC = () => (
         <AppLockGate>
           <MaintenanceGate>
             <AppContent />
+            <VersionChipMount />
           </MaintenanceGate>
         </AppLockGate>
       </RemoteConfigProvider>

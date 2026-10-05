@@ -1,6 +1,6 @@
 // Single source of truth for app version + changelog
-export const APP_VERSION = "8.3.0";
-export const APP_RELEASE_DATE = "2026-10-01";
+export const APP_VERSION = "8.4.0";
+export const APP_RELEASE_DATE = "2026-10-05";
 
 
 
@@ -25,6 +25,33 @@ export interface ReleaseNote {
 }
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "8.4.0",
+    date: "2026-10-05",
+    type: "Major Release",
+    highlight: "Real background push notifications, version shown on every page, new training and progress tools.",
+    sections: [
+      { title: "New Features", icon: "sparkles", items: [
+        "Background push notifications that arrive even when the app is closed",
+        "Send a test push to your own device",
+        "Admin announcements now also push to every subscribed device",
+        "Version label on every page that lights up when an update is ready",
+        "Interval timer, 1-rep max and plate calculator in Workouts",
+        "Weight log, BMI and personal records in Progress",
+        "Synced goals checklist and share-card link in Profile",
+        "Settings export/import and in-app feedback on About",
+      ] },
+      { title: "Improvements", icon: "zap", items: [
+        "Tapping a notification opens the app you already have open instead of a new tab",
+        "Notifications show the FitFusion icon",
+        "About lists the key features of the latest releases",
+      ] },
+      { title: "Security", icon: "shield", items: [
+        "Push sending is signed server-side; only admins can broadcast",
+        "Expired devices are removed automatically",
+      ] },
+    ],
+  },
   {
     version: "8.3.0",
     date: "2026-10-01",
