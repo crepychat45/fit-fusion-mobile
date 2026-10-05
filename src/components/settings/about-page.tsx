@@ -1,3 +1,4 @@
+import { AboutReportPanel } from "@/components/extras/page-toolkits";
 import { useLiveHealth } from "@/hooks/use-live-health";
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -462,6 +463,7 @@ export function AboutPage() {
             </div>
           </CardContent>
         </Card>
+      <div className="mt-4"><AboutReportPanel /></div>
       </motion.div>
     </div>
   );
