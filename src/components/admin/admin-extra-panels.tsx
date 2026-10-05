@@ -95,7 +95,10 @@ export function PushCenter() {
       return;
     }
     await logAdminAction("push.send", title.trim(), { audience });
-    toast({ title: "Notification delivered", description: "Every open app received it live." });
+    const { data: pushRes } = await supabase.functions.invoke("send-push", {
+      body: { title: title.trim(), body: body.trim(), url: link.trim().startsWith("/") ? link.trim() : undefined, target: "all" },
+    });
+    toast({ title: "Notification delivered", description: `Shown live in every open app and pushed to ${pushRes?.sent ?? 0} device(s) in the background.` });
     setTitle("");
     setBody("");
     setLink("");
