@@ -5,7 +5,7 @@
 //  - Images: cache-first with expiration
 //  - API/Supabase: network-first (no offline replay for auth/mutations)
 // Messages: SKIP_WAITING, CLEAR_CACHES, GET_CACHE_INFO
-const VERSION = "v14-8.3.0";
+const VERSION = "v15-8.4.0";
 const STATIC_CACHE = `fitfusion-static-${VERSION}`;
 const ASSET_CACHE = `fitfusion-assets-${VERSION}`;
 const IMAGE_CACHE = `fitfusion-images-${VERSION}`;
@@ -176,8 +176,10 @@ self.addEventListener("push", (event) => {
     (async () => {
       await self.registration.showNotification(data.title || "FitFusion", {
         body: data.body,
-        icon: "/favicon.ico",
-        badge: "/favicon.ico",
+        icon: "/icons/icon-192.png",
+        badge: "/icons/icon-192.png",
+        tag: data.tag || undefined,
+        renotify: Boolean(data.tag),
         vibrate: [180, 90, 180],
         data,
       });
@@ -200,5 +202,17 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  event.waitUntil(self.clients.openWindow(event.notification.data?.url || "/"));
+  const target = new URL(event.notification.data?.url || "/", self.location.origin).href;
+  event.waitUntil(
+    (async () => {
+      const wins = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      const win = wins.find((w) => w.url.startsWith(self.location.origin));
+      if (win) {
+        await win.focus();
+        if ("navigate" in win) return win.navigate(target);
+        return;
+      }
+      return self.clients.openWindow(target);
+    })(),
+  );
 });

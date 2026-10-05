@@ -66,7 +66,7 @@ export function usePushNotifications() {
 
       // Public VAPID key comes from the environment; without it web push
       // cannot be established (native builds use FCM/APNs instead).
-      const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined;
+      const vapidPublicKey = (import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined) || "BN5Rz99wDhRMo6mJ64wvLzTuz2tmAvhW-KnxJ1WfugIWkLmq3vC1TBIDNh5QkfLWzfcYBaPKBcYXZ5duKX3ABJw";
 
       if (!vapidPublicKey) {
         toast({
@@ -79,7 +79,8 @@ export function usePushNotifications() {
       }
 
       const vapidKey = urlBase64ToUint8Array(vapidPublicKey);
-      const sub = await (registration as any).pushManager.subscribe({
+      const existing = await (registration as any).pushManager.getSubscription();
+      const sub = existing ?? await (registration as any).pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: new Uint8Array(vapidKey),
       });
@@ -206,8 +207,21 @@ export function usePushNotifications() {
     }
   };
 
+  const sendTest = async () => {
+    const { data, error } = await supabase.functions.invoke('send-push', {
+      body: { title: 'FitFusion test', body: 'Background notifications are working.', target: 'self' },
+    });
+    if (error || !data?.sent) {
+      toast({ title: 'Test not delivered', description: 'Turn on push notifications on this device first.', variant: 'destructive' });
+      return false;
+    }
+    toast({ title: 'Test sent', description: `Delivered to ${data.sent} device(s).` });
+    return true;
+  };
+
   return {
     isSupported,
+    sendTest,
     isSubscribed,
     subscription,
     subscribe,

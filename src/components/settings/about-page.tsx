@@ -52,7 +52,10 @@ export function AboutPage() {
   );
   const live = useLiveHealth();
 
-  const features = [
+  const latestFeatures = RELEASE_NOTES.slice(0, 3).flatMap((n) =>
+    n.sections.flatMap((sec) => sec.items.slice(0, sec.title === "New Features" ? 6 : 2).map((it) => ({ icon: sec.icon === "shield" ? Shield : sec.icon === "zap" ? Smartphone : sec.icon === "bug" ? Database : Brain, title: sec.title, description: it, version: n.version }))),
+  );
+  const features = latestFeatures.length ? latestFeatures : [
     {
       icon: Brain,
       title: "AI-Powered Workouts",
@@ -237,14 +240,14 @@ export function AboutPage() {
               <Star className="h-5 w-5" />
               Key Features
             </CardTitle>
-            <CardDescription>Cutting-edge technology that makes FitFusion stand out</CardDescription>
+            <CardDescription>What's new in v{appVersion} and recent releases</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {features.map((feature, index) => {
               const FeatureIcon = feature.icon;
               return (
                 <motion.div
-                  key={feature.title}
+                  key={feature.version + feature.description}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.1 }}
