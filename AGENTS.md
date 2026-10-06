@@ -7,3 +7,4 @@
 - Route every AI chat reply through `askCoach` (the real AI function); no canned or keyword-matched responses.
 - Compute security scores only from `runSecurityChecks` (observable device/account state); never invent threats or scores.
 - Store live-synced Settings groups under a `live` key in the matching user_settings column with a per-hook Realtime channel so other devices update instantly.
+- Send background push only through the `send-push` function (server-held keys); "self" for tests, "all" restricted to admin roles; delete expired endpoints on 404/410.
