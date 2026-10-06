@@ -1,4 +1,4 @@
-import { SettingsTransferPanel } from "@/components/extras/page-toolkits";
+import { SettingsTransferPanel, PushDevicePanel } from "@/components/extras/page-toolkits";
 import React, { lazy, Suspense, useState, useEffect } from "react";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { SettingsNavigation } from "./settings-navigation";
@@ -577,6 +577,7 @@ export function SettingsContainer() {
 
             <TabsContent value="notifications" className="mt-0">
               <div className="space-y-6">
+                <PushDevicePanel />
                 <L><NotificationLivePanel /></L>
                 <L><NotificationPreferences /></L>
                 <L><NotificationSettings /></L>
