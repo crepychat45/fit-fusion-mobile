@@ -1,3 +1,5 @@
+import { usePushNotifications } from "@/hooks/use-push-notifications";
+import { BellRing } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -355,6 +357,31 @@ export function AboutReportPanel() {
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <span>{message.length}/1000 · v{APP_VERSION} attached</span>
         <Button size="sm" onClick={submit}>{sent ? "Sent ✓" : "Send"}</Button>
+      </div>
+    </Section>
+  );
+}
+
+/* ===================== PUSH ===================== */
+export function PushDevicePanel() {
+  const push = usePushNotifications();
+  const inFrame = typeof window !== "undefined" && window.top !== window.self;
+  const [busy, setBusy] = useState(false);
+  const run = async (fn: () => Promise<unknown>) => { setBusy(true); try { await fn(); } finally { setBusy(false); } };
+  return (
+    <Section icon={BellRing} title="Background push on this device">
+      <p className="text-xs text-muted-foreground">
+        Get alerts even when FitFusion is closed. {push.isSubscribed ? "This device is subscribed." : "This device is not subscribed yet."}
+      </p>
+      {!push.isSupported && <p className="text-xs text-destructive">This browser doesn't support push. On iPhone, add the app to your Home Screen first.</p>}
+      {inFrame && <p className="text-xs text-destructive">Open the app in its own tab to allow notifications.</p>}
+      <div className="flex flex-wrap gap-2">
+        {push.isSubscribed ? (
+          <Button variant="outline" disabled={busy} onClick={() => run(push.unsubscribe)}>Turn off</Button>
+        ) : (
+          <Button disabled={busy || !push.isSupported || inFrame} onClick={() => run(push.subscribe)}>Turn on push</Button>
+        )}
+        <Button variant="outline" disabled={busy || !push.isSubscribed} onClick={() => run(push.sendTest)}>Send test push</Button>
       </div>
     </Section>
   );
