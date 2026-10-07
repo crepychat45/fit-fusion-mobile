@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Brain, Heart, TrendingUp, Shield, Sparkles, Dumbbell, Flame, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TodayActivityStrip } from "@/components/home/today-activity-strip";
+import { FitScoreCard } from "@/components/home/fit-score-card";
 
 const DailyTip = lazy(() => import("@/components/daily-tip").then((m) => ({ default: m.DailyTip })));
 const TodaysWorkout = lazy(() => import("@/components/dashboard/todays-workout").then((m) => ({ default: m.TodaysWorkout })));
@@ -95,6 +96,7 @@ const Index = () => {
           <ProfileHeader />
         </motion.div>
 
+        <div className="mt-4"><FitScoreCard /></div>
         <div className="mt-4"><TodayActivityStrip /></div>
 
         <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-5 relative z-10 mt-4">
