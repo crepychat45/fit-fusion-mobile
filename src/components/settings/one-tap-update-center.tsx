@@ -1,3 +1,4 @@
+import { safeJsonParse } from "@/lib/safe-storage";
 import React, { useCallback, useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -39,7 +40,7 @@ interface HistoryEntry {
 
 function readHistory(): HistoryEntry[] {
   try {
-    const raw = JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+    const raw = safeJsonParse<any>(localStorage.getItem(HISTORY_KEY), []);
     if (!Array.isArray(raw)) return [];
     return raw.filter((e): e is HistoryEntry => !!e && typeof e.version === "string" && typeof e.date === "string");
   } catch {

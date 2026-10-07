@@ -1,3 +1,4 @@
+import { safeJsonParse } from "@/lib/safe-storage";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
@@ -19,7 +20,7 @@ const SEEN_KEY = "fitfusion-admin-push-seen";
 
 const readSeen = (): string[] => {
   try {
-    return JSON.parse(localStorage.getItem(SEEN_KEY) ?? "[]") as string[];
+    return safeJsonParse<any>(localStorage.getItem(SEEN_KEY), []) as string[];
   } catch {
     return [];
   }

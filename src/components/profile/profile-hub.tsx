@@ -1,3 +1,4 @@
+import { safeJsonParse } from "@/lib/safe-storage";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -359,11 +360,11 @@ export const ProfileHub: React.FC<{ email?: string | null; displayName?: string;
   type DevItem = { id: string; label: string; value: string; createdAt: number };
   const DEV_KEY = `ff.dev.${userId ?? "anon"}`;
   const [dev, setDev] = useState<{ apiKeys: DevItem[]; oauthApps: DevItem[]; webhooks: DevItem[] }>(() => {
-    try { return JSON.parse(localStorage.getItem(DEV_KEY) || "") || { apiKeys: [], oauthApps: [], webhooks: [] }; }
+    try { return safeJsonParse<any>(localStorage.getItem(DEV_KEY), null) || { apiKeys: [], oauthApps: [], webhooks: [] }; }
     catch { return { apiKeys: [], oauthApps: [], webhooks: [] }; }
   });
   useEffect(() => {
-    try { setDev(JSON.parse(localStorage.getItem(DEV_KEY) || "") || { apiKeys: [], oauthApps: [], webhooks: [] }); } catch { /* keep */ }
+    try { setDev(safeJsonParse<any>(localStorage.getItem(DEV_KEY), null) || { apiKeys: [], oauthApps: [], webhooks: [] }); } catch { /* keep */ }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
   useEffect(() => { try { localStorage.setItem(DEV_KEY, JSON.stringify(dev)); } catch {} }, [dev, DEV_KEY]);

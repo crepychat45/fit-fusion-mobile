@@ -1,3 +1,4 @@
+import { safeJsonParse } from "@/lib/safe-storage";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -223,7 +224,7 @@ export function SecurityPanel({ userEmail }: { userEmail?: string }) {
   }
 
   const trustedDevices: { id: string; label: string; lastSeen: string }[] = useMemo(() => {
-    try { return JSON.parse(localStorage.getItem(LS_TRUSTED_DEVICES) || "[]"); } catch { return []; }
+    try { return safeJsonParse<any>(localStorage.getItem(LS_TRUSTED_DEVICES), []); } catch { return []; }
   }, []);
 
   async function sendPasswordReset() {
