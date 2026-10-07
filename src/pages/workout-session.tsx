@@ -1,3 +1,4 @@
+import { safeJsonParse } from "@/lib/safe-storage";
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { EnhancedWorkoutPlayer } from "@/components/workout/enhanced-workout-player";
@@ -32,7 +33,7 @@ export default function WorkoutSession() {
 
   const handleComplete = () => {
     // Save workout completion to localStorage
-    const completedWorkouts = JSON.parse(localStorage.getItem('completedWorkouts') || '[]');
+    const completedWorkouts = safeJsonParse<any>(localStorage.getItem('completedWorkouts'), []);
     completedWorkouts.push({
       id: workout.id,
       title: workout.title,

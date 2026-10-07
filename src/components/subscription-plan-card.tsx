@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Check, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { useSettings } from "@/contexts/settings-context";
+import { useSettings } from "@/contexts/safe-settings-context";
 import { useToast } from "@/components/ui/use-toast";
 
 interface SubscriptionPlanCardProps {

@@ -1,3 +1,4 @@
+import { safeJsonParse } from "@/lib/safe-storage";
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -56,7 +57,7 @@ export function SettingsCopilot() {
   const applyTheme = (v: "light" | "dark" | "system") => {
     persistTheme(v);
     try {
-      const prev = JSON.parse(localStorage.getItem("fitfusion_appearance") || "{}");
+      const prev = safeJsonParse<any>(localStorage.getItem("fitfusion_appearance"), {});
       localStorage.setItem("fitfusion_appearance", JSON.stringify({ ...prev, theme: v }));
     } catch { /* ignore */ }
   };

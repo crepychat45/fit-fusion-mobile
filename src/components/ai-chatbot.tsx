@@ -38,7 +38,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useSettings } from "@/contexts/settings-context";
+import { useSettings } from "@/contexts/safe-settings-context";
 import {
   Dialog,
   DialogContent,

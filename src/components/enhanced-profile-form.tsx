@@ -42,7 +42,7 @@ import {
   Star,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSettings } from "@/contexts/settings-context";
+import { useSettings } from "@/contexts/safe-settings-context";
 
 interface ProfileData {
   personalInfo: {

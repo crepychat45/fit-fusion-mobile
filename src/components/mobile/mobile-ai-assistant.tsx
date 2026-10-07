@@ -1,3 +1,4 @@
+import { safeJsonParse } from "@/lib/safe-storage";
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -87,7 +88,7 @@ const QUICK_PROMPTS = [
 
 function loadHistory(): Message[] {
   try {
-    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    const raw = safeJsonParse<any>(localStorage.getItem(STORAGE_KEY), []);
     if (Array.isArray(raw)) return raw.slice(-60);
   } catch {
     /* ignore */
@@ -97,7 +98,7 @@ function loadHistory(): Message[] {
 
 function loadPrefs(): { model: Model; coach: Coach; speak: boolean } {
   try {
-    const raw = JSON.parse(localStorage.getItem(PREFS_KEY) || "null");
+    const raw = safeJsonParse<any>(localStorage.getItem(PREFS_KEY), null);
     if (raw && typeof raw === "object") {
       return {
         model: raw.model === "google/gemini-3-pro-preview" ? raw.model : "google/gemini-3-flash-preview",

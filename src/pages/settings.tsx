@@ -7,6 +7,7 @@ import { SettingsContainer } from "@/components/settings/settings-container";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { APP_VERSION } from "@/lib/app-version";
+import { SettingsOverview } from "@/components/settings/settings-overview";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -32,13 +33,14 @@ const Settings = () => {
             <div className="flex items-center">
               <button
                 onClick={() => navigate(-1)}
+                aria-label="Go back"
                 className="p-2 rounded-full hover:bg-primary-foreground/10 backdrop-blur-sm transition-colors"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
               <div className="ml-2 flex items-center gap-2">
                 <SettingsIcon className="h-5 w-5" />
-                <h1 className="text-xl font-bold">Settings</h1>
+                <div><h1 className="text-xl font-bold leading-tight">Settings</h1><p className="text-xs opacity-80">Customize your FitXFusion experience</p></div>
               </div>
             </div>
             <Badge className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30 text-xs">
@@ -50,6 +52,7 @@ const Settings = () => {
 
       <div className="pb-24 relative z-10">
         <SafeSettingsWrapper>
+          <SettingsOverview />
           <SettingsContainer />
         </SafeSettingsWrapper>
       </div>

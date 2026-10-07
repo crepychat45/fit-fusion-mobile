@@ -1,6 +1,5 @@
 import React from "react";
 import { EnhancedErrorBoundary } from "@/components/enhanced-error-handling";
-import { SettingsProvider } from "@/contexts/settings-context";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Settings, AlertTriangle } from "lucide-react";
@@ -45,9 +44,7 @@ const SettingsErrorFallback = ({ error, retry }: { error: Error; retry: () => vo
 export function SafeSettingsWrapper({ children }: SafeSettingsWrapperProps) {
   return (
     <EnhancedErrorBoundary fallback={SettingsErrorFallback}>
-      <SettingsProvider>
-        {children}
-      </SettingsProvider>
+      {children}
     </EnhancedErrorBoundary>
   );
 }

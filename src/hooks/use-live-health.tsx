@@ -1,3 +1,4 @@
+import { safeJsonParse } from "@/lib/safe-storage";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { sensorHub, loadState, EVT, type SensorReading } from "@/lib/smartwatch";
@@ -33,7 +34,7 @@ const GOAL_KEY = "fitfusion.weeklyGoal";
 
 const readWater = () => {
   try {
-    const v = JSON.parse(localStorage.getItem(WATER_KEY) || "{}");
+    const v = safeJsonParse<any>(localStorage.getItem(WATER_KEY), {});
     return v[dayKey()] ?? 0;
   } catch {
     return 0;
@@ -87,7 +88,7 @@ export function useLiveHealth() {
 
   const addWater = (ml: number) => {
     try {
-      const v = JSON.parse(localStorage.getItem(WATER_KEY) || "{}");
+      const v = safeJsonParse<any>(localStorage.getItem(WATER_KEY), {});
       v[dayKey()] = Math.max(0, (v[dayKey()] ?? 0) + ml);
       localStorage.setItem(WATER_KEY, JSON.stringify(v));
       setWaterMl(v[dayKey()]);

@@ -1,3 +1,4 @@
+import { safeJsonParse } from "@/lib/safe-storage";
 import React, { useEffect, useState } from "react";
 import {
   Card,
@@ -35,7 +36,7 @@ interface Prefs {
 
 function load(): Prefs {
   try {
-    const v = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    const v = safeJsonParse<any>(localStorage.getItem(STORAGE_KEY), null);
     if (v) return v;
   } catch { /* ignore */ }
   return { theme: "light", accent: "#2563EB", fontSize: 16, reduceMotion: false };
