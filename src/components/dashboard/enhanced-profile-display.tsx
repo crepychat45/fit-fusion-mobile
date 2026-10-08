@@ -25,6 +25,7 @@ import { userProfile } from "@/data/user";
 import { useNavigate } from "react-router-dom";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
 import { useProfile } from "@/hooks/use-profile";
+import { useLiveHealth } from "@/hooks/use-live-health";
 
 interface Achievement {
   id: string;
@@ -71,12 +72,27 @@ export function EnhancedProfileDisplay({
   userName,
   showFullProfile = false,
 }: ProfileDisplayProps) {
-  const [currentProfile, setCurrentProfile] = useState(userProfile);
-  const [displayName, setDisplayName] = useState(userName || userProfile.name);
+  const [baseProfile, setCurrentProfile] = useState({ ...userProfile, name: "User" });
+  const [displayName, setDisplayName] = useState(userName || "User");
+  const live = useLiveHealth();
   const [streakMotivation, setStreakMotivation] = useState("");
   const navigate = useNavigate();
   const { user } = useEnhancedAuth();
   const { profile: dbProfile } = useProfile(user?.id, { enabled: Boolean(user?.id) });
+  // Only real data: recorded sessions + saved profile fields. No sample stats.
+  const currentProfile = {
+    ...baseProfile,
+    goal: (dbProfile as { fitness_goals?: string[] | null } | null)?.fitness_goals?.[0] ?? "Set a goal",
+    level: (dbProfile as { fitness_level?: string | null } | null)?.fitness_level ?? "Not set",
+    memberSince: "—",
+    lastWorkout: live.totalWorkouts ? "Recently" : "No workouts yet",
+    stats: {
+      workoutsCompleted: live.totalWorkouts,
+      streakDays: live.streakDays,
+      caloriesBurned: live.totalCalories,
+      avgHeartRate: live.avgHeartRate ?? 0,
+    },
+  };
 
   // Live avatar: prefer DB profile → auth metadata → local cache → static
   const [localAvatar, setLocalAvatar] = useState<string | null>(null);
