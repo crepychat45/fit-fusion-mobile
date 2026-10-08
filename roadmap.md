@@ -22,3 +22,14 @@
 - [x] Live health, streak, presence, cross-device Settings sync
 - [x] Settings: live security check, sessions, password change, privacy, quiet hours, workout prefs, storage
 - [ ] Publish so the service worker can deliver 8.3.0 (needs user to publish)
+
+## Master audit (2026-10-07)
+- [x] One settings system (removed duplicate providers)
+- [x] Crash-proof saved-data reading + central logger
+- [x] Removed canned chat replies and sample profile/level/Pro/sleep on Home
+- [x] FitScore + Your Week card on Home (real data only)
+- [x] Settings overview: profile, security score, cloud sync
+- [ ] Settings full 14-category redesign
+- [ ] Workouts: full-screen active workout + AI workout builder
+- [ ] Progress: deeper charts and time filters
+- [ ] Signed-in click-through testing (test browser was signed out)

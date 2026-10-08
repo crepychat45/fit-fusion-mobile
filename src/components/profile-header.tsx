@@ -6,7 +6,6 @@ import { useProfile, useAvatarUpload } from "@/hooks/use-profile";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import { userProfile } from "@/data/user";
 
 const getCachedProfileUser = () => {
   if (typeof window === "undefined") return null;
@@ -17,7 +16,7 @@ const getCachedProfileUser = () => {
     return {
       id: parsedProfile.user_id || undefined,
       email,
-      user_metadata: { name: parsedProfile.name || userProfile.name, avatar_url: parsedProfile.avatar_url },
+      user_metadata: { name: parsedProfile.name || undefined, avatar_url: parsedProfile.avatar_url },
     };
   } catch {
     return null;
@@ -125,7 +124,7 @@ export function ProfileHeader() {
   }
 
   if (!profileEnabled || error || !profile) {
-    const cachedName = user?.user_metadata?.name || userProfile.name || fallbackName;
+    const cachedName = user?.user_metadata?.name || fallbackName;
     const cachedInitials = cachedName.slice(0, 2).toUpperCase();
     return (
       <div className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20">
@@ -136,10 +135,10 @@ export function ProfileHeader() {
         <div className="flex-1 min-w-0 flex items-center justify-between gap-2">
           <div>
             <p className="font-semibold text-sm truncate">{cachedName}</p>
-            <p className="text-xs text-muted-foreground truncate">Ready instantly · syncing in background</p>
+            <p className="text-xs text-muted-foreground truncate">{user?.id ? "Ready instantly · syncing in background" : "Not signed in"}</p>
           </div>
           <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 text-xs px-2 py-0.5 shrink-0">
-            Online
+            {typeof navigator !== "undefined" && !navigator.onLine ? "Offline" : "Online"}
           </Badge>
         </div>
       </div>

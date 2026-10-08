@@ -32,7 +32,7 @@ const DEFAULTS: CommandState = {
   water: 0,
   steps: 0,
   calories: 0,
-  sleep: 70,
+  sleep: 0,
   mood: null,
   energy: 3,
   focusSeconds: 0,

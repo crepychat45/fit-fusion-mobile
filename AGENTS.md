@@ -8,3 +8,5 @@
 - Compute security scores only from `runSecurityChecks` (observable device/account state); never invent threats or scores.
 - Store live-synced Settings groups under a `live` key in the matching user_settings column with a per-hook Realtime channel so other devices update instantly.
 - Send background push only through the `send-push` function (server-held keys); "self" for tests, "all" restricted to admin roles; delete expired endpoints on 404/410.
+- Mount exactly one SettingsProvider (`safe-settings-context`, in AppWrapper); never nest or add another settings provider, because duplicates caused conflicting state.
+- Read stored JSON through `safeJsonParse`/`readJson` from `src/lib/safe-storage.ts` and log through `src/lib/logger.ts`, so corrupted storage never crashes and production logs stay quiet and redacted.
