@@ -21,7 +21,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 // Lazy-load each panel — only the active tab loads, making Settings open fast.
-const MaxX = (n: string) => lazy(() => import("./settings-max-extras").then((m: Record<string, React.ComponentType>) => ({ default: m[n] })));
+const MaxX = (n: string) => lazy(() => import("./settings-max-extras").then((m) => ({ default: (m as unknown as Record<string, React.ComponentType>)[n] })));
 const AccountMaxExtras = MaxX("AccountMaxExtras");
 const SecurityMaxExtras = MaxX("SecurityMaxExtras");
 const DisplayMaxExtras = MaxX("DisplayMaxExtras");
