@@ -33,3 +33,8 @@
 - [ ] Workouts: full-screen active workout + AI workout builder
 - [ ] Progress: deeper charts and time filters
 - [ ] Signed-in click-through testing (test browser was signed out)
+
+## 8.5.0 (2026-10-08)
+- [x] New real tools in all Settings tabs
+- [x] Latest Capacitor packages + Share/Clipboard/Browser/Orientation
+- [x] Version 8.5.0 in package, app, service worker
