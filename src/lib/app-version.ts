@@ -1,6 +1,6 @@
 // Single source of truth for app version + changelog
-export const APP_VERSION = "8.4.0";
-export const APP_RELEASE_DATE = "2026-10-05";
+export const APP_VERSION = "8.5.0";
+export const APP_RELEASE_DATE = "2026-10-08";
 
 
 
