@@ -21,6 +21,17 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 // Lazy-load each panel — only the active tab loads, making Settings open fast.
+const MaxX = (n: string) => lazy(() => import("./settings-max-extras").then((m) => ({ default: (m as unknown as Record<string, React.ComponentType>)[n] })));
+const AccountMaxExtras = MaxX("AccountMaxExtras");
+const SecurityMaxExtras = MaxX("SecurityMaxExtras");
+const DisplayMaxExtras = MaxX("DisplayMaxExtras");
+const PrivacyMaxExtras = MaxX("PrivacyMaxExtras");
+const NotificationMaxExtras = MaxX("NotificationMaxExtras");
+const UnitsMaxExtras = MaxX("UnitsMaxExtras");
+const ChatMaxExtras = MaxX("ChatMaxExtras");
+const DataMaxExtras = MaxX("DataMaxExtras");
+const DeveloperMaxExtras = MaxX("DeveloperMaxExtras");
+const AboutMaxExtras = MaxX("AboutMaxExtras");
 const AccountSettings = lazy(() => import("./account-settings").then(m => ({ default: m.AccountSettings })));
 const DisplaySettings = lazy(() => import("./display-settings").then(m => ({ default: m.DisplaySettings })));
 const PrivacySettings = lazy(() => import("./privacy-settings").then(m => ({ default: m.PrivacySettings })));
@@ -519,6 +530,7 @@ export function SettingsContainer() {
                 <L><AccountProExtras /></L>
                 <L><AccountNextExtras /></L>
                 <L><AccountUltraExtras /></L>
+                <L><AccountMaxExtras /></L>
                 <L><AccountHyperExtras /></L>
                 <L><AccountQuantumExtras /></L>
                 <L><AccountFusionExtras /></L>
@@ -536,6 +548,7 @@ export function SettingsContainer() {
                 <L><SecurityProExtras /></L>
                 <L><SecurityNextExtras /></L>
                 <L><SecurityUltraExtras /></L>
+                <L><SecurityMaxExtras /></L>
                 <L><SecurityHyperExtras /></L>
                 <L><SecurityQuantumExtras /></L>
                 <L><SecurityFusionExtras /></L>
@@ -552,6 +565,7 @@ export function SettingsContainer() {
                 <L><DisplayProExtras /></L>
                 <L><DisplayNextExtras /></L>
                 <L><DisplayUltraExtras /></L>
+                <L><DisplayMaxExtras /></L>
                 <L><DisplayHyperExtras /></L>
                 <L><DisplayQuantumExtras /></L>
                 <L><DisplayFusionExtras /></L>
@@ -567,6 +581,7 @@ export function SettingsContainer() {
                 <L><PrivacyExtras /></L>
                 <L><PrivacyProExtras /></L>
                 <L><PrivacyUltraExtras /></L>
+                <L><PrivacyMaxExtras /></L>
                 <L><PrivacyHyperExtras /></L>
                 <L><PrivacyQuantumExtras /></L>
                 <L><PrivacyFusionExtras /></L>
@@ -585,6 +600,7 @@ export function SettingsContainer() {
                 <L><NotificationProExtras /></L>
                 <L><NotificationNextExtras /></L>
                 <L><NotificationUltraExtras /></L>
+                <L><NotificationMaxExtras /></L>
                 <L><NotificationHyperExtras /></L>
                 <L><NotificationQuantumExtras /></L>
                 <L><NotificationFusionExtras /></L>
@@ -601,6 +617,7 @@ export function SettingsContainer() {
                 <L><UnitsProExtras /></L>
                 <L><UnitsNextExtras /></L>
                 <L><UnitsUltraExtras /></L>
+                <L><UnitsMaxExtras /></L>
                 <L><UnitsHyperExtras /></L>
                 <L><UnitsQuantumExtras /></L>
                 <L><UnitsFusionExtras /></L>
@@ -616,6 +633,7 @@ export function SettingsContainer() {
                 <L><ChatProExtras /></L>
                 <L><ChatNextExtras /></L>
                 <L><ChatUltraExtras /></L>
+                <L><ChatMaxExtras /></L>
                 <L><ChatHyperExtras /></L>
                 <L><ChatQuantumExtras /></L>
                 <L><ChatFusionExtras /></L>
@@ -642,6 +660,7 @@ export function SettingsContainer() {
             <TabsContent value="enhanced" className="mt-0">
               <div className="space-y-6">
                 <L><EnhancedValidationExtras /></L>
+                <L><DeveloperMaxExtras /></L>
                 <L><DeveloperHyperExtras /></L>
                 <L><DeveloperQuantumExtras /></L>
                 <L><DeveloperFusionExtras /></L>
@@ -711,6 +730,7 @@ export function SettingsContainer() {
             <TabsContent value="data" className="mt-0">
               <div className="space-y-6">
                 <L><StorageLivePanel /></L>
+                <L><DataMaxExtras /></L>
                 <SettingsTransferPanel />
                 <L><DataBackupPanel /></L>
                 <L><DataExtras /></L>
@@ -771,6 +791,7 @@ export function SettingsContainer() {
             <TabsContent value="about" className="mt-0">
               <div className="space-y-6">
                 <L><AboutPage /></L>
+                <L><AboutMaxExtras /></L>
                 <L><AboutExtras /></L>
                 <L><AboutProExtras /></L>
                 <L><AboutUltraExtras /></L>

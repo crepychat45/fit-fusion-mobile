@@ -1,6 +1,6 @@
 // Single source of truth for app version + changelog
-export const APP_VERSION = "8.4.0";
-export const APP_RELEASE_DATE = "2026-10-05";
+export const APP_VERSION = "8.5.0";
+export const APP_RELEASE_DATE = "2026-10-08";
 
 
 
@@ -25,6 +25,30 @@ export interface ReleaseNote {
 }
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "8.5.0",
+    date: "2026-10-08",
+    type: "Major Release",
+    highlight: "New tools in every Settings tab and the latest phone-app packages.",
+    sections: [
+      { title: "New Features", icon: "sparkles", items: [
+        "Account details and copy-ID for support",
+        "Session key countdown with renew",
+        "Text size slider and screen rotation lock",
+        "Blur screen when leaving the app and clear clipboard",
+        "Quick one-off reminders (fire even when the phone app is closed)",
+        "Unit converter for weight, length, distance, energy and temperature",
+        "Saved chat quick replies",
+        "Device storage breakdown with per-item clear",
+        "Native capability inspector, share app and open website",
+      ] },
+      { title: "Improvements", icon: "zap", items: [
+        "Phone app updated to the latest Capacitor 8 packages with Share, Clipboard, Browser and Screen Orientation",
+        "New Settings tools load only when opened",
+        "Service worker cache refreshed for 8.5.0",
+      ] },
+    ],
+  },
   {
     version: "8.4.0",
     date: "2026-10-05",

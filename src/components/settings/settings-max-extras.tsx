@@ -175,10 +175,10 @@ export function PrivacyMaxExtras() {
   const [s, set] = usePersisted("fitfusion-max-privacy", { blurOnLeave: false });
   useEffect(() => {
     if (!s.blurOnLeave) return;
-    const onVis = () => document.body.classList.toggle("ff-privacy-blur", document.hidden);
+    const onVis = () => document.documentElement.classList.toggle("ff-privacy-blur", document.hidden);
     document.addEventListener("visibilitychange", onVis);
-    window.addEventListener("blur", () => document.body.classList.add("ff-privacy-blur"));
-    const unblur = () => document.body.classList.remove("ff-privacy-blur");
+    window.addEventListener("blur", () => document.documentElement.classList.add("ff-privacy-blur"));
+    const unblur = () => document.documentElement.classList.remove("ff-privacy-blur");
     window.addEventListener("focus", unblur);
     return () => { document.removeEventListener("visibilitychange", onVis); window.removeEventListener("focus", unblur); unblur(); };
   }, [s.blurOnLeave]);
