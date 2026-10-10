@@ -139,6 +139,8 @@ self.addEventListener("fetch", (event) => {
 
   // Never touch OAuth callbacks or auth endpoints
   if (url.pathname.startsWith("/~oauth") || url.pathname.startsWith("/auth/")) return;
+  // Version manifest must always come from the network so update checks are truthful
+  if (url.pathname === "/version.json") return;
 
   if (request.mode === "navigate") {
     event.respondWith(networkFirstNav(request));

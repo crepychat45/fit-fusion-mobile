@@ -1,4 +1,5 @@
 import { WorkoutsToolkit } from "@/components/extras/page-toolkits";
+import { BreathingCoach } from "@/components/extras/daily-toolkit";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MainLayout } from "@/components/layout/main-layout";
@@ -448,6 +449,7 @@ const Workouts = () => {
         </Dialog>
 
         <WorkoutsToolkit />
+        <div className="mt-4"><BreathingCoach /></div>
         <MobileNav />
       </div>
     </MainLayout>

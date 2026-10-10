@@ -21,6 +21,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 // Lazy-load each panel — only the active tab loads, making Settings open fast.
+const LiveUpdatePanel = lazy(() => import("./live-update-panel").then(m => ({ default: m.LiveUpdatePanel })));
 const MaxX = (n: string) => lazy(() => import("./settings-max-extras").then((m) => ({ default: (m as unknown as Record<string, React.ComponentType>)[n] })));
 const AccountMaxExtras = MaxX("AccountMaxExtras");
 const SecurityMaxExtras = MaxX("SecurityMaxExtras");
@@ -644,6 +645,7 @@ export function SettingsContainer() {
 
             <TabsContent value="updates" className="mt-0">
               <div className="space-y-6">
+                <L><LiveUpdatePanel /></L>
                 <L><OneTapUpdateCenter /></L>
                 <L><UpdateHealthPanel /></L>
                 <L><VersionControlPanel /></L>

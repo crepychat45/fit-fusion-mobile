@@ -1,10 +1,20 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
+import fs from "fs";
 import { componentTagger } from "lovable-tagger";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
 
 // https://vitejs.dev/config/
+const BUILD_ID = `${Date.now().toString(36)}`;
+const APP_VER = JSON.parse(fs.readFileSync("./package.json", "utf8")).version;
+const versionJsonPlugin = () => ({
+  name: "fitx-version-json",
+  generateBundle(this: any) {
+    this.emitFile({ type: "asset", fileName: "version.json", source: JSON.stringify({ version: APP_VER, buildId: BUILD_ID, builtAt: new Date().toISOString() }) });
+  },
+});
+
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
@@ -14,7 +24,7 @@ export default defineConfig(({ mode }) => ({
       clientFiles: ["./src/main.tsx", "./src/App.tsx", "./src/pages/Index.tsx"],
     },
   },
-  plugins: [react(), mode === "development" && componentTagger(), mcpPlugin()].filter(
+  plugins: [react(), versionJsonPlugin(), mode === "development" && componentTagger(), mcpPlugin()].filter(
     Boolean,
   ),
   resolve: {
@@ -25,6 +35,7 @@ export default defineConfig(({ mode }) => ({
   },
   define: {
     global: "globalThis",
+    __BUILD_ID__: JSON.stringify(BUILD_ID),
   },
   optimizeDeps: {
     include: [
