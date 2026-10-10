@@ -12,6 +12,7 @@ import { Brain, Heart, TrendingUp, Shield, Sparkles, Dumbbell, Flame, Zap } from
 import { Button } from "@/components/ui/button";
 import { TodayActivityStrip } from "@/components/home/today-activity-strip";
 import { FitScoreCard } from "@/components/home/fit-score-card";
+import { HabitTracker, BreathingCoach } from "@/components/extras/daily-toolkit";
 
 const DailyTip = lazy(() => import("@/components/daily-tip").then((m) => ({ default: m.DailyTip })));
 const TodaysWorkout = lazy(() => import("@/components/dashboard/todays-workout").then((m) => ({ default: m.TodaysWorkout })));
@@ -97,6 +98,7 @@ const Index = () => {
         </motion.div>
 
         <div className="mt-4"><FitScoreCard /></div>
+        <div className="mt-4 grid gap-4 md:grid-cols-2"><HabitTracker /><BreathingCoach /></div>
         <div className="mt-4"><TodayActivityStrip /></div>
 
         <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-5 relative z-10 mt-4">

@@ -8,6 +8,7 @@ import { CommunityStats } from "@/components/community/community-stats";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, Trophy, Activity, Star, User } from "lucide-react";
 import { TransformationStories } from "@/components/community/transformation-stories";
+import { InviteFriendsCard } from "@/components/extras/daily-toolkit";
 
 export default function Community() {
   return (
@@ -20,6 +21,7 @@ export default function Community() {
           </p>
         </div>
 
+        <div className="mb-6"><InviteFriendsCard /></div>
         <Tabs defaultValue="feed" className="space-y-6">
           <TabsList className="grid w-full grid-cols-5 max-w-2xl">
             <TabsTrigger value="feed"><Activity className="h-4 w-4 mr-1" />Feed</TabsTrigger>
