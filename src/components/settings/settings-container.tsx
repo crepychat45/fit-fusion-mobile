@@ -181,9 +181,6 @@ export function SettingsContainer() {
   });
 
   const [isLoggedOut, setIsLoggedOut] = useState(false);
-  const [settingsValidated, setSettingsValidated] = useState(false);
-  const [validationProgress, setValidationProgress] = useState(0);
-  const [isValidating, setIsValidating] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isConnected, setIsConnected] = useState(true);
