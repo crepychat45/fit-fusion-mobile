@@ -1,7 +1,8 @@
 import { WorkoutsToolkit } from "@/components/extras/page-toolkits";
 import { BreathingCoach } from "@/components/extras/daily-toolkit";
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useWorkoutHistory } from "@/hooks/use-workout-history";
 import { MainLayout } from "@/components/layout/main-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,21 +36,21 @@ const Workouts = () => {
   const [filterDifficulty, setFilterDifficulty] = useState("all");
   const [sortBy, setSortBy] = useState("popular");
   const [previewWorkout, setPreviewWorkout] = useState<Workout | null>(null);
-  const [favoriteWorkouts, setFavoriteWorkouts] = useState<string[]>([]);
-  const [completedWorkouts, setCompletedWorkouts] = useState<string[]>([]);
+  const history = useWorkoutHistory();
+  const favoriteWorkouts = history.favorites;
+  const queue = history.queue;
+  const completedWorkouts = [...history.completedIds];
   const [equipment, setEquipment] = useState("all");
-  const [queue, setQueue] = useState<string[]>([]);
+  const [searchParams] = useSearchParams();
+  const [maxDuration, setMaxDuration] = useState<number | null>(null);
 
+  // ?quick=true (or mode=quick) shows short workouts ≤ 20 min.
   useEffect(() => {
-     try {
-       const saved = localStorage.getItem("workout-data");
-       if (!saved) return;
-       const data = JSON.parse(saved);
-       setFavoriteWorkouts(Array.isArray(data.favorites) ? data.favorites : []);
-       setCompletedWorkouts(Array.isArray(data.completed) ? data.completed : []);
-       setQueue(Array.isArray(data.queue) ? data.queue.slice(0, 12) : []);
-     } catch { /* Ignore unavailable or corrupt local data */ }
-  }, []);
+    if (searchParams.get("quick") === "true" || searchParams.get("mode") === "quick") {
+      setMaxDuration(20);
+      setSortBy("shortest");
+    }
+  }, [searchParams]);
 
   const filteredWorkouts = workouts
     .filter((w) => {
@@ -58,11 +59,13 @@ const Workouts = () => {
         w.title.toLowerCase().includes(q) ||
         w.description.toLowerCase().includes(q) ||
         (w.tags || []).some((t) => t.toLowerCase().includes(q)) ||
-        (w.equipment || []).some((t) => t.toLowerCase().includes(q));
+        (w.equipment || []).some((t) => t.toLowerCase().includes(q)) ||
+        (w.exercises || []).some((e: any) => e.name?.toLowerCase().includes(q) || (e.muscles || []).some((m: string) => m.toLowerCase().includes(q)));
       const matchesType = filterType === "all" || w.category === filterType;
-       const matchesDifficulty = filterDifficulty === "all" || w.level === filterDifficulty;
-        const matchesEquipment = equipment === "all" || (equipment === "none" ? !(w.equipment || []).length : (w.equipment || []).some((item) => item.toLowerCase().includes(equipment)));
-       return matchesSearch && matchesType && matchesDifficulty && matchesEquipment;
+      const matchesDifficulty = filterDifficulty === "all" || w.level === filterDifficulty;
+      const matchesEquipment = equipment === "all" || (equipment === "none" ? !(w.equipment || []).length : (w.equipment || []).some((item) => item.toLowerCase().includes(equipment)));
+      const matchesDuration = maxDuration == null || w.duration <= maxDuration;
+      return matchesSearch && matchesType && matchesDifficulty && matchesEquipment && matchesDuration;
     })
     .sort((a, b) => {
       switch (sortBy) {
@@ -82,19 +85,14 @@ const Workouts = () => {
     });
 
   const toggleFavorite = (id: string) => {
-    const newFavs = favoriteWorkouts.includes(id) ? favoriteWorkouts.filter((f) => f !== id) : [...favoriteWorkouts, id];
-    setFavoriteWorkouts(newFavs);
-    localStorage.setItem("workout-data", JSON.stringify({ favorites: newFavs, completed: completedWorkouts, queue }));
-    toast({ title: favoriteWorkouts.includes(id) ? "Removed from favorites" : "Added to favorites" });
+    const was = favoriteWorkouts.includes(id);
+    history.toggleFavorite(id);
+    toast({ title: was ? "Removed from favorites" : "Added to favorites" });
   };
 
-  const updateQueue = (next: string[]) => {
-    const capped = next.slice(0, 12);
-    setQueue(capped);
-    localStorage.setItem("workout-data", JSON.stringify({ favorites: favoriteWorkouts, completed: completedWorkouts, queue: capped }));
-  };
+  const updateQueue = (next: string[]) => history.setQueue(next);
 
-   const stats = { total: workouts.length, completed: completedWorkouts.length, favorites: favoriteWorkouts.length, streak: 0 };
+  const stats = { total: workouts.length, completed: history.stats.totalSessions, favorites: favoriteWorkouts.length, streak: history.stats.currentStreak };
 
   const fadeUp = { hidden: { y: 12, opacity: 0 }, visible: { y: 0, opacity: 1, transition: { duration: 0.4 } } };
 
