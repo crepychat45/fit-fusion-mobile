@@ -25,7 +25,6 @@ import { WorkoutCategories } from "@/components/workout/workout-categories";
 import { WorkoutVideoLab } from "@/components/workout/workout-video-lab";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { Workout } from "@/data/workouts";
-import { APP_VERSION } from "@/lib/app-version";
 
 const Workouts = () => {
   const { toast } = useToast();
@@ -112,14 +111,16 @@ const Workouts = () => {
                 </div>
                 <p className="text-primary-foreground/70 text-sm">AI-powered fitness routines</p>
               </div>
-              <Badge className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30">v{APP_VERSION}</Badge>
+              <Badge className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30">
+                {stats.streak > 0 ? `${stats.streak}-day streak` : "No streak yet"}
+              </Badge>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-4 gap-2">
               {[
                 { icon: Target, value: stats.total, label: "Available" },
-                { icon: Award, value: stats.completed, label: "Done" },
+                { icon: Award, value: stats.completed, label: "Sessions" },
                 { icon: Heart, value: stats.favorites, label: "Saved" },
                 { icon: ListPlus, value: queue.length, label: "Queued" },
               ].map((s, i) => (
