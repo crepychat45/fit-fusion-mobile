@@ -38,3 +38,14 @@
 - [x] New real tools in all Settings tabs
 - [x] Latest Capacitor packages + Share/Clipboard/Browser/Orientation
 - [x] Version 8.5.0 in package, app, service worker
+
+## Full audit pass 1 (2026-10-11)
+- [x] Removed floating version badge
+- [x] One workout history store (migrates old keys), no double counting
+- [x] Player: empty guard, last exercise counted, background-safe timer, resume, exit confirm, summary
+- [x] Workouts: real streak/sessions, quick=short workouts, exercise/muscle search
+- [x] Unit tests (vitest) for history and streaks
+- [ ] Settings 8-section redesign with search/reset
+- [ ] Progress/Home read from shared workout history
+- [ ] Custom builder, calendar, templates, PRs
+- [ ] Signed-in end-to-end testing
