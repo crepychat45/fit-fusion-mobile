@@ -274,55 +274,8 @@ export function SettingsContainer() {
     }
   };
 
-  const validateAllSettings = async () => {
-    if (isValidating) return;
-
-    setIsValidating(true);
-    setValidationProgress(0);
-
-    const validationSteps = [
-      "Checking account settings...",
-      "Validating security configuration...",
-      "Verifying display preferences...",
-      "Testing privacy settings...",
-      "Checking chat configuration...",
-      "Validating update settings...",
-      "Checking developer options...",
-      "Final verification...",
-    ];
-
-    try {
-      for (let i = 0; i < validationSteps.length; i++) {
-        setValidationProgress(((i + 1) / validationSteps.length) * 100);
-
-        // Simulate validation time
-        await new Promise((resolve) => setTimeout(resolve, 600));
-
-        toast({
-          title: validationSteps[i],
-          description: `Step ${i + 1} of ${validationSteps.length}`,
-        });
-      }
-
-      setSettingsValidated(true);
-
-      toast({
-        title: "🎉 Validation Complete",
-        description: "All settings have been validated successfully.",
-      });
-    } catch (error) {
-      console.error("Validation error:", error);
-      toast({
-        title: "❌ Validation Failed",
-        description: "Some settings could not be validated.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsValidating(false);
-    }
-  };
-
-  const handleAutoSave = async () => {
+  // Each settings panel saves itself; this only clears the pending-changes flag.
+  const handleAutoSave = () => {
     if (!isConnected) {
       toast({
         title: "⚠️ Offline",
@@ -331,25 +284,8 @@ export function SettingsContainer() {
       });
       return;
     }
-
-    try {
-      // Simulate saving settings
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      setHasUnsavedChanges(false);
-      setLastSaved(new Date());
-
-      toast({
-        title: "💾 Auto-saved",
-        description: "Your changes have been saved automatically.",
-      });
-    } catch (error) {
-      console.error("Auto-save error:", error);
-      toast({
-        title: "❌ Save Failed",
-        description: "Unable to save changes. Please try again.",
-        variant: "destructive",
-      });
-    }
+    setHasUnsavedChanges(false);
+    setLastSaved(new Date());
   };
 
   const handleManualSave = async () => {
