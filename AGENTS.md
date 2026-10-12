@@ -10,3 +10,4 @@
 - Send background push only through the `send-push` function (server-held keys); "self" for tests, "all" restricted to admin roles; delete expired endpoints on 404/410.
 - Mount exactly one SettingsProvider (`safe-settings-context`, in AppWrapper); never nest or add another settings provider, because duplicates caused conflicting state.
 - Read stored JSON through `safeJsonParse`/`readJson` from `src/lib/safe-storage.ts` and log through `src/lib/logger.ts`, so corrupted storage never crashes and production logs stay quiet and redacted.
+- Record workout sessions only via `src/lib/workout-history.ts` / `useWorkoutHistory`; it is the single source for completion, streaks and favorites/queue, preventing mismatched counts.
