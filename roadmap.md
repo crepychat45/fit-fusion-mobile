@@ -45,7 +45,7 @@
 - [x] Player: empty guard, last exercise counted, background-safe timer, resume, exit confirm, summary
 - [x] Workouts: real streak/sessions, quick=short workouts, exercise/muscle search
 - [x] Unit tests (vitest) for history and streaks
-- [ ] Settings 8-section redesign with search/reset
+- [x] Settings consolidation: merged Enhanced+Developer tabs, removed fake validation/auto-save, added search button, duplicate Data Center removed
 - [ ] Progress/Home read from shared workout history
 - [ ] Custom builder, calendar, templates, PRs
 - [ ] Signed-in end-to-end testing
