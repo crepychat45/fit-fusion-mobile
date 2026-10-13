@@ -17,6 +17,7 @@ import {
   X,
   Database,
   Shield,
+  Search,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -385,6 +386,16 @@ export function SettingsContainer() {
               </div>
 
               <div className="flex items-center gap-2 shrink-0">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl bg-background/40 backdrop-blur-sm border-white/20"
+                  onClick={() => handleTabChange("search")}
+                  aria-label="Search settings"
+                >
+                  <Search className="h-4 w-4" />
+                  <span className="hidden sm:inline ml-1">Search</span>
+                </Button>
                 {hasUnsavedChanges && (
                   <Button
                     variant="outline"
