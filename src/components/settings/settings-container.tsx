@@ -668,6 +668,17 @@ export function SettingsContainer() {
                 <L><AboutFusionExtras /></L>
                 <L><AboutNovaExtras /></L>
                 <L><AboutPrimeExtras /></L>
+                <L><DeveloperOptions /></L>
+                <L><DeveloperExtras /></L>
+                <L><DeveloperProExtras /></L>
+                <L><DeveloperUltraExtras /></L>
+                <L><DeveloperMaxExtras /></L>
+                <L><DeveloperHyperExtras /></L>
+                <L><DeveloperQuantumExtras /></L>
+                <L><DeveloperFusionExtras /></L>
+                <L><DeveloperNovaExtras /></L>
+                <L><DeveloperPrimeExtras /></L>
+                <L><PythonLabPanel /></L>
               </div>
             </TabsContent>
 
