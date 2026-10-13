@@ -17,6 +17,7 @@ import {
   X,
   Database,
   Shield,
+  Search,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -288,8 +289,8 @@ export function SettingsContainer() {
     setLastSaved(new Date());
   };
 
-  const handleManualSave = async () => {
-    await handleAutoSave();
+  const handleManualSave = () => {
+    handleAutoSave();
     toast({
       title: "✅ Settings Saved",
       description: "All your changes have been saved successfully.",
@@ -385,6 +386,16 @@ export function SettingsContainer() {
               </div>
 
               <div className="flex items-center gap-2 shrink-0">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl bg-background/40 backdrop-blur-sm border-white/20"
+                  onClick={() => handleTabChange("search")}
+                  aria-label="Search settings"
+                >
+                  <Search className="h-4 w-4" />
+                  <span className="hidden sm:inline ml-1">Search</span>
+                </Button>
                 {hasUnsavedChanges && (
                   <Button
                     variant="outline"
@@ -592,76 +603,6 @@ export function SettingsContainer() {
 
 
 
-            <TabsContent value="enhanced" className="mt-0">
-              <div className="space-y-6">
-                <L><EnhancedValidationExtras /></L>
-                <L><DeveloperMaxExtras /></L>
-                <L><DeveloperHyperExtras /></L>
-                <L><DeveloperQuantumExtras /></L>
-                <L><DeveloperFusionExtras /></L>
-                <L><DeveloperNovaExtras /></L>
-                <L><DeveloperPrimeExtras /></L>
-                <L><PerformanceMetricsPanel /></L>
-                <L><AdvancedSettingsReset /></L>
-                <L><SettingsBackupRestore /></L>
-                <L><DataManagementPanel /></L>
-
-
-                <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 p-6 rounded-lg border">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    Data Management Center
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-6">
-                    Manage your local data, account session, and export
-                    preferences with advanced controls
-                  </p>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Button
-                      variant="outline"
-                      className="w-full justify-between h-auto p-4"
-                      onClick={() => setConfirmClearOpen(true)}
-                    >
-                      <div className="text-left">
-                        <div className="font-medium">Clear Local Data</div>
-                        <div className="text-xs text-muted-foreground">
-                          Removes app data from this device
-                        </div>
-                      </div>
-                      <Database className="h-4 w-4" />
-                    </Button>
-
-                    <Button
-                      variant="destructive"
-                      className="w-full justify-between h-auto p-4 md:col-span-2"
-                      onClick={() => setConfirmLogoutOpen(true)}
-                    >
-                      <div className="text-left">
-                        <div className="font-medium">Log Out</div>
-                        <div className="text-xs">
-                          End your current session securely
-                        </div>
-                      </div>
-                      <Shield className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="developer" className="mt-0">
-              <div className="space-y-6">
-                <L><DeveloperOptions /></L>
-                <L><DeveloperExtras /></L>
-                <L><DeveloperProExtras /></L>
-                <L><DeveloperUltraExtras /></L>
-                <L><DeveloperQuantumExtras /></L>
-                <L><DeveloperFusionExtras /></L>
-                <L><DeveloperNovaExtras /></L>
-                <L><PythonLabPanel /></L>
-              </div>
-            </TabsContent>
-
             <TabsContent value="data" className="mt-0">
               <div className="space-y-6">
                 <L><StorageLivePanel /></L>
@@ -679,7 +620,11 @@ export function SettingsContainer() {
                 <L><NetworkRealtimePanel /></L>
                 <L><NetworkLabPanel /></L>
                 <L><SystemHealthPanel /></L>
-
+                <L><EnhancedValidationExtras /></L>
+                <L><PerformanceMetricsPanel /></L>
+                <L><AdvancedSettingsReset /></L>
+                <L><SettingsBackupRestore /></L>
+                <L><DataManagementPanel /></L>
 
                 <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 p-6 rounded-lg border">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -734,6 +679,17 @@ export function SettingsContainer() {
                 <L><AboutFusionExtras /></L>
                 <L><AboutNovaExtras /></L>
                 <L><AboutPrimeExtras /></L>
+                <L><DeveloperOptions /></L>
+                <L><DeveloperExtras /></L>
+                <L><DeveloperProExtras /></L>
+                <L><DeveloperUltraExtras /></L>
+                <L><DeveloperMaxExtras /></L>
+                <L><DeveloperHyperExtras /></L>
+                <L><DeveloperQuantumExtras /></L>
+                <L><DeveloperFusionExtras /></L>
+                <L><DeveloperNovaExtras /></L>
+                <L><DeveloperPrimeExtras /></L>
+                <L><PythonLabPanel /></L>
               </div>
             </TabsContent>
 

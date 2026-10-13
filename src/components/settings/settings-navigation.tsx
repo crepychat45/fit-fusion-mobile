@@ -20,8 +20,6 @@ import {
   Globe,
   Zap,
   Database,
-  Code,
-  Heart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -99,36 +97,20 @@ const settingsCategories = [
     description: "App updates and version management",
   },
   {
-    id: "enhanced",
-    title: "Enhanced Validation",
-    icon: Heart,
-    color: "text-pink-500",
-    bgColor: "bg-pink-50",
-    description: "Advanced settings validation",
-  },
-  {
-    id: "developer",
-    title: "Developer",
-    icon: Code,
-    color: "text-gray-500",
-    bgColor: "bg-gray-50",
-    description: "Developer tools and debugging options",
-  },
-  {
     id: "data",
-    title: "Data Management",
+    title: "Data & Advanced",
     icon: Database,
     color: "text-cyan-500",
     bgColor: "bg-cyan-50",
-    description: "Manage your data and logout options",
+    description: "Storage, backup, reset and advanced tools",
   },
   {
     id: "about",
-    title: "About",
+    title: "About & Developer",
     icon: Info,
     color: "text-yellow-500",
     bgColor: "bg-yellow-50",
-    description: "App information and version details",
+    description: "App info, version details and developer tools",
   },
 ];
 
