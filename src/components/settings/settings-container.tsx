@@ -288,8 +288,8 @@ export function SettingsContainer() {
     setLastSaved(new Date());
   };
 
-  const handleManualSave = async () => {
-    await handleAutoSave();
+  const handleManualSave = () => {
+    handleAutoSave();
     toast({
       title: "✅ Settings Saved",
       description: "All your changes have been saved successfully.",
