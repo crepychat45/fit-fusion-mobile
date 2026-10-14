@@ -402,4 +402,7 @@ const baseWorkouts: Workout[] = [
   },
 ];
 
-export const workouts: Workout[] = [...baseWorkouts, ...extraWorkouts];
+import { getCustomWorkouts } from "@/lib/custom-workouts";
+
+/** Built-in library plus the user's custom workouts (custom first). */
+export const workouts: Workout[] = [...getCustomWorkouts(), ...baseWorkouts, ...extraWorkouts];
