@@ -15,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, Filter, Zap, Clock, Target, TrendingUp, Calendar, Star,
-  PlayCircle, Heart, Share2, Award, Flame, Brain, Video, Sparkles, Dumbbell, ListPlus, X,
+  PlayCircle, Heart, Share2, Award, Flame, Brain, Video, Sparkles, Dumbbell, ListPlus, X, Plus,
 } from "lucide-react";
 import { getAllWorkouts } from "@/data/workouts";
 import { AIWorkoutVideos } from "@/components/workout/ai-workout-videos";
@@ -112,9 +112,18 @@ const Workouts = () => {
                 </div>
                 <p className="text-primary-foreground/70 text-sm">AI-powered fitness routines</p>
               </div>
-              <Badge className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30">
-                {stats.streak > 0 ? `${stats.streak}-day streak` : "No streak yet"}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  onClick={() => navigate("/create-workout")}
+                  className="bg-primary-foreground/20 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/30 rounded-xl h-8"
+                >
+                  <Plus className="h-4 w-4 mr-1" />Create
+                </Button>
+                <Badge className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30">
+                  {stats.streak > 0 ? `${stats.streak}-day streak` : "No streak yet"}
+                </Badge>
+              </div>
             </div>
 
             {/* Stats */}
