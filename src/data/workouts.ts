@@ -402,4 +402,12 @@ const baseWorkouts: Workout[] = [
   },
 ];
 
-export const workouts: Workout[] = [...baseWorkouts, ...extraWorkouts];
+import { getCustomWorkouts } from "@/lib/custom-workouts";
+
+/** Built-in library plus the user's custom workouts (custom first). Recomputed each call so newly saved customs appear immediately. */
+export function getAllWorkouts(): Workout[] {
+  return [...getCustomWorkouts(), ...baseWorkouts, ...extraWorkouts];
+}
+
+/** @deprecated Static snapshot — prefer getAllWorkouts() so custom workouts appear without reload. */
+export const workouts: Workout[] = getAllWorkouts();

@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { Dumbbell, Heart, Wind, Flame, Trophy, Timer } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { workouts } from "@/data/workouts";
+import { getAllWorkouts } from "@/data/workouts";
 
 const CATEGORIES = [
   { key: "strength", label: "Strength", icon: Dumbbell, color: "from-blue-500 to-indigo-600" },
@@ -17,7 +17,7 @@ export function WorkoutCategories({ onSelect }: { onSelect?: (cat: string) => vo
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
       {CATEGORIES.map((c, i) => {
-        const count = workouts.filter((w) => w.category === c.key).length;
+        const count = getAllWorkouts().filter((w) => w.category === c.key).length;
         return (
           <motion.button
             key={c.key}

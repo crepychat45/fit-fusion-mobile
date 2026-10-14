@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, PlayCircle, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { workouts } from "@/data/workouts";
+import { getAllWorkouts } from "@/data/workouts";
 import { workoutVideos } from "@/data/workout-videos";
 import { WorkoutVideo } from "@/components/workout-video";
 import {
@@ -22,7 +22,7 @@ const ExerciseDetail = () => {
   const navigate = useNavigate();
   const [showVideo, setShowVideo] = useState(false);
 
-  const workout = workouts.find((w) => w.id === workoutId);
+  const workout = getAllWorkouts().find((w) => w.id === workoutId);
   const exercise = workout?.exercises.find((e) => e.id === exerciseId);
   const exerciseVideo = workoutVideos.find((v) => v.exerciseId === exerciseId);
 

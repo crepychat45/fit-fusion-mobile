@@ -15,9 +15,9 @@ import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, Filter, Zap, Clock, Target, TrendingUp, Calendar, Star,
-  PlayCircle, Heart, Share2, Award, Flame, Brain, Video, Sparkles, Dumbbell, ListPlus, X,
+  PlayCircle, Heart, Share2, Award, Flame, Brain, Video, Sparkles, Dumbbell, ListPlus, X, Plus,
 } from "lucide-react";
-import { workouts } from "@/data/workouts";
+import { getAllWorkouts } from "@/data/workouts";
 import { AIWorkoutVideos } from "@/components/workout/ai-workout-videos";
 import { AIWorkoutBuilder } from "@/components/features/ai-workout-builder";
 import { RecoveryFocusWidget } from "@/components/workout/recovery-focus-widget";
@@ -51,7 +51,8 @@ const Workouts = () => {
     }
   }, [searchParams]);
 
-  const filteredWorkouts = workouts
+  const allWorkouts = getAllWorkouts();
+  const filteredWorkouts = allWorkouts
     .filter((w) => {
       const q = searchQuery.toLowerCase();
       const matchesSearch =
@@ -91,7 +92,7 @@ const Workouts = () => {
 
   const updateQueue = (next: string[]) => history.setQueue(next);
 
-  const stats = { total: workouts.length, completed: history.stats.totalSessions, favorites: favoriteWorkouts.length, streak: history.stats.currentStreak };
+  const stats = { total: allWorkouts.length, completed: history.stats.totalSessions, favorites: favoriteWorkouts.length, streak: history.stats.currentStreak };
 
   const fadeUp = { hidden: { y: 12, opacity: 0 }, visible: { y: 0, opacity: 1, transition: { duration: 0.4 } } };
 
@@ -111,9 +112,18 @@ const Workouts = () => {
                 </div>
                 <p className="text-primary-foreground/70 text-sm">AI-powered fitness routines</p>
               </div>
-              <Badge className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30">
-                {stats.streak > 0 ? `${stats.streak}-day streak` : "No streak yet"}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  onClick={() => navigate("/create-workout")}
+                  className="bg-primary-foreground/20 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/30 rounded-xl h-8"
+                >
+                  <Plus className="h-4 w-4 mr-1" />Create
+                </Button>
+                <Badge className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30">
+                  {stats.streak > 0 ? `${stats.streak}-day streak` : "No streak yet"}
+                </Badge>
+              </div>
             </div>
 
             {/* Stats */}
@@ -212,7 +222,7 @@ const Workouts = () => {
                 <div className="mb-2 flex items-center gap-2 text-sm font-semibold"><ListPlus className="h-4 w-4 text-primary" />Workout queue <Badge variant="secondary">{queue.length}</Badge></div>
                 <div className="flex gap-2 overflow-x-auto">
                   {queue.map((id) => {
-                    const queued = workouts.find((item) => item.id === id);
+                    const queued = allWorkouts.find((item) => item.id === id);
                     if (!queued) return null;
                      return <div key={id} className="flex shrink-0 items-center gap-2 rounded-lg bg-muted/40 px-3 py-2 text-xs"><Button variant="link" size="sm" onClick={() => navigate(`/workout-detail/${id}`)} className="h-7 px-0 font-medium">{queued.title}</Button><Button variant="ghost" size="icon" className="h-7 w-7" aria-label={`Remove ${queued.title} from queue`} onClick={() => updateQueue(queue.filter((item) => item !== id))}><X className="h-3 w-3" /></Button></div>;
                   })}
@@ -313,7 +323,7 @@ const Workouts = () => {
                     </CardHeader>
                   </Card>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {workouts.filter((w) => w.level === "beginner").slice(0, 2).map((w, i) => (
+                    {allWorkouts.filter((w) => w.level === "beginner").slice(0, 2).map((w, i) => (
                       <motion.div key={w.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
                         <Card className="border-primary/20 bg-card/60 backdrop-blur-sm hover:shadow-lg transition-all">
                           <CardHeader className="pb-2">
@@ -347,7 +357,7 @@ const Workouts = () => {
                        <CardDescription>Choose a session to view exercises and get started</CardDescription>
                     </CardHeader>
                   </Card>
-                  {workouts.filter((w) => w.level === "intermediate").slice(0, 2).map((p, i) => (
+                  {allWorkouts.filter((w) => w.level === "intermediate").slice(0, 2).map((p, i) => (
                     <motion.div key={p.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
                       <Card className="border-border/20 bg-card/60 backdrop-blur-sm hover:shadow-lg transition-all">
                         <CardHeader className="pb-2">
@@ -380,7 +390,7 @@ const Workouts = () => {
                     </Card>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {workouts.filter((w) => favoriteWorkouts.includes(w.id)).map((workout, i) => (
+                      {allWorkouts.filter((w) => favoriteWorkouts.includes(w.id)).map((workout, i) => (
                         <motion.div key={workout.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
                           <Card className="border-border/20 bg-card/60 backdrop-blur-sm hover:shadow-lg transition-all">
                             <CardHeader className="pb-2">
