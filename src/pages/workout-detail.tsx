@@ -12,7 +12,7 @@ import {
   Settings,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { workouts } from "@/data/workouts";
+import { getAllWorkouts } from "@/data/workouts";
 import { WorkoutVideo } from "@/components/workout-video";
 import { WorkoutTimer } from "@/components/workout-timer";
 import { getWorkoutVideo, getExerciseVideo } from "@/data/workout-videos";
@@ -41,7 +41,7 @@ const WorkoutDetail = () => {
   const [showCustomizer, setShowCustomizer] = useState(false);
   const [workoutCustomization, setWorkoutCustomization] = useState<any>(null);
 
-  const workout = workouts.find((w) => w.id === id);
+  const workout = getAllWorkouts().find((w) => w.id === id);
 
   if (!workout) {
     return (
