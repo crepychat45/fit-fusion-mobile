@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { EnhancedWorkoutPlayer, type PlayerResult } from "@/components/workout/enhanced-workout-player";
-import { workouts } from "@/data/workouts";
+import { getAllWorkouts } from "@/data/workouts";
 import { useToast } from "@/hooks/use-toast";
 import { addSession } from "@/lib/workout-history";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,7 +18,7 @@ export default function WorkoutSession() {
   const [confirmExit, setConfirmExit] = useState(false);
   const [summary, setSummary] = useState<PlayerResult | null>(null);
 
-  const workout = workouts.find((w) => w.id === id);
+  const workout = getAllWorkouts().find((w) => w.id === id);
 
   if (!workout) {
     return (
