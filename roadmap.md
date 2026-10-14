@@ -49,3 +49,4 @@
 - [ ] Progress/Home read from shared workout history
 - [ ] Custom builder, calendar, templates, PRs
 - [ ] Signed-in end-to-end testing
+- [x] Progress page reads real workout history (charts, streaks, goals, achievements from useWorkoutHistory); Home already uses useLiveHealth
