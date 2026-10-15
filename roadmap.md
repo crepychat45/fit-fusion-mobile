@@ -51,3 +51,4 @@
 - [ ] Signed-in end-to-end testing
 - [x] Progress page reads real workout history (charts, streaks, goals, achievements from useWorkoutHistory); Home already uses useLiveHealth
 - [x] Custom workout builder at /create-workout (save to device, plays in player, appears in library)
+- [x] Workout calendar at /schedule (month grid, schedule any workout with optional time, completed-day dots, upcoming list, start from calendar)
