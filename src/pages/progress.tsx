@@ -58,6 +58,31 @@ const ProgressPage = () => {
   const avgMinutes = stats.totalSessions ? Math.round(stats.totalMinutes / stats.totalSessions) : 0;
   const weeklyProgress = Math.min(100, Math.round((stats.thisWeek / Math.max(1, weeklyGoal)) * 100));
 
+  // Personal records computed from recorded sessions only.
+  const records = useMemo(() => {
+    if (done.length === 0) return null;
+    let longestSessionMin = 0;
+    const perDay = new Map<string, number>();
+    const perWeek = new Map<string, number>();
+    for (const s of done) {
+      const d = new Date(s.completedAt);
+      const mins = s.durationSec / 60;
+      longestSessionMin = Math.max(longestSessionMin, mins);
+      const dayKey = d.toISOString().split("T")[0];
+      perDay.set(dayKey, (perDay.get(dayKey) ?? 0) + mins);
+      const weekStart = new Date(d);
+      weekStart.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+      const weekKey = weekStart.toISOString().split("T")[0];
+      perWeek.set(weekKey, (perWeek.get(weekKey) ?? 0) + 1);
+    }
+    return {
+      longestSessionMin: Math.round(longestSessionMin),
+      bestDayMin: Math.round(Math.max(...perDay.values())),
+      bestWeekCount: Math.max(...perWeek.values()),
+      longestStreak: stats.longestStreak,
+    };
+  }, [done, stats.longestStreak]);
+
   // Achievements unlocked by real recorded stats only.
   const achievements = useMemo(() => [
     { id: 1, title: "First Steps", description: "Complete your first workout", icon: "🎯", progress: Math.min(100, stats.totalSessions * 100) },
@@ -226,6 +251,33 @@ const ProgressPage = () => {
                     </CardContent>
                   </Card>
                 </div>
+
+                {records && (
+                  <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center gap-2 text-base"><Trophy className="h-4 w-4" />Personal Records</CardTitle>
+                      <CardDescription className="text-xs">Your best marks from recorded sessions.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-2 gap-3">
+                      <div className="rounded-xl border border-border/30 p-3">
+                        <p className="text-xl font-bold">{records.longestSessionMin}m</p>
+                        <p className="text-xs text-muted-foreground">Longest session</p>
+                      </div>
+                      <div className="rounded-xl border border-border/30 p-3">
+                        <p className="text-xl font-bold">{records.bestDayMin}m</p>
+                        <p className="text-xs text-muted-foreground">Most in one day</p>
+                      </div>
+                      <div className="rounded-xl border border-border/30 p-3">
+                        <p className="text-xl font-bold">{records.bestWeekCount}</p>
+                        <p className="text-xs text-muted-foreground">Best week (workouts)</p>
+                      </div>
+                      <div className="rounded-xl border border-border/30 p-3">
+                        <p className="text-xl font-bold">{records.longestStreak}d</p>
+                        <p className="text-xs text-muted-foreground">Longest streak</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </TabsContent>
 
               <TabsContent value="analytics" className="space-y-4 mt-0">
