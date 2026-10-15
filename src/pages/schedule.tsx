@@ -19,7 +19,7 @@ import {
   removeFromSchedule,
   SCHEDULE_EVENT,
 } from "@/lib/schedule";
-import { useWorkoutHistory } from "@/lib/workout-history";
+import { useWorkoutHistory } from "@/hooks/use-workout-history";
 import { useEffect } from "react";
 import { toast } from "sonner";
 

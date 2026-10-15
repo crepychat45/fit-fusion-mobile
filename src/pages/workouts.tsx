@@ -115,9 +115,16 @@ const Workouts = () => {
               <div className="flex items-center gap-2">
                 <Button
                   size="sm"
+                  onClick={() => navigate("/schedule")}
+                  className="bg-primary-foreground/20 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/30 rounded-xl h-8"
+                 >
+                  <Calendar className="h-4 w-4 mr-1" />Calendar
+                </Button>
+                <Button
+                  size="sm"
                   onClick={() => navigate("/create-workout")}
                   className="bg-primary-foreground/20 text-primary-foreground border border-primary-foreground/30 hover:bg-primary-foreground/30 rounded-xl h-8"
-                >
+                 >
                   <Plus className="h-4 w-4 mr-1" />Create
                 </Button>
                 <Badge className="bg-primary-foreground/20 text-primary-foreground border-primary-foreground/30">

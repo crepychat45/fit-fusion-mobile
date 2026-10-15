@@ -76,6 +76,7 @@ const Workouts = lazyWithRetry(() => import("./pages/workouts"));
 const WorkoutDetail = lazyWithRetry(() => import("./pages/workout-detail"));
 const WorkoutPlans = lazyWithRetry(() => import("./pages/workout-plans"));
 const CreateWorkout = lazyWithRetry(() => import("./pages/create-workout"));
+const SchedulePage = lazyWithRetry(() => import("./pages/schedule"));
 const WorkoutSession = lazyWithRetry(() => import("./pages/workout-session"));
 const Community = lazyWithRetry(() => import("./pages/community"));
 const ExerciseDetail = lazyWithRetry(() => import("./pages/exercise-detail"));
@@ -161,6 +162,7 @@ const AppContent: React.FC = () => {
           <Route path="/workouts" element={<ProtectedRoute><P><Workouts /></P></ProtectedRoute>} />
           <Route path="/workout-plans" element={<ProtectedRoute><P><WorkoutPlans /></P></ProtectedRoute>} />
           <Route path="/create-workout" element={<ProtectedRoute><P><CreateWorkout /></P></ProtectedRoute>} />
+          <Route path="/schedule" element={<ProtectedRoute><P><SchedulePage /></P></ProtectedRoute>} />
           <Route path="/workout-detail/:id" element={<ProtectedRoute><P><WorkoutDetail /></P></ProtectedRoute>} />
           <Route path="/workout-session/:id" element={<ProtectedRoute><P><WorkoutSession /></P></ProtectedRoute>} />
           <Route path="/community" element={<ProtectedRoute><P><Community /></P></ProtectedRoute>} />
