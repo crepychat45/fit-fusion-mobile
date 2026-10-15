@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import { ChevronLeft, Plus, Trash2, ArrowUp, ArrowDown, Save, Dumbbell, Play } from "lucide-react";
 import { getAllWorkouts, type Exercise, type Workout } from "@/data/workouts";
 import { saveCustomWorkout } from "@/lib/custom-workouts";
+import { WORKOUT_TEMPLATES, type WorkoutTemplate } from "@/lib/workout-templates";
 
 interface DraftExercise extends Exercise {
   key: string;
@@ -50,6 +51,15 @@ export default function CreateWorkout() {
     const secs = exercises.reduce((a, e) => a + e.sets * (e.duration ? e.duration + 20 : 45), 0);
     return Math.max(1, Math.round(secs / 60));
   }, [exercises]);
+
+  const applyTemplate = (tpl: WorkoutTemplate) => {
+    setTitle(tpl.name);
+    setDescription(tpl.description);
+    setCategory(tpl.category);
+    setLevel(tpl.level);
+    setExercises(tpl.exercises.map((e) => ({ ...e, key: nextKey() })));
+    toast({ title: "Template loaded", description: `"${tpl.name}" is ready to edit below.` });
+  };
 
   const addFromPool = () => {
     const e = pool.find((p) => p.name === poolPick);
@@ -127,6 +137,29 @@ export default function CreateWorkout() {
       </div>
 
       <div className="px-4 py-5 space-y-4 max-w-2xl mx-auto">
+        <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Start from a template</CardTitle>
+            <CardDescription className="text-xs">Loads a ready-made routine you can edit before saving.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {WORKOUT_TEMPLATES.map((tpl) => (
+              <button
+                key={tpl.id}
+                onClick={() => applyTemplate(tpl)}
+                className="rounded-xl border border-border/30 p-3 text-left hover:bg-muted/50 transition-colors"
+              >
+                <p className="text-sm font-semibold">{tpl.name}</p>
+                <p className="text-xs text-muted-foreground line-clamp-2">{tpl.description}</p>
+                <div className="mt-1.5 flex gap-1">
+                  <Badge variant="secondary" className="text-[10px] capitalize">{tpl.category}</Badge>
+                  <Badge variant="outline" className="text-[10px] capitalize">{tpl.level}</Badge>
+                </div>
+              </button>
+            ))}
+          </CardContent>
+        </Card>
+
         <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">Basics</CardTitle>
