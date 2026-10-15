@@ -53,3 +53,4 @@
 - [x] Custom workout builder at /create-workout (save to device, plays in player, appears in library)
 - [x] Workout calendar at /schedule (month grid, schedule any workout with optional time, completed-day dots, upcoming list, start from calendar)
 - [x] Workout templates in the builder (4 built-in starting points) and real Personal Records card on Progress (longest session, best day, best week, longest streak from recorded sessions)
+- [x] Signed-in browser verification: template → save → library (toast + count), calendar page, progress page; no page errors
