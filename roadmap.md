@@ -54,3 +54,9 @@
 - [x] Workout calendar at /schedule (month grid, schedule any workout with optional time, completed-day dots, upcoming list, start from calendar)
 - [x] Workout templates in the builder (4 built-in starting points) and real Personal Records card on Progress (longest session, best day, best week, longest streak from recorded sessions)
 - [x] Signed-in browser verification: template → save → library (toast + count), calendar page, progress page; no page errors
+
+## Security audit pass (2026-10-17)
+- [x] Revoked anon/authenticated EXECUTE on email-queue functions (enqueue/delete/read_batch/move_to_dlq/dispatch/wake)
+- [x] Reviewed public-read findings: feature_flags, feature_switches, site_content, exercises, posts, post_comments, post_likes — intentional public/community data, writes restricted
+- [x] Remaining linter warns (is_admin*, search_chat_contacts, shares_chat_thread) are required by RLS policies and chat — boolean-only, false positive
+- [ ] Performance pass (bundle analysis, lazy loading review)
