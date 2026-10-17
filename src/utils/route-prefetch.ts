@@ -28,6 +28,10 @@ export function prefetchRoute(path: string) {
 }
 
 export function prefetchAllRoutes() {
+  // Skip pre-warming on metered/slow connections — the user pays for
+  // every byte, and idle prefetch of 4 route chunks can cost ~1 MB.
+  const conn = (navigator as any).connection;
+  if (conn?.saveData || conn?.effectiveType === "2g" || conn?.effectiveType === "slow-2g") return;
   const idle =
     (window as any).requestIdleCallback ||
     ((cb: any, opts?: { timeout?: number }) => window.setTimeout(cb, opts?.timeout ?? 3000));
