@@ -59,4 +59,4 @@
 - [x] Revoked anon/authenticated EXECUTE on email-queue functions (enqueue/delete/read_batch/move_to_dlq/dispatch/wake)
 - [x] Reviewed public-read findings: feature_flags, feature_switches, site_content, exercises, posts, post_comments, post_likes — intentional public/community data, writes restricted
 - [x] Remaining linter warns (is_admin*, search_chat_contacts, shares_chat_thread) are required by RLS policies and chat — boolean-only, false positive
-- [ ] Performance pass (bundle analysis, lazy loading review)
+- [x] Performance pass (2026-10-17): lazy-loaded EnhancedChatSettings (was 204KB static in chat page, now 12KB on-demand); route prefetch skipped on saveData/2G connections; confirmed all routes lazy, export libs (jspdf/xlsx) already dynamic; build verified
