@@ -23,7 +23,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { LoadingSpinner } from "@/components/common/loading-spinner";
 import { AdvancedChatInterface } from "@/components/chat/advanced-chat-interface";
 import { MobileChatInterface } from "@/components/chat/mobile-chat-interface";
-import { EnhancedChatSettings } from "@/components/chat/enhanced-chat-settings";
+const EnhancedChatSettings = React.lazy(() =>
+  import("@/components/chat/enhanced-chat-settings").then((m) => ({ default: m.EnhancedChatSettings }))
+);
 import { ChatSecurity } from "@/components/chat/chat-security";
 import { ChatNotifications } from "@/components/chat/chat-notifications";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -485,9 +487,11 @@ const ChatPage = () => {
 
                             <div className="mt-4 max-h-[calc(100dvh-9rem)] space-y-4 overflow-y-auto pr-1 custom-scrollbar">
                               <TabsContent value="settings">
-                                <EnhancedChatSettings
-                                  onClose={() => setShowMobileMenu(false)}
-                                />
+                                <React.Suspense fallback={<LoadingSpinner />}>
+                                  <EnhancedChatSettings
+                                    onClose={() => setShowMobileMenu(false)}
+                                  />
+                                </React.Suspense>
                               </TabsContent>
 
                               <TabsContent value="security">
@@ -689,9 +693,11 @@ const ChatPage = () => {
 
               <div className="mt-4 min-h-0 flex-1 overflow-y-auto pr-1 custom-scrollbar">
                 <TabsContent value="settings" className="h-full">
-                  <EnhancedChatSettings
-                    onClose={() => setShowSettings(false)}
-                  />
+                  <React.Suspense fallback={<LoadingSpinner />}>
+                    <EnhancedChatSettings
+                      onClose={() => setShowSettings(false)}
+                    />
+                  </React.Suspense>
                 </TabsContent>
 
                 <TabsContent value="security" className="h-full">
