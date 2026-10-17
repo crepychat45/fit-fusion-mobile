@@ -23,7 +23,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { LoadingSpinner } from "@/components/common/loading-spinner";
 import { AdvancedChatInterface } from "@/components/chat/advanced-chat-interface";
 import { MobileChatInterface } from "@/components/chat/mobile-chat-interface";
-import { EnhancedChatSettings } from "@/components/chat/enhanced-chat-settings";
+const EnhancedChatSettings = React.lazy(() =>
+  import("@/components/chat/enhanced-chat-settings").then((m) => ({ default: m.EnhancedChatSettings }))
+);
 import { ChatSecurity } from "@/components/chat/chat-security";
 import { ChatNotifications } from "@/components/chat/chat-notifications";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
