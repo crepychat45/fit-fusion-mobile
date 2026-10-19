@@ -11,7 +11,7 @@ const mk = (id: string, title = "My Workout"): Workout => ({
   duration: 20,
   exercises: [{ id: "e1", name: "Push-up", sets: 3, reps: 10, instructions: "", muscles: ["chest"] }],
   popularity: 0,
-  createdAt: new Date().toISOString(),
+  createdAt: Date.now(),
 });
 
 describe("custom workouts", () => {
