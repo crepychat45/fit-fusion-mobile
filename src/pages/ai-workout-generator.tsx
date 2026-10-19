@@ -86,7 +86,7 @@ const AIWorkoutGenerator: React.FC = () => {
       duration: w.duration_minutes,
       exercises: [...(w.warmup ?? []), ...(w.exercises ?? []), ...(w.cooldown ?? [])].map(toEx),
       popularity: 0,
-      createdAt: new Date().toISOString(),
+      createdAt: Date.now(),
       calories: w.estimated_calories,
       equipment: [equipment],
       tags: ["ai", "custom"],
