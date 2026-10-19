@@ -1,6 +1,10 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
+import { saveCustomWorkout } from "@/lib/custom-workouts";
+import { useToast } from "@/hooks/use-toast";
+import type { Workout as LibraryWorkout, Exercise as LibraryExercise } from "@/data/workouts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
