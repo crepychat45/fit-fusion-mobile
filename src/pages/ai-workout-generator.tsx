@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sparkles, Dumbbell, Timer, Flame, Loader2, ArrowRight } from "lucide-react";
+import { Sparkles, Dumbbell, Timer, Flame, Loader2, ArrowRight, Save, Play } from "lucide-react";
 
 type Exercise = {
   name: string;
@@ -64,6 +64,45 @@ const AIWorkoutGenerator: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [workout, setWorkout] = useState<Workout | null>(null);
+  const { user } = useEnhancedAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const toLibraryWorkout = (w: Workout): LibraryWorkout => {
+    const toEx = (ex: Exercise, i: number): LibraryExercise => ({
+      id: `ai-ex-${i}`,
+      name: ex.name,
+      sets: ex.sets ?? 1,
+      reps: typeof ex.reps === "string" ? parseInt(ex.reps, 10) || 0 : (ex.reps ?? 0),
+      instructions: ex.instructions ?? "",
+      muscles: ex.muscle_groups ?? [],
+    });
+    return {
+      id: `ai-${Date.now()}`,
+      title: w.name,
+      description: w.summary,
+      category: "strength",
+      level: (["beginner", "intermediate", "advanced"].includes(w.difficulty) ? w.difficulty : "beginner") as LibraryWorkout["level"],
+      duration: w.duration_minutes,
+      exercises: [...(w.warmup ?? []), ...(w.exercises ?? []), ...(w.cooldown ?? [])].map(toEx),
+      popularity: 0,
+      createdAt: new Date().toISOString(),
+      calories: w.estimated_calories,
+      equipment: [equipment],
+      tags: ["ai", "custom"],
+    };
+  };
+
+  const saveToLibrary = (startAfter: boolean) => {
+    if (!workout) return;
+    const lib = toLibraryWorkout(workout);
+    if (!saveCustomWorkout(lib)) {
+      toast({ title: "Could not save", description: "Your device storage is unavailable.", variant: "destructive" });
+      return;
+    }
+    toast({ title: "Saved to your library", description: `${lib.title} is now in your workouts.` });
+    if (startAfter) navigate(`/workout-session/${lib.id}`);
+  };
 
   React.useEffect(() => {
     document.title = "AI Workout Generator — Free Personalized Plans | FitFusion";
