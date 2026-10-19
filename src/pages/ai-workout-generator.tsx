@@ -309,11 +309,22 @@ const AIWorkoutGenerator: React.FC = () => {
                       </ul>
                     </div>
                   ) : null}
-                  <Link to="/auth" className="block">
-                    <Button className="w-full" size="lg">
-                      Save plans & track progress — Free <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                  </Link>
+                  {user ? (
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Button className="flex-1" size="lg" onClick={() => saveToLibrary(false)}>
+                        <Save className="w-4 h-4 mr-2" /> Save to my library
+                      </Button>
+                      <Button className="flex-1" size="lg" variant="secondary" onClick={() => saveToLibrary(true)}>
+                        <Play className="w-4 h-4 mr-2" /> Save & start
+                      </Button>
+                    </div>
+                  ) : (
+                    <Link to="/auth" className="block">
+                      <Button className="w-full" size="lg">
+                        Save plans & track progress — Free <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               )}
             </CardContent>
