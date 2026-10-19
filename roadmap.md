@@ -60,3 +60,6 @@
 - [x] Reviewed public-read findings: feature_flags, feature_switches, site_content, exercises, posts, post_comments, post_likes — intentional public/community data, writes restricted
 - [x] Remaining linter warns (is_admin*, search_chat_contacts, shares_chat_thread) are required by RLS policies and chat — boolean-only, false positive
 - [x] Performance pass (2026-10-17): lazy-loaded EnhancedChatSettings (was 204KB static in chat page, now 12KB on-demand); route prefetch skipped on saveData/2G connections; confirmed all routes lazy, export libs (jspdf/xlsx) already dynamic; build verified
+
+## Tests pass (2026-10-17)
+- [x] Added vitest coverage for custom workouts (save/replace/cap-50/delete/corruption) and schedule (add/sort/remove/cap-200/corruption/date-key) — 18 tests passing across 3 files
