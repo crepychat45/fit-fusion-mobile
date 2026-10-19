@@ -63,3 +63,4 @@
 
 ## Tests pass (2026-10-17)
 - [x] Added vitest coverage for custom workouts (save/replace/cap-50/delete/corruption) and schedule (add/sort/remove/cap-200/corruption/date-key) — 18 tests passing across 3 files
+- [x] AI workout generator: signed-in users can save generated workouts to their library and start them immediately (converts AI plan to custom workout format)
