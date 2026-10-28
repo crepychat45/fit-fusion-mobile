@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
 import { saveCustomWorkout } from "@/lib/custom-workouts";
 import { useToast } from "@/hooks/use-toast";
-import type { Workout as LibraryWorkout, Exercise as LibraryExercise } from "@/data/workouts";
+import { aiWorkoutSchema, toLibraryWorkout, type AIWorkout as Workout, type AIExercise as Exercise } from "@/lib/ai-workout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,29 +12,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sparkles, Dumbbell, Timer, Flame, Loader2, ArrowRight, Save, Play } from "lucide-react";
-
-type Exercise = {
-  name: string;
-  sets?: number;
-  reps?: string;
-  rest?: string;
-  duration?: string;
-  instructions?: string;
-  muscle_groups?: string[];
-};
-
-type Workout = {
-  name: string;
-  summary: string;
-  duration_minutes: number;
-  difficulty: string;
-  focus: string;
-  warmup: Exercise[];
-  exercises: Exercise[];
-  cooldown: Exercise[];
-  tips: string[];
-  estimated_calories: number;
-};
 
 const FAQS = [
   {
@@ -68,38 +45,19 @@ const AIWorkoutGenerator: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const toLibraryWorkout = (w: Workout): LibraryWorkout => {
-    const toEx = (ex: Exercise, i: number): LibraryExercise => ({
-      id: `ai-ex-${i}`,
-      name: ex.name,
-      sets: ex.sets ?? 1,
-      reps: typeof ex.reps === "string" ? parseInt(ex.reps, 10) || 0 : (ex.reps ?? 0),
-      instructions: ex.instructions ?? "",
-      muscles: ex.muscle_groups ?? [],
-    });
-    return {
-      id: `ai-${Date.now()}`,
-      title: w.name,
-      description: w.summary,
-      category: "strength",
-      level: (["beginner", "intermediate", "advanced"].includes(w.difficulty) ? w.difficulty : "beginner") as LibraryWorkout["level"],
-      duration: w.duration_minutes,
-      exercises: [...(w.warmup ?? []), ...(w.exercises ?? []), ...(w.cooldown ?? [])].map(toEx),
-      popularity: 0,
-      createdAt: Date.now(),
-      calories: w.estimated_calories,
-      equipment: [equipment],
-      tags: ["ai", "custom"],
-    };
-  };
-
+  const [savedId, setSavedId] = useState<string | null>(null);
   const saveToLibrary = (startAfter: boolean) => {
-    if (!workout) return;
-    const lib = toLibraryWorkout(workout);
+    if (!workout || !user) return;
+    if (savedId) {
+      if (startAfter) navigate(`/workout-session/${savedId}`);
+      return;
+    }
+    const lib = toLibraryWorkout(workout, equipment);
     if (!saveCustomWorkout(lib)) {
       toast({ title: "Could not save", description: "Your device storage is unavailable.", variant: "destructive" });
       return;
     }
+    setSavedId(lib.id);
     toast({ title: "Saved to your library", description: `${lib.title} is now in your workouts.` });
     if (startAfter) navigate(`/workout-session/${lib.id}`);
   };
@@ -150,15 +108,18 @@ const AIWorkoutGenerator: React.FC = () => {
     setLoading(true);
     setError(null);
     setWorkout(null);
+    setSavedId(null);
     try {
       const { data, error } = await supabase.functions.invoke("public-ai-workout-generator", {
         body: { goal, focus, duration, equipment, level },
       });
       if (error) throw error;
-      if ((data as any)?.error) throw new Error((data as any).error);
-      setWorkout((data as any).workout as Workout);
-    } catch (e: any) {
-      setError(e?.message || "Something went wrong. Please try again.");
+      if (data?.error) throw new Error(String(data.error));
+      const parsed = aiWorkoutSchema.safeParse(data?.workout);
+      if (!parsed.success) throw new Error("The generated plan was incomplete. Please try again.");
+      setWorkout(parsed.data);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -166,7 +127,7 @@ const AIWorkoutGenerator: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-primary/5">
-      <header className="border-b border-white/5 backdrop-blur-md sticky top-0 z-10 bg-background/60">
+      <header className="border-b border-border/20 backdrop-blur-md sticky top-0 z-10 bg-background/60">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="font-bold text-lg">FitFusion</Link>
           <div className="flex items-center gap-2">
@@ -181,7 +142,7 @@ const AIWorkoutGenerator: React.FC = () => {
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs">
             <Sparkles className="w-3 h-3" /> Free · No signup required
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-normal">
             AI Workout Generator
           </h1>
           <p className="max-w-2xl mx-auto text-muted-foreground text-lg">
@@ -191,7 +152,7 @@ const AIWorkoutGenerator: React.FC = () => {
         </section>
 
         <section className="grid md:grid-cols-2 gap-6">
-          <Card className="backdrop-blur-md bg-card/60 border-white/10">
+          <Card className="backdrop-blur-md bg-card/60 border-border/30">
             <CardHeader>
               <CardTitle className="flex items-center gap-2"><Dumbbell className="w-5 h-5" /> Design your workout</CardTitle>
             </CardHeader>
@@ -260,7 +221,7 @@ const AIWorkoutGenerator: React.FC = () => {
                   </Select>
                 </div>
               </div>
-              <Button onClick={generate} disabled={loading || !goal.trim()} className="w-full" size="lg">
+              <Button onClick={generate} disabled={loading || !goal.trim() || duration < 5 || duration > 120 || !Number.isFinite(duration)} className="w-full" size="lg">
                 {loading ? (
                   <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating…</>
                 ) : (
@@ -271,7 +232,7 @@ const AIWorkoutGenerator: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card className="backdrop-blur-md bg-card/60 border-white/10">
+          <Card className="backdrop-blur-md bg-card/60 border-border/30">
             <CardHeader>
               <CardTitle className="flex items-center gap-2"><Flame className="w-5 h-5" /> Your AI workout</CardTitle>
             </CardHeader>
@@ -295,7 +256,7 @@ const AIWorkoutGenerator: React.FC = () => {
                       <span className="inline-flex items-center gap-1"><Timer className="w-3 h-3" />{workout.duration_minutes} min</span>
                       <span>Focus: {workout.focus}</span>
                       <span>Level: {workout.difficulty}</span>
-                      <span>~{workout.estimated_calories} kcal</span>
+                      {workout.estimated_calories != null && <span>~{workout.estimated_calories} kcal estimated</span>}
                     </div>
                   </div>
                   <Section title="Warmup" items={workout.warmup} />
@@ -311,11 +272,11 @@ const AIWorkoutGenerator: React.FC = () => {
                   ) : null}
                   {user ? (
                     <div className="flex flex-col sm:flex-row gap-2">
-                      <Button className="flex-1" size="lg" onClick={() => saveToLibrary(false)}>
-                        <Save className="w-4 h-4 mr-2" /> Save to my library
+                      <Button className="flex-1" size="lg" onClick={() => saveToLibrary(false)} disabled={!!savedId}>
+                        <Save className="w-4 h-4 mr-2" /> {savedId ? "Saved to library" : "Save to my library"}
                       </Button>
                       <Button className="flex-1" size="lg" variant="secondary" onClick={() => saveToLibrary(true)}>
-                        <Play className="w-4 h-4 mr-2" /> Save & start
+                        <Play className="w-4 h-4 mr-2" /> {savedId ? "Start workout" : "Save & start"}
                       </Button>
                     </div>
                   ) : (
@@ -339,7 +300,7 @@ const AIWorkoutGenerator: React.FC = () => {
               { t: "2. Pick constraints", d: "Duration, equipment, and level shape the routine to your life." },
               { t: "3. Get a personalized plan", d: "AI-generated warmup, sets, reps, rest, and coaching cues." },
             ].map((s) => (
-              <Card key={s.t} className="bg-card/60 border-white/10">
+              <Card key={s.t} className="bg-card/60 border-border/30">
                 <CardHeader><CardTitle className="text-base">{s.t}</CardTitle></CardHeader>
                 <CardContent className="text-sm text-muted-foreground">{s.d}</CardContent>
               </Card>
@@ -351,7 +312,7 @@ const AIWorkoutGenerator: React.FC = () => {
           <h2 className="text-2xl font-bold">Frequently asked questions</h2>
           <div className="space-y-3">
             {FAQS.map((f) => (
-              <Card key={f.q} className="bg-card/60 border-white/10">
+              <Card key={f.q} className="bg-card/60 border-border/30">
                 <CardHeader><CardTitle className="text-base">{f.q}</CardTitle></CardHeader>
                 <CardContent className="text-sm text-muted-foreground">{f.a}</CardContent>
               </Card>
@@ -378,7 +339,7 @@ const Section: React.FC<{ title: string; items: Exercise[]; main?: boolean }> = 
       <h3 className="font-semibold mb-2">{title}</h3>
       <ul className="space-y-2">
         {items.map((ex, i) => (
-          <li key={i} className="rounded-lg border border-white/10 bg-background/40 p-3">
+          <li key={i} className="rounded-lg border border-border/30 bg-background/40 p-3">
             <div className="flex items-center justify-between gap-2">
               <span className="font-medium">{ex.name}</span>
               <span className="text-xs text-muted-foreground">

@@ -14,7 +14,7 @@ interface ProgressChartProps {
 export function ProgressChart({
   title,
   data,
-  color = "#8B5CF6",
+  color = "hsl(var(--primary))",
 }: ProgressChartProps) {
   return (
     <Card>
@@ -35,10 +35,11 @@ export function ProgressChart({
                 tick={{ fontSize: 10 }}
               />
               <Tooltip
-                cursor={{ fill: "rgba(139, 92, 246, 0.1)" }}
+                cursor={{ fill: "hsl(var(--muted) / 0.3)" }}
                 contentStyle={{
-                  backgroundColor: "#fff",
-                  border: "1px solid #e2e8f0",
+                  backgroundColor: "hsl(var(--popover))",
+                  color: "hsl(var(--popover-foreground))",
+                  border: "1px solid hsl(var(--border))",
                   borderRadius: "0.375rem",
                   fontSize: "12px",
                 }}

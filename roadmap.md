@@ -64,3 +64,10 @@
 ## Tests pass (2026-10-17)
 - [x] Added vitest coverage for custom workouts (save/replace/cap-50/delete/corruption) and schedule (add/sort/remove/cap-200/corruption/date-key) — 18 tests passing across 3 files
 - [x] AI workout generator: signed-in users can save generated workouts to their library and start them immediately (converts AI plan to custom workout format)
+
+## Remaining master-review work (2026-10-28)
+- [ ] Consolidate Settings into eight sections, preserve deep links and search, remove misleading global save claims
+- [ ] Unify Recent Sessions with workout history; add consistent 7/30/90-day analytics and local-calendar records
+- [ ] Preserve timed exercises in AI plans, validate generated results and prevent duplicate saves
+- [ ] Run regression tests and authenticated workout → Progress → calendar → Settings checks
+- [ ] Reconcile outdated checklist items and record verified results and external blockers
