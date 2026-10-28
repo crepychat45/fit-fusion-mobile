@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -108,27 +109,10 @@ const SETTINGS_INDEX: SettingsSearchResult[] = [
   },
 
   // Updates
-  {
-    id: "updates-auto",
-    title: "Automatic Updates",
-    description: "Enable automatic app updates",
-    category: "Updates",
-    keywords: ["updates", "automatic", "upgrade"],
-  },
-  {
-    id: "updates-scheduler",
-    title: "Update Scheduler",
-    description: "Schedule updates at preferred times",
-    category: "Updates",
-    keywords: ["scheduler", "schedule", "timing"],
-  },
-  {
-    id: "updates-rollback",
-    title: "Rollback Updates",
-    description: "Revert to previous app version",
-    category: "Updates",
-    keywords: ["rollback", "revert", "previous"],
-  },
+  { id: "updates-check", title: "Check for Updates", description: "Check for a deployed app update", category: "Updates", keywords: ["update", "version", "check", "download", "install"] },
+  { id: "chat-preferences", title: "Chat Preferences", description: "Chat appearance and conversation preferences", category: "Chat", keywords: ["chat", "messages", "conversation"] },
+  { id: "units-format", title: "Units & Format", description: "Measurement units and regional formats", category: "Units", keywords: ["units", "weight", "kilograms", "pounds", "format"] },
+  { id: "about-version", title: "Version & About", description: "Installed app version and release notes", category: "About", keywords: ["about", "version", "changelog", "release", "developer"] },
 
   // Security
   {
@@ -199,24 +183,12 @@ export function SettingsSearch({ onResultClick }: SettingsSearchProps) {
     }).slice(0, 8); // Limit to 8 results
   }, [query]);
 
-  const getCategoryColor = (category: string) => {
-    const colors: Record<string, string> = {
-      Account: "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300",
-      Display: "bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300",
-      Privacy: "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300",
-      Notifications: "bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-300",
-      Updates: "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300",
-      Security: "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300",
-      Data: "bg-pink-100 text-pink-800 dark:bg-pink-950 dark:text-pink-300",
-    };
-    return colors[category] || colors.Account;
-  };
-
   return (
     <div className="space-y-4">
       <div className="relative">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
+          aria-label="Search settings"
           placeholder="Search settings, preferences, features..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -241,12 +213,10 @@ export function SettingsSearch({ onResultClick }: SettingsSearchProps) {
               <ScrollArea className="h-64 rounded-lg border p-2">
                 <div className="space-y-2">
                   {results.map((result) => (
-                    <motion.div
+                    <Button variant="ghost"
                       key={result.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
                       onClick={() => onResultClick?.(result)}
-                      className="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-800/50 cursor-pointer transition-colors"
+                      className="h-auto w-full whitespace-normal p-3 rounded-lg border border-border/30 bg-muted/20 hover:bg-muted/40 text-left block"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
@@ -257,14 +227,12 @@ export function SettingsSearch({ onResultClick }: SettingsSearchProps) {
                         </div>
                         <Badge
                           variant="secondary"
-                          className={`ml-2 text-xs ${getCategoryColor(
-                            result.category,
-                          )}`}
+                          className="ml-2 text-xs"
                         >
                           {result.category}
                         </Badge>
                       </div>
-                    </motion.div>
+                    </Button>
                   ))}
                 </div>
               </ScrollArea>

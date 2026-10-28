@@ -1,6 +1,11 @@
 import { SettingsTransferPanel, PushDevicePanel } from "@/components/extras/page-toolkits";
 import React, { lazy, Suspense, useState, useEffect } from "react";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { localAppDataKeys, resolveSettingsTab } from "@/lib/settings-sections";
+import { HISTORY_EVENT } from "@/lib/workout-history";
+import { CUSTOM_EVENT } from "@/lib/custom-workouts";
+import { logger } from "@/lib/logger";
+import { useLocation, useNavigate } from "react-router-dom";
 import { SettingsNavigation } from "./settings-navigation";
 import { SettingsSearch } from "./settings-search";
 import { useToast } from "@/components/ui/use-toast";
@@ -172,18 +177,18 @@ const L: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 export function SettingsContainer() {
   const { toast } = useToast();
+  const location = useLocation();
+  const navigate = useNavigate();
   // Deep link support: /settings?tab=updates opens that tab directly.
   const [activeTab, setActiveTab] = useState(() => {
     try {
-      return new URLSearchParams(window.location.search).get("tab") || "account";
+      return resolveSettingsTab(new URLSearchParams(window.location.search).get("tab"));
     } catch {
       return "account";
     }
   });
 
   const [isLoggedOut, setIsLoggedOut] = useState(false);
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isConnected, setIsConnected] = useState(true);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [confirmClearOpen, setConfirmClearOpen] = useState(false);
@@ -206,47 +211,23 @@ export function SettingsContainer() {
   }, []);
 
   useEffect(() => {
-    // Auto-save functionality
-    if (hasUnsavedChanges && isConnected) {
-      const timeout = setTimeout(() => {
-        handleAutoSave();
-      }, 5000); // Auto-save after 5 seconds of inactivity
-
-      return () => clearTimeout(timeout);
-    }
-  }, [hasUnsavedChanges, isConnected]);
+    setActiveTab(resolveSettingsTab(new URLSearchParams(location.search).get("tab")));
+  }, [location.search]);
 
   const handleClearLocalData = async () => {
     try {
-      const keysToPreserve = [
-        "auth_token",
-        "supabase.auth.token",
-        "fitfusion-app-version",
-      ];
-      const keysToRemove = [];
-
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (
-          key &&
-          !keysToPreserve.includes(key) &&
-          !key.startsWith("supabase.auth")
-        ) {
-          keysToRemove.push(key);
-        }
-      }
-
-      keysToRemove.forEach((key) => localStorage.removeItem(key));
+      const keysToRemove = localAppDataKeys(localStorage);
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      window.dispatchEvent(new Event(HISTORY_EVENT));
+      window.dispatchEvent(new Event(CUSTOM_EVENT));
 
       toast({
         title: "✅ Data Cleared",
         description: `Successfully cleared ${keysToRemove.length} items from local storage.`,
       });
 
-      setHasUnsavedChanges(false);
-      setLastSaved(new Date());
     } catch (error) {
-      console.error("Error clearing data:", error);
+      logger.error("Error clearing data:", error);
       toast({
         title: "❌ Error",
         description: "Failed to clear local data. Please try again.",
@@ -257,7 +238,8 @@ export function SettingsContainer() {
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut({ scope: "global" });
+      const { error } = await supabase.auth.signOut({ scope: "global" });
+      if (error) throw error;
       localStorage.removeItem("auth_token");
       setIsLoggedOut(true);
 
@@ -266,7 +248,7 @@ export function SettingsContainer() {
         description: "You have been securely logged out.",
       });
     } catch (error) {
-      console.error("Logout error:", error);
+      logger.error("Logout error:", error);
       toast({
         title: "❌ Logout Error",
         description: "There was a problem signing you out. Please try again.",
@@ -275,38 +257,13 @@ export function SettingsContainer() {
     }
   };
 
-  // Each settings panel saves itself; this only clears the pending-changes flag.
-  const handleAutoSave = () => {
-    if (!isConnected) {
-      toast({
-        title: "⚠️ Offline",
-        description: "Changes will be saved when connection is restored.",
-        variant: "destructive",
-      });
-      return;
-    }
-    setHasUnsavedChanges(false);
-    setLastSaved(new Date());
-  };
-
-  const handleManualSave = () => {
-    handleAutoSave();
-    toast({
-      title: "✅ Settings Saved",
-      description: "All your changes have been saved successfully.",
-    });
-  };
-
   const handleTabChange = (value: string) => {
-    if (hasUnsavedChanges) {
-      const shouldContinue = window.confirm(
-        "You have unsaved changes. Do you want to continue without saving?",
-      );
-      if (!shouldContinue) return;
-    }
-    setActiveTab(value);
+    const tab = resolveSettingsTab(value);
+    setActiveTab(tab);
     setShowMobileMenu(false);
-    console.log(`Switching to tab: ${value}`);
+    const params = new URLSearchParams(location.search);
+    params.set("tab", tab);
+    navigate({ pathname: location.pathname, search: params.toString() }, { replace: true });
   };
 
   if (isLoggedOut) {
@@ -316,8 +273,8 @@ export function SettingsContainer() {
         animate={{ opacity: 1, scale: 1 }}
         className="max-w-md mx-auto py-20 text-center space-y-4"
       >
-        <div className="mx-auto h-16 w-16 rounded-full bg-green-100 flex items-center justify-center mb-6">
-          <CheckCircle className="h-8 w-8 text-green-600" />
+        <div className="mx-auto h-16 w-16 rounded-full bg-accent/20 flex items-center justify-center mb-6">
+          <CheckCircle className="h-8 w-8 text-accent-foreground" />
         </div>
         <h2 className="text-2xl font-bold">Successfully Logged Out</h2>
         <p className="text-muted-foreground">
@@ -326,7 +283,7 @@ export function SettingsContainer() {
         </p>
         <Button
           onClick={() => window.location.reload()}
-          className="mt-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+          className="mt-6 bg-primary text-primary-foreground"
         >
           <RefreshCw className="h-4 w-4 mr-2" />
           Refresh Page
@@ -348,16 +305,8 @@ export function SettingsContainer() {
       )}
 
       {/* Liquid Glass Header */}
-      <div className="sticky top-0 z-50 backdrop-blur-2xl bg-background/60 border-b border-white/10 shadow-[0_8px_32px_-12px_rgba(0,0,0,0.25)]">
+      <div className="sticky top-0 z-50 backdrop-blur-2xl bg-background/60 border-b border-border/30 shadow-lg">
         <div className="relative overflow-hidden">
-          {/* Ambient orbs */}
-          <div className="pointer-events-none absolute -top-16 -left-16 w-56 h-56 rounded-full bg-primary/20 blur-3xl animate-float" />
-          <div
-            className="pointer-events-none absolute -bottom-20 -right-10 w-64 h-64 rounded-full bg-accent/20 blur-3xl animate-float"
-            style={{ animationDelay: "2s" }}
-          />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5" />
-
           <div className="relative max-w-screen-xl mx-auto px-4 py-4">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
@@ -367,50 +316,34 @@ export function SettingsContainer() {
                   className="relative p-2.5 rounded-2xl bg-gradient-to-br from-primary to-accent shadow-lg shadow-primary/30"
                 >
                   <Settings className="h-5 w-5 text-primary-foreground" />
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-white/30 to-transparent pointer-events-none" />
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-primary-foreground/30 to-transparent pointer-events-none" />
                 </motion.div>
                 <div className="min-w-0">
                   <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-foreground via-primary to-accent-foreground bg-clip-text text-transparent">
                     Settings
                   </h1>
                   <p className="text-[11px] sm:text-xs text-muted-foreground truncate">
-                    Liquid Glass · personalize every detail
+                    Account and app preferences
                   </p>
                 </div>
-                {lastSaved && (
-                  <div className="hidden md:flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full backdrop-blur-sm ml-2">
-                    <CheckCircle className="h-3 w-3" />
-                    Saved {lastSaved.toLocaleTimeString()}
-                  </div>
-                )}
+
               </div>
 
               <div className="flex items-center gap-2 shrink-0">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="rounded-xl bg-background/40 backdrop-blur-sm border-white/20"
+                  className="rounded-xl bg-background/40 backdrop-blur-sm border-border/30"
                   onClick={() => handleTabChange("search")}
                   aria-label="Search settings"
                 >
                   <Search className="h-4 w-4" />
                   <span className="hidden sm:inline ml-1">Search</span>
                 </Button>
-                {hasUnsavedChanges && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleManualSave}
-                    className="rounded-xl border-orange-400/40 bg-orange-500/10 text-orange-600 dark:text-orange-300 backdrop-blur-sm hover:bg-orange-500/20"
-                  >
-                    <Save className="h-3.5 w-3.5 mr-1" />
-                    Save
-                  </Button>
-                )}
                 <Button
                   variant="outline"
                   size="sm"
-                  className="md:hidden rounded-xl bg-background/40 backdrop-blur-sm border-white/20"
+                  className="md:hidden rounded-xl bg-background/40 backdrop-blur-sm border-border/30"
                   onClick={() => setShowMobileMenu(!showMobileMenu)}
                   aria-label="Toggle settings menu"
                 >
@@ -455,7 +388,11 @@ export function SettingsContainer() {
                       Display: "display",
                       Privacy: "privacy",
                       Notifications: "notifications",
-                      Updates: "updates",
+                      Updates: "about",
+                      Chat: "chat",
+                      Units: "display",
+                      About: "about",
+                      Developer: "about",
                       Security: "security",
                       Data: "data",
                     };
@@ -516,6 +453,20 @@ export function SettingsContainer() {
                 <L><DisplayFusionExtras /></L>
                 <L><DisplayNovaExtras /></L>
                 <L><DisplayPrimeExtras /></L>
+                <h2 className="text-lg font-semibold">Units & Workout Preferences</h2>
+
+                <L><WorkoutLivePanel /></L>
+                <L><UnitPreferences /></L>
+                <L><UnitsExtras /></L>
+                <L><UnitsProExtras /></L>
+                <L><UnitsNextExtras /></L>
+                <L><UnitsUltraExtras /></L>
+                <L><UnitsMaxExtras /></L>
+                <L><UnitsHyperExtras /></L>
+                <L><UnitsQuantumExtras /></L>
+                <L><UnitsFusionExtras /></L>
+                <L><UnitsNovaExtras /></L>
+                <L><UnitsPrimeExtras /></L>
               </div>
             </TabsContent>
 
@@ -554,22 +505,7 @@ export function SettingsContainer() {
               </div>
             </TabsContent>
 
-            <TabsContent value="units" className="mt-0">
-              <div className="space-y-6">
-                <L><WorkoutLivePanel /></L>
-                <L><UnitPreferences /></L>
-                <L><UnitsExtras /></L>
-                <L><UnitsProExtras /></L>
-                <L><UnitsNextExtras /></L>
-                <L><UnitsUltraExtras /></L>
-                <L><UnitsMaxExtras /></L>
-                <L><UnitsHyperExtras /></L>
-                <L><UnitsQuantumExtras /></L>
-                <L><UnitsFusionExtras /></L>
-                <L><UnitsNovaExtras /></L>
-                <L><UnitsPrimeExtras /></L>
-              </div>
-            </TabsContent>
+
 
             <TabsContent value="chat" className="mt-0">
               <div className="space-y-6">
@@ -587,16 +523,7 @@ export function SettingsContainer() {
               </div>
             </TabsContent>
 
-            <TabsContent value="updates" className="mt-0">
-              <div className="space-y-6">
-                <L><LiveUpdatePanel /></L>
-                <L><OneTapUpdateCenter /></L>
-                <L><UpdateHealthPanel /></L>
-                <L><VersionControlPanel /></L>
-                <L><PwaVaultPanel /></L>
-                <L><DataFusionExtras /></L>
-              </div>
-            </TabsContent>
+
 
 
 
@@ -626,7 +553,7 @@ export function SettingsContainer() {
                 <L><SettingsBackupRestore /></L>
                 <L><DataManagementPanel /></L>
 
-                <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 p-6 rounded-lg border">
+                <div className="bg-muted/30 p-6 rounded-lg border">
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                     Data Management Center
                   </h3>
@@ -658,7 +585,7 @@ export function SettingsContainer() {
                       <div className="text-left">
                         <div className="font-medium">Log Out</div>
                         <div className="text-xs">
-                          End your current session securely
+                          Sign out on every device
                         </div>
                       </div>
                       <Shield className="h-4 w-4" />
@@ -690,6 +617,14 @@ export function SettingsContainer() {
                 <L><DeveloperNovaExtras /></L>
                 <L><DeveloperPrimeExtras /></L>
                 <L><PythonLabPanel /></L>
+                <h2 className="text-lg font-semibold">App Updates</h2>
+
+                <L><LiveUpdatePanel /></L>
+                <L><OneTapUpdateCenter /></L>
+                <L><UpdateHealthPanel /></L>
+                <L><VersionControlPanel /></L>
+                <L><PwaVaultPanel /></L>
+                <L><DataFusionExtras /></L>
               </div>
             </TabsContent>
 

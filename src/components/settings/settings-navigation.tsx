@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+const MotionButton = motion(Button);
 
 interface SettingsNavigationProps {
   activeTab: string;
@@ -36,7 +37,7 @@ const settingsCategories = [
     id: "account",
     title: "Account",
     icon: User,
-    color: "text-blue-500",
+    color: "text-muted-foreground",
     bgColor: "bg-blue-50",
     description: "Manage your profile and personal information",
   },
@@ -44,15 +45,15 @@ const settingsCategories = [
     id: "security",
     title: "Security",
     icon: Shield,
-    color: "text-green-500",
+    color: "text-muted-foreground",
     bgColor: "bg-green-50",
     description: "Privacy settings and security options",
   },
   {
     id: "display",
-    title: "Display",
+    title: "Appearance & Units",
     icon: Palette,
-    color: "text-purple-500",
+    color: "text-muted-foreground",
     bgColor: "bg-purple-50",
     description: "Theme, colors, and visual preferences",
   },
@@ -60,7 +61,7 @@ const settingsCategories = [
     id: "privacy",
     title: "Privacy",
     icon: Lock,
-    color: "text-red-500",
+    color: "text-muted-foreground",
     bgColor: "bg-red-50",
     description: "Control your data and privacy settings",
   },
@@ -68,47 +69,31 @@ const settingsCategories = [
     id: "notifications",
     title: "Notifications",
     icon: Bell,
-    color: "text-amber-500",
+    color: "text-muted-foreground",
     bgColor: "bg-amber-50",
     description: "Manage notification preferences and timing",
-  },
-  {
-    id: "units",
-    title: "Units & Format",
-    icon: Globe,
-    color: "text-teal-500",
-    bgColor: "bg-teal-50",
-    description: "Set measurement units and regional formats",
   },
   {
     id: "chat",
     title: "Chat Settings",
     icon: MessageSquare,
-    color: "text-orange-500",
+    color: "text-muted-foreground",
     bgColor: "bg-orange-50",
     description: "Configure chat preferences and notifications",
-  },
-  {
-    id: "updates",
-    title: "Updates",
-    icon: Download,
-    color: "text-indigo-500",
-    bgColor: "bg-indigo-50",
-    description: "App updates and version management",
   },
   {
     id: "data",
     title: "Data & Advanced",
     icon: Database,
-    color: "text-cyan-500",
+    color: "text-muted-foreground",
     bgColor: "bg-cyan-50",
     description: "Storage, backup, reset and advanced tools",
   },
   {
     id: "about",
-    title: "About & Developer",
+    title: "App & Updates",
     icon: Info,
-    color: "text-yellow-500",
+    color: "text-muted-foreground",
     bgColor: "bg-yellow-50",
     description: "App info, version details and developer tools",
   },
@@ -190,15 +175,14 @@ export function SettingsNavigation({
 
                   return (
                     <motion.div key={category.id} variants={itemVariants}>
-                      <button
+                      <Button variant="ghost"
                         type="button"
                         aria-current={isActive ? "page" : undefined}
                         onClick={() => {
                           onTabChange(category.id);
-                          onMobileMenuToggle();
                         }}
                         className={cn(
-                          "crystal-glass crystal-sheen w-full overflow-hidden rounded-2xl p-3 text-left flex items-center gap-3",
+                          "crystal-glass crystal-sheen w-full overflow-hidden h-auto whitespace-normal rounded-lg p-3 text-left flex items-center gap-3",
                           isActive && "crystal-glass-active",
                         )}
                       >
@@ -234,7 +218,7 @@ export function SettingsNavigation({
                             isActive ? "text-primary" : "text-muted-foreground",
                           )}
                         />
-                      </button>
+                      </Button>
                     </motion.div>
                   );
                 })}
@@ -253,21 +237,21 @@ export function SettingsNavigation({
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="grid grid-cols-2 gap-4 p-4 lg:grid-cols-3 xl:grid-cols-5"
+        className="grid grid-cols-2 gap-4 p-4 lg:grid-cols-3 xl:grid-cols-4"
       >
         {settingsCategories.map((category) => {
           const isActive = activeTab === category.id;
           const CategoryIcon = category.icon;
 
           return (
-            <motion.button
+            <MotionButton variant="ghost"
               key={category.id}
               type="button"
               variants={itemVariants}
               aria-current={isActive ? "page" : undefined}
               onClick={() => onTabChange(category.id)}
               className={cn(
-                "crystal-glass crystal-sheen group relative overflow-hidden rounded-2xl p-4 text-center",
+                "crystal-glass crystal-sheen group relative overflow-hidden h-auto whitespace-normal rounded-lg p-4 text-center",
                 isActive && "crystal-glass-active",
               )}
             >
@@ -307,7 +291,7 @@ export function SettingsNavigation({
                   )}
                 </span>
               </div>
-            </motion.button>
+            </MotionButton>
           );
         })}
       </motion.div>
