@@ -18,6 +18,7 @@ import { ProgressPowerExtras } from "@/components/progress/progress-power-extras
 import { ProgressInsightLab } from "@/components/progress/progress-insight-lab";
 import { useWorkoutHistory } from "@/hooks/use-workout-history";
 import { readJson, writeJson } from "@/lib/safe-storage";
+import { normalizeWeeklyGoal, personalRecords, rangeAnalytics, type ProgressRange } from "@/lib/progress-analytics";
 
 const WEEKLY_GOAL_KEY = "fitfusion-weekly-goal";
 
@@ -25,63 +26,21 @@ const ProgressPage = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
   const { sessions, stats } = useWorkoutHistory();
-  const [weeklyGoal, setWeeklyGoal] = useState<number>(() => readJson<number>(WEEKLY_GOAL_KEY, 5));
+  const [weeklyGoal, setWeeklyGoal] = useState<number>(() => normalizeWeeklyGoal(readJson<unknown>(WEEKLY_GOAL_KEY, 5)));
 
   const done = useMemo(() => sessions.filter((s) => s.status === "completed"), [sessions]);
 
-  // Real charts computed from recorded sessions.
-  const weeklyData = useMemo(() => {
-    const labels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const minutes = [0, 0, 0, 0, 0, 0, 0];
+  const [range, setRange] = useState<ProgressRange>(30);
+  const analytics = useMemo(() => rangeAnalytics(sessions, range), [sessions, range]);
+  const weeklyCount = useMemo(() => {
     const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
-    for (const s of done) {
-      const d = new Date(s.completedAt);
-      if (d >= start) minutes[d.getDay()] += Math.round(s.durationSec / 60);
-    }
-    return [1, 2, 3, 4, 5, 6, 0].map((i) => ({ name: labels[i], value: minutes[i] }));
+    const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    monday.setDate(monday.getDate() - (monday.getDay() + 6) % 7);
+    return done.filter(s => Date.parse(s.completedAt) >= monday.getTime() && Date.parse(s.completedAt) <= now.getTime()).length;
   }, [done]);
-
-  const monthlyData = useMemo(() => {
-    const counts = [0, 0, 0, 0];
-    const now = Date.now();
-    for (const s of done) {
-      const ageDays = (now - Date.parse(s.completedAt)) / 86400000;
-      if (ageDays < 7) counts[3]++;
-      else if (ageDays < 14) counts[2]++;
-      else if (ageDays < 21) counts[1]++;
-      else if (ageDays < 28) counts[0]++;
-    }
-    return counts.map((v, i) => ({ name: `Week ${i + 1}`, value: v }));
-  }, [done]);
-
   const avgMinutes = stats.totalSessions ? Math.round(stats.totalMinutes / stats.totalSessions) : 0;
-  const weeklyProgress = Math.min(100, Math.round((stats.thisWeek / Math.max(1, weeklyGoal)) * 100));
-
-  // Personal records computed from recorded sessions only.
-  const records = useMemo(() => {
-    if (done.length === 0) return null;
-    let longestSessionMin = 0;
-    const perDay = new Map<string, number>();
-    const perWeek = new Map<string, number>();
-    for (const s of done) {
-      const d = new Date(s.completedAt);
-      const mins = s.durationSec / 60;
-      longestSessionMin = Math.max(longestSessionMin, mins);
-      const dayKey = d.toISOString().split("T")[0];
-      perDay.set(dayKey, (perDay.get(dayKey) ?? 0) + mins);
-      const weekStart = new Date(d);
-      weekStart.setDate(d.getDate() - ((d.getDay() + 6) % 7));
-      const weekKey = weekStart.toISOString().split("T")[0];
-      perWeek.set(weekKey, (perWeek.get(weekKey) ?? 0) + 1);
-    }
-    return {
-      longestSessionMin: Math.round(longestSessionMin),
-      bestDayMin: Math.round(Math.max(...perDay.values())),
-      bestWeekCount: Math.max(...perWeek.values()),
-      longestStreak: stats.longestStreak,
-    };
-  }, [done, stats.longestStreak]);
+  const weeklyProgress = Math.min(100, Math.round((weeklyCount / weeklyGoal) * 100));
+  const records = useMemo(() => personalRecords(done), [done]);
 
   // Achievements unlocked by real recorded stats only.
   const achievements = useMemo(() => [
@@ -100,10 +59,10 @@ const ProgressPage = () => {
       list.push({ title: "Start your journey", description: "Complete your first workout and your insights will appear here.", icon: Sparkles });
       return list;
     }
-    if (stats.thisWeek >= weeklyGoal) {
-      list.push({ title: "Weekly goal reached", description: `You hit ${stats.thisWeek}/${weeklyGoal} workouts this week. Consider raising your goal.`, icon: Trophy });
+    if (weeklyCount >= weeklyGoal) {
+      list.push({ title: "Weekly goal reached", description: `You hit ${weeklyCount}/${weeklyGoal} workouts this week. Consider raising your goal.`, icon: Trophy });
     } else {
-      list.push({ title: "Keep going", description: `${weeklyGoal - stats.thisWeek} more workout${weeklyGoal - stats.thisWeek === 1 ? "" : "s"} to reach this week's goal of ${weeklyGoal}.`, icon: Target });
+      list.push({ title: "Keep going", description: `${weeklyGoal - weeklyCount} more workout${weeklyGoal - weeklyCount === 1 ? "" : "s"} to reach this week's goal of ${weeklyGoal}.`, icon: Target });
     }
     if (stats.currentStreak >= 3) {
       list.push({ title: "Streak building", description: `You're on a ${stats.currentStreak}-day streak. A rest or mobility session still counts.`, icon: Flame });
@@ -114,10 +73,10 @@ const ProgressPage = () => {
       list.push({ title: "Finish rate", description: `You finish ${stats.completionRate}% of started workouts. Shorter sessions may help you complete more.`, icon: Activity });
     }
     return list;
-  }, [stats, weeklyGoal, sessions.length]);
+  }, [stats, weeklyGoal, sessions.length, weeklyCount]);
 
   const saveGoal = (g: number) => {
-    const clamped = Math.min(14, Math.max(1, g));
+    const clamped = normalizeWeeklyGoal(g);
     setWeeklyGoal(clamped);
     writeJson(WEEKLY_GOAL_KEY, clamped);
     toast({ title: "Goal updated", description: `Weekly goal set to ${clamped} workouts.` });
@@ -126,19 +85,25 @@ const ProgressPage = () => {
   const exportProgress = () => {
     const blob = new Blob([JSON.stringify({ stats, weeklyGoal, sessions: done }, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
+    const url = URL.createObjectURL(blob);
+    a.href = url;
     a.download = `fitfusion-progress-${new Date().toISOString().split("T")[0]}.json`;
     a.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     toast({ title: "📊 Progress Exported", description: "Your data has been downloaded." });
   };
 
-  const shareProgress = () => {
+  const shareProgress = async () => {
     const text = `${stats.totalSessions} workouts, ${stats.currentStreak}-day streak on FitXFusion!`;
-    if (navigator.share) {
-      navigator.share({ title: "My FitXFusion Progress", text, url: window.location.href });
-    } else {
-      navigator.clipboard.writeText(text);
-      toast({ title: "📋 Copied to clipboard" });
+    try {
+      if (navigator.share) await navigator.share({ title: "My FitXFusion Progress", text, url: window.location.href });
+      else {
+        await navigator.clipboard.writeText(text);
+        toast({ title: "Copied to clipboard" });
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") return;
+      toast({ title: "Could not share", description: "Sharing is unavailable on this device.", variant: "destructive" });
     }
   };
 
@@ -188,7 +153,7 @@ const ProgressPage = () => {
             <TabsTrigger value="overview" className="text-xs rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><BarChart3 className="h-3.5 w-3.5 mr-1" />Overview</TabsTrigger>
             <TabsTrigger value="analytics" className="text-xs rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><LineChart className="h-3.5 w-3.5 mr-1" />Stats</TabsTrigger>
             <TabsTrigger value="achievements" className="text-xs rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Award className="h-3.5 w-3.5 mr-1" />Goals</TabsTrigger>
-            <TabsTrigger value="insights" className="text-xs rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Brain className="h-3.5 w-3.5 mr-1" />AI</TabsTrigger>
+            <TabsTrigger value="insights" className="text-xs rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"><Brain className="h-3.5 w-3.5 mr-1" />Insights</TabsTrigger>
           </TabsList>
 
           <AnimatePresence mode="wait">
@@ -202,13 +167,13 @@ const ProgressPage = () => {
                         <CardTitle className="flex items-center gap-2 text-base"><Calendar className="h-4 w-4" />Weekly Progress</CardTitle>
                         <CardDescription className="text-sm">{weeklyProgress}% of weekly goal</CardDescription>
                       </div>
-                      <Badge variant="outline" className="text-xs">{stats.thisWeek}/{weeklyGoal}</Badge>
+                      <Badge variant="outline" className="text-xs">{weeklyCount}/{weeklyGoal}</Badge>
                     </div>
                   </CardHeader>
                   <CardContent>
                     <Progress value={weeklyProgress} className="h-2.5 mb-2" />
                     <div className="flex justify-between items-center text-xs text-muted-foreground">
-                      <span>This week: {stats.thisWeek}</span>
+                      <span>This week: {weeklyCount}</span>
                       <span className="flex items-center gap-1">
                         Goal:
                         <Button variant="ghost" size="sm" className="h-6 px-1.5 text-xs" onClick={() => saveGoal(weeklyGoal - 1)} aria-label="Decrease weekly goal">−</Button>
@@ -219,13 +184,14 @@ const ProgressPage = () => {
                   </CardContent>
                 </Card>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <ProgressChart title="Weekly Activity (minutes)" data={weeklyData} color="hsl(var(--primary))" />
-                  <ProgressChart title="Last 4 Weeks (workouts)" data={monthlyData} color="hsl(var(--accent-foreground))" />
+                <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Progress date range">
+                  {([7, 30, 90] as const).map(days => <Button key={days} size="sm" variant={range === days ? "default" : "outline"} aria-pressed={range === days} onClick={() => setRange(days)}>{days} days</Button>)}
                 </div>
-
-                {/* Live Session History */}
-                <SessionHistory />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <ProgressChart title={`Last ${range} days · minutes`} data={analytics.buckets.map(b => ({ name: b.name, value: b.minutes }))} />
+                  <ProgressChart title={`Last ${range} days · workouts`} data={analytics.buckets.map(b => ({ name: b.name, value: b.count }))} color="hsl(var(--accent-foreground))" />
+                </div>
+                <SessionHistory range={range} />
 
                 <div className="grid grid-cols-2 gap-3">
                   <Card className="border-border/20 bg-card/60 backdrop-blur-sm">
@@ -272,7 +238,7 @@ const ProgressPage = () => {
                         <p className="text-xs text-muted-foreground">Best week (workouts)</p>
                       </div>
                       <div className="rounded-xl border border-border/30 p-3">
-                        <p className="text-xl font-bold">{records.longestStreak}d</p>
+                        <p className="text-xl font-bold">{stats.longestStreak}d</p>
                         <p className="text-xs text-muted-foreground">Longest streak</p>
                       </div>
                     </CardContent>
