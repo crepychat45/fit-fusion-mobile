@@ -4,3 +4,10 @@ export function resolveSettingsTab(tab: string | null): string {
   const resolved = tab ? aliases[tab] ?? tab : "account";
   return resolved === "search" || SETTINGS_SECTIONS.some(id => id === resolved) ? resolved : "account";
 }
+
+/** Clear only this app's device data; never delete another application's or auth storage. */
+export function localAppDataKeys(storage: Storage): string[] {
+  return Array.from({ length: storage.length }, (_, i) => storage.key(i)).filter((key): key is string =>
+    key !== null && (/^fit(?:x)?fusion[-:]/i.test(key) || key === "completedWorkouts" || key === "workout-data") && key !== "fitfusion-app-version",
+  );
+}
