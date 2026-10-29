@@ -1,4 +1,10 @@
 # FitxFusion 8.1 roadmap
+## Settings reliability enhancement (2026-10-29)
+- [ ] Fix confirmed save/sync errors and misleading success indicators
+- [ ] Remove or honestly label unsupported Settings controls
+- [ ] Improve Settings navigation and verify authenticated saves across devices
+- [ ] Run targeted regression tests and check app errors
+
 - [x] Shared live activity summary and Home Today strip
 - [x] Persisted Workouts queue and equipment filters
 - [x] Progress 7/30/90-day live session ranges
