@@ -11,3 +11,6 @@
 - Mount exactly one SettingsProvider (`safe-settings-context`, in AppWrapper); never nest or add another settings provider, because duplicates caused conflicting state.
 - Read stored JSON through `safeJsonParse`/`readJson` from `src/lib/safe-storage.ts` and log through `src/lib/logger.ts`, so corrupted storage never crashes and production logs stay quiet and redacted.
 - Record workout sessions only via `src/lib/workout-history.ts` / `useWorkoutHistory`; it is the single source for completion, streaks and favorites/queue, preventing mismatched counts.
+- Aggregate Progress ranges and personal records through `progress-analytics` using local calendar dates so charts and session lists agree.
+- Validate AI workout responses and convert them through `ai-workout` before saving so timings, instructions and exercise IDs survive into the player.
+- Resolve Settings sections and legacy deep links through `settings-sections`; clear only app-owned device keys so auth and unrelated data are preserved.

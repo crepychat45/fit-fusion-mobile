@@ -17,6 +17,7 @@ interface Exercise {
   videoUrl?: string;
   thumbnailUrl?: string;
   description?: string;
+  instructions?: string;
   caloriesBurned?: number;
 }
 
@@ -82,7 +83,7 @@ export function EnhancedWorkoutPlayer({ exercises, workoutName, workoutId = work
     if (finishedRef.current) return;
     writeJson(draftKey(workoutId), { ...meta.current, index, completed, accumulatedSec: elapsed } satisfies Draft);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [index, completed, isPlaying, workoutId]);
+  }, [index, completed, isPlaying, workoutId, elapsed]);
 
   useEffect(() => {
     const warn = (e: BeforeUnloadEvent) => { if (!finishedRef.current && completed.length) { e.preventDefault(); e.returnValue = ""; } };
@@ -173,7 +174,7 @@ export function EnhancedWorkoutPlayer({ exercises, workoutName, workoutId = work
               {!!current.reps && <Stat v={current.reps} l="Reps" />}
               {!!current.duration && <Stat v={`${current.duration}s`} l="Duration" />}
             </div>
-            {current.description && <p className="text-muted-foreground">{current.description}</p>}
+            {(current.instructions || current.description) && <p className="text-muted-foreground">{current.instructions || current.description}</p>}
             <div className="flex items-center justify-center gap-4">
               <Button variant="outline" size="icon" aria-label="Previous exercise" onClick={() => setIndex((i) => Math.max(0, i - 1))} disabled={index === 0}><SkipBack className="h-5 w-5" /></Button>
               <Button size="lg" aria-label={isPlaying ? "Pause" : "Start"} onClick={() => setPlaying(!isPlaying)} className="h-14 w-14 rounded-full">
