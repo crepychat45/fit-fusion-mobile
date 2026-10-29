@@ -5,6 +5,7 @@ import { getAllWorkouts } from "@/data/workouts";
 import { useToast } from "@/hooks/use-toast";
 import { addSession } from "@/lib/workout-history";
 import { supabase } from "@/integrations/supabase/client";
+import { useEnhancedAuth } from "@/hooks/use-enhanced-auth";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -17,6 +18,8 @@ export default function WorkoutSession() {
   const { toast } = useToast();
   const [confirmExit, setConfirmExit] = useState(false);
   const [summary, setSummary] = useState<PlayerResult | null>(null);
+  const [saveStatus, setSaveStatus] = useState<"saving" | "device" | "synced" | "failed">("saving");
+  const { user } = useEnhancedAuth();
 
   const workout = getAllWorkouts().find((w) => w.id === id);
 
@@ -32,33 +35,38 @@ export default function WorkoutSession() {
   }
 
   const handleComplete = async (r: PlayerResult) => {
-    const { data } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
-    const userId = data?.user?.id ?? null;
+    const userId = user?.id ?? null;
+    const completedAt = new Date().toISOString();
     const ok = addSession({
       id: r.sessionId,
       workoutId: workout.id,
       workoutTitle: workout.title,
       userId,
       startedAt: r.startedAt,
-      completedAt: new Date().toISOString(),
+      completedAt,
       durationSec: r.durationSec,
       exercisesCompleted: r.exercisesCompleted,
       totalExercises: workout.exercises.length,
       estimatedCalories: r.estimatedCalories || undefined,
       status: "completed",
     });
+    setSummary(r);
+    setSaveStatus(ok ? "device" : "failed");
+    if (!ok) {
+      toast({ title: "Could not save workout", description: "Device storage is full or blocked. Your session has not been added to Progress.", variant: "destructive" });
+      return;
+    }
     if (userId) {
       const { error } = await supabase.from("workout_sessions").insert({
         user_id: userId,
-        completed_at: new Date().toISOString(),
-        duration_minutes: Math.max(1, Math.round(r.durationSec / 60)),
+        completed_at: completedAt,
+        duration_minutes: Math.round(r.durationSec / 60),
         calories_burned: r.estimatedCalories || null,
         notes: workout.title,
       });
       if (error) toast({ title: "Saved on this device", description: "Couldn't sync to your account yet. It's safe here." });
+      else setSaveStatus("synced");
     }
-    if (!ok) toast({ title: "Could not save workout", description: "Device storage is full or blocked.", variant: "destructive" });
-    setSummary(r);
   };
 
   if (summary) {
@@ -68,6 +76,9 @@ export default function WorkoutSession() {
         <div className="w-full max-w-sm rounded-2xl border bg-card p-6 text-center space-y-3">
           <h1 className="text-2xl font-bold">Workout complete</h1>
           <p className="text-muted-foreground">{workout.title}</p>
+          <p className={`text-sm ${saveStatus === "failed" ? "text-destructive" : "text-muted-foreground"}`} role="status">
+            {saveStatus === "failed" ? "Not saved — device storage is unavailable." : saveStatus === "synced" ? "Saved on this device and synced to your account." : "Saved on this device."}
+          </p>
           <div className="grid grid-cols-3 gap-2 text-sm">
             <div><div className="text-xl font-bold">{mins}m {summary.durationSec % 60}s</div>Time</div>
             <div><div className="text-xl font-bold">{summary.exercisesCompleted.length}/{workout.exercises.length}</div>Exercises</div>
