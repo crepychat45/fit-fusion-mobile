@@ -982,6 +982,7 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
       is_admin_or_super: { Args: { _user_id?: string }; Returns: boolean }
       is_super_admin: { Args: { _user_id?: string }; Returns: boolean }
+      merge_settings_preferences: { Args: { p_patch: Json }; Returns: Json }
       move_to_dlq: {
         Args: {
           dlq_name: string
