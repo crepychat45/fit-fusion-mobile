@@ -9,7 +9,7 @@
 - [x] Admin release/link validation and auditing
 - [x] Version/changelog/service-worker metadata 8.1.0
 - [x] Typecheck and authenticated page-load browser validation
-- [ ] Verify authenticated click-through interactions — blocked by unavailable browser session after sandbox reset
+- [x] Authenticated workout/Progress/calendar/Settings click-through verified on 2026-10-28; hardware pairing remains device-only
 
 # FitxFusion 8.2 roadmap
 - [x] Refine mobile glass dock motion, contrast and touch behavior
@@ -21,7 +21,7 @@
 - [x] Removed fake data/scans/replies across Home, chat, security, about, backup
 - [x] Live health, streak, presence, cross-device Settings sync
 - [x] Settings: live security check, sessions, password change, privacy, quiet hours, workout prefs, storage
-- [ ] Publish so the service worker can deliver 8.3.0 (needs user to publish)
+- [ ] Publish the current changes so deployed service-worker updates can deliver them (requires the user to publish)
 
 ## Master audit (2026-10-07)
 - [x] One settings system (removed duplicate providers)
@@ -29,10 +29,10 @@
 - [x] Removed canned chat replies and sample profile/level/Pro/sleep on Home
 - [x] FitScore + Your Week card on Home (real data only)
 - [x] Settings overview: profile, security score, cloud sync
-- [ ] Settings full 14-category redesign
-- [ ] Workouts: full-screen active workout + AI workout builder
-- [ ] Progress: deeper charts and time filters
-- [ ] Signed-in click-through testing (test browser was signed out)
+- [x] Settings consolidated into eight sections with all tools retained and legacy links resolved
+- [x] Workouts: full-screen active workout + AI workout builder connected to library
+- [x] Progress: consistent 7/30/90-day charts and session lists
+- [x] Signed-in click-through testing (real AI generation, save/start/resume/finish, Progress, calendar and Settings search)
 
 ## 8.5.0 (2026-10-08)
 - [x] New real tools in all Settings tabs
@@ -46,9 +46,9 @@
 - [x] Workouts: real streak/sessions, quick=short workouts, exercise/muscle search
 - [x] Unit tests (vitest) for history and streaks
 - [x] Settings consolidation: merged Enhanced+Developer tabs, removed fake validation/auto-save, added search button, duplicate Data Center removed
-- [ ] Progress/Home read from shared workout history
-- [ ] Custom builder, calendar, templates, PRs
-- [ ] Signed-in end-to-end testing
+- [x] Progress/Home read from shared workout history
+- [x] Custom builder, calendar, templates, PRs
+- [x] Signed-in end-to-end testing
 - [x] Progress page reads real workout history (charts, streaks, goals, achievements from useWorkoutHistory); Home already uses useLiveHealth
 - [x] Custom workout builder at /create-workout (save to device, plays in player, appears in library)
 - [x] Workout calendar at /schedule (month grid, schedule any workout with optional time, completed-day dots, upcoming list, start from calendar)
@@ -66,8 +66,14 @@
 - [x] AI workout generator: signed-in users can save generated workouts to their library and start them immediately (converts AI plan to custom workout format)
 
 ## Remaining master-review work (2026-10-28)
-- [ ] Consolidate Settings into eight sections, preserve deep links and search, remove misleading global save claims
-- [ ] Unify Recent Sessions with workout history; add consistent 7/30/90-day analytics and local-calendar records
-- [ ] Preserve timed exercises in AI plans, validate generated results and prevent duplicate saves
-- [ ] Run regression tests and authenticated workout → Progress → calendar → Settings checks
-- [ ] Reconcile outdated checklist items and record verified results and external blockers
+- [x] Consolidate Settings into eight sections, preserve deep links and search, remove misleading global save claims
+- [x] Unify Recent Sessions with workout history; add consistent 7/30/90-day analytics and local-calendar records
+- [x] Preserve timed exercises in AI plans, validate generated results and prevent duplicate saves
+- [x] Run regression tests and authenticated workout → Progress → calendar → Settings checks
+- [x] Reconcile outdated checklist items and record verified results and external blockers
+
+### Verification
+- 29 tests passed across six files; local-date/streak tests also passed in Asia/Kolkata.
+- Real AI request → save (duplicate save disabled) → start → exit → resume → finish → read back in all Progress ranges passed.
+- Scheduling the saved AI routine, legacy units/updates links, invalid-tab fallback, Settings search → Chat, and eight navigation entries passed; no browser page errors.
+- Latest automatic build: OK. Publishing and physical smartwatch/native capability tests remain external; no deployed-update or hardware success claimed.

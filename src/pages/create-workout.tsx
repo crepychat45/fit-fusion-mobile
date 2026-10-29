@@ -100,7 +100,7 @@ export default function CreateWorkout() {
       return;
     }
     const workout: Workout = {
-      id: `custom-${Date.now()}`,
+      id: `custom-${crypto.randomUUID()}`,
       title: title.trim(),
       description: description.trim() || "Custom workout",
       category,
@@ -109,7 +109,7 @@ export default function CreateWorkout() {
       popularity: 0,
       createdAt: Date.now(),
       tags: ["custom"],
-      exercises: valid.map(({ key: _k, ...e }, i) => ({ ...e, id: e.id || `ce-${i}` })),
+      exercises: valid.map(({ key, ...e }) => ({ ...e, id: key })),
     };
     if (!saveCustomWorkout(workout)) {
       toast({ title: "Save failed", description: "Could not store the workout on this device.", variant: "destructive" });
