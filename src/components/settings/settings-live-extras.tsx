@@ -9,73 +9,18 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useCloudSettingsGroup as useCloudGroup, type CloudGroupState as SyncState } from "@/hooks/use-cloud-settings-group";
 import { runSecurityChecks, type SecurityCheck } from "@/lib/security-checks";
 import { CheckCircle2, XCircle, ShieldCheck, LogOut, KeyRound, History, Radio, Moon, BellRing, Dumbbell, HardDrive, Loader2, Cloud, CloudOff } from "lucide-react";
 
-type Category = "privacy_settings" | "notification_settings" | "account_settings" | "security_settings";
-type SyncState = "idle" | "saving" | "saved" | "error";
-
-/** Cloud-backed preference group stored under `live` in one user_settings column, with live cross-device updates. */
-function useCloudGroup<T extends Record<string, unknown>>(category: Category, defaults: T) {
-  const [value, setValue] = useState<T>(defaults);
-  const [sync, setSync] = useState<SyncState>("idle");
-  const [remoteAt, setRemoteAt] = useState<number | null>(null);
-  const uidRef = useRef<string | null>(null);
-  const rowRef = useRef<Record<string, unknown>>({});
-  const lastWrite = useRef(0);
-
-  const apply = useCallback((row: Record<string, unknown> | null) => {
-    const col = (row?.[category] as Record<string, unknown>) ?? {};
-    rowRef.current = col;
-    setValue({ ...defaults, ...((col.live as T) ?? {}) });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category]);
-
-  useEffect(() => {
-    let channel: ReturnType<typeof supabase.channel> | null = null;
-    supabase.auth.getUser().then(async ({ data }) => {
-      const uid = data.user?.id;
-      if (!uid) return;
-      uidRef.current = uid;
-      const { data: row } = await supabase.from("user_settings").select(category).eq("user_id", uid).maybeSingle();
-      apply(row as Record<string, unknown> | null);
-      channel = supabase
-        .channel(`settings-live-${category}-${crypto.randomUUID()}`)
-        .on("postgres_changes", { event: "*", schema: "public", table: "user_settings", filter: `user_id=eq.${uid}` }, (p) => {
-          if (Date.now() - lastWrite.current < 1500) return;
-          apply(p.new as Record<string, unknown>);
-          setRemoteAt(Date.now());
-        })
-        .subscribe();
-    });
-    return () => {
-      if (channel) supabase.removeChannel(channel);
-    };
-  }, [category, apply]);
-
-  const update = async (patch: Partial<T>) => {
-    const next = { ...value, ...patch };
-    setValue(next);
-    const uid = uidRef.current;
-    if (!uid) return setSync("error");
-    setSync("saving");
-    lastWrite.current = Date.now();
-    const merged = { ...rowRef.current, live: next };
-    rowRef.current = merged;
-    const { error } = await supabase.from("user_settings").upsert({ user_id: uid, [category]: merged } as never, { onConflict: "user_id" });
-    setSync(error ? "error" : "saved");
-  };
-
-  const reset = () => update(defaults);
-  return { value, update, reset, sync, remoteAt, signedIn: Boolean(uidRef.current) };
-}
-
 function SyncBadge({ sync, remoteAt }: { sync: SyncState; remoteAt: number | null }) {
+  if (sync === "loading") return <Badge variant="outline"><Loader2 className="h-3 w-3 mr-1 animate-spin" />Loading</Badge>;
+  if (sync === "signed-out") return <Badge variant="outline"><CloudOff className="h-3 w-3 mr-1" />Sign in to save</Badge>;
   if (sync === "saving") return <Badge variant="outline"><Loader2 className="h-3 w-3 mr-1 animate-spin" />Saving</Badge>;
   if (sync === "error") return <Badge variant="destructive"><CloudOff className="h-3 w-3 mr-1" />Sync failed</Badge>;
   if (remoteAt && Date.now() - remoteAt < 10000) return <Badge><Radio className="h-3 w-3 mr-1" />Updated from another device</Badge>;
   if (sync === "saved") return <Badge variant="secondary"><Cloud className="h-3 w-3 mr-1" />Saved</Badge>;
-  return <Badge variant="outline"><Cloud className="h-3 w-3 mr-1" />Synced</Badge>;
+  return null;
 }
 
 function Row({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
