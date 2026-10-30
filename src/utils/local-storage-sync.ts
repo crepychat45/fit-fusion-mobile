@@ -6,7 +6,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 const PREFIXES = ["fitfusion-", "fitfusion."] as const;
-const matchesPrefix = (k: string) => PREFIXES.some((p) => k.startsWith(p));
+const matchesPrefix = (k: string) => PREFIXES.some((p) => k.startsWith(p)) && !/(token|secret|password|recovery|pin|biometric|profile|custom-sounds|backup)/i.test(k);
 const DEBOUNCE_MS = 900;
 
 let currentUserId: string | null = null;
@@ -31,20 +31,22 @@ function collectLocalKv(): Record<string, string> {
 
 async function pushNow() {
   if (!currentUserId) return;
+  const uid = currentUserId;
   const kv = collectLocalKv();
   const { error } = await supabase
     .from("user_settings")
     .upsert(
-      { user_id: currentUserId, local_kv: kv },
+      { user_id: uid, local_kv: kv },
       { onConflict: "user_id" },
     );
   if (error && navigator.onLine) {
     // one retry on transient failure
     setTimeout(() => {
+      if (currentUserId !== uid) return;
       supabase
         .from("user_settings")
         .upsert(
-          { user_id: currentUserId!, local_kv: kv },
+          { user_id: uid, local_kv: kv },
           { onConflict: "user_id" },
         );
     }, 2500);
@@ -63,15 +65,16 @@ async function hydrateFromCloud(uid: string) {
     .select("local_kv")
     .eq("user_id", uid)
     .maybeSingle();
+  if (currentUserId !== uid) return;
   if (error || !data) {
-    hydrated = true;
+    hydrated = !error;
     return;
   }
   const kv = (data.local_kv ?? {}) as Record<string, string>;
   let changed = false;
   try {
     for (const [k, v] of Object.entries(kv)) {
-      if (typeof v !== "string") continue;
+      if (!matchesPrefix(k) || typeof v !== "string") continue;
       if (localStorage.getItem(k) !== v) {
         localStorage.setItem(k, v);
         changed = true;
@@ -146,6 +149,7 @@ export function initSettingsCloudMirror() {
     } else if (event === "SIGNED_OUT") {
       currentUserId = null;
       hydrated = false;
+      if (pendingTimer) clearTimeout(pendingTimer);
     }
   });
 }

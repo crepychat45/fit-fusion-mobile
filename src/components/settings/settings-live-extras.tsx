@@ -171,38 +171,37 @@ export function PrivacyLivePanel() {
 /* ---------------- Notifications ---------------- */
 export function NotificationLivePanel() {
   const { toast } = useToast();
-  const g = useCloudGroup("notification_settings", { quietEnabled: false, quietFrom: "22:00", quietTo: "07:00", workouts: true, social: true, updates: true, security: true });
+  const g = useCloudGroup("notification_settings", { testTitle: "FitxFusion", testMessage: "Notification test" });
+  const [busy, setBusy] = useState(false);
   const test = async () => {
-    if (typeof Notification === "undefined") return toast({ title: "Notifications aren't supported here", variant: "destructive" });
-    const perm = Notification.permission === "default" ? await Notification.requestPermission() : Notification.permission;
-    if (perm !== "granted") return toast({ title: "Notifications are blocked", description: "Allow them in your browser or phone settings.", variant: "destructive" });
-    const reg = await navigator.serviceWorker?.getRegistration();
-    if (reg) await reg.showNotification("FitxFusion", { body: "Test notification — it works!", icon: "/icons/icon-192.png" });
-    else new Notification("FitxFusion", { body: "Test notification — it works!" });
+    setBusy(true);
+    try {
+      if (typeof Notification === "undefined") throw new Error("Notifications aren't supported on this device.");
+      const perm = Notification.permission === "default" ? await Notification.requestPermission() : Notification.permission;
+      if (perm !== "granted") throw new Error("Notifications are blocked. Allow them in your device settings.");
+      const reg = await navigator.serviceWorker?.getRegistration();
+      if (reg) await reg.showNotification(g.value.testTitle, { body: g.value.testMessage, icon: "/icons/icon-192.png" });
+      else new Notification(g.value.testTitle, { body: g.value.testMessage });
+    } catch (error) {
+      toast({ title: "Notification not sent", description: error instanceof Error ? error.message : "Please try again.", variant: "destructive" });
+    } finally { setBusy(false); }
   };
-  return (
-    <Card className="liquid-glass">
-      <CardHeader className="flex-row items-center justify-between space-y-0">
-        <div><CardTitle className="flex items-center gap-2"><BellRing className="h-5 w-5" />Live Notification Rules</CardTitle><CardDescription>Synced instantly to your other devices.</CardDescription></div>
-        <SyncBadge sync={g.sync} remoteAt={g.remoteAt} />
-      </CardHeader>
-      <CardContent className="divide-y divide-border/40">
-        <Row label="Quiet hours" hint="Silence alerts during these times"><Switch checked={g.value.quietEnabled} onCheckedChange={(v) => g.update({ quietEnabled: v })} /></Row>
-        {g.value.quietEnabled && (
-          <div className="flex items-center gap-2 py-2"><Moon className="h-4 w-4" />
-            <Input type="time" className="w-28" value={g.value.quietFrom} onChange={(e) => g.update({ quietFrom: e.target.value })} />
-            <span className="text-sm">to</span>
-            <Input type="time" className="w-28" value={g.value.quietTo} onChange={(e) => g.update({ quietTo: e.target.value })} />
-          </div>
-        )}
-        <Row label="Workout reminders"><Switch checked={g.value.workouts} onCheckedChange={(v) => g.update({ workouts: v })} /></Row>
-        <Row label="Likes, comments & messages"><Switch checked={g.value.social} onCheckedChange={(v) => g.update({ social: v })} /></Row>
-        <Row label="App updates"><Switch checked={g.value.updates} onCheckedChange={(v) => g.update({ updates: v })} /></Row>
-        <Row label="Security alerts"><Switch checked={g.value.security} onCheckedChange={(v) => g.update({ security: v })} /></Row>
-        <div className="pt-3 flex gap-2"><Button size="sm" onClick={test}>Send test notification</Button><Button variant="ghost" size="sm" onClick={g.reset}>Reset section</Button></div>
-      </CardContent>
-    </Card>
-  );
+  return <Card className="liquid-glass">
+    <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <CardTitle className="flex items-center gap-2"><BellRing className="h-5 w-5 text-primary" />Device Notification Test</CardTitle>
+      <SyncBadge sync={g.sync} remoteAt={g.remoteAt} />
+    </CardHeader>
+    <CardContent className="space-y-3">
+      <Label htmlFor="notification-test-title">Title</Label>
+      <Input id="notification-test-title" value={g.value.testTitle} disabled={!g.signedIn} maxLength={80} onChange={e => g.update({ testTitle: e.target.value })} />
+      <Label htmlFor="notification-test-message">Message</Label>
+      <Input id="notification-test-message" value={g.value.testMessage} disabled={!g.signedIn} maxLength={240} onChange={e => g.update({ testMessage: e.target.value })} />
+      <div className="flex flex-wrap gap-2">
+        <Button onClick={test} disabled={busy || !g.value.testTitle.trim()}>{busy && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}Send device test</Button>
+        {g.sync === "error" && <Button variant="outline" onClick={g.retry}>Retry save</Button>}
+      </div>
+    </CardContent>
+  </Card>;
 }
 
 /* ---------------- Workout preferences ---------------- */
@@ -258,7 +257,7 @@ export function StorageLivePanel() {
   const clear = async () => {
     if ("caches" in window) await Promise.all((await caches.keys()).map((k) => caches.delete(k)));
     await refresh();
-    toast({ title: "Cache cleared", description: "Your account data is safe in the cloud." });
+    toast({ title: "Offline cache cleared", description: "Recorded workouts and account preferences were not removed." });
   };
   const mb = (n: number) => (n / 1048576).toFixed(1);
   return (

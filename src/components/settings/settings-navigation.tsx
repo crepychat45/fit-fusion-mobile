@@ -237,7 +237,7 @@ export function SettingsNavigation({
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="grid grid-cols-2 gap-4 p-4 lg:grid-cols-3 xl:grid-cols-4"
+        className="grid grid-cols-2 gap-2 p-4 lg:grid-cols-4"
       >
         {settingsCategories.map((category) => {
           const isActive = activeTab === category.id;
@@ -251,20 +251,20 @@ export function SettingsNavigation({
               aria-current={isActive ? "page" : undefined}
               onClick={() => onTabChange(category.id)}
               className={cn(
-                "crystal-glass crystal-sheen group relative overflow-hidden h-auto whitespace-normal rounded-lg p-4 text-center",
+                "crystal-glass crystal-sheen group relative overflow-hidden h-auto whitespace-normal rounded-lg p-3 text-left",
                 isActive && "crystal-glass-active",
               )}
             >
-              <div className="flex flex-col items-center gap-3">
+              <div className="flex items-center gap-3">
                 <span
                   className={cn(
-                    "rounded-2xl p-3 transition-transform duration-300 group-hover:-translate-y-0.5",
+                    "rounded-lg p-2 transition-transform duration-300 group-hover:-translate-y-0.5",
                     isActive ? "bg-primary/15" : "bg-muted/60",
                   )}
                 >
                   <CategoryIcon
                     className={cn(
-                      "h-6 w-6",
+                      "h-5 w-5",
                       isActive ? "text-primary" : category.color,
                     )}
                   />
@@ -278,11 +278,9 @@ export function SettingsNavigation({
                   >
                     {category.title}
                   </span>
-                  <span className="mt-1 line-clamp-2 block text-xs text-muted-foreground">
-                    {category.description}
-                  </span>
+
                 </span>
-                <span className="h-1 w-full overflow-hidden rounded-full bg-transparent">
+                <span className="hidden">
                   {isActive && (
                     <motion.span
                       layoutId="activeIndicator"
@@ -302,6 +300,9 @@ export function SettingsNavigation({
     <>
       <MobileMenu />
       <DesktopMenu />
+      <nav aria-label="Settings sections" className="md:hidden flex gap-2 overflow-x-auto px-4 py-3 border-b border-border/30">
+        {settingsCategories.map(category => <Button key={category.id} size="sm" variant={activeTab === category.id ? "default" : "outline"} className="shrink-0" aria-current={activeTab === category.id ? "page" : undefined} onClick={() => onTabChange(category.id)}><category.icon className="h-4 w-4 mr-2" />{category.title}</Button>)}
+      </nav>
     </>
   );
 }
