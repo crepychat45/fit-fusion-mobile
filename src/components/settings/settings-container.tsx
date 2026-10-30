@@ -6,6 +6,9 @@ import { HISTORY_EVENT } from "@/lib/workout-history";
 import { CUSTOM_EVENT } from "@/lib/custom-workouts";
 import { logger } from "@/lib/logger";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useSettings } from "@/contexts/safe-settings-context";
+import { Badge } from "@/components/ui/badge";
+import { PermissionCenter } from "@/components/permissions/permission-center";
 import { SettingsNavigation } from "./settings-navigation";
 import { SettingsSearch } from "./settings-search";
 import { useToast } from "@/components/ui/use-toast";
@@ -177,6 +180,7 @@ const L: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 export function SettingsContainer() {
   const { toast } = useToast();
+  const { syncStatus, syncNow } = useSettings();
   const location = useLocation();
   const navigate = useNavigate();
   // Deep link support: /settings?tab=updates opens that tab directly.
@@ -296,9 +300,9 @@ export function SettingsContainer() {
     <div className="w-full relative">
       {/* Connection Status */}
       {!isConnected && (
-        <Alert className="mx-4 mb-4 border-red-200 bg-red-50 dark:bg-red-950/20">
-          <AlertTriangle className="h-4 w-4 text-red-600" />
-          <AlertDescription className="text-red-800 dark:text-red-200">
+        <Alert className="mx-4 mb-4 border-destructive/30 bg-destructive/5">
+          <AlertTriangle className="h-4 w-4 text-destructive" />
+          <AlertDescription className="text-foreground">
             You are currently offline. Some features may not be available.
           </AlertDescription>
         </Alert>
@@ -330,6 +334,10 @@ export function SettingsContainer() {
               </div>
 
               <div className="flex items-center gap-2 shrink-0">
+                <Badge variant={syncStatus === "error" ? "destructive" : "outline"} role="status" className="hidden sm:inline-flex" data-testid="settings-sync-status">
+                  {{ loading: "Loading preferences", saving: "Saving preferences", saved: "Preferences saved", error: "Save failed", offline: "Waiting for connection", paused: "Sync paused", "signed-out": "Device only" }[syncStatus]}
+                </Badge>
+                {(syncStatus === "error" || syncStatus === "offline") && <Button size="icon" variant="outline" onClick={syncNow} aria-label="Retry preference sync" title="Retry preference sync"><RefreshCw className="h-4 w-4" /></Button>
                 <Button
                   variant="outline"
                   size="sm"
@@ -435,7 +443,6 @@ export function SettingsContainer() {
                 <L><SecurityQuantumExtras /></L>
                 <L><SecurityFusionExtras /></L>
                 <L><SecurityNovaExtras /></L>
-                <L><SecurityPrimeExtras /></L>
               </div>
             </TabsContent>
 
@@ -455,7 +462,6 @@ export function SettingsContainer() {
                 <L><DisplayPrimeExtras /></L>
                 <h2 className="text-lg font-semibold">Units & Workout Preferences</h2>
 
-                <L><WorkoutLivePanel /></L>
                 <L><UnitPreferences /></L>
                 <L><UnitsExtras /></L>
                 <L><UnitsProExtras /></L>
@@ -472,9 +478,7 @@ export function SettingsContainer() {
 
             <TabsContent value="privacy" className="mt-0">
               <div className="space-y-6">
-                <L><PrivacyLivePanel /></L>
-                <L><PrivacySettings /></L>
-                <L><PrivacyExtras /></L>
+                <PermissionCenter />
                 <L><PrivacyProExtras /></L>
                 <L><PrivacyUltraExtras /></L>
                 <L><PrivacyMaxExtras /></L>
@@ -482,7 +486,6 @@ export function SettingsContainer() {
                 <L><PrivacyQuantumExtras /></L>
                 <L><PrivacyFusionExtras /></L>
                 <L><PrivacyNovaExtras /></L>
-                <L><PrivacyPrimeExtras /></L>
               </div>
             </TabsContent>
 
@@ -491,8 +494,6 @@ export function SettingsContainer() {
                 <PushDevicePanel />
                 <L><NotificationLivePanel /></L>
                 <L><NotificationPreferences /></L>
-                <L><NotificationSettings /></L>
-                <L><NotificationExtras /></L>
                 <L><NotificationProExtras /></L>
                 <L><NotificationNextExtras /></L>
                 <L><NotificationUltraExtras /></L>
@@ -501,7 +502,6 @@ export function SettingsContainer() {
                 <L><NotificationQuantumExtras /></L>
                 <L><NotificationFusionExtras /></L>
                 <L><NotificationNovaExtras /></L>
-                <L><NotificationPrimePanel /></L>
               </div>
             </TabsContent>
 

@@ -11,7 +11,14 @@ import {
   fetchRemoteSettings,
   createDebouncedPush,
   type SettingsSnapshot,
+  type SettingsSyncStatus,
+  changedSettings,
+  unpackRow,
+  pushRemoteSettings,
 } from "@/utils/settings-sync";
+import { readJson } from "@/lib/safe-storage";
+import { logger } from "@/lib/logger";
+import { APP_VERSION } from "@/lib/app-version";
 import { getStoredTheme, onThemeChange, setTheme as persistTheme } from "@/lib/theme";
 
 type SubscriptionPlan = "Free" | "Basic" | "Super" | "Advance";
@@ -26,6 +33,10 @@ type PaymentMethod =
 type UnitSystem = "metric" | "imperial";
 
 interface SettingsContextType {
+  settingsSnapshot: SettingsSnapshot;
+  restorePreferences: (values: Partial<SettingsSnapshot>) => Promise<boolean>;
+  syncStatus: SettingsSyncStatus;
+  syncNow: () => Promise<void>;
   soundEnabled: boolean;
   setSoundEnabled: (enabled: boolean) => void;
   soundVolume: number;
@@ -122,7 +133,7 @@ const safeLocalStorage = {
     try {
       return localStorage.getItem(key) || defaultValue;
     } catch (error) {
-      console.warn(`Failed to read ${key} from localStorage:`, error);
+      logger.warn(`Failed to read ${key} from localStorage:`, error);
       return defaultValue;
     }
   },
@@ -131,7 +142,7 @@ const safeLocalStorage = {
     try {
       localStorage.setItem(key, value);
     } catch (error) {
-      console.warn(`Failed to save ${key} to localStorage:`, error);
+      logger.warn(`Failed to save ${key} to localStorage:`, error);
     }
   },
   getBoolItem: (key: string, defaultValue: boolean = false): boolean => {
@@ -140,7 +151,7 @@ const safeLocalStorage = {
       const saved = localStorage.getItem(key);
       return saved !== null ? saved === "true" : defaultValue;
     } catch (error) {
-      console.warn(`Failed to read ${key} from localStorage:`, error);
+      logger.warn(`Failed to read ${key} from localStorage:`, error);
       return defaultValue;
     }
   },
@@ -148,9 +159,9 @@ const safeLocalStorage = {
     if (typeof window === "undefined") return defaultValue;
     try {
       const saved = localStorage.getItem(key);
-      return saved ? JSON.parse(saved) : defaultValue;
+      return readJson(key, defaultValue);
     } catch (error) {
-      console.warn(`Failed to read ${key} from localStorage:`, error);
+      logger.warn(`Failed to read ${key} from localStorage:`, error);
       return defaultValue;
     }
   },
@@ -168,7 +179,8 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
 
   const [soundVolume, setSoundVolume] = useState(() => {
     const saved = safeLocalStorage.getItem("fitfusion-sound-volume", "80");
-    return parseInt(saved) || 80;
+    const volume = Number(saved);
+    return Number.isFinite(volume) ? Math.min(100, Math.max(0, volume)) : 80;
   });
 
   const [hapticEnabled, setHapticEnabled] = useState(() =>
@@ -261,34 +273,9 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     safeLocalStorage.getBoolItem("fitfusion-code-editor-enabled", false)
   );
 
-  // Version info
-  const [appVersion, setAppVersionState] = useState(() =>
-    safeLocalStorage.getItem("fitfusion-app-version", "8.0.0")
-  );
-
-  // Listen for version updates from other components
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const handleVersionUpdate = (event: CustomEvent) => {
-      setAppVersionState(event.detail);
-    };
-
-    window.addEventListener("versionUpdated", handleVersionUpdate as EventListener);
-
-    return () => {
-      window.removeEventListener("versionUpdated", handleVersionUpdate as EventListener);
-    };
-  }, []);
-
-  const setAppVersion = (version: string) => {
-    setAppVersionState(version);
-    safeLocalStorage.setItem("fitfusion-app-version", version);
-    
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new CustomEvent("versionUpdated", { detail: version }));
-    }
-  };
+  // Installed version is bundled code, never an editable preference.
+  const appVersion = APP_VERSION;
+  const setAppVersion = (_version: string) => {};
 
   // Subscription settings
   const [subscriptionPlan, setSubscriptionPlan] = useState<SubscriptionPlan>(() => {
@@ -479,27 +466,40 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     profileData: Record<string, any>,
   ): Promise<boolean> => {
     try {
-      safeLocalStorage.setItem("fitfusion-profile", JSON.stringify(profileData));
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const { data, error: authError } = await supabase.auth.getUser();
+      if (authError || !data.user) return false;
+      const info = profileData.personalInfo ?? profileData;
+      const { error } = await supabase.from("profiles").upsert({
+        user_id: data.user.id,
+        name: info.fullName ?? info.name ?? null,
+        bio: info.bio ?? null,
+        fitness_goals: profileData.fitnessGoals?.primaryGoals ?? [],
+        body_measurements: profileData.bodyMeasurements ?? {},
+      }, { onConflict: "user_id" });
+      if (error) throw error;
       return true;
     } catch (error) {
-      console.error("Error saving profile data:", error);
+      logger.error("Error saving profile data:", error);
       return false;
     }
   };
 
-  /* -------------------- Cloud sync (persistence across devices / logout) -------------------- */
+  const [syncStatus, setSyncStatus] = useState<SettingsSyncStatus>("loading");
+  const [readyUser, setReadyUser] = useState<string | null>(null);
   const userIdRef = useRef<string | null>(null);
-  const hydratedRef = useRef(false);
-  const pushRef = useRef(createDebouncedPush(900));
-
-  // Hydrate from remote when signed in; clear flag on sign-out.
-  useEffect(() => {
-    let cancelled = false;
-    const hydrate = async (uid: string) => {
-      const remote = await fetchRemoteSettings(uid);
-      if (cancelled) return;
-      if (remote) {
+  const baseline = useRef<Partial<SettingsSnapshot>>({});
+  const pushRef = useRef(createDebouncedPush(900, setSyncStatus));
+  const snapshot: SettingsSnapshot = {
+    theme, fontSize, language, unitSystem, autoSync, cloudBackup, notifications,
+    soundEnabled, soundVolume, soundPack, hapticEnabled, hapticFeedback,
+    compactView, showCalories, showHeartRate, exportFormat, exportAnonymized,
+    exportCategories, displayOptions, developerOptions, codeEditorEnabled,
+    programmingLanguages, customSounds, subscriptionPlan, paymentMethod,
+  };
+  const snapshotRef = useRef(snapshot);
+  snapshotRef.current = snapshot;
+  const applyRemote = (remote: Partial<SettingsSnapshot>) => {
+        if (remote.theme === "light" || remote.theme === "dark" || remote.theme === "system") setTheme(remote.theme);
         if (typeof remote.fontSize === "string") setFontSize(remote.fontSize as any);
         if (typeof remote.language === "string") setLanguage(remote.language);
         if (typeof remote.unitSystem === "string") setUnitSystem(remote.unitSystem as UnitSystem);
@@ -524,86 +524,95 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
         if (remote.customSounds && typeof remote.customSounds === "object") setCustomSounds(remote.customSounds);
         if (typeof remote.subscriptionPlan === "string") setSubscriptionPlan(remote.subscriptionPlan as any);
         if (typeof remote.paymentMethod === "string") setPaymentMethod(remote.paymentMethod as any);
-      }
-      hydratedRef.current = true;
-    };
 
-    supabase.auth.getSession().then(({ data }) => {
-      const uid = data.session?.user?.id ?? null;
+  };
+  const applyRef = useRef(applyRemote);
+  applyRef.current = applyRemote;
+
+  useEffect(() => {
+    let disposed = false;
+    let generation = 0;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    const initialize = async (uid: string | null) => {
+      if (disposed) return;
+      const epoch = ++generation;
       userIdRef.current = uid;
-      if (uid) hydrate(uid);
-      else hydratedRef.current = true; // allow push once user signs in
-    });
-
-    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      const uid = session?.user?.id ?? null;
-      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
-        userIdRef.current = uid;
-        if (uid) hydrate(uid);
-      } else if (event === "SIGNED_OUT") {
-        userIdRef.current = null;
-        hydratedRef.current = false;
-      }
-    });
-    return () => {
-      cancelled = true;
-      sub.subscription.unsubscribe();
+      setReadyUser(null);
+      pushRef.current.cancel();
+      if (channel) { void supabase.removeChannel(channel); channel = null; }
+      if (!uid) { setSyncStatus("signed-out"); return; }
+      setSyncStatus("loading");
+      const start = snapshotRef.current;
+      try {
+        const remote = await fetchRemoteSettings(uid);
+        if (disposed || epoch !== generation || userIdRef.current !== uid) return;
+        const edits = changedSettings(start, snapshotRef.current);
+        const merged = { ...snapshotRef.current, ...remote, ...edits };
+        baseline.current = remote ? { ...merged, ...remote } : {};
+        applyRef.current(merged);
+        setReadyUser(uid);
+        setSyncStatus("saved");
+        channel = supabase.channel(`settings-provider-${uid}-${crypto.randomUUID()}`)
+          .on("postgres_changes", { event: "*", schema: "public", table: "user_settings", filter: `user_id=eq.${uid}` }, payload => {
+            if (disposed || userIdRef.current !== uid) return;
+            const remoteValues = unpackRow(payload.new as Record<string, unknown>);
+            const local = { ...changedSettings(baseline.current, snapshotRef.current), ...pushRef.current.pending() };
+            const next = { ...snapshotRef.current, ...remoteValues, ...local };
+            baseline.current = { ...baseline.current, ...remoteValues };
+            applyRef.current(next);
+          }).subscribe();
+      } catch (error) { if (!disposed && epoch === generation) { logger.warn("Settings load failed", error); setSyncStatus("error"); } }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    void supabase.auth.getSession().then(({ data }) => initialize(data.session?.user.id ?? null));
+    const { data: auth } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "TOKEN_REFRESHED" || session?.user.id === userIdRef.current && event !== "SIGNED_OUT") return;
+      // Leave the auth callback before making database requests.
+      void Promise.resolve().then(() => initialize(session?.user.id ?? null));
+    });
+    const online = () => {
+      if (userIdRef.current) void initialize(userIdRef.current);
+    };
+    window.addEventListener("online", online);
+    return () => { disposed = true; generation++; pushRef.current.cancel(); auth.subscription.unsubscribe(); window.removeEventListener("online", online); if (channel) void supabase.removeChannel(channel); };
   }, []);
 
-  // Push snapshot to cloud on any settings change (debounced).
   useEffect(() => {
-    if (!hydratedRef.current) return;
+    if (!readyUser || readyUser !== userIdRef.current) return;
+    if (!autoSync) { pushRef.current.cancel(); setSyncStatus("paused"); return; }
+    const patch = changedSettings(baseline.current, snapshotRef.current);
+    if (!Object.keys(patch).length) return;
+    baseline.current = snapshotRef.current;
+    pushRef.current(readyUser, patch);
+  }, [readyUser, theme, fontSize, language, unitSystem, autoSync, cloudBackup, notifications,
+    soundEnabled, soundVolume, soundPack, hapticEnabled, hapticFeedback, compactView,
+    showCalories, showHeartRate, exportFormat, exportAnonymized, exportCategories,
+    displayOptions, developerOptions, codeEditorEnabled, programmingLanguages, customSounds,
+    subscriptionPlan, paymentMethod]);
+
+  const restorePreferences = async (values: Partial<SettingsSnapshot>) => {
     const uid = userIdRef.current;
-    if (!uid) return;
-    const snapshot: SettingsSnapshot = {
-      theme, fontSize, language, unitSystem,
-      autoSync, cloudBackup, notifications,
-      soundEnabled, soundVolume, soundPack, hapticEnabled, hapticFeedback,
-      compactView, showCalories, showHeartRate,
-      exportFormat, exportAnonymized, exportCategories,
-      displayOptions, developerOptions, codeEditorEnabled,
-      programmingLanguages, customSounds,
-      subscriptionPlan, paymentMethod,
-    };
-    pushRef.current(uid, snapshot);
-  }, [
-    theme, fontSize, language, unitSystem,
-    autoSync, cloudBackup, notifications,
-    soundEnabled, soundVolume, soundPack, hapticEnabled, hapticFeedback,
-    compactView, showCalories, showHeartRate,
-    exportFormat, exportAnonymized, exportCategories,
-    displayOptions, developerOptions, codeEditorEnabled,
-    programmingLanguages, customSounds,
-    subscriptionPlan, paymentMethod,
-  ]);
+    if (!uid) return false;
+    setSyncStatus("saving");
+    const ok = await pushRemoteSettings(uid, values);
+    if (ok) {
+      const next = { ...snapshotRef.current, ...values };
+      baseline.current = next;
+      applyRef.current(next);
+    }
+    setSyncStatus(ok ? "saved" : "error");
+    return ok;
+  };
 
-  // Retry sync when network returns.
-  useEffect(() => {
-    const onOnline = () => {
-      const uid = userIdRef.current;
-      if (!uid || !hydratedRef.current) return;
-      const snapshot: SettingsSnapshot = {
-        theme, fontSize, language, unitSystem,
-        autoSync, cloudBackup, notifications,
-        soundEnabled, soundVolume, soundPack, hapticEnabled, hapticFeedback,
-        compactView, showCalories, showHeartRate,
-        exportFormat, exportAnonymized, exportCategories,
-        displayOptions, developerOptions, codeEditorEnabled,
-        programmingLanguages, customSounds,
-        subscriptionPlan, paymentMethod,
-      };
-      pushRef.current(uid, snapshot);
-    };
-    window.addEventListener("online", onOnline);
-    return () => window.removeEventListener("online", onOnline);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const syncNow = async () => {
+    if (!readyUser) { setSyncStatus("error"); return; }
+    pushRef.current(readyUser, changedSettings(baseline.current, snapshotRef.current));
+    await pushRef.current.flush();
+  };
 
   return (
     <SettingsContext.Provider
       value={{
+        settingsSnapshot: snapshot, restorePreferences, syncStatus, syncNow,
         soundEnabled,
         setSoundEnabled,
         soundVolume,

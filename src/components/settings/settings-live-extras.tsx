@@ -9,73 +9,18 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useCloudSettingsGroup as useCloudGroup, type CloudGroupState as SyncState } from "@/hooks/use-cloud-settings-group";
 import { runSecurityChecks, type SecurityCheck } from "@/lib/security-checks";
 import { CheckCircle2, XCircle, ShieldCheck, LogOut, KeyRound, History, Radio, Moon, BellRing, Dumbbell, HardDrive, Loader2, Cloud, CloudOff } from "lucide-react";
 
-type Category = "privacy_settings" | "notification_settings" | "account_settings" | "security_settings";
-type SyncState = "idle" | "saving" | "saved" | "error";
-
-/** Cloud-backed preference group stored under `live` in one user_settings column, with live cross-device updates. */
-function useCloudGroup<T extends Record<string, unknown>>(category: Category, defaults: T) {
-  const [value, setValue] = useState<T>(defaults);
-  const [sync, setSync] = useState<SyncState>("idle");
-  const [remoteAt, setRemoteAt] = useState<number | null>(null);
-  const uidRef = useRef<string | null>(null);
-  const rowRef = useRef<Record<string, unknown>>({});
-  const lastWrite = useRef(0);
-
-  const apply = useCallback((row: Record<string, unknown> | null) => {
-    const col = (row?.[category] as Record<string, unknown>) ?? {};
-    rowRef.current = col;
-    setValue({ ...defaults, ...((col.live as T) ?? {}) });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category]);
-
-  useEffect(() => {
-    let channel: ReturnType<typeof supabase.channel> | null = null;
-    supabase.auth.getUser().then(async ({ data }) => {
-      const uid = data.user?.id;
-      if (!uid) return;
-      uidRef.current = uid;
-      const { data: row } = await supabase.from("user_settings").select(category).eq("user_id", uid).maybeSingle();
-      apply(row as Record<string, unknown> | null);
-      channel = supabase
-        .channel(`settings-live-${category}-${crypto.randomUUID()}`)
-        .on("postgres_changes", { event: "*", schema: "public", table: "user_settings", filter: `user_id=eq.${uid}` }, (p) => {
-          if (Date.now() - lastWrite.current < 1500) return;
-          apply(p.new as Record<string, unknown>);
-          setRemoteAt(Date.now());
-        })
-        .subscribe();
-    });
-    return () => {
-      if (channel) supabase.removeChannel(channel);
-    };
-  }, [category, apply]);
-
-  const update = async (patch: Partial<T>) => {
-    const next = { ...value, ...patch };
-    setValue(next);
-    const uid = uidRef.current;
-    if (!uid) return setSync("error");
-    setSync("saving");
-    lastWrite.current = Date.now();
-    const merged = { ...rowRef.current, live: next };
-    rowRef.current = merged;
-    const { error } = await supabase.from("user_settings").upsert({ user_id: uid, [category]: merged } as never, { onConflict: "user_id" });
-    setSync(error ? "error" : "saved");
-  };
-
-  const reset = () => update(defaults);
-  return { value, update, reset, sync, remoteAt, signedIn: Boolean(uidRef.current) };
-}
-
 function SyncBadge({ sync, remoteAt }: { sync: SyncState; remoteAt: number | null }) {
+  if (sync === "loading") return <Badge variant="outline"><Loader2 className="h-3 w-3 mr-1 animate-spin" />Loading</Badge>;
+  if (sync === "signed-out") return <Badge variant="outline"><CloudOff className="h-3 w-3 mr-1" />Sign in to save</Badge>;
   if (sync === "saving") return <Badge variant="outline"><Loader2 className="h-3 w-3 mr-1 animate-spin" />Saving</Badge>;
   if (sync === "error") return <Badge variant="destructive"><CloudOff className="h-3 w-3 mr-1" />Sync failed</Badge>;
   if (remoteAt && Date.now() - remoteAt < 10000) return <Badge><Radio className="h-3 w-3 mr-1" />Updated from another device</Badge>;
   if (sync === "saved") return <Badge variant="secondary"><Cloud className="h-3 w-3 mr-1" />Saved</Badge>;
-  return <Badge variant="outline"><Cloud className="h-3 w-3 mr-1" />Synced</Badge>;
+  return null;
 }
 
 function Row({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
@@ -226,38 +171,37 @@ export function PrivacyLivePanel() {
 /* ---------------- Notifications ---------------- */
 export function NotificationLivePanel() {
   const { toast } = useToast();
-  const g = useCloudGroup("notification_settings", { quietEnabled: false, quietFrom: "22:00", quietTo: "07:00", workouts: true, social: true, updates: true, security: true });
+  const g = useCloudGroup("notification_settings", { testTitle: "FitxFusion", testMessage: "Notification test" });
+  const [busy, setBusy] = useState(false);
   const test = async () => {
-    if (typeof Notification === "undefined") return toast({ title: "Notifications aren't supported here", variant: "destructive" });
-    const perm = Notification.permission === "default" ? await Notification.requestPermission() : Notification.permission;
-    if (perm !== "granted") return toast({ title: "Notifications are blocked", description: "Allow them in your browser or phone settings.", variant: "destructive" });
-    const reg = await navigator.serviceWorker?.getRegistration();
-    if (reg) await reg.showNotification("FitxFusion", { body: "Test notification — it works!", icon: "/icons/icon-192.png" });
-    else new Notification("FitxFusion", { body: "Test notification — it works!" });
+    setBusy(true);
+    try {
+      if (typeof Notification === "undefined") throw new Error("Notifications aren't supported on this device.");
+      const perm = Notification.permission === "default" ? await Notification.requestPermission() : Notification.permission;
+      if (perm !== "granted") throw new Error("Notifications are blocked. Allow them in your device settings.");
+      const reg = await navigator.serviceWorker?.getRegistration();
+      if (reg) await reg.showNotification(g.value.testTitle, { body: g.value.testMessage, icon: "/icons/icon-192.png" });
+      else new Notification(g.value.testTitle, { body: g.value.testMessage });
+    } catch (error) {
+      toast({ title: "Notification not sent", description: error instanceof Error ? error.message : "Please try again.", variant: "destructive" });
+    } finally { setBusy(false); }
   };
-  return (
-    <Card className="liquid-glass">
-      <CardHeader className="flex-row items-center justify-between space-y-0">
-        <div><CardTitle className="flex items-center gap-2"><BellRing className="h-5 w-5" />Live Notification Rules</CardTitle><CardDescription>Synced instantly to your other devices.</CardDescription></div>
-        <SyncBadge sync={g.sync} remoteAt={g.remoteAt} />
-      </CardHeader>
-      <CardContent className="divide-y divide-border/40">
-        <Row label="Quiet hours" hint="Silence alerts during these times"><Switch checked={g.value.quietEnabled} onCheckedChange={(v) => g.update({ quietEnabled: v })} /></Row>
-        {g.value.quietEnabled && (
-          <div className="flex items-center gap-2 py-2"><Moon className="h-4 w-4" />
-            <Input type="time" className="w-28" value={g.value.quietFrom} onChange={(e) => g.update({ quietFrom: e.target.value })} />
-            <span className="text-sm">to</span>
-            <Input type="time" className="w-28" value={g.value.quietTo} onChange={(e) => g.update({ quietTo: e.target.value })} />
-          </div>
-        )}
-        <Row label="Workout reminders"><Switch checked={g.value.workouts} onCheckedChange={(v) => g.update({ workouts: v })} /></Row>
-        <Row label="Likes, comments & messages"><Switch checked={g.value.social} onCheckedChange={(v) => g.update({ social: v })} /></Row>
-        <Row label="App updates"><Switch checked={g.value.updates} onCheckedChange={(v) => g.update({ updates: v })} /></Row>
-        <Row label="Security alerts"><Switch checked={g.value.security} onCheckedChange={(v) => g.update({ security: v })} /></Row>
-        <div className="pt-3 flex gap-2"><Button size="sm" onClick={test}>Send test notification</Button><Button variant="ghost" size="sm" onClick={g.reset}>Reset section</Button></div>
-      </CardContent>
-    </Card>
-  );
+  return <Card className="liquid-glass">
+    <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <CardTitle className="flex items-center gap-2"><BellRing className="h-5 w-5 text-primary" />Device Notification Test</CardTitle>
+      <SyncBadge sync={g.sync} remoteAt={g.remoteAt} />
+    </CardHeader>
+    <CardContent className="space-y-3">
+      <Label htmlFor="notification-test-title">Title</Label>
+      <Input id="notification-test-title" value={g.value.testTitle} disabled={!g.signedIn} maxLength={80} onChange={e => g.update({ testTitle: e.target.value })} />
+      <Label htmlFor="notification-test-message">Message</Label>
+      <Input id="notification-test-message" value={g.value.testMessage} disabled={!g.signedIn} maxLength={240} onChange={e => g.update({ testMessage: e.target.value })} />
+      <div className="flex flex-wrap gap-2">
+        <Button onClick={test} disabled={busy || !g.value.testTitle.trim()}>{busy && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}Send device test</Button>
+        {g.sync === "error" && <Button variant="outline" onClick={g.retry}>Retry save</Button>}
+      </div>
+    </CardContent>
+  </Card>;
 }
 
 /* ---------------- Workout preferences ---------------- */
@@ -313,7 +257,7 @@ export function StorageLivePanel() {
   const clear = async () => {
     if ("caches" in window) await Promise.all((await caches.keys()).map((k) => caches.delete(k)));
     await refresh();
-    toast({ title: "Cache cleared", description: "Your account data is safe in the cloud." });
+    toast({ title: "Offline cache cleared", description: "Recorded workouts and account preferences were not removed." });
   };
   const mb = (n: number) => (n / 1048576).toFixed(1);
   return (
