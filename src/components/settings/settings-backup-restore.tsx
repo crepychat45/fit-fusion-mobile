@@ -15,7 +15,7 @@ export function SettingsBackupRestore() {
   const { settingsSnapshot, restorePreferences } = useSettings();
   const [backups, setBackups] = useState<Backup[]>(() => {
     const stored = readJson<unknown>(KEY, []);
-    return Array.isArray(stored) ? stored.filter(b => validSettingsBackup(b) && typeof b.id === "string") as Backup[] : [];
+    return Array.isArray(stored) ? stored.filter(b => validSettingsBackup(b) && 'id' in b && typeof b.id === "string") as Backup[] : [];
   });
   const [result, setResult] = useState("");
   const [busy, setBusy] = useState(false);

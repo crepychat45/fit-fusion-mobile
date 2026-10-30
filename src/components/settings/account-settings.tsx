@@ -1,3 +1,6 @@
+import { localAppDataKeys } from "@/lib/settings-sections";
+import { safeJsonParse } from "@/lib/safe-storage";
+import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import {
   Card,
@@ -102,6 +105,7 @@ function parseUserAgent(ua: string) {
 // ---------- component ----------
 export function AccountSettings() {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // auth state
   const [session, setSession] = useState<any>(null);
@@ -278,7 +282,6 @@ export function AccountSettings() {
     setIsLoading(true);
     try {
       const { signOutAndRedirect } = await import("@/lib/sign-out");
-      toast({ title: "Signed out everywhere", description: "All sessions revoked." });
       setLogoutDialogOpen(false);
       await signOutAndRedirect("global");
     } catch (e: any) {
@@ -297,6 +300,8 @@ export function AccountSettings() {
     try {
       const { error } = await supabase.auth.updateUser({ data: { name: newName.trim() } });
       if (error) throw error;
+      const { error: profileError } = await supabase.from("profiles").upsert({ user_id: session.user.id, name: newName.trim() }, { onConflict: "user_id" });
+      if (profileError) throw profileError;
       setName(newName.trim());
       toast({ title: "Name updated" });
       setNameDialogOpen(false);
@@ -406,10 +411,10 @@ export function AccountSettings() {
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
         if (!k) continue;
-        if (k.startsWith("supabase.auth") || k === "auth_token") continue;
+        if (!localAppDataKeys(localStorage).includes(k)) continue;
         try {
           const raw = localStorage.getItem(k);
-          localData[k] = raw ? (raw.startsWith("{") || raw.startsWith("[") ? JSON.parse(raw) : raw) : null;
+          localData[k] = raw ? (raw.startsWith("{") || raw.startsWith("[") ? safeJsonParse(raw, raw) : raw) : null;
         } catch {
           localData[k] = localStorage.getItem(k);
         }
@@ -451,18 +456,9 @@ export function AccountSettings() {
     }
     setIsLoading(true);
     try {
-      // Try Edge Function first (recommended), fall back to a soft delete flag.
-      const { error: fnErr } = await supabase.functions.invoke("delete-account", { body: {} });
-      if (fnErr) {
-        // Soft-delete fallback: mark account then sign out globally
-        await supabase.auth.updateUser({ data: { pending_deletion_at: new Date().toISOString() } });
-        toast({
-          title: "Deletion requested",
-          description: "Your account is queued for deletion. Support will finalize it shortly.",
-        });
-      } else {
-        toast({ title: "Account deleted", description: "Your account and data have been removed." });
-      }
+      const { data, error } = await supabase.functions.invoke("delete-account", { body: {} });
+      if (error || data?.error || data?.success !== true) throw new Error("Account deletion is unavailable. Your account has not been deleted.");
+      toast({ title: "Account deleted", description: "Your account and data have been removed." });
       await supabase.auth.signOut({ scope: "global" });
       setDeleteDialogOpen(false);
       setDeleteConfirm("");
@@ -643,7 +639,7 @@ export function AccountSettings() {
             <div className="flex-1 text-center sm:text-left space-y-1">
               <div className="text-lg font-semibold">{name || "Unnamed User"}</div>
               <div className="text-sm text-muted-foreground truncate">{email}</div>
-              <Badge variant="secondary" className="mt-1">Verified Account</Badge>
+              <Badge variant="secondary" className="mt-1">{session.user.email_confirmed_at ? "Email verified" : "Email not verified"}</Badge>
             </div>
             <div>
               <input
@@ -702,57 +698,11 @@ export function AccountSettings() {
         </CardContent>
       </Card>
 
-      {/* Preferences & Privacy */}
-      <Card className="liquid-glass border-border/30">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Palette className="h-5 w-5 text-primary" /> Preferences & Privacy
-          </CardTitle>
-          <CardDescription>Persistent settings saved to this device.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {[
-            {
-              key: "emailNotifications" as const,
-              label: "Email Notifications",
-              desc: "Weekly reports and important alerts.",
-              icon: Bell,
-            },
-            {
-              key: "privateAccount" as const,
-              label: "Private Account",
-              desc: "Hide your workouts and activity from other users.",
-              icon: Shield,
-            },
-            {
-              key: "reducedMotion" as const,
-              label: "Reduced Motion",
-              desc: "Minimize animations across the app.",
-              icon: RefreshCcw,
-            },
-            {
-              key: "compactMode" as const,
-              label: "Compact Mode",
-              desc: "Denser layouts with tighter spacing.",
-              icon: Monitor,
-            },
-          ].map(({ key, label, desc, icon: Icon }) => (
-            <div key={key} className="flex items-center justify-between p-3 liquid-glass-subtle rounded-xl">
-              <div className="flex items-start gap-3">
-                <Icon className="h-4 w-4 mt-0.5 text-primary" />
-                <div>
-                  <div className="font-medium text-sm">{label}</div>
-                  <div className="text-xs text-muted-foreground">{desc}</div>
-                </div>
-              </div>
-              <Switch
-                checked={prefs[key]}
-                onCheckedChange={(v) => setPrefs((p) => ({ ...p, [key]: v }))}
-              />
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+      <div className="flex flex-wrap gap-2">
+        <Button variant="outline" onClick={() => navigate("/settings?tab=display")}><Palette className="h-4 w-4 mr-2" />Appearance & Units</Button>
+        <Button variant="outline" onClick={() => navigate("/settings?tab=privacy")}><Shield className="h-4 w-4 mr-2" />Privacy & Permissions</Button>
+        <Button variant="outline" onClick={() => navigate("/settings?tab=notifications")}><Bell className="h-4 w-4 mr-2" />Notifications</Button>
+      </div>
 
       {/* Device & Location */}
       <Card className="liquid-glass border-border/30">
@@ -773,7 +723,7 @@ export function AccountSettings() {
               </div>
             </div>
             <div className="p-3 liquid-glass-subtle rounded-xl">
-              <div className="text-xs text-muted-foreground">Location (approx)</div>
+              <div className="text-xs text-muted-foreground">Time zone</div>
               <div className="font-medium text-sm flex items-center gap-2">
                 <MapPin className="h-4 w-4" /> {locale}
               </div>
