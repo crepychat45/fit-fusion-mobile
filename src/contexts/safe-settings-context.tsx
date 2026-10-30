@@ -14,6 +14,7 @@ import {
   type SettingsSyncStatus,
   changedSettings,
   unpackRow,
+  pushRemoteSettings,
 } from "@/utils/settings-sync";
 import { readJson } from "@/lib/safe-storage";
 import { logger } from "@/lib/logger";
@@ -32,6 +33,8 @@ type PaymentMethod =
 type UnitSystem = "metric" | "imperial";
 
 interface SettingsContextType {
+  settingsSnapshot: SettingsSnapshot;
+  restorePreferences: (values: Partial<SettingsSnapshot>) => Promise<boolean>;
   syncStatus: SettingsSyncStatus;
   syncNow: () => Promise<void>;
   soundEnabled: boolean;
@@ -531,7 +534,7 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     let generation = 0;
     let channel: ReturnType<typeof supabase.channel> | null = null;
     const initialize = async (uid: string | null) => {
-      if (disposed || uid === userIdRef.current && readyUser === uid) return;
+      if (disposed) return;
       const epoch = ++generation;
       userIdRef.current = uid;
       setReadyUser(null);
@@ -562,7 +565,7 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     };
     void supabase.auth.getSession().then(({ data }) => initialize(data.session?.user.id ?? null));
     const { data: auth } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "TOKEN_REFRESHED") return;
+      if (event === "TOKEN_REFRESHED" || session?.user.id === userIdRef.current && event !== "SIGNED_OUT") return;
       // Leave the auth callback before making database requests.
       void Promise.resolve().then(() => initialize(session?.user.id ?? null));
     });
@@ -586,6 +589,20 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
     displayOptions, developerOptions, codeEditorEnabled, programmingLanguages, customSounds,
     subscriptionPlan, paymentMethod]);
 
+  const restorePreferences = async (values: Partial<SettingsSnapshot>) => {
+    const uid = userIdRef.current;
+    if (!uid) return false;
+    setSyncStatus("saving");
+    const ok = await pushRemoteSettings(uid, values);
+    if (ok) {
+      const next = { ...snapshotRef.current, ...values };
+      baseline.current = next;
+      applyRef.current(next);
+    }
+    setSyncStatus(ok ? "saved" : "error");
+    return ok;
+  };
+
   const syncNow = async () => {
     if (!readyUser) { setSyncStatus("error"); return; }
     pushRef.current(readyUser, changedSettings(baseline.current, snapshotRef.current));
@@ -595,7 +612,7 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
   return (
     <SettingsContext.Provider
       value={{
-        syncStatus, syncNow,
+        settingsSnapshot: snapshot, restorePreferences, syncStatus, syncNow,
         soundEnabled,
         setSoundEnabled,
         soundVolume,
