@@ -1,329 +1,68 @@
+import { useRef, useState } from "react";
 import { APP_VERSION } from "@/lib/app-version";
-import React, { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { safeJsonParse, readJson, writeJson } from "@/lib/safe-storage";
+import { validSettingsBackup } from "@/lib/settings-defaults";
+import { useSettings } from "@/contexts/safe-settings-context";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/components/ui/use-toast";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Progress } from "@/components/ui/progress";
-import {
-  HardDrive,
-  Download,
-  Upload,
-  RefreshCw,
-  CheckCircle,
-  AlertTriangle,
-  Trash2,
-  Copy,
-  Calendar,
-} from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Download, Upload, HardDrive, Trash2, RotateCcw } from "lucide-react";
+import { ConfirmDialog } from "./confirm-dialog";
 
-interface BackupData {
-  timestamp: number;
-  version: string;
-  size: number;
-  hash: string;
-  includes: string[];
-}
+type Backup = { id: string; at: string; version: string; preferences: ReturnType<typeof useSettings>["settingsSnapshot"] };
+const KEY = "fitfusion-settings-backups-v2";
 
 export function SettingsBackupRestore() {
-  const { toast } = useToast();
-  const [backups, setBackups] = useState<BackupData[]>(() => {
-    const saved = localStorage.getItem("settings-backups");
-    return saved ? JSON.parse(saved) : [];
+  const { settingsSnapshot, restorePreferences } = useSettings();
+  const [backups, setBackups] = useState<Backup[]>(() => {
+    const stored = readJson<unknown>(KEY, []);
+    return Array.isArray(stored) ? stored.filter(b => validSettingsBackup(b) && typeof b.id === "string") as Backup[] : [];
   });
-
-  const [isCreatingBackup, setIsCreatingBackup] = useState(false);
-  const [isRestoring, setIsRestoring] = useState(false);
-  const [backupProgress, setBackupProgress] = useState(0);
-  const [selectedBackup, setSelectedBackup] = useState<BackupData | null>(null);
-
-  const createBackup = async () => {
-    setIsCreatingBackup(true);
-    setBackupProgress(0);
-
+  const [result, setResult] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [restore, setRestore] = useState<unknown>(null);
+  const file = useRef<HTMLInputElement>(null);
+  const persist = (next: Backup[]) => {
+    if (!writeJson(KEY, next)) { setResult("Device storage unavailable. Backup not saved."); return false; }
+    setBackups(next); return true;
+  };
+  const create = () => {
+    const backup = { id: crypto.randomUUID(), at: new Date().toISOString(), version: APP_VERSION, preferences: settingsSnapshot };
+    if (persist([backup, ...backups].slice(0, 10))) setResult("Preferences backed up on this device.");
+  };
+  const download = (backup: Backup) => {
+    const url = URL.createObjectURL(new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" }));
+    const link = document.createElement("a"); link.href = url; link.download = `fitfusion-settings-${backup.at.slice(0, 10)}.json`; link.click(); URL.revokeObjectURL(url);
+  };
+  const apply = async () => {
+    if (!validSettingsBackup(restore)) { setResult("Invalid backup. Nothing changed."); return; }
+    setBusy(true);
     try {
-      
-      // Get all settings from localStorage
-      const settingsToBackup = {
-        account: localStorage.getItem("account-settings"),
-        display: localStorage.getItem("display-settings"),
-        privacy: localStorage.getItem("privacy-settings"),
-        notifications: localStorage.getItem("notification-settings"),
-        units: localStorage.getItem("unit-preferences"),
-        app: localStorage.getItem("app-settings"),
-        chat: localStorage.getItem("chat-settings"),
-        theme: localStorage.getItem("theme-preference"),
-      };
-
-      const backupString = JSON.stringify(settingsToBackup);
-      const backupData: BackupData = {
-        timestamp: Date.now(),
-        version: APP_VERSION,
-        size: new Blob([backupString]).size,
-        hash: Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(backupString)))).slice(0, 6).map((b) => b.toString(16).padStart(2, "0")).join(""),
-        includes: Object.keys(settingsToBackup).filter(
-          (key) => settingsToBackup[key as keyof typeof settingsToBackup] !== null,
-        ),
-      };
-
-      const newBackups = [...backups, backupData].slice(-10); // Keep last 10 backups
-      setBackups(newBackups);
-      localStorage.setItem("settings-backups", JSON.stringify(newBackups));
-      localStorage.setItem(`backup-${backupData.hash}`, backupString);
-
-      toast({
-        title: "✅ Backup Created",
-        description: `Successfully created backup (${(backupData.size / 1024).toFixed(2)} KB)`,
-      });
-    } catch (error) {
-      console.error("Backup error:", error);
-      toast({
-        title: "❌ Backup Failed",
-        description: "Failed to create backup. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsCreatingBackup(false);
-      setBackupProgress(0);
-    }
+      setResult(await restorePreferences(restore.preferences) ? "Preferences restored and saved to your account." : "Restore not saved. Check your connection and retry.");
+    } finally { setBusy(false); setRestore(null); }
   };
-
-  const restoreBackup = async (backup: BackupData) => {
-    const confirmed = window.confirm(
-      "This will overwrite your current settings. Continue?",
-    );
-    if (!confirmed) return;
-
-    setIsRestoring(true);
-
-    try {
-      const backupString = localStorage.getItem(`backup-${backup.hash}`);
-      if (!backupString) {
-        throw new Error("Backup data not found");
-      }
-
-      const settingsToRestore = JSON.parse(backupString);
-
-      Object.entries(settingsToRestore).forEach(([key, value]) => {
-        if (value) {
-          localStorage.setItem(`${key}-settings`, value as string);
-        }
-      });
-
-      toast({
-        title: "✅ Restore Complete",
-        description: "Settings have been restored successfully. Please refresh the page.",
-      });
-
-      // Refresh after a short delay
-      setTimeout(() => window.location.reload(), 1500);
-    } catch (error) {
-      console.error("Restore error:", error);
-      toast({
-        title: "❌ Restore Failed",
-        description: "Failed to restore settings. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsRestoring(false);
-    }
-  };
-
-  const deleteBackup = (backup: BackupData) => {
-    const confirmed = window.confirm("Delete this backup permanently?");
-    if (!confirmed) return;
-
-    const newBackups = backups.filter((b) => b.hash !== backup.hash);
-    setBackups(newBackups);
-    localStorage.setItem("settings-backups", JSON.stringify(newBackups));
-    localStorage.removeItem(`backup-${backup.hash}`);
-
-    toast({
-      title: "✅ Backup Deleted",
-      description: "Backup has been permanently removed.",
-    });
-  };
-
-  const downloadBackup = (backup: BackupData) => {
-    const backupString = localStorage.getItem(`backup-${backup.hash}`);
-    if (!backupString) {
-      toast({
-        title: "❌ Error",
-        description: "Backup data not found.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const element = document.createElement("a");
-    const file = new Blob([backupString], { type: "application/json" });
-    element.href = URL.createObjectURL(file);
-    element.download = `fitfusion-backup-${new Date(backup.timestamp).toISOString().split("T")[0]}.json`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-
-    toast({
-      title: "✅ Backup Downloaded",
-      description: "Settings backup has been downloaded.",
-    });
-  };
-
-  return (
-    <div className="space-y-6">
-      <Card className="overflow-hidden border-purple-200 dark:border-purple-800">
-        <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-100/50 dark:from-purple-950/30 dark:to-pink-900/30">
-          <CardTitle className="flex items-center gap-2">
-            <HardDrive className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-            Settings Backup & Restore
-          </CardTitle>
-          <CardDescription>
-            Create and manage backups of your application settings
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent className="space-y-6 pt-6">
-          {/* Create Backup */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="font-medium">Create Backup</h4>
-              <Badge variant="secondary">Max 10 backups</Badge>
-            </div>
-
-            <Button
-              onClick={createBackup}
-              disabled={isCreatingBackup}
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-            >
-              {isCreatingBackup ? (
-                <>
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  Creating Backup...
-                </>
-              ) : (
-                <>
-                  <Download className="h-4 w-4 mr-2" />
-                  Create New Backup
-                </>
-              )}
-            </Button>
-
-            {isCreatingBackup && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-2"
-              >
-                <div className="flex justify-between text-sm">
-                  <span>Progress</span>
-                  <span className="font-semibold">{backupProgress}%</span>
-                </div>
-                <Progress value={backupProgress} className="h-2" />
-              </motion.div>
-            )}
-          </div>
-
-          {/* Backups List */}
-          <div className="space-y-3">
-            <h4 className="font-medium flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Existing Backups ({backups.length})
-            </h4>
-
-            <AnimatePresence>
-              {backups.length === 0 ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="text-center py-8 text-muted-foreground"
-                >
-                  <p>No backups created yet</p>
-                </motion.div>
-              ) : (
-                <div className="space-y-2">
-                  {backups.map((backup) => (
-                    <motion.div
-                      key={backup.hash}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="p-4 rounded-lg border border-purple-200/50 dark:border-purple-800/30 bg-purple-50/30 dark:bg-purple-950/10 hover:bg-purple-50/50 dark:hover:bg-purple-950/20 transition-colors"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <p className="font-medium text-sm">
-                              {new Date(backup.timestamp).toLocaleString()}
-                            </p>
-                            <Badge variant="outline" className="text-xs">
-                              v{backup.version}
-                            </Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            Size: {(backup.size / 1024).toFixed(2)} KB • Items: {backup.includes.length}
-                          </p>
-                          <div className="flex gap-1 mt-2">
-                            {backup.includes.map((item) => (
-                              <Badge key={item} variant="secondary" className="text-xs">
-                                {item}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="flex gap-2 ml-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => downloadBackup(backup)}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => restoreBackup(backup)}
-                            disabled={isRestoring}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Upload className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => deleteBackup(backup)}
-                            className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-950/30"
-                          >
-                            <Trash2 className="h-4 w-4 text-red-600" />
-                          </Button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Info Box */}
-          <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/20">
-            <AlertTriangle className="h-4 w-4 text-blue-600" />
-            <AlertDescription className="text-blue-700 dark:text-blue-300 text-sm">
-              Backups are stored locally in your browser. To transfer settings between devices,
-              download a backup and import it on another device.
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
-    </div>
-  );
+  return <Card className="liquid-glass">
+    <CardHeader><CardTitle className="flex items-center gap-2"><HardDrive className="h-5 w-5 text-primary" />Preferences Backup & Restore</CardTitle></CardHeader>
+    <CardContent className="space-y-4">
+      <div className="flex flex-wrap gap-2"><Button onClick={create} disabled={busy}><Download className="h-4 w-4 mr-2" />Create backup</Button><Button variant="outline" onClick={() => file.current?.click()} disabled={busy}><Upload className="h-4 w-4 mr-2" />Import backup</Button></div>
+      <input ref={file} type="file" accept="application/json,.json" className="hidden" onChange={async event => {
+        const upload = event.target.files?.[0]; event.target.value = "";
+        if (!upload) return;
+        if (upload.size > 1048576) { setResult("Backup must be smaller than 1 MB."); return; }
+        const parsed = safeJsonParse<unknown>(await upload.text(), null);
+        if (!validSettingsBackup(parsed)) { setResult("Invalid preferences backup. Nothing changed."); return; }
+        setRestore(parsed);
+      }} />
+      {!backups.length && <p className="text-sm text-muted-foreground">No preference backups on this device.</p>}
+      {backups.map(backup => <div key={backup.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-border/40 py-3">
+        <p className="text-sm">{new Date(backup.at).toLocaleString()} <span className="text-muted-foreground">v{backup.version}</span></p>
+        <div className="flex gap-1">
+          <Button variant="ghost" size="icon" aria-label="Download backup" title="Download backup" onClick={() => download(backup)}><Download className="h-4 w-4" /></Button>
+          <Button variant="ghost" size="icon" aria-label="Restore backup" title="Restore backup" disabled={busy} onClick={() => setRestore(backup)}><RotateCcw className="h-4 w-4" /></Button>
+          <Button variant="ghost" size="icon" aria-label="Delete backup" title="Delete backup" disabled={busy} onClick={() => persist(backups.filter(b => b.id !== backup.id))}><Trash2 className="h-4 w-4" /></Button>
+        </div>
+      </div>)}
+      {result && <p role="status" className="text-sm text-muted-foreground">{result}</p>}
+    </CardContent>
+    <ConfirmDialog open={restore !== null} onOpenChange={open => { if (!open) setRestore(null); }} onConfirm={apply} title="Restore preferences?" description="Replaces shared app preferences. Workouts, passwords and device permissions are not included." confirmLabel="Restore" />
+  </Card>;
 }
