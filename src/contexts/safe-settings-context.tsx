@@ -471,9 +471,10 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
       const info = profileData.personalInfo ?? profileData;
       const { error } = await supabase.from("profiles").upsert({
         user_id: data.user.id,
-        name: info.fullName ?? info.name ?? null,
+        name: info.fullName ?? info.name ?? [info.firstName, info.lastName].filter(Boolean).join(" ") ?? null,
         bio: info.bio ?? null,
-        fitness_goals: profileData.fitnessGoals?.primaryGoals ?? [],
+        fitness_goals: profileData.fitnessInfo?.goals ?? profileData.fitnessGoals?.primaryGoals ?? [],
+        fitness_level: profileData.fitnessInfo?.fitnessLevel ?? null,
         body_measurements: profileData.bodyMeasurements ?? {},
       }, { onConflict: "user_id" });
       if (error) throw error;
@@ -570,7 +571,8 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
       void Promise.resolve().then(() => initialize(session?.user.id ?? null));
     });
     const online = () => {
-      if (userIdRef.current) void initialize(userIdRef.current);
+      if (Object.keys(pushRef.current.pending()).length) void pushRef.current.flush();
+      else if (userIdRef.current) void initialize(userIdRef.current);
     };
     window.addEventListener("online", online);
     return () => { disposed = true; generation++; pushRef.current.cancel(); auth.subscription.unsubscribe(); window.removeEventListener("online", online); if (channel) void supabase.removeChannel(channel); };

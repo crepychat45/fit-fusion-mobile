@@ -175,6 +175,11 @@ export function AccountSettings() {
         setEmail(s.user.email || "");
         setName(s.user.user_metadata?.name || s.user.user_metadata?.full_name || "");
         setAvatarUrl(s.user.user_metadata?.avatar_url || null);
+        void supabase.from("profiles").select("name,avatar_url").eq("user_id", s.user.id).maybeSingle().then(({ data: profile }) => {
+          if (!mounted) return;
+          if (profile?.name) setName(profile.name);
+          if (profile?.avatar_url) setAvatarUrl(profile.avatar_url);
+        });
       }
       setCheckingAuth(false);
     });

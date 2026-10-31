@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useSettings } from "@/contexts/safe-settings-context";
 import { useNavigate } from "react-router-dom";
 import { CheckCircle2, AlertTriangle, Cloud, CloudOff, RefreshCw, ShieldCheck, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,18 +15,7 @@ export function SettingsOverview() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const [security, setSecurity] = useState<{ score: number; checks: SecurityCheck[] } | null>(null);
-  const [sync, setSync] = useState<{ state: "idle" | "syncing" | "ok" | "error" | "offline" | "signed-out"; at?: string; error?: string }>({ state: "idle" });
-
-  const syncNow = useCallback(async () => {
-    if (!navigator.onLine) return setSync({ state: "offline" });
-    setSync((s) => ({ ...s, state: "syncing" }));
-    const { data: auth } = await supabase.auth.getUser();
-    const uid = auth.user?.id;
-    if (!uid) return setSync({ state: "signed-out" });
-    const { data, error } = await supabase.from("user_settings").select("updated_at").eq("user_id", uid).maybeSingle();
-    if (error) return setSync({ state: "error", error: error.message });
-    setSync({ state: "ok", at: data?.updated_at ?? undefined });
-  }, []);
+  const { syncStatus, syncNow } = useSettings();
 
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
@@ -37,15 +27,7 @@ export function SettingsOverview() {
       }
     });
     runSecurityChecks().then(setSecurity).catch(() => setSecurity(null));
-    syncNow();
-    const on = () => syncNow();
-    window.addEventListener("online", on);
-    window.addEventListener("offline", on);
-    return () => {
-      window.removeEventListener("online", on);
-      window.removeEventListener("offline", on);
-    };
-  }, [syncNow]);
+  }, []);
 
   const name = profile?.name || email?.split("@")[0] || "Guest";
   const fmt = (iso?: string) => (iso ? new Date(iso).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) : "No cloud changes yet");
@@ -90,15 +72,14 @@ export function SettingsOverview() {
 
       <section className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-xl p-4" aria-live="polite">
         <p className="font-semibold flex items-center gap-2">
-          {sync.state === "offline" || sync.state === "error" ? <CloudOff className="h-4 w-4 text-destructive" /> : <Cloud className="h-4 w-4 text-primary" />}
+          {syncStatus === "offline" || syncStatus === "error" ? <CloudOff className="h-4 w-4 text-destructive" /> : <Cloud className="h-4 w-4 text-primary" />}
           Cloud Sync
         </p>
         <p className="mt-2 text-sm">
-          {{ idle: "Checking…", syncing: "Syncing…", ok: "✓ Connected", error: "Sync error", offline: "You're offline", "signed-out": "Sign in to sync" }[sync.state]}
+          {{ loading: "Loading preferences…", saving: "Saving preferences…", saved: "Preferences saved", error: "Save failed", offline: "Waiting for connection", paused: "Sync paused", "signed-out": "Sign in to save" }[syncStatus]}
         </p>
-        <p className="text-xs text-muted-foreground">{sync.state === "error" ? sync.error : `Last saved: ${fmt(sync.at)}`}</p>
-        <Button size="sm" variant="outline" className="mt-3 w-full rounded-xl" onClick={syncNow} disabled={sync.state === "syncing"}>
-          <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${sync.state === "syncing" ? "animate-spin" : ""}`} />Sync now
+        <Button size="sm" variant="outline" className="mt-3 w-full rounded-xl" onClick={syncNow} disabled={syncStatus === "saving" || syncStatus === "loading"}>
+          <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${syncStatus === "saving" ? "animate-spin" : ""}`} />Sync now
         </Button>
       </section>
     </div>

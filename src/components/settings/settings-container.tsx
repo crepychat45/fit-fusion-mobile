@@ -337,7 +337,7 @@ export function SettingsContainer() {
                 <Badge variant={syncStatus === "error" ? "destructive" : "outline"} role="status" className="hidden sm:inline-flex" data-testid="settings-sync-status">
                   {{ loading: "Loading preferences", saving: "Saving preferences", saved: "Preferences saved", error: "Save failed", offline: "Waiting for connection", paused: "Sync paused", "signed-out": "Device only" }[syncStatus]}
                 </Badge>
-                {(syncStatus === "error" || syncStatus === "offline") && <Button size="icon" variant="outline" onClick={syncNow} aria-label="Retry preference sync" title="Retry preference sync"><RefreshCw className="h-4 w-4" /></Button>
+                {(syncStatus === "error" || syncStatus === "offline") && <Button size="icon" variant="outline" onClick={syncNow} aria-label="Retry preference sync" title="Retry preference sync"><RefreshCw className="h-4 w-4" /></Button>}
                 <Button
                   variant="outline"
                   size="sm"
@@ -372,7 +372,6 @@ export function SettingsContainer() {
 
       <div className="max-w-screen-xl mx-auto py-6 px-4 space-y-4">
         
-        <L><SettingsCopilot /></L>
         <motion.div
           key={activeTab}
           initial={{ opacity: 0, x: 20 }}
@@ -493,7 +492,6 @@ export function SettingsContainer() {
               <div className="space-y-6">
                 <PushDevicePanel />
                 <L><NotificationLivePanel /></L>
-                <L><NotificationPreferences /></L>
                 <L><NotificationProExtras /></L>
                 <L><NotificationNextExtras /></L>
                 <L><NotificationUltraExtras /></L>
