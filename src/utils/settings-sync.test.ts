@@ -40,7 +40,8 @@ describe("Settings patch persistence", () => {
     queue("user-a", { soundVolume: 0 });
     queue("user-a", { theme: "light" });
     await vi.advanceTimersByTimeAsync(10);
-    expect(write).toHaveBeenCalledExactlyOnceWith("user-a", { theme: "light", soundVolume: 0 });
+    expect(write).toHaveBeenCalledTimes(1);
+    expect(write).toHaveBeenCalledWith("user-a", { theme: "light", soundVolume: 0 });
     queue.cancel();
   });
 });
