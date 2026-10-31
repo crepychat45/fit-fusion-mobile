@@ -7,6 +7,8 @@
 - Route every AI chat reply through `askCoach` (the real AI function); no canned or keyword-matched responses.
 - Compute security scores only from `runSecurityChecks` (observable device/account state); never invent threats or scores.
 - Store live-synced Settings groups under a `live` key in the matching user_settings column with a per-hook Realtime channel so other devices update instantly.
+- Merge Settings patches through the RLS-bound `merge_settings_preferences` invoker RPC; serialize retries and cancel them on identity changes so unrelated preferences and accounts cannot be overwritten.
+- Back up and reset shared preferences through SettingsProvider snapshots, not guessed storage keys; show success only after the account write succeeds.
 - Send background push only through the `send-push` function (server-held keys); "self" for tests, "all" restricted to admin roles; delete expired endpoints on 404/410.
 - Mount exactly one SettingsProvider (`safe-settings-context`, in AppWrapper); never nest or add another settings provider, because duplicates caused conflicting state.
 - Read stored JSON through `safeJsonParse`/`readJson` from `src/lib/safe-storage.ts` and log through `src/lib/logger.ts`, so corrupted storage never crashes and production logs stay quiet and redacted.

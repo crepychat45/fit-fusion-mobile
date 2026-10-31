@@ -337,7 +337,7 @@ export function SettingsContainer() {
                 <Badge variant={syncStatus === "error" ? "destructive" : "outline"} role="status" className="hidden sm:inline-flex" data-testid="settings-sync-status">
                   {{ loading: "Loading preferences", saving: "Saving preferences", saved: "Preferences saved", error: "Save failed", offline: "Waiting for connection", paused: "Sync paused", "signed-out": "Device only" }[syncStatus]}
                 </Badge>
-                {(syncStatus === "error" || syncStatus === "offline") && <Button size="icon" variant="outline" onClick={syncNow} aria-label="Retry preference sync" title="Retry preference sync"><RefreshCw className="h-4 w-4" /></Button>
+                {(syncStatus === "error" || syncStatus === "offline") && <Button size="icon" variant="outline" onClick={syncNow} aria-label="Retry preference sync" title="Retry preference sync"><RefreshCw className="h-4 w-4" /></Button>}
                 <Button
                   variant="outline"
                   size="sm"
