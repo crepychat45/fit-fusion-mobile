@@ -473,7 +473,8 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
         user_id: data.user.id,
         name: info.fullName ?? info.name ?? [info.firstName, info.lastName].filter(Boolean).join(" ") ?? null,
         bio: info.bio ?? null,
-        fitness_goals: profileData.fitnessGoals?.primaryGoals ?? [],
+        fitness_goals: profileData.fitnessInfo?.goals ?? profileData.fitnessGoals?.primaryGoals ?? [],
+        fitness_level: profileData.fitnessInfo?.fitnessLevel ?? null,
         body_measurements: profileData.bodyMeasurements ?? {},
       }, { onConflict: "user_id" });
       if (error) throw error;

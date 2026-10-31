@@ -139,16 +139,19 @@ export function createDebouncedPush(delay = 800, report: (state: SettingsSyncSta
   let pending: { userId: string; snapshot: Partial<SettingsSnapshot> } | null = null;
   let generation = 0;
   let running = false;
+  let inFlight: Partial<SettingsSnapshot> = {};
   const flush = async () => {
     if (running || !pending) return;
     const p = pending;
     const epoch = generation;
     pending = null;
+    inFlight = p.snapshot;
     running = true;
     report("saving");
     let ok = false;
     try { ok = await write(p.userId, p.snapshot); } catch { ok = false; }
     running = false;
+    inFlight = {};
     if (epoch !== generation) { if (pending) void flush(); return; }
     if (!ok) {
       pending = { userId: p.userId, snapshot: { ...p.snapshot, ...pending?.snapshot } };
@@ -163,8 +166,8 @@ export function createDebouncedPush(delay = 800, report: (state: SettingsSyncSta
     report(navigator.onLine ? "saving" : "offline");
     timer = setTimeout(flush, delay);
   };
-  schedule.cancel = () => { generation++; pending = null; if (timer) clearTimeout(timer); };
+  schedule.cancel = () => { generation++; pending = null; inFlight = {}; if (timer) clearTimeout(timer); };
   schedule.flush = flush;
-  schedule.pending = () => pending?.snapshot ?? {};
+  schedule.pending = () => ({ ...inFlight, ...pending?.snapshot });
   return schedule;
 }

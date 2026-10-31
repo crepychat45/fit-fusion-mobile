@@ -14,6 +14,7 @@ export function useCloudSettingsGroup<T extends Record<string, unknown>>(categor
   const defaultsRef = useRef(defaults);
   const uidRef = useRef<string | null>(null);
   const pending = useRef<Partial<T>>({});
+  const inFlight = useRef<Partial<T>>({});
   const saving = useRef(false);
   const retryRef = useRef<() => Promise<void>>(async () => {});
   const mounted = useRef(false);
@@ -32,12 +33,13 @@ export function useCloudSettingsGroup<T extends Record<string, unknown>>(categor
           if (typeof saved === typeof fallback) validated[key] = saved;
         }
       }
-      setValue({ ...defaultsRef.current, ...validated, ...pending.current });
+      setValue({ ...defaultsRef.current, ...validated, ...inFlight.current, ...pending.current });
     };
     const load = async (uid: string | null) => {
       const generation = ++epoch;
       uidRef.current = uid;
       pending.current = {};
+      inFlight.current = {};
       setReady(false);
       if (channel) { void supabase.removeChannel(channel); channel = null; }
       if (!uid) { setValue(defaultsRef.current); setSync("signed-out"); return; }
@@ -59,7 +61,7 @@ export function useCloudSettingsGroup<T extends Record<string, unknown>>(categor
     };
     void supabase.auth.getSession().then(({ data }) => load(data.session?.user.id ?? null));
     const { data: auth } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event !== "TOKEN_REFRESHED") void Promise.resolve().then(() => load(session?.user.id ?? null));
+      if (event !== "TOKEN_REFRESHED" && (session?.user.id ?? null) !== uidRef.current) void Promise.resolve().then(() => load(session?.user.id ?? null));
     });
     const online = () => { if (Object.keys(pending.current).length) void retryRef.current(); else if (!channel) void load(uidRef.current); };
     window.addEventListener("online", online);
@@ -77,15 +79,18 @@ export function useCloudSettingsGroup<T extends Record<string, unknown>>(categor
     while (mounted.current && uidRef.current === uid && Object.keys(pending.current).length) {
       const patch = pending.current;
       pending.current = {};
+      inFlight.current = patch;
       setSync("saving");
       try {
         const { error } = await supabase.rpc("merge_settings_preferences", { p_patch: { [category]: { live: patch } } as Json });
         if (error) throw error;
         if (!mounted.current || uidRef.current !== uid) break;
+        inFlight.current = {};
         setSync("saved");
       } catch {
         if (mounted.current && uidRef.current === uid) {
           pending.current = { ...patch, ...pending.current };
+          inFlight.current = {};
           setSync("error");
         }
         break;
