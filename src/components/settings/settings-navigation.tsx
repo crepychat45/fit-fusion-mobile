@@ -29,7 +29,7 @@ interface SettingsNavigationProps {
   activeTab: string;
   onTabChange: (value: string) => void;
   showMobileMenu: boolean;
-  onMobileMenuToggle: () => void;
+  onMobileMenuClose: () => void;
 }
 
 const settingsCategories = [
@@ -103,7 +103,7 @@ export function SettingsNavigation({
   activeTab,
   onTabChange,
   showMobileMenu,
-  onMobileMenuToggle,
+  onMobileMenuClose,
 }: SettingsNavigationProps) {
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -125,7 +125,7 @@ export function SettingsNavigation({
   };
 
   // Mobile Menu Overlay — crystal glass drawer
-  const MobileMenu = () => (
+  const mobileMenu = (
     <AnimatePresence>
       {showMobileMenu && (
         <motion.div
@@ -133,7 +133,7 @@ export function SettingsNavigation({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[70] bg-background/40 backdrop-blur-md md:hidden"
-          onClick={onMobileMenuToggle}
+          onClick={onMobileMenuClose}
         >
           <motion.div
             initial={{ x: "-100%" }}
@@ -155,7 +155,7 @@ export function SettingsNavigation({
                   variant="ghost"
                   size="sm"
                   aria-label="Close settings menu"
-                  onClick={onMobileMenuToggle}
+                  onClick={onMobileMenuClose}
                 >
                   ✕
                 </Button>
@@ -231,7 +231,7 @@ export function SettingsNavigation({
   );
 
   // Desktop/Tablet Navigation — crystal glass grid
-  const DesktopMenu = () => (
+  const desktopMenu = (
     <div className="hidden md:block">
       <motion.div
         variants={containerVariants}
@@ -298,8 +298,8 @@ export function SettingsNavigation({
 
   return (
     <>
-      <MobileMenu />
-      <DesktopMenu />
+      {mobileMenu}
+      {desktopMenu}
       <nav aria-label="Settings sections" className="md:hidden flex gap-2 overflow-x-auto px-4 py-3 border-b border-border/30">
         {settingsCategories.map(category => <Button key={category.id} size="sm" variant={activeTab === category.id ? "default" : "outline"} className="shrink-0" aria-current={activeTab === category.id ? "page" : undefined} onClick={() => onTabChange(category.id)}><category.icon className="h-4 w-4 mr-2" />{category.title}</Button>)}
       </nav>

@@ -6,7 +6,10 @@
 import { supabase } from "@/integrations/supabase/client";
 
 const PREFIXES = ["fitfusion-", "fitfusion."] as const;
-const matchesPrefix = (k: string) => PREFIXES.some((p) => k.startsWith(p)) && !/(token|secret|password|recovery|pin|biometric|profile|custom-sounds|backup)/i.test(k);
+// SettingsProvider owns these keys; the legacy mirror must never hydrate them.
+const PROVIDER_KEYS = new Set(["sound-enabled", "sound-volume", "sound-pack", "haptic-enabled", "haptic-feedback", "export-format", "export-anonymized", "export-categories", "font-size", "language", "auto-sync", "cloud-backup", "notifications", "code-editor-enabled", "subscription-plan", "payment-method", "developer-options", "display-options", "unit-system", "compact-view", "show-calories", "show-heart-rate", "programming-languages", "theme"].map(key => `fitfusion-${key}`));
+export const isLegacyMirrorKey = (k: string) => PREFIXES.some((p) => k.startsWith(p)) && !PROVIDER_KEYS.has(k) && !/(token|secret|password|recovery|pin|biometric|profile|custom-sounds|backup)/i.test(k);
+const matchesPrefix = isLegacyMirrorKey;
 const DEBOUNCE_MS = 900;
 
 let currentUserId: string | null = null;
@@ -59,7 +62,7 @@ function schedulePush() {
   pendingTimer = setTimeout(pushNow, DEBOUNCE_MS);
 }
 
-async function hydrateFromCloud(uid: string) {
+async function hydrateFromCloud(uid: string, start = collectLocalKv()) {
   const { data, error } = await supabase
     .from("user_settings")
     .select("local_kv")
@@ -75,6 +78,8 @@ async function hydrateFromCloud(uid: string) {
   try {
     for (const [k, v] of Object.entries(kv)) {
       if (!matchesPrefix(k) || typeof v !== "string") continue;
+      // Preserve edits made while the account read was in flight.
+      if (localStorage.getItem(k) !== (start[k] ?? null)) continue;
       if (localStorage.getItem(k) !== v) {
         localStorage.setItem(k, v);
         changed = true;
@@ -91,6 +96,7 @@ async function hydrateFromCloud(uid: string) {
     /* ignore */
   }
   hydrated = true;
+  schedulePush();
   if (changed) {
     window.dispatchEvent(new Event("fitfusion-settings-hydrated"));
   }
@@ -124,11 +130,12 @@ function installStorageProxy() {
 export function initSettingsCloudMirror() {
   if (typeof window === "undefined") return;
   installStorageProxy();
+  const start = collectLocalKv();
 
   supabase.auth.getSession().then(({ data }) => {
     const uid = data.session?.user?.id ?? null;
     currentUserId = uid;
-    if (uid) hydrateFromCloud(uid);
+    if (uid) { hydrated = false; void hydrateFromCloud(uid, start); }
     else hydrated = true;
   });
 

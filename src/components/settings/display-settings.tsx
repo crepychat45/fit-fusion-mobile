@@ -48,7 +48,6 @@ export function DisplaySettings() {
   const [fontFamily, setFontFamily] = useState("Inter");
   const [colorBlindMode, setColorBlindMode] = useState("none");
   const [contrastLevel, setContrastLevel] = useState(50);
-  const [isApplyingChange, setIsApplyingChange] = useState(false);
 
   const handleThemeChange = (newTheme: "light" | "dark" | "system") => {
     setTheme(newTheme);
@@ -88,16 +87,6 @@ export function DisplaySettings() {
 
   const handleCompactViewToggle = (checked: boolean) => {
     setCompactView(checked);
-
-    // Simulate applying changes
-    setIsApplyingChange(true);
-    setTimeout(() => {
-      toast({
-        title: `${checked ? "Compact" : "Standard"} View Enabled`,
-        description: `Layout has been updated.`,
-      });
-      setIsApplyingChange(false);
-    }, 500);
   };
 
   const handleDisplayOptionToggle = (
@@ -274,7 +263,7 @@ export function DisplaySettings() {
             <Switch
               checked={compactView}
               onCheckedChange={handleCompactViewToggle}
-              disabled={isApplyingChange}
+              aria-label="Compact View"
             />
           </div>
         </CardContent>
