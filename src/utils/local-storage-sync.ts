@@ -36,22 +36,18 @@ async function pushNow() {
   if (!currentUserId) return;
   const uid = currentUserId;
   const kv = collectLocalKv();
+  // A partial upsert can reset omitted columns to defaults. Update only this
+  // mirror column; the SettingsProvider creates the account row separately.
   const { error } = await supabase
     .from("user_settings")
-    .upsert(
-      { user_id: uid, local_kv: kv },
-      { onConflict: "user_id" },
-    );
+    .update({ local_kv: kv }).eq("user_id", uid);
   if (error && navigator.onLine) {
     // one retry on transient failure
     setTimeout(() => {
       if (currentUserId !== uid) return;
       supabase
         .from("user_settings")
-        .upsert(
-          { user_id: uid, local_kv: kv },
-          { onConflict: "user_id" },
-        );
+        .update({ local_kv: kv }).eq("user_id", uid);
     }, 2500);
   }
 }
