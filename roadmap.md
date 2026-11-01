@@ -1,4 +1,9 @@
 # FitxFusion 8.1 roadmap
+## Settings stability and separate app pages (2026-11-01)
+- [x] Stop menu remounts and stale preference hydration/realtime reversions; remove competing legacy full-row upserts
+- [x] Separate About and App Updates with working Settings links; remove outdated About content and inactive actions
+- [x] Verify signed-in menu, toggle persistence/live sync and update error handling (eight sections, mobile and desktop, two signed-in browsers; 12 targeted tests)
+- [ ] Verify actual deployed update installation after publishing (no waiting deployed worker is available in this preview)
 ## Settings reliability enhancement (2026-10-29)
 - [x] Fix confirmed save/sync errors and misleading success indicators
 - [x] Remove confirmed unsupported privacy, workout and notification panels; retain real permission and push tools

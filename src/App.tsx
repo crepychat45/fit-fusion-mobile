@@ -84,6 +84,8 @@ const Progress = lazyWithRetry(() => import("./pages/progress"));
 const Profile = lazyWithRetry(() => import("./pages/profile"));
 const NotFound = lazyWithRetry(() => import("./pages/NotFound"));
 const Settings = lazyWithRetry(() => import("./pages/settings"));
+const About = lazyWithRetry(() => import("./pages/about"));
+const AppUpdates = lazyWithRetry(() => import("./pages/app-updates"));
 const NotificationsPage = lazyWithRetry(() => import("./pages/notifications"));
 const Privacy = lazyWithRetry(() => import("./pages/privacy"));
 const Help = lazyWithRetry(() => import("./pages/help"));
@@ -171,6 +173,8 @@ const AppContent: React.FC = () => {
           <Route path="/profile" element={<ProtectedRoute><P><Profile /></P></ProtectedRoute>} />
           <Route path="/chat" element={<ProtectedRoute><P><ChatPage /></P></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><P><Settings /></P></ProtectedRoute>} />
+          <Route path="/about" element={<ProtectedRoute><P><About /></P></ProtectedRoute>} />
+          <Route path="/app-updates" element={<ProtectedRoute><P><AppUpdates /></P></ProtectedRoute>} />
           <Route path="/notifications" element={<ProtectedRoute><P><NotificationsPage /></P></ProtectedRoute>} />
           <Route path="/privacy" element={<ProtectedRoute><P><Privacy /></P></ProtectedRoute>} />
           <Route path="/help" element={<ProtectedRoute><P><Help /></P></ProtectedRoute>} />

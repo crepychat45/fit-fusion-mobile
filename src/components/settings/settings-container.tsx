@@ -184,13 +184,7 @@ export function SettingsContainer() {
   const location = useLocation();
   const navigate = useNavigate();
   // Deep link support: /settings?tab=updates opens that tab directly.
-  const [activeTab, setActiveTab] = useState(() => {
-    try {
-      return resolveSettingsTab(new URLSearchParams(window.location.search).get("tab"));
-    } catch {
-      return "account";
-    }
-  });
+  const activeTab = resolveSettingsTab(new URLSearchParams(location.search).get("tab"));
 
   const [isLoggedOut, setIsLoggedOut] = useState(false);
   const [isConnected, setIsConnected] = useState(true);
@@ -213,10 +207,6 @@ export function SettingsContainer() {
       window.removeEventListener("offline", checkConnection);
     };
   }, []);
-
-  useEffect(() => {
-    setActiveTab(resolveSettingsTab(new URLSearchParams(location.search).get("tab")));
-  }, [location.search]);
 
   const handleClearLocalData = async () => {
     try {
@@ -262,8 +252,8 @@ export function SettingsContainer() {
   };
 
   const handleTabChange = (value: string) => {
+    if (value === "updates") { navigate("/app-updates"); return; }
     const tab = resolveSettingsTab(value);
-    setActiveTab(tab);
     setShowMobileMenu(false);
     const params = new URLSearchParams(location.search);
     params.set("tab", tab);
@@ -352,8 +342,9 @@ export function SettingsContainer() {
                   variant="outline"
                   size="sm"
                   className="md:hidden rounded-xl bg-background/40 backdrop-blur-sm border-border/30"
-                  onClick={() => setShowMobileMenu(!showMobileMenu)}
+                  onClick={() => setShowMobileMenu(previous => !previous)}
                   aria-label="Toggle settings menu"
+                  aria-expanded={showMobileMenu}
                 >
                   {showMobileMenu ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
                 </Button>
@@ -367,13 +358,12 @@ export function SettingsContainer() {
         activeTab={activeTab}
         onTabChange={handleTabChange}
         showMobileMenu={showMobileMenu}
-        onMobileMenuToggle={() => setShowMobileMenu(!showMobileMenu)}
+        onMobileMenuClose={() => setShowMobileMenu(false)}
       />
 
       <div className="max-w-screen-xl mx-auto py-6 px-4 space-y-4">
         
         <motion.div
-          key={activeTab}
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.3 }}
@@ -395,7 +385,7 @@ export function SettingsContainer() {
                       Display: "display",
                       Privacy: "privacy",
                       Notifications: "notifications",
-                      Updates: "about",
+                      Updates: "updates",
                       Chat: "chat",
                       Units: "display",
                       About: "about",
@@ -595,15 +585,10 @@ export function SettingsContainer() {
 
             <TabsContent value="about" className="mt-0">
               <div className="space-y-6">
-                <L><AboutPage /></L>
-                <L><AboutMaxExtras /></L>
-                <L><AboutExtras /></L>
-                <L><AboutProExtras /></L>
-                <L><AboutUltraExtras /></L>
-                <L><AboutQuantumExtras /></L>
-                <L><AboutFusionExtras /></L>
-                <L><AboutNovaExtras /></L>
-                <L><AboutPrimeExtras /></L>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Button variant="outline" className="h-14 justify-start gap-3" onClick={() => navigate("/about")}><Settings className="h-5 w-5" />About FitxFusion</Button>
+                  <Button variant="outline" className="h-14 justify-start gap-3" onClick={() => navigate("/app-updates")}><RefreshCw className="h-5 w-5" />App Updates</Button>
+                </div>
                 <L><DeveloperOptions /></L>
                 <L><DeveloperExtras /></L>
                 <L><DeveloperProExtras /></L>
@@ -615,14 +600,7 @@ export function SettingsContainer() {
                 <L><DeveloperNovaExtras /></L>
                 <L><DeveloperPrimeExtras /></L>
                 <L><PythonLabPanel /></L>
-                <h2 className="text-lg font-semibold">App Updates</h2>
-
-                <L><LiveUpdatePanel /></L>
-                <L><OneTapUpdateCenter /></L>
-                <L><UpdateHealthPanel /></L>
-                <L><VersionControlPanel /></L>
                 <L><PwaVaultPanel /></L>
-                <L><DataFusionExtras /></L>
               </div>
             </TabsContent>
 
