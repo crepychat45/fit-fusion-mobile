@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +10,6 @@ import { APP_VERSION, CURRENT_BUILD_ID, downloadAndInstall, fetchDeployedBuild, 
 
 const AUTO_KEY = "fitx-live-update-auto";
 type Step = "idle" | "checking" | "downloading" | "installing" | "restarting";
-const PCT: Record<Step, number> = { idle: 0, checking: 15, downloading: 45, installing: 80, restarting: 100 };
 
 export function LiveUpdatePanel() {
   const [deployed, setDeployed] = useState<DeployedBuild | null>(null);
@@ -18,17 +17,25 @@ export function LiveUpdatePanel() {
   const [step, setStep] = useState<Step>("idle");
   const [error, setError] = useState<string | null>(null);
   const [auto, setAuto] = useState(() => localStorage.getItem(AUTO_KEY) === "1");
+  const running = useRef(false);
 
   const check = useCallback(async () => {
+    if (running.current) return null;
+    running.current = true;
     setStep("checking"); setError(null);
     const d = await fetchDeployedBuild();
     setDeployed(d); setCheckedAt(new Date()); setStep("idle");
-    if (!d) setError("Couldn't reach the server. Check your connection.");
+    running.current = false;
+    if (!d) setError("Published release details are unavailable here. Check from the published app.");
     return d;
   }, []);
 
   const install = useCallback(async () => {
+    if (running.current) return;
+    running.current = true;
+    setError(null);
     try { await downloadAndInstall(setStep); } catch (e) { setError((e as Error).message); setStep("idle"); }
+    finally { running.current = false; }
   }, []);
 
   useEffect(() => { check(); }, [check]);
@@ -53,7 +60,7 @@ export function LiveUpdatePanel() {
         </div>
         {available ? <Badge>New update ready to download</Badge>
           : deployed ? <Badge variant="secondary" className="gap-1"><CheckCircle2 className="h-3 w-3" />You're up to date</Badge> : null}
-        {busy && <><Progress value={PCT[step]} /><div className="text-xs text-muted-foreground capitalize">{step}…</div></>}
+        {busy && <div role="status" className="flex items-center gap-2 text-xs text-muted-foreground capitalize"><RefreshCw className="h-4 w-4 animate-spin" />{step}…</div>}
         {error && <div className="text-xs text-destructive">{error}</div>}
         <div className="flex flex-wrap gap-2">
           <Button size="sm" variant="outline" onClick={check} disabled={busy}><RefreshCw className="h-4 w-4 mr-2" />Check now</Button>
