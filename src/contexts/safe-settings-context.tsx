@@ -558,7 +558,7 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
           .on("postgres_changes", { event: "*", schema: "public", table: "user_settings", filter: `user_id=eq.${uid}` }, payload => {
             if (disposed || userIdRef.current !== uid) return;
             const remoteValues = unpackRow(payload.new as Record<string, unknown>);
-            const local = { ...changedSettings(baseline.current, snapshotRef.current), ...pushRef.current.pending() };
+            const local = { ...pushRef.current.pending(), ...changedSettings(baseline.current, snapshotRef.current) };
             const next = { ...snapshotRef.current, ...remoteValues, ...local };
             baseline.current = { ...baseline.current, ...remoteValues };
             applyRef.current(next);
