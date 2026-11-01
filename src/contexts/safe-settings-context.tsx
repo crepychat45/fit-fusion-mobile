@@ -499,6 +499,7 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
   };
   const snapshotRef = useRef(snapshot);
   snapshotRef.current = snapshot;
+  const reloadRef = useRef<() => Promise<void>>(async () => {});
   const applyRemote = (remote: Partial<SettingsSnapshot>) => {
         if (remote.theme === "light" || remote.theme === "dark" || remote.theme === "system") setTheme(remote.theme);
         if (typeof remote.fontSize === "string") setFontSize(remote.fontSize as any);
@@ -564,6 +565,7 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
           }).subscribe();
       } catch (error) { if (!disposed && epoch === generation) { logger.warn("Settings load failed", error); setSyncStatus("error"); } }
     };
+    reloadRef.current = () => initialize(userIdRef.current);
     void supabase.auth.getSession().then(({ data }) => initialize(data.session?.user.id ?? null));
     const { data: auth } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "TOKEN_REFRESHED" || session?.user.id === userIdRef.current && event !== "SIGNED_OUT") return;
@@ -580,8 +582,16 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
 
   useEffect(() => {
     if (!readyUser || readyUser !== userIdRef.current) return;
-    if (!autoSync) { pushRef.current.cancel(); setSyncStatus("paused"); return; }
     const patch = changedSettings(baseline.current, snapshotRef.current);
+    if (!autoSync) {
+      // Persist the pause choice itself without discarding edits waiting to save.
+      if (patch.autoSync === false) {
+        pushRef.current(readyUser, { autoSync: false });
+        baseline.current = { ...baseline.current, autoSync: false };
+        void pushRef.current.flush().then(() => setSyncStatus("paused"));
+      } else setSyncStatus("paused");
+      return;
+    }
     if (!Object.keys(patch).length) return;
     baseline.current = snapshotRef.current;
     pushRef.current(readyUser, patch);
@@ -606,7 +616,7 @@ export const SettingsProvider = ({ children }: SettingsProviderProps) => {
   };
 
   const syncNow = async () => {
-    if (!readyUser) { setSyncStatus("error"); return; }
+    if (!readyUser) { await reloadRef.current(); return; }
     pushRef.current(readyUser, changedSettings(baseline.current, snapshotRef.current));
     await pushRef.current.flush();
   };
