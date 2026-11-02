@@ -43,7 +43,7 @@ interface MobileAIAssistantProps {
   onClose: () => void;
 }
 
-type Model = "google/gemini-3-flash-preview" | "google/gemini-3-pro-preview";
+type Model = "google/gemini-3.8-flash" | "google/gemini-3.1-pro-preview";
 type Coach = "balanced" | "strength" | "nutrition" | "recovery";
 
 const STORAGE_KEY = "fitfusion-mobile-coach-history";
@@ -101,7 +101,7 @@ function loadPrefs(): { model: Model; coach: Coach; speak: boolean } {
     const raw = safeJsonParse<any>(localStorage.getItem(PREFS_KEY), null);
     if (raw && typeof raw === "object") {
       return {
-        model: raw.model === "google/gemini-3-pro-preview" ? raw.model : "google/gemini-3-flash-preview",
+        model: raw.model === "google/gemini-3.1-pro-preview" ? raw.model : "google/gemini-3.8-flash",
         coach: (["balanced", "strength", "nutrition", "recovery"].includes(raw.coach) ? raw.coach : "balanced") as Coach,
         speak: raw.speak === true,
       };
@@ -109,7 +109,7 @@ function loadPrefs(): { model: Model; coach: Coach; speak: boolean } {
   } catch {
     /* ignore */
   }
-  return { model: "google/gemini-3-flash-preview", coach: "balanced", speak: false };
+  return { model: "google/gemini-3.8-flash", coach: "balanced", speak: false };
 }
 
 const stripForSpeech = (t: string) =>
@@ -356,7 +356,7 @@ export function MobileAIAssistant({ isOpen, onClose }: MobileAIAssistantProps) {
     setListening(true);
   };
 
-  const modelLabel = prefs.model.includes("pro") ? "Gemini 3 Pro" : "Gemini 3 Flash";
+  const modelLabel = prefs.model.includes("pro") ? "Gemini 3.1 Pro" : "Gemini 3.8 Flash";
   const showQuick = useMemo(() => messages.length === 0, [messages.length]);
 
   return (
@@ -416,9 +416,9 @@ export function MobileAIAssistant({ isOpen, onClose }: MobileAIAssistantProps) {
                     setPrefs((p) => ({
                       ...p,
                       model:
-                        p.model === "google/gemini-3-flash-preview"
-                          ? "google/gemini-3-pro-preview"
-                          : "google/gemini-3-flash-preview",
+                        p.model === "google/gemini-3.8-flash"
+                          ? "google/gemini-3.1-pro-preview"
+                          : "google/gemini-3.8-flash",
                     }))
                   }
                 >

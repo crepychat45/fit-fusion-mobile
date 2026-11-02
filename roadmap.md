@@ -90,3 +90,10 @@
 - Real AI request → save (duplicate save disabled) → start → exit → resume → finish → read back in all Progress ranges passed.
 - Scheduling the saved AI routine, legacy units/updates links, invalid-tab fallback, Settings search → Chat, and eight navigation entries passed; no browser page errors.
 - Latest automatic build: OK. Publishing and physical smartwatch/native capability tests remain external; no deployed-update or hardware success claimed.
+
+## Nov 2026 request
+- [x] More → App Update opens the App Updates page directly
+- [x] AI Coach/Assistant/workout generator on newer models; server only allows approved models
+- [ ] Workouts page + video player improvements
+- [ ] Realtime notifications + FCM push review
+- [ ] Update packages + new version with changelog
