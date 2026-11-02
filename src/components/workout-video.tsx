@@ -74,6 +74,8 @@ function InlineVideoPlayerImpl({
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [isMuted, setIsMuted] = useState(true);
   const [errored, setErrored] = useState(false);
+  const [speed, setSpeed] = useState(1);
+  const [buffering, setBuffering] = useState(false);
 
   // Reset when incoming videoUrl changes
   useEffect(() => {
@@ -155,8 +157,38 @@ function InlineVideoPlayerImpl({
 
   const currentSrc = sources[sourceIdx];
 
+  const cycleSpeed = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    const speeds = [0.5, 0.75, 1, 1.25, 1.5];
+    const next = speeds[(speeds.indexOf(speed) + 1) % speeds.length];
+    v.playbackRate = next;
+    setSpeed(next);
+  };
+
+  const togglePip = async () => {
+    const v = videoRef.current as (HTMLVideoElement & { requestPictureInPicture?: () => Promise<unknown> }) | null;
+    if (!v) return;
+    try {
+      if (document.pictureInPictureElement) await document.exitPictureInPicture();
+      else await v.requestPictureInPicture?.();
+    } catch { /* not supported */ }
+  };
+
+  const onKey = (e: React.KeyboardEvent) => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (e.key === " " || e.key === "k") { e.preventDefault(); togglePlay(); }
+    else if (e.key === "m") toggleMute();
+    else if (e.key === "f") goFullscreen();
+    else if (e.key === "ArrowRight") v.currentTime = Math.min(v.duration || 0, v.currentTime + 5);
+    else if (e.key === "ArrowLeft") v.currentTime = Math.max(0, v.currentTime - 5);
+  };
+
+  const pipSupported = typeof document !== "undefined" && "pictureInPictureEnabled" in document && document.pictureInPictureEnabled;
+
   return (
-    <div className="relative w-full bg-black group">
+    <div className="relative w-full bg-black group outline-none" tabIndex={0} onKeyDown={onKey} aria-label={`${title} video, press space to play or pause`}>
       <video
         ref={videoRef}
         key={currentSrc}
@@ -169,12 +201,21 @@ function InlineVideoPlayerImpl({
         playsInline
         preload="metadata"
         controls
-        
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         onEnded={() => setIsPlaying(false)}
+        onWaiting={() => setBuffering(true)}
+        onPlaying={() => setBuffering(false)}
+        onCanPlay={() => setBuffering(false)}
+        onLoadedMetadata={(e) => { e.currentTarget.playbackRate = speed; }}
         onError={handleError}
       />
+      {buffering && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="h-10 w-10 rounded-full border-4 border-white/30 border-t-white animate-spin" />
+        </div>
+      )}
+
       <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         <Button
           size="icon"
