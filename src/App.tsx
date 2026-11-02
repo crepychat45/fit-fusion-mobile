@@ -207,12 +207,17 @@ const AppContent: React.FC = () => {
           <FitAssistant />
         </Suspense>
       )}
-      <Suspense fallback={null}>
-        <RemoteUpdateDrawer />
-      </Suspense>
-      <Suspense fallback={null}>
-        <PerfDiagnosticsPanel />
-      </Suspense>
+      {/* Non-critical overlays: isolated so a chunk failure can never crash the app */}
+      <ErrorBoundary fallback={null}>
+        <Suspense fallback={null}>
+          <RemoteUpdateDrawer />
+        </Suspense>
+      </ErrorBoundary>
+      <ErrorBoundary fallback={null}>
+        <Suspense fallback={null}>
+          <PerfDiagnosticsPanel />
+        </Suspense>
+      </ErrorBoundary>
       </SEOManager>
     </>
   );
