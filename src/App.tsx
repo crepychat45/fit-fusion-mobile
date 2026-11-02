@@ -108,8 +108,17 @@ const AIWorkoutGenerator = lazyWithRetry(() => import("./pages/ai-workout-genera
 const PublicFitnessCard = lazyWithRetry(() => import("./pages/public-fitness-card"));
 const FitAssistant = lazyWithRetry(() => import("./components/fit-assistant").then(m => ({ default: m.FitAssistant })));
 const AdminPage = lazyWithRetry(() => import("./pages/admin"));
-const RemoteUpdateDrawer = lazy(() => import("./components/admin/remote-update-drawer").then(m => ({ default: m.RemoteUpdateDrawer })));
-const PerfDiagnosticsPanel = lazy(() => import("./components/perf-diagnostics-panel"));
+const RemoteUpdateDrawer = lazyWithRetry(() =>
+  import("./components/admin/remote-update-drawer").then((m) => {
+    // A stale/partial chunk can resolve without the export — turn that into a
+    // recoverable chunk error so caches are cleared and the import retried.
+    if (!m?.RemoteUpdateDrawer) {
+      throw new Error("Loading chunk failed: remote-update-drawer export missing");
+    }
+    return { default: m.RemoteUpdateDrawer };
+  })
+);
+const PerfDiagnosticsPanel = lazyWithRetry(() => import("./components/perf-diagnostics-panel"));
 
 
 const P: React.FC<{ children: React.ReactNode }> = ({ children }) => (
