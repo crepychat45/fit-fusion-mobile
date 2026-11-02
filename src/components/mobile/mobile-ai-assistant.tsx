@@ -356,7 +356,7 @@ export function MobileAIAssistant({ isOpen, onClose }: MobileAIAssistantProps) {
     setListening(true);
   };
 
-  const modelLabel = prefs.model.includes("pro") ? "Gemini 3 Pro" : "Gemini 3 Flash";
+  const modelLabel = prefs.model.includes("pro") ? "Gemini 3.1 Pro" : "Gemini 3.8 Flash";
   const showQuick = useMemo(() => messages.length === 0, [messages.length]);
 
   return (
