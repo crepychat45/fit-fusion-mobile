@@ -579,7 +579,7 @@ export function MobileNav() {
         label: "App Update",
         action: () => {
           setShowMore(false);
-          navigate("/settings?tab=updates");
+          navigate("/app-updates");
         },
         badge: hasAppUpdate ? `v${updateTarget}` : null,
       },
@@ -587,7 +587,7 @@ export function MobileNav() {
       { id: "ai-assistant", icon: Brain, label: "AI Coach", action: openAI, badge: showAiNew ? "NEW" : null },
       { id: "security", icon: Shield, label: "Security", action: () => setShowSecurity(true), badge: null as string | null },
       { id: "voice", icon: Mic, label: "Voice", action: openVoice, badge: null },
-      { id: "notifications", icon: Bell, label: "Alerts", action: () => navigate("/notifications"), badge: notifications > 0 ? String(notifications) : null },
+      { id: "notifications", icon: Bell, label: "Alerts", action: () => { setShowMore(false); navigate("/notifications"); }, badge: notifications > 0 ? String(notifications) : null },
     ],
     [openAI, openVoice, navigate, notifications, showAiNew, isAdmin, hasAppUpdate, updateTarget],
   );
