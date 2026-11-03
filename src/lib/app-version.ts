@@ -1,6 +1,6 @@
 // Single source of truth for app version + changelog
-export const APP_VERSION = "8.5.0";
-export const APP_RELEASE_DATE = "2026-10-08";
+export const APP_VERSION = "8.6.0";
+export const APP_RELEASE_DATE = "2026-11-02";
 
 
 
@@ -25,6 +25,29 @@ export interface ReleaseNote {
 }
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "8.6.0",
+    date: "2026-11-02",
+    type: "Minor Update",
+    highlight: "Better workout videos, faster notifications and newer AI models.",
+    sections: [
+      { title: "New Features", icon: "sparkles", items: [
+        "Workout videos: playback speed (0.5x–1.5x) and picture-in-picture",
+        "Keyboard shortcuts in videos: space, M, F and arrow keys to skip 5 seconds",
+        "Loading spinner while a video buffers",
+        "AI Coach and Assistant use newer, faster AI models",
+      ]},
+      { title: "Improvements", icon: "zap", items: [
+        "Notifications catch up instantly when you return to the app or reconnect",
+        "Bursts of notifications refresh once instead of many times",
+        "Video controls always visible on phones",
+        "Packages updated to latest compatible versions",
+      ]},
+      { title: "Bug Fixes", icon: "bug", items: [
+        "More → App Update and update notifications open the App Updates page",
+      ]},
+    ],
+  },
   {
     version: "8.5.0",
     date: "2026-10-08",

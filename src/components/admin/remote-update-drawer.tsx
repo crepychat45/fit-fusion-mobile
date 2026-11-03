@@ -111,7 +111,7 @@ export function RemoteUpdateDrawer() {
               variant="outline"
               onClick={() => {
                 setOpen(false);
-                navigate("/settings?tab=updates");
+                navigate("/app-updates");
               }}
             >
               Details
