@@ -15,6 +15,7 @@ import {
   VolumeX,
   Maximize,
   RotateCcw,
+  PictureInPicture2,
 } from "lucide-react";
 import { FALLBACK_VIDEO_URLS } from "@/data/workout-videos";
 import { isYouTubeEmbed } from "@/data/exercise-video-map";
@@ -216,41 +217,25 @@ function InlineVideoPlayerImpl({
         </div>
       )}
 
-      <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        <Button
-          size="icon"
-          variant="secondary"
-          className="h-8 w-8 bg-black/60 hover:bg-black/80 text-white border-0"
-          onClick={togglePlay}
-          aria-label={isPlaying ? "Pause" : "Play"}
-        >
+      <div className="absolute top-2 right-2 flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-opacity">
+        <Button size="sm" variant="secondary" className="h-8 px-2 bg-black/60 hover:bg-black/80 text-white border-0 text-xs" onClick={cycleSpeed} aria-label={`Playback speed ${speed}x`}>
+          {speed}x
+        </Button>
+        {pipSupported && (
+          <Button size="icon" variant="secondary" className="h-8 w-8 bg-black/60 hover:bg-black/80 text-white border-0" onClick={togglePip} aria-label="Picture in picture">
+            <PictureInPicture2 className="h-4 w-4" />
+          </Button>
+        )}
+        <Button size="icon" variant="secondary" className="h-8 w-8 bg-black/60 hover:bg-black/80 text-white border-0" onClick={togglePlay} aria-label={isPlaying ? "Pause" : "Play"}>
           {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
         </Button>
-        <Button
-          size="icon"
-          variant="secondary"
-          className="h-8 w-8 bg-black/60 hover:bg-black/80 text-white border-0"
-          onClick={toggleMute}
-          aria-label={isMuted ? "Unmute" : "Mute"}
-        >
+        <Button size="icon" variant="secondary" className="h-8 w-8 bg-black/60 hover:bg-black/80 text-white border-0" onClick={toggleMute} aria-label={isMuted ? "Unmute" : "Mute"}>
           {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
         </Button>
-        <Button
-          size="icon"
-          variant="secondary"
-          className="h-8 w-8 bg-black/60 hover:bg-black/80 text-white border-0"
-          onClick={restart}
-          aria-label="Restart"
-        >
+        <Button size="icon" variant="secondary" className="h-8 w-8 bg-black/60 hover:bg-black/80 text-white border-0" onClick={restart} aria-label="Restart">
           <RotateCcw className="h-4 w-4" />
         </Button>
-        <Button
-          size="icon"
-          variant="secondary"
-          className="h-8 w-8 bg-black/60 hover:bg-black/80 text-white border-0"
-          onClick={goFullscreen}
-          aria-label="Fullscreen"
-        >
+        <Button size="icon" variant="secondary" className="h-8 w-8 bg-black/60 hover:bg-black/80 text-white border-0" onClick={goFullscreen} aria-label="Fullscreen">
           <Maximize className="h-4 w-4" />
         </Button>
       </div>
