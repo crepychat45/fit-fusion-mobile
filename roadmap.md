@@ -94,6 +94,6 @@
 ## Nov 2026 request
 - [x] More → App Update opens the App Updates page directly
 - [x] AI Coach/Assistant/workout generator on newer models; server only allows approved models
-- [ ] Workouts page + video player improvements
-- [ ] Realtime notifications + FCM push review
-- [ ] Update packages + new version with changelog
+- [x] Video player: speed, picture-in-picture, keyboard shortcuts, buffering spinner
+- [x] Notifications: debounced realtime, catch-up on reconnect/return, update links fixed
+- [x] Packages updated (compatible), v8.6.0 with changelog
