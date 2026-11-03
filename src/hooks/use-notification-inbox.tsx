@@ -114,7 +114,7 @@ export function useNotificationInbox() {
         title: `Update available — v${r.version}`,
         body: r.title || `A new ${r.channel} update is ready to install.`,
         category: "update",
-        link: "/settings?tab=updates",
+        link: "/app-updates",
         createdAt: r.created_at,
       });
     }
@@ -126,26 +126,30 @@ export function useNotificationInbox() {
   useEffect(() => {
     refresh();
     if (!user) return;
+    // Coalesce bursts of realtime events into one refresh.
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const scheduleRefresh = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(() => refresh(), 300);
+    };
     const suffix = Math.random().toString(36).slice(2);
     const channel = supabase
       .channel(`inbox-${suffix}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "admin_notifications" },
-        () => refresh(),
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "global_announcements" },
-        () => refresh(),
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "app_releases" },
-        () => refresh(),
-      )
-      .subscribe();
+      .on("postgres_changes", { event: "*", schema: "public", table: "admin_notifications" }, scheduleRefresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "global_announcements" }, scheduleRefresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "app_releases" }, scheduleRefresh)
+      .subscribe((status) => {
+        // Catch up on anything missed while the connection was down.
+        if (status === "SUBSCRIBED") scheduleRefresh();
+      });
+    // Events can be missed while the tab is hidden or offline; catch up on return.
+    const onVisible = () => { if (document.visibilityState === "visible") scheduleRefresh(); };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("online", scheduleRefresh);
     return () => {
+      if (timer) clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("online", scheduleRefresh);
       supabase.removeChannel(channel);
     };
   }, [user, refresh]);
