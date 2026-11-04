@@ -43,7 +43,8 @@ interface MobileAIAssistantProps {
   onClose: () => void;
 }
 
-type Model = "google/gemini-3.8-flash" | "google/gemini-3.1-pro-preview";
+type Model = "google/gemini-3.8-flash" | "google/gemini-3.1-pro-preview" | "openai/gpt-5-mini";
+const MODEL_CYCLE: Model[] = ["google/gemini-3.8-flash", "google/gemini-3.1-pro-preview", "openai/gpt-5-mini"];
 type Coach = "balanced" | "strength" | "nutrition" | "recovery";
 
 const STORAGE_KEY = "fitfusion-mobile-coach-history";
@@ -101,7 +102,7 @@ function loadPrefs(): { model: Model; coach: Coach; speak: boolean } {
     const raw = safeJsonParse<any>(localStorage.getItem(PREFS_KEY), null);
     if (raw && typeof raw === "object") {
       return {
-        model: raw.model === "google/gemini-3.1-pro-preview" ? raw.model : "google/gemini-3.8-flash",
+        model: MODEL_CYCLE.includes(raw.model) ? raw.model : "google/gemini-3.8-flash",
         coach: (["balanced", "strength", "nutrition", "recovery"].includes(raw.coach) ? raw.coach : "balanced") as Coach,
         speak: raw.speak === true,
       };
@@ -415,15 +416,12 @@ export function MobileAIAssistant({ isOpen, onClose }: MobileAIAssistantProps) {
                   onClick={() =>
                     setPrefs((p) => ({
                       ...p,
-                      model:
-                        p.model === "google/gemini-3.8-flash"
-                          ? "google/gemini-3.1-pro-preview"
-                          : "google/gemini-3.8-flash",
+                      model: MODEL_CYCLE[(MODEL_CYCLE.indexOf(p.model) + 1) % MODEL_CYCLE.length],
                     }))
                   }
                 >
                   <Zap className="mr-1 h-3 w-3" />
-                  {prefs.model.includes("pro") ? "Pro (deep)" : "Flash (fast)"}
+                  {prefs.model.includes("gpt") ? "GPT-5 Mini" : prefs.model.includes("pro") ? "Pro (deep)" : "Flash (fast)"}
                 </Button>
                 <Button
                   size="sm"

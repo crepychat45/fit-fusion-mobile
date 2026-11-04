@@ -59,7 +59,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    const ALLOWED_MODELS = new Set(["google/gemini-3.8-flash", "google/gemini-3.1-pro-preview"]);
+    const ALLOWED_MODELS = new Set(["google/gemini-3.8-flash", "google/gemini-3.1-pro-preview", "openai/gpt-5-mini"]);
     const model = typeof body?.model === "string" && ALLOWED_MODELS.has(body.model) ? body.model : "google/gemini-3.8-flash";
     const language = typeof body?.language === "string" && body.language.length < 40 ? body.language : "";
     const systemPrompt = language
