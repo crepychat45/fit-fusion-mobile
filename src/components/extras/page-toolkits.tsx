@@ -1,5 +1,5 @@
 import { usePushNotifications } from "@/hooks/use-push-notifications";
-import { BellRing } from "lucide-react";
+import { BellRing, Droplets, Moon, HeartPulse } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -68,6 +68,79 @@ const Section = ({ icon: Icon, title, children }: { icon: any; title: string; ch
 );
 
 /* ===================== WORKOUTS ===================== */
+const todayKey = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
+function WaterTracker() {
+  const [log, setLog] = useSyncedKV<Record<string, number>>("waterLog", {});
+  const [goal, setGoal] = useSyncedKV<number>("waterGoalMl", 2500);
+  const today = log[todayKey()] ?? 0;
+  const add = (ml: number) => {
+    const next = { ...log, [todayKey()]: Math.max(0, today + ml) };
+    setLog(Object.fromEntries(Object.entries(next).sort().slice(-60)));
+  };
+  const pct = Math.min(100, Math.round((today / goal) * 100));
+  return (
+    <Section icon={Droplets} title="Water today">
+      <div className="text-sm">{today} / {goal} ml ({pct}%)</div>
+      <div className="h-2 rounded-full bg-muted overflow-hidden"><div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} /></div>
+      <div className="flex flex-wrap gap-2">
+        {[250, 500].map((ml) => <Button key={ml} size="sm" variant="outline" onClick={() => add(ml)}>+{ml} ml</Button>)}
+        <Button size="sm" variant="ghost" onClick={() => add(-250)} disabled={today === 0}>−250</Button>
+      </div>
+      <label className="text-xs flex items-center gap-2">Daily goal (ml)<Input className="w-24 h-8" type="number" value={goal} onChange={(e) => setGoal(Math.max(500, Math.min(6000, Number(e.target.value) || 2500)))} /></label>
+    </Section>
+  );
+}
+
+function SleepLog() {
+  const { toast } = useToast();
+  const [log, setLog] = useSyncedKV<{ date: string; hours: number }[]>("sleepLog", []);
+  const [hours, setHours] = useState("");
+  const last7 = log.slice(-7);
+  const avg = last7.length ? last7.reduce((a, b) => a + b.hours, 0) / last7.length : null;
+  const save = () => {
+    const n = Number(hours);
+    if (!(n > 0 && n <= 16)) return toast({ title: "Enter hours between 0 and 16", variant: "destructive" });
+    const d = todayKey();
+    setLog([...log.filter((x) => x.date !== d), { date: d, hours: n }].sort((a, b) => a.date.localeCompare(b.date)).slice(-90));
+    setHours("");
+    toast({ title: "Sleep saved" });
+  };
+  return (
+    <Section icon={Moon} title="Sleep log">
+      <div className="flex gap-2">
+        <Input type="number" step="0.5" placeholder="Hours slept last night" value={hours} onChange={(e) => setHours(e.target.value)} />
+        <Button onClick={save}>Save</Button>
+      </div>
+      <p className="text-sm">{avg === null ? "No nights logged yet." : `7-night average: ${avg.toFixed(1)} h (${last7.length} nights)`}</p>
+      {last7.length > 0 && (
+        <div className="flex items-end gap-1 h-16">
+          {last7.map((x) => <div key={x.date} title={`${x.date}: ${x.hours} h`} className="flex-1 rounded-t bg-primary/70" style={{ height: `${(x.hours / 12) * 100}%` }} />)}
+        </div>
+      )}
+    </Section>
+  );
+}
+
+function HealthCard() {
+  const { toast } = useToast();
+  const [card, setCard] = useSyncedKV<{ blood: string; allergies: string; contact: string }>("healthCard", { blood: "", allergies: "", contact: "" });
+  const [draft, setDraft] = useState(card);
+  useEffect(() => setDraft(card), [card]);
+  return (
+    <Section icon={HeartPulse} title="Health & emergency info">
+      <Input placeholder="Blood group (e.g. O+)" maxLength={5} value={draft.blood} onChange={(e) => setDraft({ ...draft, blood: e.target.value })} />
+      <Input placeholder="Allergies / conditions" maxLength={200} value={draft.allergies} onChange={(e) => setDraft({ ...draft, allergies: e.target.value })} />
+      <Input placeholder="Emergency contact (name & phone)" maxLength={100} value={draft.contact} onChange={(e) => setDraft({ ...draft, contact: e.target.value })} />
+      <Button onClick={() => { setCard({ blood: draft.blood.trim(), allergies: draft.allergies.trim(), contact: draft.contact.trim() }); toast({ title: "Health info saved" }); }}>Save</Button>
+      <p className="text-xs text-muted-foreground">Private to your account; never shown on your public card.</p>
+    </Section>
+  );
+}
+
 function IntervalTimer() {
   const [work, setWork] = useState(40);
   const [rest, setRest] = useState(20);
@@ -151,6 +224,7 @@ export function WorkoutsToolkit() {
       <h2 className="text-lg font-semibold">Training tools</h2>
       <IntervalTimer />
       <StrengthCalc />
+      <WaterTracker />
     </div>
   );
 }
@@ -191,6 +265,7 @@ export function ProgressToolkit() {
   return (
     <div className="px-4 py-4 space-y-4">
       <h2 className="text-lg font-semibold">Body & records</h2>
+      <SleepLog />
       <Section icon={Scale} title="Weight log & BMI">
         <div className="flex gap-2">
           <Input type="number" placeholder="Today's weight (kg)" value={kg} onChange={(e) => setKg(e.target.value)} />
@@ -270,6 +345,7 @@ export function ProfileToolkit() {
           </div>
         ))}
       </Section>
+      <HealthCard />
       <Section icon={Link2} title="Share my fitness card">
         <p className="text-xs text-muted-foreground">Share a public link to your fitness card.</p>
         <Button variant="outline" onClick={copyLink}><Link2 className="h-4 w-4 mr-2" />Share link</Button>
