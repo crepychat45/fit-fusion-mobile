@@ -34,16 +34,17 @@ export function ProfileHeader() {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
-    const idle = (window as any).requestIdleCallback || ((cb: () => void) => window.setTimeout(cb, 1200));
-    const idleId = idle(() => {
-      supabase.auth.getUser().then(({ data }) => {
-        if (data.user) {
-          localStorage.setItem("fitfusion-last-email", data.user.email || "");
-          setUser(data.user);
-          setProfileEnabled(true);
-        }
-      }).catch(() => setProfileEnabled(false));
-    }, { timeout: 2500 });
+    // getSession reads the locally stored session instantly (no network wait),
+    // so profile details start loading right away instead of after an idle delay.
+    const idleId = 0;
+    supabase.auth.getSession().then(({ data }) => {
+      const u = data.session?.user;
+      if (u) {
+        localStorage.setItem("fitfusion-last-email", u.email || "");
+        setUser(u);
+        setProfileEnabled(true);
+      }
+    }).catch(() => setProfileEnabled(false));
 
     // Listen for profile updates
     const handleProfileUpdate = () => {
