@@ -97,3 +97,12 @@
 - [x] Video player: speed, picture-in-picture, keyboard shortcuts, buffering spinner
 - [x] Notifications: debounced realtime, catch-up on reconnect/return, update links fixed
 - [x] Packages updated (compatible), v8.6.0 with changelog
+
+## Nov 3–4 2026 request
+- [x] Alerts opens Recent notifications; notification prefs persisted; real test alert
+- [x] Home profile loads instantly; v8.7.0 changelog
+- [x] AI assistant: third model (GPT-5 Mini) selectable, server allow-list updated
+- [ ] Workouts/Progress/Chat/Profile new features — scope per page with user
+- [ ] Subscription page improvements
+- [ ] Smartwatch Hub/settings/dialer improvements
+- [ ] FCM / background push — needs Firebase connection + real phone test
