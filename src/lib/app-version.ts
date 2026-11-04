@@ -1,6 +1,6 @@
 // Single source of truth for app version + changelog
-export const APP_VERSION = "8.6.0";
-export const APP_RELEASE_DATE = "2026-11-02";
+export const APP_VERSION = "8.7.0";
+export const APP_RELEASE_DATE = "2026-11-03";
 
 
 
@@ -25,6 +25,21 @@ export interface ReleaseNote {
 }
 
 export const RELEASE_NOTES: ReleaseNote[] = [
+  {
+    version: "8.7.0",
+    date: "2026-11-03",
+    type: "Minor Update",
+    highlight: "Alerts open your recent notifications and the home profile loads instantly.",
+    sections: [
+      { title: "New", icon: "sparkles", items: [
+        "Alerts in the More menu now opens straight to your Recent notifications",
+        "Notification preferences and quiet hours (any start/end time) are saved on this device",
+        "Test Notification shows a real system alert when permission is granted",
+      ] },
+      { title: "Faster", icon: "zap", items: ["Home profile details load immediately instead of after a delay"] },
+      { title: "Fixes", icon: "bug", items: ["Notification toggles no longer reset when you leave the page"] },
+    ],
+  },
   {
     version: "8.6.0",
     date: "2026-11-02",
