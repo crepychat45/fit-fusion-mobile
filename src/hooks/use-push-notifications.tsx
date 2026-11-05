@@ -62,6 +62,15 @@ export function usePushNotifications() {
         return false;
       }
 
+      const { Capacitor } = await import('@capacitor/core');
+      if (Capacitor.isNativePlatform()) {
+        const { registerNativePush } = await import('@/lib/native-push');
+        const ok = await registerNativePush();
+        setIsSubscribed(ok);
+        toast({ title: ok ? 'Subscribed!' : 'Push unavailable', description: ok ? 'This phone will receive background notifications.' : 'Allow notifications for FitxFusion in system settings.' });
+        return ok;
+      }
+
       const registration = await navigator.serviceWorker.ready;
 
       // Public VAPID key comes from the environment; without it web push
