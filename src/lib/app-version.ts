@@ -35,6 +35,8 @@ export const RELEASE_NOTES: ReleaseNote[] = [
         "Alerts in the More menu now opens straight to your Recent notifications",
         "Notification preferences and quiet hours (any start/end time) are saved on this device",
         "Test Notification shows a real system alert when permission is granted",
+        "Workouts: daily water tracker with goal; Progress: sleep log with 7-night average; Profile: private health & emergency info",
+        "AI Assistant: choose Flash, Pro or GPT-5 Mini",
       ] },
       { title: "Faster", icon: "zap", items: ["Home profile details load immediately instead of after a delay"] },
       { title: "Fixes", icon: "bug", items: ["Notification toggles no longer reset when you leave the page"] },
