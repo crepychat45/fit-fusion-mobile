@@ -134,13 +134,14 @@ export const WatchDialer: React.FC = () => {
 
   const sosCall = async () => {
     const sec = loadSecurity();
-    toast.warning(`Emergency SOS in ${sec.sosCountdown || 3}s…`, {
-      description: "Hold to cancel",
-    });
-    setTimeout(async () => {
+    const timer = setTimeout(async () => {
       await triggerEmergencySOS(sec);
       startCall("Emergency", sec.emergencyContacts[0] || state.emergencyNumber);
     }, (sec.sosCountdown || 3) * 1000);
+    toast.warning(`Emergency SOS in ${sec.sosCountdown || 3}s…`, {
+      description: "Tap Cancel to stop the call",
+      action: { label: "Cancel", onClick: () => { clearTimeout(timer); toast.message("SOS cancelled"); } },
+    });
   };
 
   const favorites = useMemo(() => state.contacts.filter((c) => c.favorite), [state.contacts]);

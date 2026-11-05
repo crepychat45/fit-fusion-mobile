@@ -103,6 +103,6 @@
 - [x] Home profile loads instantly; v8.7.0 changelog
 - [x] AI assistant: third model (GPT-5 Mini) selectable, server allow-list updated
 - [x] Workouts water tracker, Progress sleep log, Profile health info (synced to account)
-- [ ] Subscription page improvements
-- [ ] Smartwatch Hub/settings/dialer improvements
-- [ ] FCM / background push — needs Firebase connection + real phone test
+- [ ] Subscription: fake checkout disabled; real payments need Stripe/Razorpay choice
+- [x] Dialer SOS countdown cancellable
+- [x] FCM phone push: native token registration + send-push via Firebase (needs real phone test)

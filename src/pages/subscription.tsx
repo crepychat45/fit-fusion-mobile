@@ -225,10 +225,18 @@ const SubscriptionPage: React.FC = () => {
       toast({ title: "Invalid payment details", variant: "destructive" });
       return;
     }
+    // No real payment provider is connected yet, so never activate a paid plan
+    // without an actual charge.
+    const PAYMENTS_LIVE = false;
+    if (!PAYMENTS_LIVE) {
+      toast({
+        title: "Online payments are coming soon",
+        description: "Premium can't be bought in the app yet. You have not been charged.",
+      });
+      return;
+    }
     setIsProcessing(true);
     try {
-      // Simulate gateway
-      await new Promise((r) => setTimeout(r, 1800));
       await subscribe({
         plan_id: selected.id,
         plan_name: selected.name,

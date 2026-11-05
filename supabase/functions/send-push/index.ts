@@ -53,6 +53,21 @@ Deno.serve(async (req) => {
     const stale: string[] = [];
     await Promise.all(
       (subs ?? []).map(async (s) => {
+        if (s.endpoint.startsWith("fcm:")) {
+          const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+          const fcmKey = Deno.env.get("FIREBASE_MESSAGING_API_KEY");
+          if (!lovableKey || !fcmKey) return;
+          const res = await fetch("https://connector-gateway.lovable.dev/firebase_messaging/v1/projects/_/messages:send", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${lovableKey}`, "X-Connection-Api-Key": fcmKey, "Content-Type": "application/json" },
+            body: JSON.stringify({ message: { token: s.endpoint.slice(4), notification: { title, body }, data: { path: link && link.startsWith("/") ? link : "/notifications" } } }),
+          });
+          const text = await res.text();
+          if (res.ok) sent++;
+          else if (res.status === 404 || (res.status === 400 && text.includes("INVALID_ARGUMENT"))) stale.push(s.id);
+          else console.error("fcm failed", res.status, text);
+          return;
+        }
         if (!s.p256dh || !s.auth_key) return;
         try {
           await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth_key } }, payload, { TTL: 86400 });
