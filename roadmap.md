@@ -102,7 +102,7 @@
 - [x] Alerts opens Recent notifications; notification prefs persisted; real test alert
 - [x] Home profile loads instantly; v8.7.0 changelog
 - [x] AI assistant: third model (GPT-5 Mini) selectable, server allow-list updated
-- [ ] Workouts/Progress/Chat/Profile new features — scope per page with user
+- [x] Workouts water tracker, Progress sleep log, Profile health info (synced to account)
 - [ ] Subscription page improvements
 - [ ] Smartwatch Hub/settings/dialer improvements
 - [ ] FCM / background push — needs Firebase connection + real phone test
