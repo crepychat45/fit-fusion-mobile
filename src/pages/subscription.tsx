@@ -45,6 +45,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { supabase } from "@/integrations/supabase/client";
+import { openPaddleCheckout } from "@/lib/paddle";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { useSubscription, PlanId, BillingCycle } from "@/hooks/use-subscription";
 
 interface Plan {
@@ -146,7 +149,7 @@ const inr = (n: number) =>
 const SubscriptionPage: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { subscription, isPremium, subscribe, cancel, toggleAutoRenew, loading, userId } =
+  const { subscription, isPremium, cancel, toggleAutoRenew, loading, userId } =
     useSubscription();
 
   const [activeTab, setActiveTab] = useState("plans");
@@ -192,8 +195,11 @@ const SubscriptionPage: React.FC = () => {
       return;
     }
     setSelectedPlan(id);
-    setCheckoutStep(1);
-    setActiveTab("checkout");
+    setIsProcessing(true);
+    supabase.auth.getUser().then(({ data }) =>
+      openPaddleCheckout({ priceId: `${id}_${billingCycle}`, userId, email: data.user?.email ?? undefined }),
+    ).catch((e) => toast({ title: "Checkout unavailable", description: e.message, variant: "destructive" }))
+     .finally(() => setIsProcessing(false));
   };
 
   const handleProceedToPayment = () => {
@@ -225,35 +231,7 @@ const SubscriptionPage: React.FC = () => {
       toast({ title: "Invalid payment details", variant: "destructive" });
       return;
     }
-    // No real payment provider is connected yet, so never activate a paid plan
-    // without an actual charge.
-    const PAYMENTS_LIVE = false;
-    if (!PAYMENTS_LIVE) {
-      toast({
-        title: "Online payments are coming soon",
-        description: "Premium can't be bought in the app yet. You have not been charged.",
-      });
-      return;
-    }
-    setIsProcessing(true);
-    try {
-      await subscribe({
-        plan_id: selected.id,
-        plan_name: selected.name,
-        billing_cycle: billingCycle,
-        price_inr: priceOf(selected),
-        payment_method: paymentMethod,
-      });
-      setCheckoutStep(3);
-      toast({
-        title: "🎉 Welcome to FitxFusion Premium!",
-        description: `${selected.name} plan is now active.`,
-      });
-    } catch (e: any) {
-      toast({ title: "Payment failed", description: e.message, variant: "destructive" });
-    } finally {
-      setIsProcessing(false);
-    }
+    handlePlanSelect(selected.id);
   };
 
   const onCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -807,8 +785,7 @@ const SubscriptionPage: React.FC = () => {
                       <Switch
                         checked={subscription.auto_renew}
                         onCheckedChange={async () => {
-                          await toggleAutoRenew();
-                          toast({ title: "Preference updated" });
+                          try { await toggleAutoRenew(); } catch (e: any) { toast({ title: "Billing portal unavailable", description: e.message, variant: "destructive" }); }
                         }}
                       />
                     </div>
@@ -839,8 +816,7 @@ const SubscriptionPage: React.FC = () => {
                       variant="destructive"
                       size="sm"
                       onClick={async () => {
-                        await cancel();
-                        toast({ title: "Subscription cancelled" });
+                        try { await cancel(); } catch (e: any) { toast({ title: "Billing portal unavailable", description: e.message, variant: "destructive" }); }
                       }}
                     >
                       Cancel
