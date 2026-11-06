@@ -103,6 +103,7 @@
 - [x] Home profile loads instantly; v8.7.0 changelog
 - [x] AI assistant: third model (GPT-5 Mini) selectable, server allow-list updated
 - [x] Workouts water tracker, Progress sleep log, Profile health info (synced to account)
-- [ ] Subscription: fake checkout disabled; real payments need Stripe/Razorpay choice
+- [x] Premium checkout via built-in payments (test mode), webhook-only entitlements, billing portal, live status updates
 - [x] Dialer SOS countdown cancellable
 - [x] FCM phone push: native token registration + send-push via Firebase (needs real phone test)
+- [ ] Admin Panel: scanned, no fake data found — waiting on specific issues from user
