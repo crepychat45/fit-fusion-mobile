@@ -269,6 +269,10 @@ const SubscriptionPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24">
+      <PaymentTestModeBanner />
+      {new URLSearchParams(window.location.search).get("checkout") === "success" && !isPremium && (
+        <div className="px-4 py-2 text-center text-sm bg-accent/20">Payment received — activating your plan…</div>
+      )}
       {/* Hero */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-600 via-purple-600 to-indigo-700" />
