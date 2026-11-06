@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getPaddleEnvironment, openBillingPortal } from "@/lib/paddle";
 
 export type PlanId = "starter" | "pro" | "elite" | "ultimate";
 export type BillingCycle = "monthly" | "yearly";
@@ -61,6 +62,7 @@ export function useSubscription() {
       .from("user_subscriptions")
       .select("*")
       .eq("user_id", uid)
+      .eq("environment", getPaddleEnvironment())
       .order("expires_at", { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -70,14 +72,7 @@ export function useSubscription() {
       return;
     }
     let s = (data as Subscription | null) ?? null;
-    // Auto-expire
-    if (s && s.status === "active" && new Date(s.expires_at).getTime() <= Date.now()) {
-      await supabase
-        .from("user_subscriptions")
-        .update({ status: "expired" })
-        .eq("id", s.id);
-      s = { ...s, status: "expired" };
-    }
+    // Expiry is evaluated by isActive(); writes come only from the payment webhook.
     setSub(s);
     writeCache(s);
     setLoading(false);
@@ -88,78 +83,20 @@ export function useSubscription() {
     const { data: authSub } = supabase.auth.onAuthStateChange(() => refresh());
     // Periodic re-check for expiry
     const t = setInterval(refresh, 60_000);
+    const ch = supabase
+      .channel(`user-subs-${Math.random().toString(36).slice(2)}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "user_subscriptions" }, () => refresh())
+      .subscribe();
     return () => {
+      supabase.removeChannel(ch);
       authSub.subscription.unsubscribe();
       clearInterval(t);
     };
   }, [refresh]);
 
-  const subscribe = useCallback(
-    async (params: {
-      plan_id: PlanId;
-      plan_name: string;
-      billing_cycle: BillingCycle;
-      price_inr: number;
-      payment_method: string;
-    }) => {
-      if (!userId) throw new Error("Sign in to subscribe");
-      const now = new Date();
-      const expires = new Date(now);
-      if (params.billing_cycle === "monthly") expires.setMonth(expires.getMonth() + 1);
-      else expires.setFullYear(expires.getFullYear() + 1);
-      const txn = `FX-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-
-      // Mark previous active subs as replaced
-      await supabase
-        .from("user_subscriptions")
-        .update({ status: "cancelled", cancelled_at: now.toISOString() })
-        .eq("user_id", userId)
-        .eq("status", "active");
-
-      const { data, error } = await supabase
-        .from("user_subscriptions")
-        .insert({
-          user_id: userId,
-          plan_id: params.plan_id,
-          plan_name: params.plan_name,
-          billing_cycle: params.billing_cycle,
-          price_inr: params.price_inr,
-          status: "active",
-          payment_method: params.payment_method,
-          transaction_id: txn,
-          started_at: now.toISOString(),
-          expires_at: expires.toISOString(),
-          auto_renew: true,
-        })
-        .select()
-        .single();
-      if (error) throw error;
-      setSub(data as Subscription);
-      writeCache(data as Subscription);
-      return data as Subscription;
-    },
-    [userId],
-  );
-
-  const cancel = useCallback(async () => {
-    if (!sub) return;
-    const { error } = await supabase
-      .from("user_subscriptions")
-      .update({ auto_renew: false, status: "cancelled", cancelled_at: new Date().toISOString() })
-      .eq("id", sub.id);
-    if (error) throw error;
-    await refresh();
-  }, [sub, refresh]);
-
-  const toggleAutoRenew = useCallback(async () => {
-    if (!sub) return;
-    const { error } = await supabase
-      .from("user_subscriptions")
-      .update({ auto_renew: !sub.auto_renew })
-      .eq("id", sub.id);
-    if (error) throw error;
-    await refresh();
-  }, [sub, refresh]);
+  // Billing changes (cancel, auto-renew, card) happen in the secure billing portal.
+  const cancel = useCallback(async () => { await openBillingPortal(); }, []);
+  const toggleAutoRenew = cancel;
 
   return {
     subscription: sub,
@@ -167,7 +104,6 @@ export function useSubscription() {
     isPremium: isActive(sub),
     userId,
     refresh,
-    subscribe,
     cancel,
     toggleAutoRenew,
   };
