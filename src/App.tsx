@@ -98,6 +98,8 @@ const ResetPassword = lazyWithRetry(() => import("./pages/reset-password"));
 const AuthCallback = lazyWithRetry(() => import("./pages/auth-callback"));
 const TermsOfService = lazyWithRetry(() => import("./pages/terms-of-service"));
 const PrivacyPolicy = lazyWithRetry(() => import("./pages/privacy-policy"));
+const RefundPolicy = lazyWithRetry(() => import("./pages/refund-policy"));
+const Pricing = lazyWithRetry(() => import("./pages/pricing"));
 const Onboarding = lazyWithRetry(() => import("./pages/onboarding"));
 const ToolsPage = lazyWithRetry(() => import("./pages/tools"));
 const ProgressTrackerPage = lazyWithRetry(() => import("./pages/progress-tracker"));
@@ -164,6 +166,8 @@ const AppContent: React.FC = () => {
           <Route path="/auth/callback" element={<P><AuthCallback /></P>} />
           <Route path="/terms-of-service" element={<P><TermsOfService /></P>} />
           <Route path="/privacy-policy" element={<P><PrivacyPolicy /></P>} />
+          <Route path="/refund-policy" element={<P><RefundPolicy /></P>} />
+          <Route path="/pricing" element={<P><Pricing /></P>} />
           <Route path="/onboarding" element={<P><Onboarding /></P>} />
           <Route path="/.lovable/oauth/consent" element={<P><OAuthConsent /></P>} />
           <Route path="/tools/ai-workout-generator" element={<P><AIWorkoutGenerator /></P>} />
