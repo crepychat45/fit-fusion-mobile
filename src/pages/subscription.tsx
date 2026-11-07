@@ -173,6 +173,7 @@ const SubscriptionPage: React.FC = () => {
     [selectedPlan],
   );
   const priceOf = (p: Plan) => (billingCycle === "monthly" ? p.monthly : p.yearly);
+  const paymentsOn = isPaymentsConfigured();
 
   const daysLeft = useMemo(() => {
     if (!subscription) return 0;
@@ -185,6 +186,14 @@ const SubscriptionPage: React.FC = () => {
   }, [subscription]);
 
   const handlePlanSelect = (id: PlanId) => {
+    if (!paymentsOn) {
+      toast({
+        title: "Payments unavailable",
+        description: "Online payments are temporarily disabled. Please check back later.",
+        variant: "destructive",
+      });
+      return;
+    }
     if (!userId) {
       toast({
         title: "Sign in required",
@@ -340,6 +349,19 @@ const SubscriptionPage: React.FC = () => {
 
           {/* PLANS */}
           <TabsContent value="plans" className="mt-6 space-y-8">
+            {!paymentsOn && (
+              <Card className="border-amber-500/40 bg-amber-500/10">
+                <CardContent className="p-4 flex items-start gap-3">
+                  <Clock className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                  <div>
+                    <div className="font-medium text-sm">Payments are temporarily unavailable</div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Online checkout is being set up. You can browse the plans below — purchasing will be enabled soon.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
             {/* Billing toggle */}
             <div className="flex items-center justify-center gap-3">
               <Label className={billingCycle === "monthly" ? "font-semibold" : "text-muted-foreground"}>
@@ -423,10 +445,10 @@ const SubscriptionPage: React.FC = () => {
                         </ul>
                         <Button
                           className={`w-full bg-gradient-to-r ${plan.gradient} text-white border-0 hover:opacity-90`}
-                          disabled={isCurrent}
+                          disabled={isCurrent || !paymentsOn}
                           onClick={() => handlePlanSelect(plan.id)}
                         >
-                          {isCurrent ? "Current Plan" : "Choose " + plan.name}
+                          {isCurrent ? "Current Plan" : paymentsOn ? "Choose " + plan.name : "Coming soon"}
                         </Button>
                       </CardContent>
                     </Card>
