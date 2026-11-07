@@ -10,6 +10,10 @@ export function getPaddleEnvironment(): "sandbox" | "live" {
   return clientToken?.startsWith("test_") ? "sandbox" : "live";
 }
 
+export function isPaymentsConfigured(): boolean {
+  return Boolean(clientToken);
+}
+
 let ready: Promise<void> | null = null;
 export function initializePaddle(): Promise<void> {
   if (!clientToken) return Promise.reject(new Error("Payments are not configured"));
