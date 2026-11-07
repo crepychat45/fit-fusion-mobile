@@ -46,7 +46,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
-import { openPaddleCheckout } from "@/lib/paddle";
+import { openPaddleCheckout, isPaymentsConfigured } from "@/lib/paddle";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { useSubscription, PlanId, BillingCycle } from "@/hooks/use-subscription";
 
