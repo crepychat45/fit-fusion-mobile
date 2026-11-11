@@ -1,10 +1,11 @@
 # FitxFusion 8.1 roadmap
 ## Premium checkout and member tools (2026-11-09)
-- [ ] Connect an Indian UPI-capable payment service and configure verified payment activation (requires seller account credentials)
-- [ ] Replace unused card/cash checkout with secure provider checkout and truthful payment status
-- [ ] Fix identity-scoped subscription state, expiry, reconnect and realtime access updates
-- [ ] Add working, tier-specific member tools and accurate plan benefits without removing current free tools
-- [ ] Verify payment → account activation → member tools, expired/refunded access, mobile layout and targeted tests
+- [ ] Connect Indian UPI checkout and verify payment → activation (blocked: Razorpay connection declined; no payment credentials connected)
+- [x] Replace unused card/cash collection and false success screens with plan order review and explicit unavailable methods; no purchase enabled
+- [x] Fix identity/environment-scoped subscription state, exact expiry, reconnect refresh and shared user-filtered realtime listener
+- [x] Add ten tier-specific member capabilities with accurate plan benefits, lazy loading and real account-owned history; preserve existing free tools
+- [x] Verify signed-in plan selection, monthly/yearly amounts, membership refresh, real Ultimate member tools, search/goal/annual range/CSV download, mobile layout and no runtime errors
+- [x] All 53 tests passed; account/environment isolation, expired/refunded/cancelled access and tier rules covered; automatic build OK
 ## Settings stability and separate app pages (2026-11-01)
 - [x] Stop menu remounts and stale preference hydration/realtime reversions; remove competing legacy full-row upserts
 - [x] Separate About and App Updates with working Settings links; remove outdated About content and inactive actions
