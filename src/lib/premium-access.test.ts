@@ -14,6 +14,12 @@ describe("verified member access", () => {
   it("keeps cancelled renewal access until the paid period expires", () => expect(activePlan({ ...paid, status: "cancelled" }, "member", "live", now)).toBe("pro"));
   it("hides all member tools from normal users", () => expect(hasMemberTool(null, "activitySummary")).toBe(false));
   it("Starter does not receive Pro reports", () => expect(hasMemberTool("starter", "csvReport")).toBe(false));
+  it("Starter receives history filters but not Pro weekday analysis", () => {
+    expect(hasMemberTool("starter", "historyFilters")).toBe(true);
+    expect(hasMemberTool("starter", "weekdayAnalysis")).toBe(false);
+    expect(hasMemberTool("pro", "weekdayAnalysis")).toBe(true);
+    expect(hasMemberTool(null, "historyFilters")).toBe(false);
+  });
   it("Pro receives CSV reports but not Elite timeline", () => {
     expect(hasMemberTool("pro", "csvReport")).toBe(true);
     expect(hasMemberTool("pro", "recordTimeline")).toBe(false);

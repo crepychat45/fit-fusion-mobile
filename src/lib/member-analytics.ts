@@ -11,7 +11,8 @@ export function memberReview(records: WorkoutSessionRecord[], days: number, now 
   const minutes = (sessions: WorkoutSessionRecord[]) => Math.round(sessions.reduce((sum, s) => sum + s.durationSec, 0) / 60);
   const mix = new Map<string, { title: string; count: number; seconds: number }>();
   const timeline: { id: string; title: string; minutes: number; date: string }[] = [];
-  let best = 0;
+  // Older completed sessions establish the real personal best before this range.
+  let best = valid.filter(s => Date.parse(s.completedAt) < start.getTime()).reduce((max, s) => Math.max(max, s.durationSec), 0);
   for (const session of [...current].reverse()) {
     if (session.durationSec > best) {
       best = session.durationSec;
@@ -24,12 +25,26 @@ export function memberReview(records: WorkoutSessionRecord[], days: number, now 
   }
   const week = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   week.setDate(week.getDate() - (week.getDay() + 6) % 7);
+  const weekdays = Array.from({ length: 7 }, (_, index) => ({ day: index, sessions: 0, seconds: 0 }));
+  for (const session of current) {
+    const entry = weekdays[(new Date(session.completedAt).getDay() + 6) % 7];
+    if (entry) { entry.sessions++; entry.seconds += session.durationSec; }
+  }
   return {
     sessions: current, minutes: minutes(current), previousCount: before.length, previousMinutes: minutes(before),
     activeDays: new Set(current.map(s => dayKey(new Date(s.completedAt)))).size,
     thisWeek: valid.filter(s => Date.parse(s.completedAt) >= week.getTime()).length,
-    mix: [...mix.values()].sort((a, b) => b.count - a.count), timeline,
+    mix: [...mix.values()].sort((a, b) => b.count - a.count), timeline, weekdays,
+    averageMinutes: current.length ? Math.round(current.reduce((sum, s) => sum + s.durationSec, 0) / current.length / 60) : 0,
+    longestMinutes: current.length ? Math.round(Math.max(...current.map(s => s.durationSec)) / 60) : 0,
   };
+}
+
+export type MemberHistorySort = "newest" | "oldest" | "longest";
+export function filterMemberHistory(sessions: WorkoutSessionRecord[], search: string, duration: "all" | "short" | "long", sort: MemberHistorySort) {
+  const query = search.trim().toLowerCase();
+  return sessions.filter(s => `${s.workoutTitle} ${s.notes ?? ""}`.toLowerCase().includes(query) && (duration === "all" || (duration === "short" ? s.durationSec < 1800 : s.durationSec >= 1800)))
+    .sort((a, b) => sort === "longest" ? b.durationSec - a.durationSec : sort === "oldest" ? Date.parse(a.completedAt) - Date.parse(b.completedAt) : Date.parse(b.completedAt) - Date.parse(a.completedAt));
 }
 
 const csvCell = (value: string | number) => {

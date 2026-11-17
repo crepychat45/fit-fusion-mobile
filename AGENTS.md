@@ -22,3 +22,4 @@
 - Grant Premium only from the payments webhook (service role) into user_subscriptions filtered by environment; clients can read but never write subscriptions, preventing self-granted plans.
 - Derive member-tool visibility from the identity- and environment-scoped membership query plus the centralized tier catalog; never authorize paid services from browser storage.
 - Keep member analytics on account-owned recorded workout history and shared query/realtime membership state, preserving existing free tools and avoiding duplicate listeners or fabricated benefits.
+- Seed member personal-best timelines from earlier completed history before applying the selected range, so shorter sessions are never labeled new records.
