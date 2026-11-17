@@ -1,4 +1,8 @@
 # FitxFusion 8.1 roadmap
+## Premium checkout and studio follow-up (2026-11-17)
+- [ ] Recheck payment connections and address locked payment options without fake checkout
+- [ ] Add tier-gated training studio filters and recorded-session insights
+- [ ] Run regression tests and signed-in browser checks
 ## Premium checkout and member tools (2026-11-09)
 - [ ] Connect Indian UPI checkout and verify payment → activation (blocked: Razorpay connection declined; no payment credentials connected)
 - [x] Replace unused card/cash collection and false success screens with plan order review and explicit unavailable methods; no purchase enabled
